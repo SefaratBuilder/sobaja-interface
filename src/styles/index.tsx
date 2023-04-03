@@ -19,8 +19,8 @@ export const GlobalStyle = createGlobalStyle`
     --color-background:rgb(0, 64, 120);
     --color-text: rgb(18, 101, 171);
     --color-border-button: linear-gradient(44.7deg, #00FF00 14.53%, #00F322 20.2%, #00D378 33.65%, #00A5F7 51.36%, #171AFE 80.39%, #1B00FF 85.35%);
-    --background: rgba(119, 190, 255, 0.3);
     --color-text-input:rgb(142,150,172);
+    --primary-bg: linear-gradient(87.2deg, #00B2FF 2.69%, #003655 98.02%);
     }
 
     a {
@@ -34,5 +34,13 @@ export const GlobalStyle = createGlobalStyle`
 
     img {
         width: 100%;
+    }
+
+    .b {
+        font-weight: 600;
+    }
+
+    .i {
+        font-style: italic;
     }
 `
