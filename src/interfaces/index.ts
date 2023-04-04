@@ -9,7 +9,7 @@ export interface Token {
     decimals: number
     name: string
     chainId: number
-    logo: string
+    logoURI: string
 }
 
 export type TokenList = Token[]
