@@ -63,7 +63,7 @@ const SwapContainer = styled(Columns)`
     margin: auto;
     height: fit-content;
     min-height: 500px;
-    max-width: 430px;
+    max-width: 480px;
     background: #130f0f;
     border: 1px solid rgb(0, 59, 92);
     border-radius: 12px;

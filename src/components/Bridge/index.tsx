@@ -22,9 +22,9 @@ const Bridge = () => {
 
 const BridgeWrapper = styled(Row)`
     width: 100%;
-    height: 60px;
-    background: var(--primary-bg);
-    padding: 5px;
+    height: 65px;
+    background: var(--bg1);
+    padding: 10px;
     border-radius: 8px;
 
     .bridge-icon {
