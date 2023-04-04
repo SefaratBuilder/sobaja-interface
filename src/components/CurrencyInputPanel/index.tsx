@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { Field, Token } from 'interfaces'
 import Input from 'components/Input'
 import { Row } from 'components/Layouts'
+import TokenListModal from 'components/TokenListModal'
 
 interface CurrencyInputPanelProps {
     value: string | undefined
@@ -16,11 +17,13 @@ const CurrencyInputPanel = ({
     value,
     field,
     onUserInput,
+    onUserSelect,
 }: CurrencyInputPanelProps) => {
     return (
         <Wrapper>
             <Row>
                 <Input value={value} field={field} onUserInput={onUserInput} />
+                <TokenListModal onUserSelect={onUserSelect} field={field} />
             </Row>
         </Wrapper>
     )
