@@ -7,7 +7,7 @@ import { injected } from 'components/Connectors'
 
 export function useActiveWeb3React(): Web3ReactContextInterface<Web3Provider> {
     const context = useWeb3ReactCore<Web3Provider>()
-    const contextNetwork = useWeb3ReactCore<Web3Provider>('NETWORK');
+    const contextNetwork = useWeb3ReactCore<Web3Provider>('NETWORK')
     return context.active ? context : contextNetwork
 }
 
@@ -18,16 +18,12 @@ export function useEagerConnect() {
     useEffect(() => {
         injected.isAuthorized().then((isAuthorized) => {
             if (isAuthorized) {
-                console.log("vo b1")
+                console.log('vo b1')
                 activate(injected, undefined, true).catch(() => {
                     setTried(true)
                 })
-            }
-            else {
-
-                if (
-                    isMobile &&
-                    window.ethereum) {
+            } else {
+                if (isMobile && window.ethereum) {
                     activate(injected, undefined, true).catch(() => {
                         setTried(true)
                     })
@@ -62,7 +58,10 @@ export function useInactiveListener(suppress = false) {
             const handleChainChanged = () => {
                 // eat errors
                 activate(injected, undefined, true).catch((error) => {
-                    console.error('Failed to activate after chain changed', error)
+                    console.error(
+                        'Failed to activate after chain changed',
+                        error,
+                    )
                 })
             }
 
@@ -70,7 +69,10 @@ export function useInactiveListener(suppress = false) {
                 if (accounts.length > 0) {
                     // eat errors
                     activate(injected, undefined, true).catch((error) => {
-                        console.error('Failed to activate after accounts changed', error)
+                        console.error(
+                            'Failed to activate after accounts changed',
+                            error,
+                        )
                     })
                 }
             }
@@ -81,7 +83,10 @@ export function useInactiveListener(suppress = false) {
             return () => {
                 if (ethereum.removeListener) {
                     ethereum.removeListener('chainChanged', handleChainChanged)
-                    ethereum.removeListener('accountsChanged', handleAccountsChanged)
+                    ethereum.removeListener(
+                        'accountsChanged',
+                        handleAccountsChanged,
+                    )
                 }
             }
         }

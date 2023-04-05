@@ -5,6 +5,5 @@ export enum SupportedChainId {
 
 export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = [
     SupportedChainId.MAINNET,
-    SupportedChainId.ZKSYNC_GOERLI
-];
-
+    SupportedChainId.ZKSYNC_GOERLI,
+]

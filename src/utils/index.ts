@@ -1,5 +1,4 @@
-import { getAddress } from '@ethersproject/address';
-
+import { getAddress } from '@ethersproject/address'
 
 export function isAddress(value: any): string | false {
     try {
