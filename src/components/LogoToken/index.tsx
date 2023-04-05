@@ -21,7 +21,7 @@ const WrapperLogo = styled.div<{ size?: string }>`
     width: ${({ size }) => (size ? size : '20px')};
     height: ${({ size }) => (size ? size : '20px')};
     border-radius: 50%;
-    border: 0.3px solid ${({ theme }) => theme.bd4};
+    border: 0.3px solid var(--border1);
     overflow: hidden;
 
     @media screen and (max-width: 576px) {

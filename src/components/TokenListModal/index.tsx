@@ -1,7 +1,6 @@
 import React, { ChangeEvent, useState, useEffect } from 'react'
 import styled from 'styled-components'
 import Modal from 'components/Modal'
-import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { Columns, Row } from 'components/Layouts'
 import SearchInput from 'components/Input/SearchInput'
 import { CommonBaseTokens } from 'constants/index'
@@ -9,15 +8,28 @@ import { Field, Token } from 'interfaces'
 import CommonBase from './CommonBase'
 import { useTokenList, useAddTokenToCurrentList } from 'states/lists/hooks'
 import TokenSelection from './TokenSelection'
+import SelectTokenButton from 'components/Buttons/SelectButton'
+import CloseIcon from 'assets/icons/x.svg'
 
 interface TokenListModalProps {
+    token: Token | undefined
     field: Field
     onUserSelect: (field: Field, token: Token) => void
 }
 
-const TokenListModal = ({ field, onUserSelect }: TokenListModalProps) => {
+const TokenListModal = ({
+    token,
+    field,
+    onUserSelect,
+}: TokenListModalProps) => {
     const ModalButton = (onOpen: () => void) => {
-        return <PrimaryButton name="Select a token" onClick={onOpen} />
+        return (
+            <SelectTokenButton
+                token={token}
+                name={token?.symbol || 'Select a token'}
+                onClick={onOpen}
+            />
+        )
     }
 
     const ModalContent = (onClose: () => void) => {
@@ -69,7 +81,7 @@ const TokenListModal = ({ field, onUserSelect }: TokenListModalProps) => {
                 <Row jus="space-between">
                     <div className="title">Select a token</div>
                     <div className="close-btn" onClick={onClose}>
-                        X
+                        <img src={CloseIcon} alt="close icon" />
                     </div>
                 </Row>
                 <SearchInput
@@ -156,14 +168,12 @@ const ModalContentWrapper = styled(Columns)`
 `
 
 const WrapList = styled.div`
-    padding: 0 10px;
     max-height: 305px;
     height: 100%;
     overflow: hidden auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
 
     ::-webkit-scrollbar {
         border-radius: 20px;
