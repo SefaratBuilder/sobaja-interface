@@ -71,9 +71,9 @@ const Swap = () => {
         <SwapContainer>
             <Row jus="space-between">
                 <Row gap="20px">
-                    <Link to="/swap">Swap</Link>
-                    <Link to="/add">Add</Link>
-                    <Link to="/limit">Limit</Link>
+                    <Link to="swap">Swap</Link>
+                    <Link to="add">Add</Link>
+                    <Link to="limit">Limit</Link>
                 </Row>
                 <Setting />
             </Row>

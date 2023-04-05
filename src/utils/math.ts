@@ -1,4 +1,6 @@
-const { calculator } = require('jsbi-calculator')
+import JSBI from 'jsbi-calculator'
+
+const { calculator } = JSBI
 
 export const fixNum = (number: number | string): string => {
     const checkStr: any = number.toString()
@@ -32,7 +34,6 @@ export const fixNum = (number: number | string): string => {
         }
         return data
     }
-    // return a.toLocaleString("fullwide", { useGrouping: false, })
     else {
         return checkStr
     }
@@ -40,24 +41,20 @@ export const fixNum = (number: number | string): string => {
 
 export const mul = (numberA: any, numberB: any) => {
     const data = fixNum(numberA) + '*' + fixNum(numberB)
-    // console.log("calculate * =>", fixNum(numberA), fixNum(numberB))
     return calculator(data)
 }
 
 export const div = (numberA: any, numberB: any) => {
     const data = fixNum(numberA) + '/' + fixNum(numberB)
-    // console.log("calculate / =>", fixNum(numberA), fixNum(numberB))
     return calculator(data)
 }
 
 export const add = (numberA: any, numberB: any) => {
     const data = fixNum(numberA) + '+' + fixNum(numberB)
-    // console.log("calculate + =>", fixNum(numberA), fixNum(numberB))
     return calculator(data)
 }
 
 export const sub = (numberA: any, numberB: any) => {
-    // console.log("calculate - =>", fixNum(numberA), fixNum(numberB))
     const data = fixNum(numberA) + '-' + fixNum(numberB)
     return calculator(data)
 }
