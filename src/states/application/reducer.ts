@@ -1,16 +1,24 @@
-import { createReducer } from "@reduxjs/toolkit";
-import { updateBlockNumber, toggleAgreement, updateSlippageTolerance, updateTransactionDeadline, updateApplicationState, toggleDarkMode, updateRefAddress } from "./actions";
+import { createReducer } from '@reduxjs/toolkit'
+import {
+    updateBlockNumber,
+    toggleAgreement,
+    updateSlippageTolerance,
+    updateTransactionDeadline,
+    updateApplicationState,
+    toggleDarkMode,
+    updateRefAddress,
+} from './actions'
 
 export interface ApplicationState {
-    blockNumber: { [chainId: number]: number },
+    blockNumber: { [chainId: number]: number }
     setting: {
-        slippagePercent: number;
-    },
-    isAgreePolicy: boolean,
-    slippage: string,
-    deadline: number,
-    isUpdateApplication: boolean,
-    userDarkMode: boolean,
+        slippagePercent: number
+    }
+    isAgreePolicy: boolean
+    slippage: string
+    deadline: number
+    isUpdateApplication: boolean
+    userDarkMode: boolean
     refAddress: string | undefined
 }
 
@@ -20,24 +28,24 @@ const initialState: ApplicationState = {
         slippagePercent: 5,
     },
     isAgreePolicy: false,
-    slippage: "0.3", //%
+    slippage: '0.3', //%
     deadline: 20 * 60 * 1000, //ms,
     isUpdateApplication: false,
     userDarkMode: false,
-    refAddress: undefined
+    refAddress: undefined,
 }
 
-export default createReducer(initialState, builder => {
+export default createReducer(initialState, (builder) => {
     builder
         .addCase(updateBlockNumber, (state, action) => {
-            const { chainId, blockNumber } = action.payload;
-            if (typeof state.blockNumber[chainId] !== "number") {
-                state.blockNumber[chainId] = blockNumber;
+            const { chainId, blockNumber } = action.payload
+            if (typeof state.blockNumber[chainId] !== 'number') {
+                state.blockNumber[chainId] = blockNumber
             } else {
                 state.blockNumber[chainId] = Math.max(
                     blockNumber,
-                    state.blockNumber[chainId]
-                );
+                    state.blockNumber[chainId],
+                )
             }
         })
         .addCase(toggleAgreement, (state, action) => {
@@ -58,5 +66,4 @@ export default createReducer(initialState, builder => {
         .addCase(updateRefAddress, (state, action) => {
             state.refAddress = action.payload
         })
-
 })

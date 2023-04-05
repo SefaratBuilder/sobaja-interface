@@ -19,7 +19,6 @@ const TokenSelection = ({
     hideAddButton = true,
     onAdd,
 }: TokenSelectionProps) => {
-
     return (
         <WrapperSelection
             onClick={() => (onAdd ? onAdd() : onUserSelect(token))}

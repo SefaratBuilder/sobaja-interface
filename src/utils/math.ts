@@ -33,8 +33,7 @@ export const fixNum = (number: number | string): string => {
             data += '0'
         }
         return data
-    }
-    else {
+    } else {
         return checkStr
     }
 }

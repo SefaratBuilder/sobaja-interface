@@ -1,2 +1,2 @@
 /// <reference types="vite/client" />
-declare module 'jsbi-calculator';
+declare module 'jsbi-calculator'

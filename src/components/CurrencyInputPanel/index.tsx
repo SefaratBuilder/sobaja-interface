@@ -21,19 +21,19 @@ const CurrencyInputPanel = ({
     onUserInput,
     onUserSelect,
 }: CurrencyInputPanelProps) => {
-
-
     return (
         <Wrapper>
             <Row>
                 <Input value={value} field={field} onUserInput={onUserInput} />
-                <TokenListModal onUserSelect={onUserSelect} field={field} token={token} />
+                <TokenListModal
+                    onUserSelect={onUserSelect}
+                    field={field}
+                    token={token}
+                />
             </Row>
             <Row>
                 <div className="t2">$</div>
-                <div className="t2 to">
-                    Balance: {value || '0'}
-                </div>
+                <div className="t2 to">Balance: {value || '0'}</div>
             </Row>
         </Wrapper>
     )
@@ -54,7 +54,6 @@ const Row = styled.div`
     .t2 {
         font-size: 14px;
     }
-
 `
 
 export default CurrencyInputPanel

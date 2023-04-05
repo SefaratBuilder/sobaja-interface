@@ -43,8 +43,8 @@ const Button = styled.button<{ height: any }>`
     outline: none;
     background: var(--btn1);
     font-size: 1rem;
-	font-style: italic;
-	font-weight: 300;
+    font-style: italic;
+    font-weight: 300;
     letter-spacing: 0.3;
     cursor: ${({ disabled }) => (disabled ? 'no-drop' : 'pointer')};
     opacity: ${({ disabled }) => (disabled ? 0.7 : 1)};
@@ -53,6 +53,4 @@ const Button = styled.button<{ height: any }>`
     :hover {
         opacity: 0.8;
     }
-
-    
 `

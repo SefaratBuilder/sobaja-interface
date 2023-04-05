@@ -33,39 +33,40 @@ const Swap = () => {
         [onTokenSelection, swapState],
     )
 
-    const handleOnSwap = () => {
-
-    }
+    const handleOnSwap = () => {}
 
     const SwapButton = () => {
-		const balanceIn = 0
-		const isNotConnected = true
-		const isUndefinedAmount = true
-		const isInffuficientLiquidity = true
-		const isUndefinedCoin = !tokenIn || !tokenOut
-		const isInsufficientBalance = Number(inputAmount) > balanceIn
-		const unSupportedNetwork = true
+        const balanceIn = 0
+        const isNotConnected = true
+        const isUndefinedAmount = true
+        const isInffuficientLiquidity = true
+        const isUndefinedCoin = !tokenIn || !tokenOut
+        const isInsufficientBalance = Number(inputAmount) > balanceIn
+        const unSupportedNetwork = true
 
-		return (
-			<Row>
-				{isNotConnected ? (
-					<PrimaryButton name="Connect Wallet" />
-				) : unSupportedNetwork ? (
-					<LabelButton name="Supported for testnet or devnet now" />
-				) : isUndefinedCoin ? (
-					<LabelButton name="Select a coin" />
-				) : isUndefinedAmount ? (
-					<LabelButton name="Enter an amount" />
-				) : isInffuficientLiquidity ? (
-					<LabelButton name="Insufficient Liquidity" />
-				) : isInsufficientBalance ? (
-					<LabelButton name="Insufficient Balance" />
-				) : (
-					<PrimaryButton onClick={() => handleOnSwap()} name={"Swap"} />
-				)}
-			</Row>
-		)
-	}
+        return (
+            <Row>
+                {isNotConnected ? (
+                    <PrimaryButton name="Connect Wallet" />
+                ) : unSupportedNetwork ? (
+                    <LabelButton name="Supported for testnet or devnet now" />
+                ) : isUndefinedCoin ? (
+                    <LabelButton name="Select a coin" />
+                ) : isUndefinedAmount ? (
+                    <LabelButton name="Enter an amount" />
+                ) : isInffuficientLiquidity ? (
+                    <LabelButton name="Insufficient Liquidity" />
+                ) : isInsufficientBalance ? (
+                    <LabelButton name="Insufficient Balance" />
+                ) : (
+                    <PrimaryButton
+                        onClick={() => handleOnSwap()}
+                        name={'Swap'}
+                    />
+                )}
+            </Row>
+        )
+    }
 
     return (
         <SwapContainer>
@@ -95,7 +96,10 @@ const Swap = () => {
                     field={Field.OUTPUT}
                 />
             </Columns>
-            <PoolPriceBar dropDown={poolPriceBarOpen} setDropDown={setPoolPriceBarOpen} />
+            <PoolPriceBar
+                dropDown={poolPriceBarOpen}
+                setDropDown={setPoolPriceBarOpen}
+            />
             <SwapButton />
         </SwapContainer>
     )
@@ -125,7 +129,6 @@ const SwapContainer = styled(Columns)`
 const Icon = styled.img`
     width: 30px;
     margin: 0px auto;
-
 `
 
 export default Swap

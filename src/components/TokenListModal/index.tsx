@@ -17,9 +17,19 @@ interface TokenListModalProps {
     onUserSelect: (field: Field, token: Token) => void
 }
 
-const TokenListModal = ({ token, field, onUserSelect }: TokenListModalProps) => {
+const TokenListModal = ({
+    token,
+    field,
+    onUserSelect,
+}: TokenListModalProps) => {
     const ModalButton = (onOpen: () => void) => {
-        return <SelectTokenButton token={token} name={token?.symbol || "Select a token"} onClick={onOpen} />
+        return (
+            <SelectTokenButton
+                token={token}
+                name={token?.symbol || 'Select a token'}
+                onClick={onOpen}
+            />
+        )
     }
 
     const ModalContent = (onClose: () => void) => {
