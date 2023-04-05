@@ -32,7 +32,7 @@ const PrimaryButton = ({
 
 export default PrimaryButton
 
-const Button = styled.button<{ height: any }>`
+export const Button = styled.button<{ height: any }>`
     font-family: 'Montserrat', sans-serif;
     display: flex;
     font-style: italic;

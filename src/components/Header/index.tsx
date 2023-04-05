@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from 'styled-components'
 import Navigator from 'components/Navigator'
 import NetworkSelector from 'components/NetworkSelector'
