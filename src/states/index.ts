@@ -3,7 +3,7 @@ import { save, load } from 'redux-localstorage-simple'
 import swap from './swap/reducer'
 import lists from './lists/reducer'
 
-const PERSISTED_KEYS: string[] = ['lists']
+const PERSISTED_KEYS: string[] = ['']
 
 const store = configureStore({
     reducer: {

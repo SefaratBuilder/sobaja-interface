@@ -3,7 +3,7 @@ import ETH_LOGO from '../assets/token-logos/eth.jpeg'
 import tokenList from './jsons/tokenList.json'
 
 export const NATIVE_COIN: Token = {
-    address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+    address: '0x0000000000000000000000000000000000000000',
     symbol: 'ETH',
     chainId: 324,
     name: 'Ethereum',

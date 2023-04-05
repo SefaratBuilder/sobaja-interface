@@ -32,6 +32,10 @@ const InputWrapper = styled.input`
     width: 100%;
     font-size: 30px;
     font-weight: 500;
+    background: none;
+    border: none;
+    outline: none;
+    color: white;
 
     &::placeholder {
         opacity: 0.7;
