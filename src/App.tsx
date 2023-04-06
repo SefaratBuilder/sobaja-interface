@@ -7,6 +7,7 @@ import styled from 'styled-components'
 import { useSwapState } from 'states/swap/hooks'
 import { useTokenList } from 'states/lists/hooks'
 import Header from 'components/Header'
+import Pools from 'pages/pool'
 
 const App = () => {
     const swapState = useSwapState()
@@ -19,6 +20,7 @@ const App = () => {
             <AppContainer>
                 <Routes>
                     <Route path="/swap" element={<Swap />} />
+                    <Route path="/pools" element={<Pools />} />
                     <Route path="/add" element={<AddLiquidity />} />
                     <Route path="*" element={<Navigate to="/swap" />} />
                 </Routes>
