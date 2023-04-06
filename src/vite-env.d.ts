@@ -7,5 +7,7 @@ declare module '@metamask/jazzicon' {
 interface Window {
     web3?: any
     ethereum?: any
+    BinanceChain?: any
 }
+
 declare module 'jsbi-calculator'

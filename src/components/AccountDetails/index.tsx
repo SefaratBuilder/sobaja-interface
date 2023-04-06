@@ -18,7 +18,7 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account, library, chainId } = useActiveWeb3React()
+    const { account, library, chainId, deactivate } = useActiveWeb3React()
 
     console.log({ account, library, chainId })
     const ref = useRef<any>(false)

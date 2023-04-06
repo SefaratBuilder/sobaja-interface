@@ -4,9 +4,12 @@ import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import imgClose from 'assets/icons/icon-close.svg'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
-import { injected } from 'components/Connectors/index'
+import { injected, binance } from 'components/Connectors/index'
 import AccountDetails from 'components/AccountDetails'
 import { AbstractConnector } from '@web3-react/abstract-connector'
+import Loader from 'components/Loader'
+import PrimaryButton from 'components/Buttons/PrimaryButton'
+import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -29,15 +32,18 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
     const [pendingWallet, setPendingWallet] = useState<
         AbstractConnector | undefined
     >()
+    const [pendingNameWallet, setPendingNameWallet] = useState<
+        string | undefined
+    >()
     const toggleAgreement = () => {
         setIsAgreePolicy(!isAgreePolicy)
     }
 
-    // useEffect(() => {
-    //     if (connector) {
-    //         setToggleWalletModal(false)
-    //     }
-    // }, [connector])
+    useEffect(() => {
+        if (account && walletView == WALLET_VIEWS.PENDING) {
+            setToggleWalletModal(false)
+        }
+    }, [account])
 
     const tryActivation = async (connector: AbstractConnector | undefined) => {
         let name = ''
@@ -47,12 +53,23 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             }
             return true
         })
+        // log selected wallet
+        // ReactGA.event({
+        // 	category: "Wallet",
+        // 	action: "Change Wallet",
+        // 	label: name,
+        // });
+        setPendingWallet(connector) // set wallet for pending view
         setWalletView(WALLET_VIEWS.PENDING)
-        setPendingWallet(connector)
+
+        // if the connector is walletconnect and the user has already tried to connect, manually reset the connector
+        // if (connector instanceof WalletConnectConnector) {
+        //     connector.walletConnectProvider = undefined
+        // }
         connector &&
             activate(connector, undefined, true).catch((error) => {
                 if (error instanceof UnsupportedChainIdError) {
-                    activate(connector) // a little janky...can't use setError because the connector isn't set
+                    activate(connector)
                 } else {
                     setPendingError(true)
                 }
@@ -63,6 +80,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
         const isMetamask = window.ethereum && window.ethereum.isMetaMask
         return Object.keys(SUPPORTED_WALLETS).map((key) => {
             const option = SUPPORTED_WALLETS[key]
+            console.log('option.connector', option.connector)
             if (option.connector === injected) {
                 // don't show injected if there's no injected provider
                 if (!(window.web3 || window.ethereum)) {
@@ -92,15 +110,41 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     return null
                 }
             }
+            if (option.connector == binance) {
+                //don't show injected if there's no injected provider
+                if (!window.BinanceChain) {
+                    if (option.name === 'Binance Chain Wallet') {
+                        return (
+                            <Item
+                                isChecked={true}
+                                // id={`connect-${key}`}
+                                key={key}
+                                // color={'#E8831D'}
+
+                                // header={<Trans>Install Metamask</Trans>}
+                                // subheader={null}
+                                // link={'https://metamask.io/'}
+                                // icon={MetamaskIcon}
+                            >
+                                {' '}
+                                Install Metamask
+                            </Item>
+                        )
+                    } else {
+                        return null //dont want to return install twice
+                    }
+                }
+            }
             return (
-                <Item isChecked={isAgreePolicy}>
+                <Item isChecked={isAgreePolicy} key={key + option.name}>
                     <ItemContent
                         onClick={() => {
                             if (!isAgreePolicy) return
-                            console.log('connector', connector)
-                            if (option.connector) {
-                                console.log('ssss')
+                            if (option.connector != connector) {
+                                setPendingNameWallet(option.name)
                                 tryActivation(option.connector)
+                            } else {
+                                setWalletView(WALLET_VIEWS.ACCOUNT)
                             }
                         }}
                     >
@@ -120,7 +164,10 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     // pendingTransactions={pendingTransactions}
                     // confirmedTransactions={confirmedTransactions}
                     // ENSName={ENSName}
-                    openOptions={() => setWalletView(WALLET_VIEWS.OPTIONS)}
+                    openOptions={() => {
+                        // deactivate()
+                        setWalletView(WALLET_VIEWS.OPTIONS)
+                    }}
                 />
             )
         }
@@ -181,7 +228,9 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     <ContainerPending>
                         <WrapContentPending>
                             <Header>
-                                <span>Connect a wallet</span>
+                                <span>
+                                    Connect a {pendingNameWallet} wallet
+                                </span>
                                 <div>
                                     {' '}
                                     <BtnClose
@@ -194,59 +243,39 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                                 </div>
                             </Header>
                             <WrapContent>
-                                <Title>
-                                    <div>
-                                        By connecting a wallet, you agree
-                                        to&nbsp;
-                                        <b>SobajaSwap</b>&nbsp;
-                                        <a
-                                            href="https://forbitswap.com/terms-of-service.pdf"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            Terms of Service
-                                        </a>
-                                        &nbsp;and&nbsp;
-                                        <a
-                                            href="https://forbitswap.com/privacy-policy.pdf"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            Privacy Policy.
-                                        </a>
-                                    </div>
-                                    <div>
-                                        <input
-                                            type="checkbox"
-                                            onChange={toggleAgreement}
-                                            checked={isAgreePolicy}
-                                        />
-                                        <span>
-                                            I agree to Terms of Service and
-                                            Privacy Policy.
-                                        </span>
-                                    </div>
-                                </Title>
+                                <Title></Title>
                                 <WrapItem
                                     className={`${
                                         isAgreePolicy ? 'active' : ''
                                     }`}
                                 >
                                     {pendingError ? (
-                                        <div>
-                                            <span>Error connecting.</span>
-                                            <span
-                                                onClick={() =>
-                                                    tryActivation(pendingWallet)
-                                                }
-                                            >
-                                                Try Again
+                                        <LoadingWrapper
+                                            borderError={pendingError}
+                                        >
+                                            <span style={{ color: 'red' }}>
+                                                Error connecting.
                                             </span>
-                                        </div>
+                                            <span>
+                                                <PrimaryButton
+                                                    type="configbtn"
+                                                    height="25px"
+                                                    onClick={() =>
+                                                        tryActivation(
+                                                            pendingWallet,
+                                                        )
+                                                    }
+                                                    name="Try again"
+                                                />
+                                            </span>
+                                        </LoadingWrapper>
                                     ) : (
-                                        <div>
-                                            <p>inittial</p>
-                                        </div>
+                                        <LoadingWrapper
+                                            borderError={pendingError}
+                                        >
+                                            <StyledLoader />
+                                            <p>Initializing...</p>
+                                        </LoadingWrapper>
                                     )}
                                 </WrapItem>
                             </WrapContent>
@@ -258,12 +287,29 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             </Container>
         )
     }
-    console.log('connector', connector)
     return <>{getModalContent()}</>
 }
 
+const LoadingWrapper = styled.div<{ borderError: boolean }>`
+    gap: 2px;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    display: flex;
+    /* border: ${({ borderError }) =>
+        borderError ? '1px solid red' : '1px solid #ffffff'}; */
+
+    border-radius: 8px;
+    padding: 4px 0px;
+    .configbtn {
+        padding: 0px 5px;
+    }
+`
+const StyledLoader = styled(Loader)`
+    margin-right: 1rem;
+`
 const WrapContentPending = styled.div`
-    width: 60%;
+    width: 70%;
     border-radius: 20px;
     background: linear-gradient(180deg, #002033 0%, rgba(0, 38, 60, 0.8) 100%);
     border: 1px solid #003b5c;

@@ -17,6 +17,7 @@ const App = () => {
             <HashRouter>
                 <GlobalStyle />
                 <Header />
+
                 <AppContainer>
                     <Routes>
                         <Route path="/swap" element={<Swap />} />
