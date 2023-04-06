@@ -33,22 +33,22 @@ const PrimaryButton = ({
 export default PrimaryButton
 
 export const Button = styled.button<{ height: any }>`
-    font-family: 'Montserrat', sans-serif;
     display: flex;
-    font-style: italic;
     align-items: center;
     justify-content: center;
     width: 100%;
     height: ${({ height }) => (height ? height : '40px')};
     border-radius: 8px;
-    border: 1px solid #003b5c;
+    border: 1px solid var(--border2);
     outline: none;
-    background: linear-gradient(to left, #002033 100%, #00263c 39%);
-    color: white;
+    background: var(--btn1);
     font-size: 1rem;
+    font-style: italic;
+    font-weight: 300;
     letter-spacing: 0.3;
     cursor: ${({ disabled }) => (disabled ? 'no-drop' : 'pointer')};
     opacity: ${({ disabled }) => (disabled ? 0.7 : 1)};
+    color: var(--text1);
 
     :hover {
         opacity: 0.8;

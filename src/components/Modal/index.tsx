@@ -48,7 +48,7 @@ const Box = styled.div`
     height: fit-content;
     border: 1px solid #003b5c;
     border-radius: 8px;
-    padding: 10px 25px;
+    padding: 10px;
 
     @media (max-width: 576px) {
         width: 90%;

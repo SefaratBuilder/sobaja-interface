@@ -44,24 +44,23 @@ const TokenSelection = ({
 
 const WrapperSelection = styled(Row)`
     width: 100%;
-    border-radius: 12px;
     cursor: pointer;
     box-shadow: none;
     justify-content: space-between;
+    font-style: normal;
+    padding: 10px;
 
     .add-btn {
         color: #0089ff;
     }
 
     &:hover {
+        background: var(--hover2);
     }
 
     .element-selection {
         display: flex;
-        align-items: center;
-    }
-    .element-selection:nth-child(1) {
-        width: 10%;
+        align-items: flex-start;
     }
 
     .element-selection:nth-child(2) {
@@ -93,7 +92,6 @@ const WrapperSelection = styled(Row)`
 
     .element-selection:nth-child(3) {
         width: 35%;
-        justify-content: flex-end;
         overflow: hidden;
         align-items: flex-end;
         text-overflow: ellipsis;
