@@ -44,7 +44,6 @@ const Wrapper = styled(Columns)`
     padding: 15px;
     gap: 10px;
     border-radius: 8px;
-    clip-path: circle(10px at center);
 `
 
 const Row = styled.div`

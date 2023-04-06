@@ -87,7 +87,7 @@ const Swap = () => {
                     onUserSelect={handleOnTokenSelection}
                     field={Field.INPUT}
                 />
-                <Icon src={SwapIcon} alt="icon" />
+                <Icon src={SwapIcon} alt="icon" onClick={onSwitchTokens} />
                 <CurrencyInputPanel
                     token={tokenOut}
                     value={outputAmount}
@@ -127,8 +127,15 @@ const SwapContainer = styled(Columns)`
 `
 
 const Icon = styled.img`
-    width: 30px;
-    margin: 0px auto;
+    width: 35px;
+    margin: -10px auto;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all ease-in-out .3s;
+
+    :hover {
+        transform: rotate(180deg);
+    }
 `
 
 export default Swap

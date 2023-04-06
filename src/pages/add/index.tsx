@@ -7,7 +7,6 @@ import Bridge from 'components/Bridge'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
 import { Field, Token } from 'interfaces'
 import { useSwapActionHandlers, useSwapState } from 'states/swap/hooks'
-import PoolPriceBar from './PoolPriceBar'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import LabelButton from 'components/Buttons/LabelButton'
 import SwapIcon from 'assets/icons/swap-icon.svg'
@@ -96,10 +95,6 @@ const Swap = () => {
                     field={Field.OUTPUT}
                 />
             </Columns>
-            <PoolPriceBar
-                dropDown={poolPriceBarOpen}
-                setDropDown={setPoolPriceBarOpen}
-            />
             <SwapButton />
         </SwapContainer>
     )
@@ -126,9 +121,17 @@ const SwapContainer = styled(Columns)`
     gap: 15px;
 `
 
+
 const Icon = styled.img`
-    width: 30px;
-    margin: 0px auto;
+    width: 35px;
+    margin: -10px auto;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all ease-in-out .3s;
+
+    :hover {
+        transform: rotate(180deg);
+    }
 `
 
 export default Swap

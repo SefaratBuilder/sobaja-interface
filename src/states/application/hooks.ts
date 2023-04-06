@@ -5,8 +5,7 @@ import {
     updateSlippageTolerance,
     updateTransactionDeadline,
     updateApplicationState,
-    toggleDarkMode,
-    updateRefAddress,
+    toggleDarkMode
 } from './actions'
 
 export function useAppState() {
@@ -23,12 +22,6 @@ export const useUpdateApplicationState = () => {
     const dispatch = useDispatch()
     const { isUpdateApplication } = useAppState()
     return () => dispatch(updateApplicationState(!isUpdateApplication))
-}
-
-export const useUpdateRefAddress = () => {
-    const dispatch = useDispatch()
-    // const { refAddress } = useAppState();
-    return (ref: string | undefined) => dispatch(updateRefAddress(ref))
 }
 
 export const useSlippageTolerance = () => {

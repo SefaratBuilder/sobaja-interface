@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import Navigator from 'components/Navigator'
 import NetworkSelector from 'components/NetworkSelector'
 import Web3Status from 'components/Web3Status'
+import SobajaLogo from 'assets/brand/sobajaswap-logo.png'
 
 const Header = () => {
     return (
@@ -10,7 +11,7 @@ const Header = () => {
             <Logo>
                 <img
                     className="logo"
-                    src="/images/logo.svg"
+                    src={SobajaLogo}
                     alt="sobaja swap logo"
                 />
             </Logo>
@@ -32,7 +33,7 @@ export const HeaderWrapper = styled.div`
 `
 
 export const Logo = styled.div`
-    width: 280px;
+    width: 270px;
 
     img {
         width: 100%;

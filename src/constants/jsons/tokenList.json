@@ -1,13 +1,5 @@
 [
     {
-        "address": "0x0000000000000000000000000000000000000000",
-        "symbol": "ETH",
-        "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/eth.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "Ethereum",
-        "chainId": 324
-    },
-    {
         "address": "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
         "symbol": "USDC",
         "decimals": 18,
@@ -38,14 +30,6 @@
         "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/perp.svg?alt=media&token=03fa3dd9-123d-4a42-9885-6ae8e982a596",
         "name": "Perpetual",
         "chainId": 324
-    },
-    {
-        "address": "0x0000000000000000000000000000000000000000",
-        "symbol": "ETH",
-        "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/eth.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "Ethereum",
-        "chainId": 280
     },
     {
         "address": "0x0faF6df7054946141266420b43783387A78d82A9",
