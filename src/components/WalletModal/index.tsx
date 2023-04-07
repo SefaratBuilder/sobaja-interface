@@ -9,7 +9,6 @@ import AccountDetails from 'components/AccountDetails'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import Loader from 'components/Loader'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
-import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -53,19 +52,8 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             }
             return true
         })
-        // log selected wallet
-        // ReactGA.event({
-        // 	category: "Wallet",
-        // 	action: "Change Wallet",
-        // 	label: name,
-        // });
-        setPendingWallet(connector) // set wallet for pending view
+        setPendingWallet(connector)
         setWalletView(WALLET_VIEWS.PENDING)
-
-        // if the connector is walletconnect and the user has already tried to connect, manually reset the connector
-        // if (connector instanceof WalletConnectConnector) {
-        //     connector.walletConnectProvider = undefined
-        // }
         connector &&
             activate(connector, undefined, true).catch((error) => {
                 if (error instanceof UnsupportedChainIdError) {
@@ -80,25 +68,25 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
         const isMetamask = window.ethereum && window.ethereum.isMetaMask
         return Object.keys(SUPPORTED_WALLETS).map((key) => {
             const option = SUPPORTED_WALLETS[key]
-            console.log('option.connector', option.connector)
             if (option.connector === injected) {
                 // don't show injected if there's no injected provider
                 if (!(window.web3 || window.ethereum)) {
                     if (option.name === 'MetaMask') {
                         return (
                             <Item
-                                isChecked={true}
-                                // id={`connect-${key}`}
-                                key={key}
-                                // color={'#E8831D'}
-
-                                // header={<Trans>Install Metamask</Trans>}
-                                // subheader={null}
-                                // link={'https://metamask.io/'}
-                                // icon={MetamaskIcon}
+                                isChecked={isAgreePolicy}
+                                key={key + option.name}
                             >
-                                {' '}
-                                Install Metamask
+                                <ItemContent
+                                    onClick={() =>
+                                        option.href &&
+                                        option.href !== null &&
+                                        window.open(option.href)
+                                    }
+                                >
+                                    <img src={option.iconURL}></img>
+                                    <span>Install Metamask</span>
+                                </ItemContent>
                             </Item>
                         )
                     } else {
@@ -116,18 +104,19 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     if (option.name === 'Binance Chain Wallet') {
                         return (
                             <Item
-                                isChecked={true}
-                                // id={`connect-${key}`}
-                                key={key}
-                                // color={'#E8831D'}
-
-                                // header={<Trans>Install Metamask</Trans>}
-                                // subheader={null}
-                                // link={'https://metamask.io/'}
-                                // icon={MetamaskIcon}
+                                isChecked={isAgreePolicy}
+                                key={key + option.name}
                             >
-                                {' '}
-                                Install Metamask
+                                <ItemContent
+                                    onClick={() =>
+                                        option.href &&
+                                        option.href !== null &&
+                                        window.open(option.href)
+                                    }
+                                >
+                                    <img src={option.iconURL}></img>
+                                    <span>Install Binance</span>
+                                </ItemContent>
                             </Item>
                         )
                     } else {
@@ -161,11 +150,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             return (
                 <AccountDetails
                     setToggleWalletModal={setToggleWalletModal}
-                    // pendingTransactions={pendingTransactions}
-                    // confirmedTransactions={confirmedTransactions}
-                    // ENSName={ENSName}
                     openOptions={() => {
-                        // deactivate()
                         setWalletView(WALLET_VIEWS.OPTIONS)
                     }}
                 />
@@ -189,19 +174,11 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                         <div>
                             By connecting a wallet, you agree to&nbsp;
                             <b>SobajaSwap</b>&nbsp;
-                            <a
-                                href="https://forbitswap.com/terms-of-service.pdf"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
+                            <a href="#" target="_blank" rel="noreferrer">
                                 Terms of Service
                             </a>
                             &nbsp;and&nbsp;
-                            <a
-                                href="https://forbitswap.com/privacy-policy.pdf"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
+                            <a href="#" target="_blank" rel="noreferrer">
                                 Privacy Policy.
                             </a>
                         </div>
@@ -228,9 +205,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     <ContainerPending>
                         <WrapContentPending>
                             <Header>
-                                <span>
-                                    Connect a {pendingNameWallet} wallet
-                                </span>
+                                <span>Connect a {pendingNameWallet}</span>
                                 <div>
                                     {' '}
                                     <BtnClose
@@ -243,7 +218,6 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                                 </div>
                             </Header>
                             <WrapContent>
-                                <Title></Title>
                                 <WrapItem
                                     className={`${
                                         isAgreePolicy ? 'active' : ''
@@ -326,96 +300,10 @@ const ContainerPending = styled.div`
     align-items: center;
 `
 
-const WrapModalTransaction = styled.div<{ showTrans: boolean }>`
-    overflow: hidden scroll;
-    transition: all 0.3s linear;
-    height: ${({ showTrans }) => (showTrans ? '115px' : '0')};
-    p {
-        text-align: center;
-    }
-`
-const WrapItemFooter = styled.div`
-    padding: 0.45rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    &.fade {
-        cursor: no-drop;
-        opacity: 0.7;
-    }
-    img {
-        height: 12px;
-        width: 12px;
-    }
-    :last-child {
-        margin-bottom: 0.4rem;
-    }
-`
-const WrapFooterImg = styled.div`
-    display: flex;
-    gap: 5px;
-    align-items: center;
-`
-const NameBalance = styled.div`
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 20px;
-    color: #d9d9d9;
-    text-align: center;
-`
-const Name = styled.div`
-    font-weight: 600;
-    font-size: 36px;
-    line-height: 44px;
-    text-align: center;
-`
-const CopyBtn = styled.div`
-    position: relative;
-    :hover .tooltip {
-        transition: all 0.1s ease-in-out;
-        opacity: 1;
-        visibility: visible;
-    }
-`
-const Tooltip = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    visibility: hidden;
-    position: absolute;
-    width: 100px;
-    height: 30px;
-    font-size: 12px;
-    right: -45px;
-    text-align: center;
-    border: 1px solid;
-    border-radius: 6px;
-    background: rgba(157, 195, 230, 0.1);
-    backdrop-filter: blur(3px);
-`
-const WrapBtnHeader = styled.div`
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    img {
-        height: 17px;
-        width: 17px;
-    }
-    button {
-        background: none;
-        border: none;
-    }
-`
-const WrapFooterBtn = styled.div`
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-`
 const Container = styled.div<{ isConnected: boolean }>`
     position: fixed;
     background: linear-gradient(180deg, #002033 0%, rgba(0, 38, 60, 0.8) 100%);
+    transition: all 10s ease-in-out 10s;
     opacity: 0.6;
     border-radius: 20px;
     border: 1px solid #003b5c;
@@ -442,21 +330,14 @@ const Container = styled.div<{ isConnected: boolean }>`
         max-width: 365px;
     }
 `
-const WrapBlur = styled.div`
-    div {
-        opacity: 0;
-        z-index: -1;
-    }
-    &.active {
-        div {
-            opacity: 1;
-            z-index: 2;
-        }
-    }
-`
+
 const BtnClose = styled.img`
     height: 20px;
     cursor: pointer;
+
+    :hover {
+        background: #003b5c;
+    }
 `
 
 const Header = styled.div`
@@ -558,7 +439,7 @@ const Item = styled.div<{ isChecked: boolean }>`
     transition: all ease-in-out 0.1s;
 
     :hover {
-        background: ${({ isChecked, theme }) => (isChecked ? theme.hv0 : '')};
+        background: rgba(146, 129, 129, 0.13);
     }
     @media screen and (max-width: 576px) {
         width: 45%;
@@ -612,90 +493,6 @@ const Footer = styled.div`
     }
     @media screen and (max-width: 390px) {
         padding: 0.7rem 1.5rem;
-    }
-`
-
-const WrapButton = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    cursor: no-drop;
-
-    a {
-        pointer-events: none;
-    }
-
-    @media screen and (max-width: 390px) {
-        gap: 0px;
-        button:first-child {
-            margin-right: 5px;
-        }
-    }
-    a {
-        text-decoration: none;
-        button {
-            gap: 5px;
-            img {
-                height: 25px;
-                width: 25px;
-            }
-        }
-    }
-`
-const WrapAccountInfo = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 5px;
-`
-const ImgAccount = styled.img`
-    height: 20px;
-    border-radius: 50%;
-`
-const IdAccount = styled.div``
-const CopyAccountAddress = styled.img`
-    height: 12px;
-    cursor: pointer;
-`
-
-const RowTransaction = styled.div`
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 1.5rem 0.2rem 1.5rem;
-
-    &:hover {
-        background-color: #9dc3e699;
-        cursor: pointer;
-        border-bottom: 1px solid rgba(157, 195, 230, 0.6);
-    }
-
-    div {
-        text-align: end;
-    }
-
-    @media screen and (max-width: 576px) {
-        width: 100%;
-    }
-`
-
-const WrapConnectModal = styled(Container)`
-    max-width: 350px;
-    left: unset;
-    right: 90px;
-    top: unset;
-    transform: unset;
-    margin: unset;
-    overflow: unset;
-    @media screen and (max-width: 1200px) {
-        right: 70px;
-    }
-    @media screen and (max-width: 576px) {
-        left: 50%;
-        right: unset;
-        top: unset;
-        bottom: unset;
-        transform: translateX(-50%);
     }
 `
 

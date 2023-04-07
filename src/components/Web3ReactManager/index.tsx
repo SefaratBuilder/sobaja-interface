@@ -29,15 +29,13 @@ export default function Web3ReactManager({
         error: networkError,
         activate: activateNetwork,
     } = useWeb3React('NETWORK')
-    console.log('activate=>>>>>>>>>>>', activateNetwork)
-    console.log('active=>>>>>>>>>>>', active)
+
     // try to eagerly connect to an injected provider, if it exists and has granted access already
     const triedEager = useEagerConnect()
 
     // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
     useEffect(() => {
         if (triedEager && !networkActive && !networkError && !active) {
-            console.log('vo day ko ???')
             activateNetwork(network)
         }
     }, [triedEager, networkActive, networkError, activateNetwork, active])
@@ -80,7 +78,7 @@ export default function Web3ReactManager({
     if (!active && !networkActive) {
         return showLoader ? (
             <MessageWrapper>
-                <span>Loading ........</span>
+                <span>Loading...</span>
             </MessageWrapper>
         ) : null
     }

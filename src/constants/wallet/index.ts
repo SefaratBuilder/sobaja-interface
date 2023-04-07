@@ -30,7 +30,7 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
         name: 'MetaMask',
         iconURL: METAMASK_ICON_URL,
         description: 'Easy-to-use browser extension.',
-        href: null,
+        href: "https://metamask.io/",
         color: '#E8831D',
     },
     WALLET_LINK: {
@@ -55,7 +55,7 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
         name: "Binance Chain Wallet",
         iconURL: BINANCECONNECT_ICON_URL,
         description: "Login using Binance hosted wallet",
-        href: null,
+        href: "https://www.bnbchain.world/en",
         color: "#4A6C9B",
         mobile: true,
     },

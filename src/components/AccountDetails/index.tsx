@@ -18,9 +18,7 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account, library, chainId, deactivate } = useActiveWeb3React()
-
-    console.log({ account, library, chainId })
+    const { account } = useActiveWeb3React()
     const ref = useRef<any>(false)
     const [isCopied, setIsCopied] = useState<boolean>(false)
     useOnClickOutside(ref, () => {
