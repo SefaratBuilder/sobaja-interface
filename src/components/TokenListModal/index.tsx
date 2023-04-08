@@ -12,6 +12,7 @@ import SelectTokenButton from 'components/Buttons/SelectButton'
 import CloseIcon from 'assets/icons/x.svg'
 import { useAllTokenBalances } from 'hooks/useCurrencyBalance'
 import { useToken } from 'hooks/useToken'
+import { useActiveWeb3React } from 'hooks'
 
 interface TokenListModalProps {
     token: Token | undefined
@@ -43,6 +44,7 @@ const TokenListModal = ({
             [],
         )
         const allTokenBalances = useAllTokenBalances()
+        const { chainId } = useActiveWeb3React()
 
         const handleSearchToken = async (
             e: ChangeEvent<HTMLInputElement>,
@@ -84,12 +86,16 @@ const TokenListModal = ({
                     return token && sortedTokenList.push(token)
                 })
             const newTokens = tokens.filter((t) => !sortedTokenList.includes(t))
-            setRenderTokenList([...sortedTokenList, ...newTokens])
+            const filteredByChainIdTokens = [
+                ...sortedTokenList,
+                ...newTokens,
+            ].filter((item) => item.chainId !== chainId)
+            setRenderTokenList(filteredByChainIdTokens)
         }
 
         useEffect(() => {
             sortTokenList()
-        }, [tokens])
+        }, [tokens, chainId])
 
         return (
             <ModalContentWrapper gap={'16px'}>
@@ -120,7 +126,7 @@ const TokenListModal = ({
                 </Row>
                 <Hr />
                 <WrapList>
-                    {!searchedToken &&
+                    {!searchedToken ? (
                         renderedTokenList.length > 0 &&
                         renderedTokenList.map((token: Token, index: number) => {
                             return (
@@ -140,8 +146,8 @@ const TokenListModal = ({
                                     }}
                                 />
                             )
-                        })}
-                    {searchedToken && (
+                        })
+                    ) : (
                         <TokenSelection
                             token={searchedToken}
                             balance={
