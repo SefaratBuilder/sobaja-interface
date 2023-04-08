@@ -5,7 +5,7 @@ import WalletModal from 'components/WalletModal'
 import { shortenAddress } from 'utils'
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
-import { injected } from 'components/Connectors'
+import { injected } from 'connectors'
 import arrowDown from 'assets/icons/arrow-down.svg'
 const Web3Status = () => {
     const { account, connector, error } = useWeb3React()
@@ -45,7 +45,6 @@ const Web3Status = () => {
         } else if (error) {
             return (
                 <Web3StatusConnect height={undefined}>
-                    <span>Icon</span>
                     <span>
                         {error instanceof UnsupportedChainIdError ? (
                             <p>Wrong Network</p>

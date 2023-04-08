@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import styled from 'styled-components'
 
-import { network } from 'components/Connectors'
-import { useEagerConnect, useInactiveListener } from 'hooks/web3'
+import { network } from 'connectors'
+import { useEagerConnect, useInactiveListener } from 'hooks'
 // import Loader from '../Loader'
 
 const MessageWrapper = styled.div`
@@ -29,15 +29,12 @@ export default function Web3ReactManager({
         error: networkError,
         activate: activateNetwork,
     } = useWeb3React('NETWORK')
-    console.log('activate=>>>>>>>>>>>', activateNetwork)
-    console.log('active=>>>>>>>>>>>', active)
     // try to eagerly connect to an injected provider, if it exists and has granted access already
     const triedEager = useEagerConnect()
 
     // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
     useEffect(() => {
         if (triedEager && !networkActive && !networkError && !active) {
-            console.log('vo day ko ???')
             activateNetwork(network)
         }
     }, [triedEager, networkActive, networkError, activateNetwork, active])

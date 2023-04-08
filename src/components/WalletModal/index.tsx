@@ -4,7 +4,7 @@ import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import imgClose from 'assets/icons/icon-close.svg'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
-import { injected } from 'components/Connectors/index'
+import { injected } from 'connectors/index'
 import AccountDetails from 'components/AccountDetails'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 interface connectModalWallet {
@@ -97,9 +97,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     <ItemContent
                         onClick={() => {
                             if (!isAgreePolicy) return
-                            console.log('connector', connector)
                             if (option.connector) {
-                                console.log('ssss')
                                 tryActivation(option.connector)
                             }
                         }}
@@ -258,7 +256,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             </Container>
         )
     }
-    console.log('connector', connector)
+
     return <>{getModalContent()}</>
 }
 

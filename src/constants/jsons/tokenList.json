@@ -1,13 +1,5 @@
 [
     {
-        "address": "0x0000000000000000000000000000000000000000",
-        "symbol": "ETH",
-        "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/eth.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "Ethereum",
-        "chainId": 324
-    },
-    {
         "address": "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
         "symbol": "USDC",
         "decimals": 18,
@@ -40,14 +32,6 @@
         "chainId": 324
     },
     {
-        "address": "0x0000000000000000000000000000000000000000",
-        "symbol": "ETH",
-        "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/eth.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "Ethereum",
-        "chainId": 280
-    },
-    {
         "address": "0x0faF6df7054946141266420b43783387A78d82A9",
         "symbol": "USDC",
         "decimals": 18,
@@ -78,5 +62,13 @@
         "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
         "name": "ChainLink Token",
         "chainId": 280
+    },
+    {
+        "address": "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa",
+        "symbol": "WETH",
+        "decimals": 18,
+        "logoURI": "",
+        "name": "Wrapped Ethereum",
+        "chainId": 80001
     }
 ]

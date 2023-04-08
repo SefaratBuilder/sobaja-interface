@@ -1,8 +1,7 @@
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import METAMASK_ICON_URL from 'assets/icons/metamask.svg'
 import { InjectedConnector } from '@web3-react/injected-connector'
-import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/chains'
-import { injected } from 'components/Connectors'
+import { injected } from 'connectors'
 interface WalletInfo {
     connector?: AbstractConnector
     name: string

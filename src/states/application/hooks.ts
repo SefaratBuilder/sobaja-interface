@@ -1,3 +1,4 @@
+import { useActiveWeb3React } from 'hooks'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppState } from '../index'
 import {
@@ -6,7 +7,6 @@ import {
     updateTransactionDeadline,
     updateApplicationState,
     toggleDarkMode,
-    updateRefAddress,
 } from './actions'
 
 export function useAppState() {
@@ -23,12 +23,6 @@ export const useUpdateApplicationState = () => {
     const dispatch = useDispatch()
     const { isUpdateApplication } = useAppState()
     return () => dispatch(updateApplicationState(!isUpdateApplication))
-}
-
-export const useUpdateRefAddress = () => {
-    const dispatch = useDispatch()
-    // const { refAddress } = useAppState();
-    return (ref: string | undefined) => dispatch(updateRefAddress(ref))
 }
 
 export const useSlippageTolerance = () => {
@@ -54,4 +48,11 @@ export const useToggleDarkMode = () => {
     const dispatch = useDispatch()
     const { userDarkMode } = useAppState()
     return () => dispatch(toggleDarkMode(!userDarkMode))
+}
+
+export function useBlockNumber(): number | undefined {
+    const { chainId } = useActiveWeb3React()
+    return useSelector(
+        (state: AppState) => state.application.blockNumber[chainId ?? -1],
+    )
 }
