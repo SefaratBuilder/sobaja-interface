@@ -3,7 +3,7 @@ import { useWeb3React as useWeb3ReactCore } from '@web3-react/core'
 import { Web3ReactContextInterface } from '@web3-react/core/dist/types'
 import { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { injected } from 'components/Connectors'
+import { injected } from 'connectors'
 
 export function useActiveWeb3React(): Web3ReactContextInterface<Web3Provider> {
     const context = useWeb3ReactCore<Web3Provider>()
@@ -18,7 +18,6 @@ export function useEagerConnect() {
     useEffect(() => {
         injected.isAuthorized().then((isAuthorized) => {
             if (isAuthorized) {
-                console.log('vo b1')
                 activate(injected, undefined, true).catch(() => {
                     setTried(true)
                 })

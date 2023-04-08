@@ -6,7 +6,7 @@ import LogoToken from 'components/LogoToken'
 
 interface TokenSelectionProps {
     token: Token
-    balance: number
+    balance: number | string
     onUserSelect: (token: Token) => void
     hideAddButton?: boolean
     onAdd?: () => void
@@ -24,7 +24,7 @@ const TokenSelection = ({
             onClick={() => (onAdd ? onAdd() : onUserSelect(token))}
         >
             <div className={'element-selection'}>
-                <LogoToken token={token} size={'26px'} />
+                <LogoToken token={token} size={'28px'} />
             </div>
             <div className={'element-selection'}>
                 <div className="token-symbol">{token.symbol}</div>
@@ -60,11 +60,11 @@ const WrapperSelection = styled(Row)`
 
     .element-selection {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
     }
 
     .element-selection:nth-child(2) {
-        width: 50%;
+        width: 45%;
         flex-direction: column;
         align-items: flex-start;
         overflow: hidden;
@@ -91,7 +91,7 @@ const WrapperSelection = styled(Row)`
     }
 
     .element-selection:nth-child(3) {
-        width: 35%;
+        width: 45%;
         overflow: hidden;
         align-items: flex-end;
         text-overflow: ellipsis;
