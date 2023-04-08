@@ -4,12 +4,14 @@ import Modal from 'components/Modal'
 import { Columns, Row } from 'components/Layouts'
 import SearchInput from 'components/Input/SearchInput'
 import { CommonBaseTokens } from 'constants/index'
-import { Field, Token } from 'interfaces'
+import { Field, Token, TokenList } from 'interfaces'
 import CommonBase from './CommonBase'
 import { useTokenList, useAddTokenToCurrentList } from 'states/lists/hooks'
 import TokenSelection from './TokenSelection'
 import SelectTokenButton from 'components/Buttons/SelectButton'
 import CloseIcon from 'assets/icons/x.svg'
+import { useAllTokenBalances } from 'hooks/useCurrencyBalance'
+import { useToken } from 'hooks/useToken'
 
 interface TokenListModalProps {
     token: Token | undefined
@@ -33,13 +35,14 @@ const TokenListModal = ({
     }
 
     const ModalContent = (onClose: () => void) => {
-        const [searchQuery, setSearchQuery] = useState<string>()
+        const [searchQuery, setSearchQuery] = useState<string | undefined>()
         const { currentList: tokens } = useTokenList()
         const addTokenToCurrentList = useAddTokenToCurrentList()
         const [searchedToken, setSearchedToken] = useState<Token | undefined>()
         const [renderedTokenList, setRenderTokenList] = useState<Token[] | []>(
             [],
         )
+        const allTokenBalances = useAllTokenBalances()
 
         const handleSearchToken = async (
             e: ChangeEvent<HTMLInputElement>,
@@ -72,8 +75,20 @@ const TokenListModal = ({
             setSearchedToken(undefined)
         }
 
+        const sortTokenList = () => {
+            let sortedTokenList: TokenList = []
+            Object.entries(allTokenBalances)
+                .sort((a, b) => Number(b[1]) - Number(a[1]))
+                .map(([k]) => {
+                    const token = tokens.find((t) => t.address === k)
+                    return token && sortedTokenList.push(token)
+                })
+            const newTokens = tokens.filter((t) => !sortedTokenList.includes(t))
+            setRenderTokenList([...sortedTokenList, ...newTokens])
+        }
+
         useEffect(() => {
-            setRenderTokenList([...tokens])
+            sortTokenList()
         }, [tokens])
 
         return (
@@ -112,7 +127,13 @@ const TokenListModal = ({
                                 <TokenSelection
                                     key={index + 1}
                                     token={token}
-                                    balance={0}
+                                    balance={
+                                        (allTokenBalances[token.address] &&
+                                            Number(
+                                                allTokenBalances[token.address],
+                                            ).toFixed(4)) ||
+                                        0
+                                    }
                                     onUserSelect={() => {
                                         onUserSelect(field, token)
                                         onClose()
@@ -123,7 +144,11 @@ const TokenListModal = ({
                     {searchedToken && (
                         <TokenSelection
                             token={searchedToken}
-                            balance={0}
+                            balance={
+                                allTokenBalances?.[
+                                    searchedToken.address
+                                ]?.toString() || 0
+                            }
                             onUserSelect={(e) => {
                                 onUserSelect(field, searchedToken)
                                 onClose()

@@ -4,6 +4,8 @@ import { Field, Token } from 'interfaces'
 import Input from 'components/Input'
 import TokenListModal from 'components/TokenListModal'
 import { Columns } from 'components/Layouts'
+import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
+import { useActiveWeb3React } from 'hooks'
 
 interface CurrencyInputPanelProps {
     token: Token | undefined
@@ -21,6 +23,9 @@ const CurrencyInputPanel = ({
     onUserInput,
     onUserSelect,
 }: CurrencyInputPanelProps) => {
+    const { account } = useActiveWeb3React()
+    const balance = account && useCurrencyBalance(account, token)
+
     return (
         <Wrapper>
             <Row>
@@ -33,7 +38,9 @@ const CurrencyInputPanel = ({
             </Row>
             <Row>
                 <div className="t2">$</div>
-                <div className="t2 to">Balance: {value || '0'}</div>
+                <div className="t2 to">
+                    Balance: {balance ? balance?.toString() : 0}
+                </div>
             </Row>
         </Wrapper>
     )

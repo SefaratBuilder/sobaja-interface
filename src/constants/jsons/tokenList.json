@@ -62,5 +62,13 @@
         "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
         "name": "ChainLink Token",
         "chainId": 280
+    },
+    {
+        "address": "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa",
+        "symbol": "WETH",
+        "decimals": 18,
+        "logoURI": "",
+        "name": "Wrapped Ethereum",
+        "chainId": 80001
     }
 ]

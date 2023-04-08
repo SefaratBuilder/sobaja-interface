@@ -4,9 +4,9 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    tsconfigPaths()
-  ],
-  base: "/#/swap"
+  plugins: [react(), tsconfigPaths()],
+  base: "/#/swap",
+  define: {
+    'process.env': {}
+  }
 })

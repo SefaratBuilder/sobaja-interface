@@ -11,22 +11,20 @@ export const NATIVE_COIN: Token = {
     decimals: 18,
 }
 
-
-export const CommonBaseTokens: Token[] = [
-    NATIVE_COIN,
-    ...tokenList.slice(0, 5)
-]
+export const CommonBaseTokens: Token[] = [NATIVE_COIN, ...tokenList.slice(0, 5)]
 
 export const DEFAULT_TOKEN_LIST: TokenList = [NATIVE_COIN, ...tokenList]
 
 export enum ChainId {
     ZKMAINNET = 324,
     ZKTESTNET = 280,
-    GOERLI = 5
+    GOERLI = 5,
+    MUMBAI = 80001,
 }
 
-export const WRAPPED_NATIVE_COIN: { [chainId in ChainId]: string } = {
-    [ChainId.ZKMAINNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
-    [ChainId.ZKTESTNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
-    [ChainId.GOERLI]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6'
-}
+export const ALL_SUPPORTED_CHAIN_IDS: ChainId[] = [
+    ChainId.ZKMAINNET,
+    ChainId.ZKTESTNET,
+    ChainId.GOERLI,
+    ChainId.MUMBAI,
+]

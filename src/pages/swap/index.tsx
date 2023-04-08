@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
@@ -11,6 +11,8 @@ import PoolPriceBar from './PoolPriceBar'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import LabelButton from 'components/Buttons/LabelButton'
 import SwapIcon from 'assets/icons/swap-icon.svg'
+import { useActiveWeb3React } from 'hooks'
+import { usePair, usePairAddressesByIds } from 'hooks/useAllPairs'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -18,6 +20,7 @@ const Swap = () => {
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
+    const { chainId, library, account } = useActiveWeb3React()
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -87,7 +90,9 @@ const Swap = () => {
                     onUserSelect={handleOnTokenSelection}
                     field={Field.INPUT}
                 />
-                <Icon src={SwapIcon} alt="icon" onClick={onSwitchTokens} />
+                <Icon>
+                    <img src={SwapIcon} alt="icon" onClick={onSwitchTokens} />
+                </Icon>
                 <CurrencyInputPanel
                     token={tokenOut}
                     value={outputAmount}
@@ -107,11 +112,11 @@ const Swap = () => {
 
 const SwapContainer = styled(Columns)`
     position: absolute;
-    top: 0;
+    top: 100px;
     left: 0;
     right: 0;
     bottom: 0;
-    margin: auto;
+    margin: 0 auto;
     height: fit-content;
     max-width: 480px;
     background: #130f0f;
@@ -126,15 +131,25 @@ const SwapContainer = styled(Columns)`
     gap: 15px;
 `
 
-const Icon = styled.img`
+const Icon = styled.div`
     width: 35px;
+    height: 35px;
     margin: -10px auto;
     cursor: pointer;
     border-radius: 50%;
-    transition: all ease-in-out .3s;
+    transition: all ease-in-out 0.3s;
+    background: var(--bg4);
+    border: 2px solid var(--border3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
 
     :hover {
         transform: rotate(180deg);
+    }
+    img {
+        width: 20px;
     }
 `
 

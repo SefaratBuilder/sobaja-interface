@@ -44,6 +44,7 @@ const Box = styled.div`
     bottom: 0;
     margin: auto;
     background: var(--bg2);
+    backdrop-filter: blur(4px);
     max-width: 400px;
     height: fit-content;
     border: 1px solid #003b5c;
