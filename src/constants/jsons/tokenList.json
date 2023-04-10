@@ -40,12 +40,20 @@
         "chainId": 280
     },
     {
-        "address": "0x3e7676937A7E96CFB7616f255b9AD9FF47363D4b",
+        "address": "0x7f17E2e9FCc20308108B594FE68e20055D7CD8d3",
         "symbol": "DAI",
         "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/dai.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/usdc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
         "name": "DAI",
-        "chainId": 280
+        "chainId": 324
+    },
+    {
+        "address": "0x355d88ef9CCB06078a10cF7111091cAe7756c210",
+        "symbol": "SP",
+        "decimals": 18,
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/usdc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "name": "Spece",
+        "chainId": 324
     },
     {
         "address": "0x0BfcE1D53451B4a8175DD94e6e029F7d8a701e9c",
@@ -70,13 +78,5 @@
         "logoURI": "",
         "name": "Wrapped Ethereum",
         "chainId": 80001
-    },
-    {
-        "address": "0x7f17E2e9FCc20308108B594FE68e20055D7CD8d3",
-        "symbol": "SP",
-        "decimals": 18,
-        "logoURI": "",
-        "name": "SP",
-        "chainId": 324
     }
 ]
