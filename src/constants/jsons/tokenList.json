@@ -70,5 +70,13 @@
         "logoURI": "",
         "name": "Wrapped Ethereum",
         "chainId": 80001
+    },
+    {
+        "address": "0x7f17E2e9FCc20308108B594FE68e20055D7CD8d3",
+        "symbol": "SP",
+        "decimals": 18,
+        "logoURI": "",
+        "name": "SP",
+        "chainId": 324
     }
 ]

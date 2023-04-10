@@ -35,11 +35,7 @@ const PrimaryButton = ({
 
 export default PrimaryButton
 
-<<<<<<< HEAD
-export const Button = styled.button<{ height: any }>`
-=======
-const Button = styled.button<{ height: any; color: any }>`
->>>>>>> matthew
+export const Button = styled.button<{ height: any; color: any }>`
     display: flex;
     align-items: center;
     justify-content: center;
