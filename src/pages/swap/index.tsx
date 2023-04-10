@@ -82,7 +82,7 @@ const Swap = () => {
                 </Row>
                 <Setting />
             </Row>
-            <Bridge />
+            {/* <Bridge /> */}
             <Columns>
                 <CurrencyInputPanel
                     token={tokenIn}
