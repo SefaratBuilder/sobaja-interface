@@ -62,7 +62,7 @@ const Swap = () => {
             if (tokenIn && inputAmount && routerAddress) {
                 await tokenApproval?.approve(
                     routerAddress,
-                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                    1,
                 )
             }
         } catch (err) {
@@ -78,11 +78,12 @@ const Swap = () => {
         const isNotConnected = !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
-        const isUndefinedAmount = inputAmount && outputAmount
+        const isUndefinedAmount = !inputAmount || !outputAmount
         const isInffuficientLiquidity = !pair
         const isUndefinedCurrencies = !tokenIn || !tokenOut
         const isInsufficientBalance =
             inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
+            console.log('alowwww>>>>>', tokenApproval?.allowance)
         const isInsufficientAllowance =
             Number(tokenApproval?.allowance) < Number(inputAmount)
 

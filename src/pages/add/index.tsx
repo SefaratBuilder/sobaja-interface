@@ -21,10 +21,16 @@ import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 
 const Swap = () => {
     const swapState = useSwapState()
+    const router = useRouterContract();
+    // const pair = usePair(chainId, tokenIn, tokenOut)
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const { inputAmount, outputAmount, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
+    const { chainId, account } = useActiveWeb3React()
+        const routerAddress = chainId ? ROUTERS[chainId] : undefined
+        const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
+        const tokenOutApproval = useTokenApproval(account, routerAddress, tokenOut)
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -40,11 +46,7 @@ const Swap = () => {
         [onTokenSelection, swapState],
     )
 
-    const router = useRouterContract();
-    const { account, chainId } = useActiveWeb3React();
-    const pair = usePair(chainId, tokenIn, tokenOut)
-    const routerAddress = chainId ? ROUTERS[chainId] : undefined
-    const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
+
 
 
 
@@ -63,33 +65,34 @@ const Swap = () => {
         }
     }
 
-    const handleOnAddLiquidity = () => {
-        router?.addLiquidity(
-            tokenIn?.address,
-            tokenOut?.address,
-            inputAmount,
-            outputAmount,
-            0,
-            0,
-            account,
-            (new Date()).getTime()
-        )
+    const handleOnAddLiquidity = async() => {
+        try {
+            if(inputAmount && outputAmount && tokenIn && tokenOut)
+                await router?.addLiquidity(
+                    tokenIn.address,
+                    tokenOut.address,
+                    1000,
+                    1000,
+                    1000,
+                    1000,
+                    account,
+                    (new Date().getTime()/1000 + 1000).toFixed(0)
+                )
+            console.log('Add liquidity successfully')
+        }
+        catch(err) {
+            console.log(err)
+        }
     }
 
     const AddButton = () => {
-        // const balanceIn = 0
-        // const balanceOut = 0
-        // const isNotConnected = true
-        // const isUndefinedAmount = true
-        // const isInsufficientBalance = true
-        // const isUndefinedCoin = true
-        // const isInffuficientLiquidity = !pair
+     
         const balanceIn = useCurrencyBalance(account, tokenIn)
         const isNotConnected = !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
-        const isUndefinedAmount = inputAmount && outputAmount
-        const isInffuficientLiquidity = !pair
+        const isUndefinedAmount = !inputAmount || !outputAmount
+        const isInffuficientLiquidity = false
         const isUndefinedCurrencies = !tokenIn || !tokenOut
         const isInsufficientBalance =
             inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
@@ -111,16 +114,18 @@ const Swap = () => {
                     <LabelButton name="Select a coin" />
                 ) : isUndefinedAmount ? (
                     <LabelButton name="Enter an amount" />
-                ) : isInsufficientBalance ? (
-                    <LabelButton name="Insufficient Balance" />
-                ) : isInsufficientAllowance ? (
-                    <PrimaryButton 
-                        name={`Approve ${tokenIn?.symbol}`}
-                        onClick={handleOnApprove}
-                    />
-                ) : isInffuficientLiquidity ? (
-                    <LabelButton name="Insufficient Liquidity" />
-                ) : (
+                ) 
+                // : isInsufficientBalance ? (
+                //     <LabelButton name="Insufficient Balance" />
+                // ) : isInsufficientAllowance ? (
+                //     <PrimaryButton 
+                //         name={`Approve ${tokenIn?.symbol}`}
+                //         onClick={handleOnApprove}
+                //     />
+                // ) : isInffuficientLiquidity ? (
+                //     <LabelButton name="Insufficient Liquidity" />
+                // )
+                 : (
                     <PrimaryButton
                         onClick={() => handleOnAddLiquidity()}
                         name={'Swap'}
