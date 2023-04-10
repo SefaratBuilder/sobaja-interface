@@ -53,6 +53,6 @@ export function useRouterContract(): Contract | null {
     return useContract(ROUTERS[chainId], ROUTER_ABI)
 }
 
-export function useTokenContract(address: string): Contract | null {
+export function useTokenContract(address: string | undefined): Contract | null {
     return useContract(address, ERC20)
 }

@@ -23,9 +23,9 @@ export function useETHBalances(
         () =>
             uncheckedAddresses
                 ? uncheckedAddresses
-                      .map(isAddress)
-                      .filter((a): a is string => a !== false)
-                      .sort()
+                    .map(isAddress)
+                    .filter((a): a is string => a !== false)
+                    .sort()
                 : [],
         [uncheckedAddresses],
     )
@@ -88,16 +88,16 @@ export function useTokenBalancesWithLoadingIndicator(
             () =>
                 address && validatedTokens.length > 0
                     ? validatedTokens.reduce<{
-                          [tokenAddress: string]: FixedNumber | undefined
-                      }>((memo, token, i) => {
-                          const value = balances?.[i]?.result?.[0]
-                          if (value) {
-                              memo[token.address] = FixedNumber.fromBytes(
-                                  value._hex,
-                              )
-                          }
-                          return memo
-                      }, {})
+                        [tokenAddress: string]: FixedNumber | undefined
+                    }>((memo, token, i) => {
+                        const value = balances?.[i]?.result?.[0]
+                        if (value) {
+                            memo[token.address] = FixedNumber.fromBytes(
+                                value._hex,
+                            )
+                        }
+                        return memo
+                    }, {})
                     : {},
             [address, validatedTokens, balances],
         ),
@@ -114,22 +114,22 @@ export function useTokenBalances(
 
 // get the balance for a single token/account combo
 export function useTokenBalance(
-    account?: string,
+    account?: string | null,
     token?: Token,
 ): FixedNumber | undefined {
+    if (!token || !account) return undefined
     const tokenBalances = useTokenBalances(account, [token])
-    if (!token) return undefined
     return tokenBalances[token.address]
 }
 
 export function useCurrencyBalances(
-    account?: string,
+    account?: string | null,
     currencies?: (Token | undefined)[],
 ): (FixedNumber | undefined)[] {
+
+    if (!account || !currencies) return []
     const { chainId } = useActiveWeb3React()
-
     const tokens = currencies
-
     const tokenBalances = useTokenBalances(account, tokens)
     const ethBalance = useETHBalances([account])
 
@@ -137,8 +137,9 @@ export function useCurrencyBalances(
         () =>
             currencies?.map((currency) => {
                 if (!account || !currency) return undefined
-                if (currency.address === NATIVE_COIN.address)
+                if (currency.address === NATIVE_COIN.address) {
                     return ethBalance[account]
+                }
                 if (currency) return tokenBalances[currency.address]
                 return undefined
             }) ?? [],
@@ -147,7 +148,7 @@ export function useCurrencyBalances(
 }
 
 export function useCurrencyBalance(
-    account?: string,
+    account?: string | null,
     currency?: Token | undefined,
 ): FixedNumber | undefined {
     return useCurrencyBalances(account, [currency])[0]
