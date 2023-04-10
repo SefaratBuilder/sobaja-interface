@@ -21,8 +21,10 @@ import { ROUTERS } from 'constants/addresses'
 import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
+import { useRouterContract } from 'hooks/useContract'
 
 const Swap = () => {
+
     const swapState = useSwapState()
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
@@ -34,6 +36,8 @@ const Swap = () => {
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
     console.log('token allowance', tokenApproval)
+
+    const router = useRouterContract();
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -49,7 +53,9 @@ const Swap = () => {
         [onTokenSelection, swapState],
     )
 
-    const handleOnSwap = () => {}
+    const handleOnSwap = () => {
+
+    }
 
     const handleOnApprove = async () => {
         try {
