@@ -66,7 +66,6 @@ const TokenListModal = ({
     const sortTokenList = () => {
         let sortedTokenList: TokenList = []
         Object.entries(allTokenBalances)
-            .sort((a, b) => Number(b[1]) - Number(a[1]))
             .map(([k]) => {
                 const token = tokens.find((t) => t.address === k)
                 return token && sortedTokenList.push(token)

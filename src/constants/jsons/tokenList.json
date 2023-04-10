@@ -78,5 +78,13 @@
         "logoURI": "",
         "name": "SP",
         "chainId": 324
+    },
+    {
+        "address": "0x355d88ef9CCB06078a10cF7111091cAe7756c210",
+        "symbol": "DAI",
+        "decimals": 18,
+        "logoURI": "",
+        "name": "DAI",
+        "chainId": 324
     }
 ]
