@@ -16,34 +16,33 @@ export function useToken(address: string | undefined): Token | undefined {
         [],
     )
 
-    return
-    // const nameResult = useMultipleContractSingleData(
-    //     [address],
-    //     ERC20_INTERFACE,
-    //     "name",
-    //     []
-    // )
+    const nameResult = useMultipleContractSingleData(
+        [address],
+        ERC20_INTERFACE,
+        "name",
+        []
+    )
 
-    // const decimalsResult = useMultipleContractSingleData(
-    //     [address],
-    //     ERC20_INTERFACE,
-    //     "decimals",
-    //     []
-    // )
+    const decimalsResult = useMultipleContractSingleData(
+        [address],
+        ERC20_INTERFACE,
+        "decimals",
+        []
+    )
 
-    // return useMemo(() => {
-    //     const symbol = symbolResult?.[0]?.result?.[0]
-    //     const name = nameResult?.[0]?.result?.[0]
-    //     const decimals = decimalsResult?.[0]?.result?.[0]
+    return useMemo(() => {
+        const symbol = symbolResult?.[0]?.result?.[0]
+        const name = nameResult?.[0]?.result?.[0]
+        const decimals = decimalsResult?.[0]?.result?.[0]
 
-    //     if (!symbol || !name || !decimals || !chainId || !address) return
-    //     return {
-    //         address,
-    //         name,
-    //         decimals,
-    //         chainId,
-    //         symbol,
-    //         logoURI: ''
-    //     }
-    // }, [address, chainId, symbolResult, nameResult, decimalsResult])
+        if (!symbol || !name || !decimals || !chainId || !address) return
+        return {
+            address,
+            name,
+            decimals,
+            chainId,
+            symbol,
+            logoURI: ''
+        }
+    }, [address, chainId, symbolResult, nameResult, decimalsResult])
 }

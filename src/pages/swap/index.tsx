@@ -13,6 +13,7 @@ import LabelButton from 'components/Buttons/LabelButton'
 import SwapIcon from 'assets/icons/swap-icon.svg'
 import { useActiveWeb3React } from 'hooks'
 import { usePair, usePairAddressesByIds } from 'hooks/useAllPairs'
+import { useToken } from 'hooks/useToken'
 
 const Swap = () => {
     const swapState = useSwapState()

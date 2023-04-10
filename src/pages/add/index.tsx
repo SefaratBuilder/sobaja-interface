@@ -32,35 +32,33 @@ const Swap = () => {
         [onTokenSelection, swapState],
     )
 
-    const handleOnSwap = () => {}
+    const handleOnAddLiquidity = () => {}
 
-    const SwapButton = () => {
+    const AddButton = () => {
         const balanceIn = 0
+        const balanceOut = 0
         const isNotConnected = true
         const isUndefinedAmount = true
-        const isInffuficientLiquidity = true
-        const isUndefinedCoin = !tokenIn || !tokenOut
-        const isInsufficientBalance = Number(inputAmount) > balanceIn
-        const unSupportedNetwork = true
+        const isInsufficientBalance = true
+        const isUndefinedCoin = true
 
         return (
             <Row>
                 {isNotConnected ? (
-                    <PrimaryButton name="Connect Wallet" />
-                ) : unSupportedNetwork ? (
-                    <LabelButton name="Supported for testnet or devnet now" />
+                    <PrimaryButton
+                        // onClick={() => setIsConnected(!isConnected)}
+                        name="Connect Wallet"
+                    />
                 ) : isUndefinedCoin ? (
                     <LabelButton name="Select a coin" />
                 ) : isUndefinedAmount ? (
                     <LabelButton name="Enter an amount" />
-                ) : isInffuficientLiquidity ? (
-                    <LabelButton name="Insufficient Liquidity" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
                 ) : (
                     <PrimaryButton
-                        onClick={() => handleOnSwap()}
-                        name={'Swap'}
+                        onClick={() => handleOnAddLiquidity()}
+                        name={'Add Liquidity'}
                     />
                 )}
             </Row>
@@ -97,7 +95,7 @@ const Swap = () => {
                     field={Field.OUTPUT}
                 />
             </Columns>
-            <SwapButton />
+            <AddButton />
         </SwapContainer>
     )
 }
