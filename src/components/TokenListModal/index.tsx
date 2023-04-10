@@ -25,6 +25,70 @@ const TokenListModal = ({
     field,
     onUserSelect,
 }: TokenListModalProps) => {
+    const [searchQuery, setSearchQuery] = useState<string | undefined>()
+    const { currentList: tokens } = useTokenList()
+    const addTokenToCurrentList = useAddTokenToCurrentList()
+    const [searchedToken, setSearchedToken] = useState<Token | undefined>()
+    const [renderedTokenList, setRenderTokenList] = useState<Token[] | []>(
+        [],
+    )
+    const allTokenBalances = useAllTokenBalances()
+    const { chainId } = useActiveWeb3React()
+
+    const handleSearchToken = async (
+        e: ChangeEvent<HTMLInputElement>,
+    ): Promise<void> => {
+        const searchQuery = e.target.value
+        setSearchQuery(searchQuery)
+        searchedToken && setSearchedToken(undefined)
+        const tokenHasAlreadyInList =
+            searchQuery && tokens.length > 0
+                ? tokens.filter(
+                      (token: Token) =>
+                          token.name.includes(searchQuery) ||
+                          token.address.includes(searchQuery) ||
+                          token.symbol.includes(searchQuery),
+                  )
+                : []
+        if (tokenHasAlreadyInList.length > 0) {
+            setRenderTokenList(tokenHasAlreadyInList)
+            return
+        }
+        if (searchQuery && tokenHasAlreadyInList.length === 0) {
+            setRenderTokenList([])
+            return
+        }
+        setRenderTokenList(tokens)
+    }
+
+    const handleAddToken = (token: Token) => {
+        addTokenToCurrentList(token)
+        setSearchedToken(undefined)
+    }
+
+    const sortTokenList = () => {
+        let sortedTokenList: TokenList = []
+        Object.entries(allTokenBalances)
+            .sort((a, b) => Number(b[1]) - Number(a[1]))
+            .map(([k]) => {
+                const token = tokens.find((t) => t.address === k)
+                return token && sortedTokenList.push(token)
+            })
+        const newTokens = tokens.filter((t) => !sortedTokenList.includes(t))
+        const filteredByChainIdTokens = [
+            ...sortedTokenList,
+            ...newTokens,
+        ].filter((item) => item.chainId !== chainId)
+        setRenderTokenList(filteredByChainIdTokens)
+    }
+
+    useEffect(() => {
+        sortTokenList()
+    }, [tokens, chainId])
+
+    const tokenss = useToken(searchQuery)
+    console.log({tokenss})
+
     const ModalButton = (onOpen: () => void) => {
         return (
             <SelectTokenButton
@@ -36,66 +100,6 @@ const TokenListModal = ({
     }
 
     const ModalContent = (onClose: () => void) => {
-        const [searchQuery, setSearchQuery] = useState<string | undefined>()
-        const { currentList: tokens } = useTokenList()
-        const addTokenToCurrentList = useAddTokenToCurrentList()
-        const [searchedToken, setSearchedToken] = useState<Token | undefined>()
-        const [renderedTokenList, setRenderTokenList] = useState<Token[] | []>(
-            [],
-        )
-        const allTokenBalances = useAllTokenBalances()
-        const { chainId } = useActiveWeb3React()
-
-        const handleSearchToken = async (
-            e: ChangeEvent<HTMLInputElement>,
-        ): Promise<void> => {
-            const searchQuery = e.target.value
-            setSearchQuery(searchQuery)
-            searchedToken && setSearchedToken(undefined)
-            const tokenHasAlreadyInList =
-                searchQuery && tokens.length > 0
-                    ? tokens.filter(
-                          (token: Token) =>
-                              token.name.includes(searchQuery) ||
-                              token.address.includes(searchQuery) ||
-                              token.symbol.includes(searchQuery),
-                      )
-                    : []
-            if (tokenHasAlreadyInList.length > 0) {
-                setRenderTokenList(tokenHasAlreadyInList)
-                return
-            }
-            if (searchQuery && tokenHasAlreadyInList.length === 0) {
-                setRenderTokenList([])
-                return
-            }
-            setRenderTokenList(tokens)
-        }
-
-        const handleAddToken = (token: Token) => {
-            addTokenToCurrentList(token)
-            setSearchedToken(undefined)
-        }
-
-        const sortTokenList = () => {
-            let sortedTokenList: TokenList = []
-            Object.entries(allTokenBalances)
-                .sort((a, b) => Number(b[1]) - Number(a[1]))
-                .map(([k]) => {
-                    const token = tokens.find((t) => t.address === k)
-                    return token && sortedTokenList.push(token)
-                })
-            const newTokens = tokens.filter((t) => !sortedTokenList.includes(t))
-            const filteredByChainIdTokens = [
-                ...sortedTokenList,
-                ...newTokens,
-            ].filter((item) => item.chainId !== chainId)
-            setRenderTokenList(filteredByChainIdTokens)
-        }
-
-        useEffect(() => {
-            sortTokenList()
-        }, [tokens, chainId])
 
         return (
             <ModalContentWrapper gap={'16px'}>

@@ -5,7 +5,7 @@ import { ChainId } from '..'
 
 const MULTICALL_NETWORKS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441',
-    [ChainId.ZKTESTNET]: '0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507',
+    [ChainId.ZKTESTNET]: '0xb6d65a6e0AA575e2280427D58375Ee5cED42A764',
     [ChainId.GOERLI]: '0x77dca2c955b15e9de4dbbcf1246b4b85b651e50e',
     [ChainId.MUMBAI]: '0x08411ADd0b5AA8ee47563b146743C13b3556c9Cc',
 }
