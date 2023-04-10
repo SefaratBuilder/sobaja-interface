@@ -8,7 +8,6 @@ import { useTokenContract } from './useContract'
 import { FixedNumber } from 'ethers'
 
 export function useToken(address: string | undefined): Token | undefined {
-    if (!address || !isAddress(address)) return
     const { chainId } = useActiveWeb3React()
 
     const symbolResult = useMultipleContractSingleData(
@@ -51,26 +50,20 @@ export function useToken(address: string | undefined): Token | undefined {
 
 export function useTokenApproval(
     from: string | null | undefined,
-    to: string | undefined,
+    to: string | null | undefined,
     token: Token | undefined,
 ): {
     allowance: FixedNumber | undefined
     approve: (to: string, amount: number | string) => void
 } {
+    from = from == null ? undefined : from
+    to = to == null ? undefined : to
     const tokenContract = useTokenContract(token?.address)
 
     const approve = (to: string, amount: number | string) => {
         if (!isAddress(to)) return
         return tokenContract?.approve(to, amount)
     }
-
-    if (
-        !from ||
-        !isAddress(from) ||
-        !isAddress(to) ||
-        !isAddress(token?.address)
-    )
-        return { allowance: FixedNumber.fromValue(0), approve }
 
     const allowance = useMultipleContractSingleData(
         [token?.address],

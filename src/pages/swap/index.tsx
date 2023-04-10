@@ -35,7 +35,7 @@ const Swap = () => {
     const pair = usePair(chainId, tokenIn, tokenOut)
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
-    console.log('token allowance', tokenApproval)
+    const balanceIn = useCurrencyBalance(account, tokenIn)
 
     const router = useRouterContract();
 
@@ -60,11 +60,10 @@ const Swap = () => {
     const handleOnApprove = async () => {
         try {
             if (tokenIn && inputAmount && routerAddress) {
-                await tokenApproval.approve(
+                await tokenApproval?.approve(
                     routerAddress,
                     mulNumberWithDecimal(inputAmount, tokenIn.decimals),
                 )
-                console.log('Approve successfully...')
             }
         } catch (err) {
             console.log('Failed to approve token: ', err)
@@ -76,7 +75,6 @@ const Swap = () => {
     }
 
     const SwapButton = () => {
-        const balanceIn = useCurrencyBalance(account, tokenIn)
         const isNotConnected = !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
@@ -129,7 +127,7 @@ const Swap = () => {
                 <Row gap="20px">
                     <Link to="/swap">Swap</Link>
                     <Link to="/add">Add</Link>
-                    <Link to="/limit">Limit</Link>
+                    <Link to="/pools">Pool</Link>
                 </Row>
                 <Setting />
             </Row>

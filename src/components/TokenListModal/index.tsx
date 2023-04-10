@@ -11,7 +11,6 @@ import TokenSelection from './TokenSelection'
 import SelectTokenButton from 'components/Buttons/SelectButton'
 import CloseIcon from 'assets/icons/x.svg'
 import { useAllTokenBalances } from 'hooks/useCurrencyBalance'
-import { useToken } from 'hooks/useToken'
 import { useActiveWeb3React } from 'hooks'
 
 interface TokenListModalProps {
@@ -83,9 +82,6 @@ const TokenListModal = ({
     useEffect(() => {
         sortTokenList()
     }, [tokens, chainId])
-
-    const tokenss = useToken(searchQuery)
-    console.log({ tokenss })
 
     const ModalButton = (onOpen: () => void) => {
         return (
