@@ -23,9 +23,9 @@ export function useETHBalances(
         () =>
             uncheckedAddresses
                 ? uncheckedAddresses
-                      .map(isAddress)
-                      .filter((a): a is string => a !== false)
-                      .sort()
+                    .map(isAddress)
+                    .filter((a): a is string => a !== false)
+                    .sort()
                 : [],
         [uncheckedAddresses],
     )
@@ -55,7 +55,7 @@ export function useETHBalances(
  * Returns a map of token addresses to their eventually consistent token balances for a single account.
  */
 export function useTokenBalancesWithLoadingIndicator(
-    address?: string,
+    address?: string | null,
     tokens?: (Token | undefined)[],
 ): [{ [tokenAddress: string]: FixedNumber | undefined }, boolean] {
     const validatedTokens: Token[] = useMemo(
@@ -70,7 +70,7 @@ export function useTokenBalancesWithLoadingIndicator(
         () => validatedTokens.map((vt) => vt.address),
         [validatedTokens],
     )
-
+    address = address == null ? undefined : address
     const balances = useMultipleContractSingleData(
         validatedTokenAddresses,
         ERC20_INTERFACE,
@@ -88,16 +88,16 @@ export function useTokenBalancesWithLoadingIndicator(
             () =>
                 address && validatedTokens.length > 0
                     ? validatedTokens.reduce<{
-                          [tokenAddress: string]: FixedNumber | undefined
-                      }>((memo, token, i) => {
-                          const value = balances?.[i]?.result?.[0]
-                          if (value) {
-                              memo[token.address] = FixedNumber.fromBytes(
-                                  value._hex,
-                              )
-                          }
-                          return memo
-                      }, {})
+                        [tokenAddress: string]: FixedNumber | undefined
+                    }>((memo, token, i) => {
+                        const value = balances?.[i]?.result?.[0]
+                        if (value) {
+                            memo[token.address] = FixedNumber.fromBytes(
+                                value._hex,
+                            )
+                        }
+                        return memo
+                    }, {})
                     : {},
             [address, validatedTokens, balances],
         ),
@@ -106,7 +106,7 @@ export function useTokenBalancesWithLoadingIndicator(
 }
 
 export function useTokenBalances(
-    address?: string,
+    address?: string | null,
     tokens?: (Token | undefined)[],
 ): { [tokenAddress: string]: FixedNumber | undefined } {
     return useTokenBalancesWithLoadingIndicator(address, tokens)[0]
@@ -117,16 +117,14 @@ export function useTokenBalance(
     account?: string | null,
     token?: Token,
 ): FixedNumber | undefined {
-    if (!token || !account) return undefined
     const tokenBalances = useTokenBalances(account, [token])
-    return tokenBalances[token.address]
+    return token && tokenBalances[token.address]
 }
 
 export function useCurrencyBalances(
     account?: string | null,
     currencies?: (Token | undefined)[],
 ): (FixedNumber | undefined)[] {
-    if (!account || !currencies) return []
     const { chainId } = useActiveWeb3React()
     const tokens = currencies
     const tokenBalances = useTokenBalances(account, tokens)
