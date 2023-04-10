@@ -53,12 +53,14 @@ const Swap = () => {
 
     const handleOnApprove = async () => {
         try {
-            if(tokenIn && inputAmount && routerAddress){
-                await tokenApproval.approve(routerAddress, mulNumberWithDecimal(inputAmount, tokenIn.decimals))
+            if (tokenIn && inputAmount && routerAddress) {
+                await tokenApproval.approve(
+                    routerAddress,
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                )
                 console.log('Approve successfully...')
             }
-        }
-        catch(err) {
+        } catch (err) {
             console.log('Failed to approve token: ', err)
         }
     }
@@ -70,17 +72,23 @@ const Swap = () => {
     const SwapButton = () => {
         const balanceIn = useCurrencyBalance(account, tokenIn)
         const isNotConnected = !account
-        const unSupportedNetwork = chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
+        const unSupportedNetwork =
+            chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
         const isUndefinedAmount = inputAmount && outputAmount
         const isInffuficientLiquidity = !pair
         const isUndefinedCurrencies = !tokenIn || !tokenOut
-        const isInsufficientBalance = inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
-        const isInsufficientAllowance = Number(tokenApproval?.allowance) < Number(inputAmount)
+        const isInsufficientBalance =
+            inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
+        const isInsufficientAllowance =
+            Number(tokenApproval?.allowance) < Number(inputAmount)
 
         return (
             <Row>
                 {isNotConnected ? (
-                    <PrimaryButton name="Connect Wallet" onClick={openWalletModal} />
+                    <PrimaryButton
+                        name="Connect Wallet"
+                        onClick={openWalletModal}
+                    />
                 ) : unSupportedNetwork ? (
                     <LabelButton name="Unsupported network" />
                 ) : isUndefinedCurrencies ? (
@@ -90,7 +98,10 @@ const Swap = () => {
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
                 ) : isInsufficientAllowance ? (
-                    <PrimaryButton name={`Approve ${tokenIn?.symbol}`} onClick={handleOnApprove} />
+                    <PrimaryButton
+                        name={`Approve ${tokenIn?.symbol}`}
+                        onClick={handleOnApprove}
+                    />
                 ) : isInffuficientLiquidity ? (
                     <LabelButton name="Insufficient Liquidity" />
                 ) : (
@@ -105,7 +116,9 @@ const Swap = () => {
 
     return (
         <SwapContainer>
-            {!account && isOpenWalletModal && <WalletModal setToggleWalletModal={openWalletModal}/>}
+            {!account && isOpenWalletModal && (
+                <WalletModal setToggleWalletModal={openWalletModal} />
+            )}
             <Row jus="space-between">
                 <Row gap="20px">
                     <Link to="/swap">Swap</Link>

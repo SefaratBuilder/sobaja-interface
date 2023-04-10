@@ -4,8 +4,8 @@ import { Token } from 'interfaces'
 import { useMultipleContractSingleData } from 'states/multicall/hooks'
 import { useActiveWeb3React } from 'hooks'
 import { isAddress } from 'utils'
-import { useTokenContract } from './useContract';
-import { FixedNumber } from 'ethers';
+import { useTokenContract } from './useContract'
+import { FixedNumber } from 'ethers'
 
 export function useToken(address: string | undefined): Token | undefined {
     if (!address || !isAddress(address)) return
@@ -49,11 +49,14 @@ export function useToken(address: string | undefined): Token | undefined {
     }, [address, chainId, symbolResult, nameResult, decimalsResult])
 }
 
-export function useTokenApproval(from: string | null | undefined, to: string | undefined, token: Token | undefined): {
-    allowance: FixedNumber | undefined,
+export function useTokenApproval(
+    from: string | null | undefined,
+    to: string | undefined,
+    token: Token | undefined,
+): {
+    allowance: FixedNumber | undefined
     approve: (to: string, amount: number | string) => void
 } {
-
     const tokenContract = useTokenContract(token?.address)
 
     const approve = (to: string, amount: number | string) => {
@@ -61,7 +64,13 @@ export function useTokenApproval(from: string | null | undefined, to: string | u
         return tokenContract?.approve(to, amount)
     }
 
-    if (!from || !isAddress(from) || !isAddress(to) || !isAddress(token?.address)) return { allowance: FixedNumber.fromValue(0), approve }
+    if (
+        !from ||
+        !isAddress(from) ||
+        !isAddress(to) ||
+        !isAddress(token?.address)
+    )
+        return { allowance: FixedNumber.fromValue(0), approve }
 
     const allowance = useMultipleContractSingleData(
         [token?.address],
@@ -75,7 +84,7 @@ export function useTokenApproval(from: string | null | undefined, to: string | u
 
         return {
             allowance: value && FixedNumber.fromValue(value, token?.decimals),
-            approve
+            approve,
         }
     }, [from, to, token])
 }
