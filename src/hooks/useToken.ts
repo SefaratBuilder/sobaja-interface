@@ -19,15 +19,15 @@ export function useToken(address: string | undefined): Token | undefined {
     const nameResult = useMultipleContractSingleData(
         [address],
         ERC20_INTERFACE,
-        "name",
-        []
+        'name',
+        [],
     )
 
     const decimalsResult = useMultipleContractSingleData(
         [address],
         ERC20_INTERFACE,
-        "decimals",
-        []
+        'decimals',
+        [],
     )
 
     return useMemo(() => {
@@ -42,7 +42,7 @@ export function useToken(address: string | undefined): Token | undefined {
             decimals,
             chainId,
             symbol,
-            logoURI: ''
+            logoURI: '',
         }
     }, [address, chainId, symbolResult, nameResult, decimalsResult])
 }

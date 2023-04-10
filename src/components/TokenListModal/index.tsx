@@ -29,9 +29,7 @@ const TokenListModal = ({
     const { currentList: tokens } = useTokenList()
     const addTokenToCurrentList = useAddTokenToCurrentList()
     const [searchedToken, setSearchedToken] = useState<Token | undefined>()
-    const [renderedTokenList, setRenderTokenList] = useState<Token[] | []>(
-        [],
-    )
+    const [renderedTokenList, setRenderTokenList] = useState<Token[] | []>([])
     const allTokenBalances = useAllTokenBalances()
     const { chainId } = useActiveWeb3React()
 
@@ -87,7 +85,7 @@ const TokenListModal = ({
     }, [tokens, chainId])
 
     const tokenss = useToken(searchQuery)
-    console.log({tokenss})
+    console.log({ tokenss })
 
     const ModalButton = (onOpen: () => void) => {
         return (
@@ -100,7 +98,6 @@ const TokenListModal = ({
     }
 
     const ModalContent = (onClose: () => void) => {
-
         return (
             <ModalContentWrapper gap={'16px'}>
                 <Row jus="space-between">
