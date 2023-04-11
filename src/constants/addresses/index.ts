@@ -37,9 +37,9 @@ const INIT_CODE_HASHES: { [chainId: number]: string } = {
 
 export const WRAPPED_NATIVE_COIN: { [chainId in ChainId]: string } = {
     [ChainId.ZKMAINNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
-    [ChainId.ZKTESTNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+    [ChainId.ZKTESTNET]: '0x20b28b1e4665fff290650586ad76e977eab90c5d',
     [ChainId.GOERLI]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
-    [ChainId.MUMBAI]: '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
+    [ChainId.MUMBAI]: '0x062f24cb618e6ba873EC1C85FD08B8D2Ee9bF23e',
 }
 
 export {

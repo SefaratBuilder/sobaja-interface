@@ -75,6 +75,7 @@ const TokenListModal = ({
             return token && sortedTokenList.push(token)
         })
         const newTokens = tokens.filter((t) => !sortedTokenList.includes(t))
+
         const filteredByChainIdTokens = [
             ...sortedTokenList,
             ...newTokens,
