@@ -65,11 +65,10 @@ const TokenListModal = ({
 
     const sortTokenList = () => {
         let sortedTokenList: TokenList = []
-        Object.entries(allTokenBalances)
-            .map(([k]) => {
-                const token = tokens.find((t) => t.address === k)
-                return token && sortedTokenList.push(token)
-            })
+        Object.entries(allTokenBalances).map(([k]) => {
+            const token = tokens.find((t) => t.address === k)
+            return token && sortedTokenList.push(token)
+        })
         const newTokens = tokens.filter((t) => !sortedTokenList.includes(t))
         const filteredByChainIdTokens = [
             ...sortedTokenList,

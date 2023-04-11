@@ -55,10 +55,7 @@ const Swap = () => {
     const handleOnApprove = async () => {
         try {
             if (tokenIn && inputAmount && routerAddress) {
-                await tokenApproval?.approve(
-                    routerAddress,
-                    1,
-                )
+                await tokenApproval?.approve(routerAddress, 1)
             }
         } catch (err) {
             console.log('Failed to approve token: ', err)
@@ -177,6 +174,9 @@ const SwapContainer = styled(Columns)`
         rgba(0, 28, 44, 0.3)
     );
     gap: 15px;
+    @media screen and (max-width: 767px) {
+        margin: 0 20px;
+    }
 `
 
 const Icon = styled.div`

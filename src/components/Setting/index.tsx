@@ -240,7 +240,6 @@ const Wrap = styled.div`
     margin: auto;
     color: ${({ theme }) => theme.text1};
     font-size: 14px;
-    // background: ${({ theme }) => theme.bg10};
     max-width: 385px;
     width: 100%;
     backdrop-filter: blur(10px);
@@ -251,7 +250,7 @@ const Wrap = styled.div`
     padding: 15px;
     // width: 360px;
     // height: 360px;
-    background: linear-gradient(180deg, #002033 0%, rgba(0, 38, 60, 0.8) 100%);
+    background: var(--bg5);
     border: 1px solid #003b5c;
 
     @media screen and (max-width: 390px) {
