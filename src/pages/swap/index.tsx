@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
-import Setting from 'components/Setting'
+import Transaction from 'components/Setting'
 import Bridge from 'components/Bridge'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
 import { Field, Token } from 'interfaces'
@@ -13,6 +13,7 @@ import LabelButton from 'components/Buttons/LabelButton'
 import SwapIcon from 'assets/icons/swap-icon.svg'
 import { useActiveWeb3React } from 'hooks'
 import { usePair, usePairAddressesByIds } from 'hooks/useAllPairs'
+import HeaderLiquidity from 'components/HeaderLiquidity'
 import { useToken, useTokenApproval } from 'hooks/useToken'
 import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
@@ -69,6 +70,8 @@ const Swap = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
     }
 
+    const [setting, setSetting] = useState(false)
+
     const SwapButton = () => {
         const isNotConnected = !account
         const unSupportedNetwork =
@@ -124,7 +127,8 @@ const Swap = () => {
                     <Link to="/add">Add</Link>
                     <Link to="/pools">Pool</Link>
                 </Row>
-                <Setting />
+                {/* <Transaction /> */}
+                <HeaderLiquidity name="Swap" />
             </Row>
             {/* <Bridge /> */}
             <Columns>
@@ -174,6 +178,9 @@ const SwapContainer = styled(Columns)`
         rgba(0, 28, 44, 0.3)
     );
     gap: 15px;
+    @media screen and (max-width: 767px) {
+        margin: 0 20px;
+    }
 `
 
 const Icon = styled.div`
