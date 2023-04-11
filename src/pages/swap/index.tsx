@@ -13,7 +13,7 @@ import LabelButton from 'components/Buttons/LabelButton'
 import SwapIcon from 'assets/icons/swap-icon.svg'
 import { useActiveWeb3React } from 'hooks'
 import { usePair, usePairAddressesByIds } from 'hooks/useAllPairs'
-import HeaderLiquidity from "components/HeaderLiquidity";
+import HeaderLiquidity from 'components/HeaderLiquidity'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -39,7 +39,7 @@ const Swap = () => {
 
     const handleOnSwap = () => {}
 
-    const [setting, setSetting] = useState(false);
+    const [setting, setSetting] = useState(false)
 
     const SwapButton = () => {
         const balanceIn = 0
