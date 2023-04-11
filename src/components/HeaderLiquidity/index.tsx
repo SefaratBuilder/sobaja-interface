@@ -17,7 +17,7 @@ const HeaderLiquidity = ({ name }: HeaderLiquidityProps) => {
         <>
             <HeaderTitle>
                 <WrapNav>
-                    <label>{name}</label>
+                    {/* <label>{name}</label> */}
                     <img
                         onClick={() => setSetting(true)}
                         src={userDarkMode ? SettingIcon : SettingIcon}
