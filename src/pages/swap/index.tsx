@@ -22,8 +22,10 @@ import { ROUTERS } from 'constants/addresses'
 import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
+import { useRouterContract } from 'hooks/useContract'
 
 const Swap = () => {
+
     const swapState = useSwapState()
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
@@ -51,7 +53,9 @@ const Swap = () => {
         [onTokenSelection, swapState],
     )
 
-    const handleOnSwap = () => {}
+    const handleOnSwap = () => {
+
+    }
 
     const handleOnApprove = async () => {
         try {
@@ -81,6 +85,7 @@ const Swap = () => {
         const isUndefinedCurrencies = !tokenIn || !tokenOut
         const isInsufficientBalance =
             inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
+            console.log('alowwww>>>>>', tokenApproval?.allowance)
         const isInsufficientAllowance =
             Number(tokenApproval?.allowance) < Number(inputAmount)
 
