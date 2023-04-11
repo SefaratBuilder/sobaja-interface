@@ -13,12 +13,12 @@ const Header = () => {
             <Logo>
                 <img
                     className="logo"
-                    src="/images/logo.svg"
+                    src={SobajaLogo}
                     alt="sobaja swap logo"
                 />
                 <img
                     className="logo-mobile"
-                    src="/images/logo-mobile.svg"
+                    src="/favicon.ico"
                     alt="sobaja swap logo mobile"
                 />
             </Logo>

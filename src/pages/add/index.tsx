@@ -10,6 +10,10 @@ import { useSwapActionHandlers, useSwapState } from 'states/swap/hooks'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import LabelButton from 'components/Buttons/LabelButton'
 import PlusIcon from 'assets/icons/plus.svg'
+import { useFactoryContract, useRouterContract } from 'hooks/useContract'
+import { useActiveWeb3React } from 'hooks'
+import { mulNumberWithDecimal } from 'utils/math'
+import { usePair } from 'hooks/useAllPairs'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -17,7 +21,11 @@ const Swap = () => {
     const { inputAmount, outputAmount, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
-
+    const routerContract = useRouterContract()
+    const factoryContract = useFactoryContract()
+    const { account, chainId } = useActiveWeb3React()
+    const pair = usePair(chainId, tokenIn, tokenOut)
+    console.log({pair})
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
             onUserInput(field, value)
@@ -31,8 +39,28 @@ const Swap = () => {
         },
         [onTokenSelection, swapState],
     )
-
-    const handleOnAddLiquidity = () => {}
+    
+    const handleOnAddLiquidity = async() => {
+        try {
+            
+            if(inputAmount && outputAmount && tokenIn && tokenOut) {
+                await routerContract?.addLiquidity(
+                    tokenIn.address,
+                    tokenOut.address,
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                    mulNumberWithDecimal(outputAmount, tokenOut.decimals),
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                    mulNumberWithDecimal(outputAmount, tokenOut.decimals),
+                    account,
+                    (new Date().getTime()/1000 + 1000).toFixed(0)
+                )
+                console.log('Add liquidity successfully')
+            }
+        }
+        catch(err) {
+            console.log(err)
+        }
+    }
 
     const AddButton = () => {
         const balanceIn = 0
@@ -44,7 +72,7 @@ const Swap = () => {
 
         return (
             <Row>
-                {isNotConnected ? (
+                {/* {isNotConnected ? (
                     <PrimaryButton
                         // onClick={() => setIsConnected(!isConnected)}
                         name="Connect Wallet"
@@ -60,7 +88,11 @@ const Swap = () => {
                         onClick={() => handleOnAddLiquidity()}
                         name={'Add Liquidity'}
                     />
-                )}
+                )} */}
+                <PrimaryButton
+                        onClick={() => handleOnAddLiquidity()}
+                        name={'Add Liquidity'}
+                    />
             </Row>
         )
     }

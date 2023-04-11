@@ -35,6 +35,7 @@ const Swap = () => {
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
     const balanceIn = useCurrencyBalance(account, tokenIn)
+    console.log({pair})
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -55,7 +56,10 @@ const Swap = () => {
     const handleOnApprove = async () => {
         try {
             if (tokenIn && inputAmount && routerAddress) {
-                await tokenApproval?.approve(routerAddress, 1)
+                await tokenApproval?.approve(
+                    routerAddress,
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals)
+                )
             }
         } catch (err) {
             console.log('Failed to approve token: ', err)
@@ -164,7 +168,7 @@ const SwapContainer = styled(Columns)`
     margin: 0 auto;
     height: fit-content;
     max-width: 480px;
-    background: #130f0f;
+    background: var(--bg5)!important;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
