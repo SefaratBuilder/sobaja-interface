@@ -32,7 +32,7 @@ const INIT_CODE_HASHES: { [chainId: number]: string } = {
     [ChainId.GOERLI]:
         '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f',
     [ChainId.MUMBAI]:
-        '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f',
+        '0x17f3f03b4063530632eba024ef5b90dd5ab3efaa82f6a54a1a7d1025bb81c1dd',
 }
 
 export const WRAPPED_NATIVE_COIN: { [chainId in ChainId]: string } = {

@@ -9,7 +9,7 @@ import { FixedNumber } from 'ethers'
 
 export function useToken(address: string | undefined): Token | undefined {
     const { chainId } = useActiveWeb3React()
-
+    address = isAddress(address) ? address : undefined
     const symbolResult = useMultipleContractSingleData(
         [address],
         ERC20_INTERFACE,
@@ -79,5 +79,5 @@ export function useTokenApproval(
             allowance: value && FixedNumber.fromValue(value, token?.decimals),
             approve,
         }
-    }, [from, to, token])
+    }, [from, to, token, tokenContract])
 }

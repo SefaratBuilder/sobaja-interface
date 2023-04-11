@@ -61,25 +61,25 @@ export const sub = (numberA: any, numberB: any) => {
 export const divNumberWithDecimal = (
     n: number | string,
     decimals: number,
-): number => {
-    return Number(div(n, 10 ** decimals))
+): string => {
+    return fixNum(Number(div(n, 10 ** decimals)))
 }
 
 export const mulNumberWithDecimal = (
     n: number | string,
     decimals: number,
-): number => {
+): string => {
     if (n?.toString().includes('.')) {
         if (n.toString().split('.')[1].length >= decimals) {
             const a = n.toString().split('.')
-            return Number(a[0] + a[1].slice(0, decimals))
+            return fixNum(Number(a[0] + a[1].slice(0, decimals)))
         } else {
             const diff = decimals - n.toString().split('.')[1].length
             let zero = ''
             for (let i = 0; i < diff; i++) zero += '0'
-            return Number(n.toString().replaceAll('.', '') + zero)
+            return fixNum(Number(n.toString().replaceAll('.', '') + zero))
         }
     } else {
-        return Number(n) * Number(`1e${decimals}`)
+        return fixNum(Number(n) * Number(`1e${decimals}`))
     }
 }

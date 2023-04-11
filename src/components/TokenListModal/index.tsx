@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import Modal from 'components/Modal'
 import { Columns, Row } from 'components/Layouts'
 import SearchInput from 'components/Input/SearchInput'
-import { CommonBaseTokens } from 'constants/index'
+import { CommonBaseTokens, NATIVE_COIN } from 'constants/index'
 import { Field, Token, TokenList } from 'interfaces'
 import CommonBase from './CommonBase'
 import { useTokenList, useAddTokenToCurrentList } from 'states/lists/hooks'
@@ -12,6 +12,7 @@ import SelectTokenButton from 'components/Buttons/SelectButton'
 import CloseIcon from 'assets/icons/x.svg'
 import { useAllTokenBalances } from 'hooks/useCurrencyBalance'
 import { useActiveWeb3React } from 'hooks'
+import { useToken } from 'hooks/useToken'
 
 interface TokenListModalProps {
     token: Token | undefined
@@ -24,13 +25,17 @@ const TokenListModal = ({
     field,
     onUserSelect,
 }: TokenListModalProps) => {
-    const [searchQuery, setSearchQuery] = useState<string | undefined>()
+    const [searchQuery, setSearchQuery] = useState<string | undefined>('')
     const { currentList: tokens } = useTokenList()
     const addTokenToCurrentList = useAddTokenToCurrentList()
     const [searchedToken, setSearchedToken] = useState<Token | undefined>()
     const [renderedTokenList, setRenderTokenList] = useState<Token[] | []>([])
     const allTokenBalances = useAllTokenBalances()
     const { chainId } = useActiveWeb3React()
+    const queriedToken = useToken(searchQuery)
+    useEffect(() => {
+        if(queriedToken) setRenderTokenList(tokens => [...tokens, queriedToken])
+    }, [searchQuery])
 
     const handleSearchToken = async (
         e: ChangeEvent<HTMLInputElement>,
@@ -65,17 +70,16 @@ const TokenListModal = ({
 
     const sortTokenList = () => {
         let sortedTokenList: TokenList = []
-        Object.entries(allTokenBalances)
-            .map(([k]) => {
-                const token = tokens.find((t) => t.address === k)
-                return token && sortedTokenList.push(token)
-            })
+        Object.entries(allTokenBalances).map(([k]) => {
+            const token = tokens.find((t) => t.address === k)
+            return token && sortedTokenList.push(token)
+        })
         const newTokens = tokens.filter((t) => !sortedTokenList.includes(t))
 
         const filteredByChainIdTokens = [
             ...sortedTokenList,
             ...newTokens,
-        ].filter((item) => item.chainId === chainId)
+        ].filter((item) => item.chainId === chainId || item.address === NATIVE_COIN.address)
         setRenderTokenList(filteredByChainIdTokens)
     }
 

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
-import Setting from 'components/Setting'
+import Transaction from 'components/Setting'
 import Bridge from 'components/Bridge'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
 import { Field, Token } from 'interfaces'
@@ -13,6 +13,7 @@ import LabelButton from 'components/Buttons/LabelButton'
 import SwapIcon from 'assets/icons/swap-icon.svg'
 import { useActiveWeb3React } from 'hooks'
 import { usePair, usePairAddressesByIds } from 'hooks/useAllPairs'
+import HeaderLiquidity from 'components/HeaderLiquidity'
 import { useToken, useTokenApproval } from 'hooks/useToken'
 import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
@@ -37,7 +38,6 @@ const Swap = () => {
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
     const balanceIn = useCurrencyBalance(account, tokenIn)
     console.log({pair})
-    const router = useRouterContract();
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -62,7 +62,7 @@ const Swap = () => {
             if (tokenIn && inputAmount && routerAddress) {
                 await tokenApproval?.approve(
                     routerAddress,
-                    1,
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals)
                 )
             }
         } catch (err) {
@@ -73,6 +73,8 @@ const Swap = () => {
     const openWalletModal = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
     }
+
+    const [setting, setSetting] = useState(false)
 
     const SwapButton = () => {
         const isNotConnected = !account
@@ -130,7 +132,8 @@ const Swap = () => {
                     <Link to="/add">Add</Link>
                     <Link to="/pools">Pool</Link>
                 </Row>
-                <Setting />
+                {/* <Transaction /> */}
+                <HeaderLiquidity name="Swap" />
             </Row>
             {/* <Bridge /> */}
             <Columns>
@@ -170,7 +173,7 @@ const SwapContainer = styled(Columns)`
     margin: 0 auto;
     height: fit-content;
     max-width: 480px;
-    background: #130f0f;
+    background: var(--bg5)!important;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
@@ -180,6 +183,9 @@ const SwapContainer = styled(Columns)`
         rgba(0, 28, 44, 0.3)
     );
     gap: 15px;
+    @media screen and (max-width: 767px) {
+        margin: 0 20px;
+    }
 `
 
 const Icon = styled.div`

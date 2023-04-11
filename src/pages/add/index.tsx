@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
@@ -10,29 +10,34 @@ import { useSwapActionHandlers, useSwapState } from 'states/swap/hooks'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import LabelButton from 'components/Buttons/LabelButton'
 import PlusIcon from 'assets/icons/plus.svg'
-import { useRouterContract } from 'hooks/useContract'
-import { useActiveWeb3React } from 'hooks'
 import {ROUTERS} from 'constants/addresses'
 import { useTokenApproval } from 'hooks/useToken'
-import { mulNumberWithDecimal } from 'utils/math'
-import { usePair } from 'hooks/useAllPairs'
 import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { ethers } from 'ethers'
+import { useFactoryContract, useRouterContract } from 'hooks/useContract'
+import { useActiveWeb3React } from 'hooks'
+import { mulNumberWithDecimal } from 'utils/math'
+import { usePair } from 'hooks/useAllPairs'
+import { FixedNumber } from '@ethersproject/bignumber'
 
 const Swap = () => {
     const swapState = useSwapState()
     const router = useRouterContract();
-    // const pair = usePair(chainId, tokenIn, tokenOut)
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const { inputAmount, outputAmount, tokenIn, tokenOut } = swapState
+
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
-    const { chainId, account } = useActiveWeb3React()
-        const routerAddress = chainId ? ROUTERS[chainId] : undefined
-        const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
-        const tokenOutApproval = useTokenApproval(account, routerAddress, tokenOut)
+       const { account, chainId } = useActiveWeb3React()
+ const routerContract = useRouterContract()
+    const routerAddress = chainId ? ROUTERS[chainId] : undefined
 
+    const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
+
+    const factoryContract = useFactoryContract()
+    const pair = usePair(chainId, tokenIn, tokenOut)
+    console.log({pair})
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
             onUserInput(field, value)
@@ -46,70 +51,36 @@ const Swap = () => {
         },
         [onTokenSelection, swapState],
     )
-
-
-
-
-
-
-    const handleOnApprove = async () =>{
-        try {
-            if (tokenIn && inputAmount && routerAddress) {
-                await tokenApproval.approve(
-                    routerAddress,
-                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
-                )
-                console.log('Approve successfully...')
-            }
-        } catch (err) {
-            console.log('Failed to approve token: ', err)
-        }
-    }
-
-
+    
     const handleOnAddLiquidity = async() => {
-        try {   
-            if(inputAmount && outputAmount && tokenIn && tokenOut){
-            const gasLimit = await router?.estimateGas.addLiquidity(
-                tokenIn.address,
-                tokenOut.address,
-                1000,
-                1000,
-                1000,
-                1000,
-                account,
-                (new Date().getTime()/1000 + 1000).toFixed(0)
-            )
-            await router?.addLiquidity(
-                tokenIn.address,
-                tokenOut.address,
-                1000,
-                1000,
-                1000,
-                1000,
-                account,
-                (new Date().getTime()/1000 + 1000).toFixed(0),
-                {
-                    gasLimit
-                }
-            )
+        try {
+            
+            if(inputAmount && outputAmount && tokenIn && tokenOut) {
+                await routerContract?.addLiquidity(
+                    tokenIn.address,
+                    tokenOut.address,
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                    mulNumberWithDecimal(outputAmount, tokenOut.decimals),
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                    mulNumberWithDecimal(outputAmount, tokenOut.decimals),
+                    account,
+                    (new Date().getTime()/1000 + 1000).toFixed(0)
+                )
+                console.log('Add liquidity successfully')
             }
-                // await router?.addLiquidity(
-                //     tokenIn.address,
-                //     tokenOut.address,
-                //     1000,
-                //     1000,
-                //     1000,
-                //     1000,
-                //     account,
-                //     (new Date().getTime()/1000 + 1000).toFixed(0)
-                //  ,
-                // )             
         }
         catch(err) {
             console.log(err)
         }
     }
+
+    useEffect(() => {
+        if(inputAmount && pair && tokenIn && tokenOut) {
+            const amountInWithDel = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
+            const addRate = pair?.calcAddRate((amountInWithDel), tokenIn, tokenOut, Field.INPUT)
+            console.log({addRate})
+        }
+    }, [inputAmount])
 
     const AddButton = () => {
      
@@ -128,7 +99,7 @@ const Swap = () => {
 
         return (
             <Row>
-                {isNotConnected ? (
+                {/* {isNotConnected ? (
                     <PrimaryButton
                         // onClick={() => setIsConnected(!isConnected)}
                         name="Connect Wallet"
@@ -156,7 +127,11 @@ const Swap = () => {
                         onClick={() => handleOnAddLiquidity()}
                         name={'Swap'}
                     />
-                )}
+                )} */}
+                <PrimaryButton
+                        onClick={() => handleOnAddLiquidity()}
+                        name={'Add Liquidity'}
+                    />
             </Row>
         )
     }
@@ -169,7 +144,7 @@ const Swap = () => {
                     <Link to="/add">Add</Link>
                     <Link to="/pools">Pool</Link>
                 </Row>
-                <Setting />
+                {/* <Setting /> */}
             </Row>
             <Bridge />
             <Columns>
