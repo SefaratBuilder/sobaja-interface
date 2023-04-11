@@ -18,6 +18,7 @@ import { mulNumberWithDecimal } from 'utils/math'
 import { usePair } from 'hooks/useAllPairs'
 import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
+import { ethers } from 'ethers'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -65,20 +66,45 @@ const Swap = () => {
         }
     }
 
+
     const handleOnAddLiquidity = async() => {
-        try {
-            if(inputAmount && outputAmount && tokenIn && tokenOut)
-                await router?.addLiquidity(
-                    tokenIn.address,
-                    tokenOut.address,
-                    1000,
-                    1000,
-                    1000,
-                    1000,
-                    account,
-                    (new Date().getTime()/1000 + 1000).toFixed(0)
-                )
-            console.log('Add liquidity successfully')
+        try {   
+            if(inputAmount && outputAmount && tokenIn && tokenOut){
+            const gasLimit = await router?.estimateGas.addLiquidity(
+                tokenIn.address,
+                tokenOut.address,
+                1000,
+                1000,
+                1000,
+                1000,
+                account,
+                (new Date().getTime()/1000 + 1000).toFixed(0)
+            )
+            await router?.addLiquidity(
+                tokenIn.address,
+                tokenOut.address,
+                1000,
+                1000,
+                1000,
+                1000,
+                account,
+                (new Date().getTime()/1000 + 1000).toFixed(0),
+                {
+                    gasLimit
+                }
+            )
+            }
+                // await router?.addLiquidity(
+                //     tokenIn.address,
+                //     tokenOut.address,
+                //     1000,
+                //     1000,
+                //     1000,
+                //     1000,
+                //     account,
+                //     (new Date().getTime()/1000 + 1000).toFixed(0)
+                //  ,
+                // )             
         }
         catch(err) {
             console.log(err)

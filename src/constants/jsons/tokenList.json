@@ -78,5 +78,21 @@
         "logoURI": "",
         "name": "Wrapped Ethereum",
         "chainId": 80001
+    },    
+    {
+        "address": "0x2958c4F56fc4d40ad99E06759b548e02cA2c5ab7",
+        "symbol": "SBJ",
+        "decimals": 18,
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "name": "Sobaja token",
+        "chainId": 80001
+    },
+    {
+        "address": "0x116BDAC75BB21edc50ea54baa6feb33A022a6abc",
+        "symbol": "SP",
+        "decimals": 18,
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "name": "Space",
+        "chainId": 80001
     }
 ]
