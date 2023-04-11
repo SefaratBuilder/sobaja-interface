@@ -12,8 +12,8 @@ export interface SwapState {
 }
 
 const initialState: SwapState = {
-    inputAmount: undefined,
-    outputAmount: undefined,
+    inputAmount: '',
+    outputAmount: '',
     tokenIn: NATIVE_COIN,
     tokenOut: undefined,
     swapType: Field.INPUT,

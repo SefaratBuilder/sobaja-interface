@@ -10,6 +10,10 @@ import { useSwapActionHandlers, useSwapState } from 'states/swap/hooks'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import LabelButton from 'components/Buttons/LabelButton'
 import PlusIcon from 'assets/icons/plus.svg'
+import { useFactoryContract, useRouterContract } from 'hooks/useContract'
+import { useActiveWeb3React } from 'hooks'
+import { mulNumberWithDecimal } from 'utils/math'
+import { usePair } from 'hooks/useAllPairs'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -17,7 +21,11 @@ const Swap = () => {
     const { inputAmount, outputAmount, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
-
+    const routerContract = useRouterContract()
+    const factoryContract = useFactoryContract()
+    const { account, chainId } = useActiveWeb3React()
+    const pair = usePair(chainId, tokenIn, tokenOut)
+    console.log({pair})
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
             onUserInput(field, value)
@@ -31,38 +39,60 @@ const Swap = () => {
         },
         [onTokenSelection, swapState],
     )
+    
+    const handleOnAddLiquidity = async() => {
+        try {
+            
+            if(inputAmount && outputAmount && tokenIn && tokenOut) {
+                await routerContract?.addLiquidity(
+                    tokenIn.address,
+                    tokenOut.address,
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                    mulNumberWithDecimal(outputAmount, tokenOut.decimals),
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                    mulNumberWithDecimal(outputAmount, tokenOut.decimals),
+                    account,
+                    (new Date().getTime()/1000 + 1000).toFixed(0)
+                )
+                console.log('Add liquidity successfully')
+            }
+        }
+        catch(err) {
+            console.log(err)
+        }
+    }
 
-    const handleOnSwap = () => {}
-
-    const SwapButton = () => {
+    const AddButton = () => {
         const balanceIn = 0
+        const balanceOut = 0
         const isNotConnected = true
         const isUndefinedAmount = true
-        const isInffuficientLiquidity = true
-        const isUndefinedCoin = !tokenIn || !tokenOut
-        const isInsufficientBalance = Number(inputAmount) > balanceIn
-        const unSupportedNetwork = true
+        const isInsufficientBalance = true
+        const isUndefinedCoin = true
 
         return (
             <Row>
-                {isNotConnected ? (
-                    <PrimaryButton name="Connect Wallet" />
-                ) : unSupportedNetwork ? (
-                    <LabelButton name="Supported for testnet or devnet now" />
+                {/* {isNotConnected ? (
+                    <PrimaryButton
+                        // onClick={() => setIsConnected(!isConnected)}
+                        name="Connect Wallet"
+                    />
                 ) : isUndefinedCoin ? (
                     <LabelButton name="Select a coin" />
                 ) : isUndefinedAmount ? (
                     <LabelButton name="Enter an amount" />
-                ) : isInffuficientLiquidity ? (
-                    <LabelButton name="Insufficient Liquidity" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
                 ) : (
                     <PrimaryButton
-                        onClick={() => handleOnSwap()}
-                        name={'Swap'}
+                        onClick={() => handleOnAddLiquidity()}
+                        name={'Add Liquidity'}
                     />
-                )}
+                )} */}
+                <PrimaryButton
+                        onClick={() => handleOnAddLiquidity()}
+                        name={'Add Liquidity'}
+                    />
             </Row>
         )
     }
@@ -73,7 +103,7 @@ const Swap = () => {
                 <Row gap="20px">
                     <Link to="/swap">Swap</Link>
                     <Link to="/add">Add</Link>
-                    <Link to="/limit">Limit</Link>
+                    <Link to="/pools">Pool</Link>
                 </Row>
                 <Setting />
             </Row>
@@ -97,7 +127,7 @@ const Swap = () => {
                     field={Field.OUTPUT}
                 />
             </Columns>
-            <SwapButton />
+            <AddButton />
         </SwapContainer>
     )
 }

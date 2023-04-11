@@ -5,7 +5,7 @@ import lists from './lists/reducer'
 import application from './application/reducer'
 import multicall from './multicall/reducer'
 
-const PERSISTED_KEYS: string[] = ['application', 'multicall', 'swap']
+const PERSISTED_KEYS: string[] = ['application', 'multicall']
 
 const store = configureStore({
     reducer: {

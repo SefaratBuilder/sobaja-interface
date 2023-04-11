@@ -21,6 +21,7 @@ export const GlobalStyle = createGlobalStyle`
         --bg2: linear-gradient(180deg,#0020333d 0%,rgb(0 38 60 / 79%) 100%),linear-gradient(0deg,#003b5c9e,#003b5ccf);
         --bg3: #ffffff1c;
         --bg4: #212c33;
+        --bg5: linear-gradient(to top right, #05262a, #070e11);
         --btn1: linear-gradient(87.2deg, #00B2FF 2.69%, #003655 98.02%);
         --btn2: linear-gradient(to left, #002033 100%, #00263c 39%);
         --border1: #c9c9c9;

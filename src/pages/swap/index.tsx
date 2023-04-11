@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
-import Setting from 'components/Setting'
+import Transaction from 'components/Setting'
 import Bridge from 'components/Bridge'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
 import { Field, Token } from 'interfaces'
@@ -13,6 +13,15 @@ import LabelButton from 'components/Buttons/LabelButton'
 import SwapIcon from 'assets/icons/swap-icon.svg'
 import { useActiveWeb3React } from 'hooks'
 import { usePair, usePairAddressesByIds } from 'hooks/useAllPairs'
+import HeaderLiquidity from 'components/HeaderLiquidity'
+import { useToken, useTokenApproval } from 'hooks/useToken'
+import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
+import WalletModal from 'components/WalletModal'
+import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/index'
+import { ROUTERS } from 'constants/addresses'
+import { FixedNumber } from 'ethers'
+import { mulNumberWithDecimal } from 'utils/math'
+import { MaxUint256 } from 'ethers'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -21,6 +30,12 @@ const Swap = () => {
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
     const { chainId, library, account } = useActiveWeb3React()
+    const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
+    const pair = usePair(chainId, tokenIn, tokenOut)
+    const routerAddress = chainId ? ROUTERS[chainId] : undefined
+    const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
+    const balanceIn = useCurrencyBalance(account, tokenIn)
+    console.log({pair})
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -38,29 +53,59 @@ const Swap = () => {
 
     const handleOnSwap = () => {}
 
+    const handleOnApprove = async () => {
+        try {
+            if (tokenIn && inputAmount && routerAddress) {
+                await tokenApproval?.approve(
+                    routerAddress,
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals)
+                )
+            }
+        } catch (err) {
+            console.log('Failed to approve token: ', err)
+        }
+    }
+
+    const openWalletModal = () => {
+        setIsOpenWalletModal(!isOpenWalletModal)
+    }
+
+    const [setting, setSetting] = useState(false)
+
     const SwapButton = () => {
-        const balanceIn = 0
-        const isNotConnected = true
-        const isUndefinedAmount = true
-        const isInffuficientLiquidity = true
-        const isUndefinedCoin = !tokenIn || !tokenOut
-        const isInsufficientBalance = Number(inputAmount) > balanceIn
-        const unSupportedNetwork = true
+        const isNotConnected = !account
+        const unSupportedNetwork =
+            chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
+        const isUndefinedAmount = !inputAmount || !outputAmount
+        const isInffuficientLiquidity = !pair
+        const isUndefinedCurrencies = !tokenIn || !tokenOut
+        const isInsufficientBalance =
+            inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
+        const isInsufficientAllowance =
+            Number(tokenApproval?.allowance) < Number(inputAmount)
 
         return (
             <Row>
                 {isNotConnected ? (
-                    <PrimaryButton name="Connect Wallet" />
+                    <PrimaryButton
+                        name="Connect Wallet"
+                        onClick={openWalletModal}
+                    />
                 ) : unSupportedNetwork ? (
-                    <LabelButton name="Supported for testnet or devnet now" />
-                ) : isUndefinedCoin ? (
+                    <LabelButton name="Unsupported network" />
+                ) : isUndefinedCurrencies ? (
                     <LabelButton name="Select a coin" />
                 ) : isUndefinedAmount ? (
                     <LabelButton name="Enter an amount" />
-                ) : isInffuficientLiquidity ? (
-                    <LabelButton name="Insufficient Liquidity" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
+                ) : isInsufficientAllowance ? (
+                    <PrimaryButton
+                        name={`Approve ${tokenIn?.symbol}`}
+                        onClick={handleOnApprove}
+                    />
+                ) : isInffuficientLiquidity ? (
+                    <LabelButton name="Insufficient Liquidity" />
                 ) : (
                     <PrimaryButton
                         onClick={() => handleOnSwap()}
@@ -73,15 +118,19 @@ const Swap = () => {
 
     return (
         <SwapContainer>
+            {!account && isOpenWalletModal && (
+                <WalletModal setToggleWalletModal={openWalletModal} />
+            )}
             <Row jus="space-between">
                 <Row gap="20px">
                     <Link to="/swap">Swap</Link>
                     <Link to="/add">Add</Link>
-                    <Link to="/limit">Limit</Link>
+                    <Link to="/pools">Pool</Link>
                 </Row>
-                <Setting />
+                {/* <Transaction /> */}
+                <HeaderLiquidity name="Swap" />
             </Row>
-            <Bridge />
+            {/* <Bridge /> */}
             <Columns>
                 <CurrencyInputPanel
                     token={tokenIn}
@@ -119,7 +168,7 @@ const SwapContainer = styled(Columns)`
     margin: 0 auto;
     height: fit-content;
     max-width: 480px;
-    background: #130f0f;
+    background: var(--bg5)!important;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
@@ -129,6 +178,9 @@ const SwapContainer = styled(Columns)`
         rgba(0, 28, 44, 0.3)
     );
     gap: 15px;
+    @media screen and (max-width: 767px) {
+        margin: 0 20px;
+    }
 `
 
 const Icon = styled.div`
