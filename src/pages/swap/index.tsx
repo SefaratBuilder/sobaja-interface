@@ -34,7 +34,7 @@ const Swap = () => {
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
     const balanceIn = useCurrencyBalance(account, tokenIn)
-
+    console.log({pair})
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
             onUserInput(field, value)
@@ -56,7 +56,7 @@ const Swap = () => {
             if (tokenIn && inputAmount && routerAddress) {
                 await tokenApproval?.approve(
                     routerAddress,
-                    1,
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals)
                 )
             }
         } catch (err) {
@@ -95,7 +95,7 @@ const Swap = () => {
                     <LabelButton name="Enter an amount" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
-                ) : isInsufficientAllowance ? (
+                ) : !isInsufficientAllowance ? (
                     <PrimaryButton
                         name={`Approve ${tokenIn?.symbol}`}
                         onClick={handleOnApprove}

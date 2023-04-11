@@ -12,14 +12,14 @@ const MULTICALL_NETWORKS: { [chainId: number]: string } = {
 
 const FACTORIES: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
-    [ChainId.ZKTESTNET]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
+    [ChainId.ZKTESTNET]: '0x02D74f4b3C3b55dC7Ecae36C7CFA696828CDF348',
     [ChainId.GOERLI]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
     [ChainId.MUMBAI]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
 }
 
 const ROUTERS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
-    [ChainId.ZKTESTNET]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
+    [ChainId.ZKTESTNET]: '0x8Ad6de397Ab44bD0b7C34801A8D4d71CE75EfF4f',
     [ChainId.GOERLI]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
     [ChainId.MUMBAI]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
 }
@@ -28,7 +28,7 @@ const INIT_CODE_HASHES: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]:
         '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f',
     [ChainId.ZKTESTNET]:
-        '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f',
+        '0x3475adab255cd0db7772175d9a78d13d335e88a5a2924b8f36bb48684791cb11',
     [ChainId.GOERLI]:
         '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f',
     [ChainId.MUMBAI]:

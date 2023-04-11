@@ -65,6 +65,7 @@ export function usePair(
     tokenB: Token | undefined,
 ): Pair | undefined {
     const lpAddress = computePairAddress({ chainId, tokenA, tokenB })
+    console.log({ lpAddress })
     const tokenLp = useToken(lpAddress)
     const balance = useMultipleContractSingleData(
         [lpAddress],

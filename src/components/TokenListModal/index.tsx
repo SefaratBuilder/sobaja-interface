@@ -12,6 +12,7 @@ import SelectTokenButton from 'components/Buttons/SelectButton'
 import CloseIcon from 'assets/icons/x.svg'
 import { useAllTokenBalances } from 'hooks/useCurrencyBalance'
 import { useActiveWeb3React } from 'hooks'
+import { useToken } from 'hooks/useToken'
 
 interface TokenListModalProps {
     token: Token | undefined
@@ -24,14 +25,15 @@ const TokenListModal = ({
     field,
     onUserSelect,
 }: TokenListModalProps) => {
-    const [searchQuery, setSearchQuery] = useState<string | undefined>()
+    const [searchQuery, setSearchQuery] = useState<string | undefined>('')
     const { currentList: tokens } = useTokenList()
     const addTokenToCurrentList = useAddTokenToCurrentList()
     const [searchedToken, setSearchedToken] = useState<Token | undefined>()
     const [renderedTokenList, setRenderTokenList] = useState<Token[] | []>([])
     const allTokenBalances = useAllTokenBalances()
     const { chainId } = useActiveWeb3React()
-
+    const queriedToken = useToken(searchQuery)
+    console.log({queriedToken})
     const handleSearchToken = async (
         e: ChangeEvent<HTMLInputElement>,
     ): Promise<void> => {
@@ -55,6 +57,7 @@ const TokenListModal = ({
             setRenderTokenList([])
             return
         }
+        if(queriedToken) setRenderTokenList([queriedToken])
         setRenderTokenList(tokens)
     }
 
