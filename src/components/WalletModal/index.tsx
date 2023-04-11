@@ -367,9 +367,9 @@ const WrapFooterBtn = styled.div`
 `
 const Container = styled.div<{ isConnected: boolean }>`
     position: fixed;
-    background: linear-gradient(180deg, #002033 0%, rgba(0, 38, 60, 0.8) 100%);
+    background: var(--bg5);
     opacity: 0.6;
-    border-radius: 20px;
+    border-radius: 12px;
     border: 1px solid #003b5c;
     /* backdrop-filter: blur(40px); */
     box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
@@ -377,7 +377,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     max-width: 500px;
     width: 100%;
     left: 0;
-    top: 50%;
+    top: 49%;
     right: 0;
     transform: translateY(-50%);
     margin: auto;
@@ -391,7 +391,7 @@ const Container = styled.div<{ isConnected: boolean }>`
         max-width: 410px;
     }
     @media screen and (max-width: 390px) {
-        max-width: 365px;
+        max-width: 335px;
     }
 `
 const WrapBlur = styled.div`
