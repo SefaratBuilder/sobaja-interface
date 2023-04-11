@@ -78,7 +78,7 @@ export function usePair(
         PAIR_INTERFACE,
         'getReserves',
         [],
-    )?.[0].result?.[0]
+    )?.[0].result
 
     const pair =
         tokenA &&

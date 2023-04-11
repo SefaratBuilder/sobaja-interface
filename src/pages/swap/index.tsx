@@ -36,7 +36,7 @@ const Swap = () => {
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
     const balanceIn = useCurrencyBalance(account, tokenIn)
-
+    console.log({pair})
     const router = useRouterContract();
 
     const handleOnUserInput = useCallback(
