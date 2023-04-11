@@ -10,6 +10,7 @@ import {
     ROUTER_ABI,
     ROUTERS,
 } from 'constants/addresses'
+import ERC20 from 'constants/jsons/erc20.json'
 
 // returns null on errors
 export const useContract = (
@@ -49,5 +50,9 @@ export function useFactoryContract(): Contract | null {
 export function useRouterContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
     if (!chainId) return null
-    return useContract(ROUTERS[chainId], ROUTERS)
+    return useContract(ROUTERS[chainId], ROUTER_ABI)
+}
+
+export function useTokenContract(address: string | undefined): Contract | null {
+    return useContract(address, ERC20)
 }
