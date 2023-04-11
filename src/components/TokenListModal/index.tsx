@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import Modal from 'components/Modal'
 import { Columns, Row } from 'components/Layouts'
 import SearchInput from 'components/Input/SearchInput'
-import { CommonBaseTokens } from 'constants/index'
+import { CommonBaseTokens, NATIVE_COIN } from 'constants/index'
 import { Field, Token, TokenList } from 'interfaces'
 import CommonBase from './CommonBase'
 import { useTokenList, useAddTokenToCurrentList } from 'states/lists/hooks'
@@ -33,7 +33,10 @@ const TokenListModal = ({
     const allTokenBalances = useAllTokenBalances()
     const { chainId } = useActiveWeb3React()
     const queriedToken = useToken(searchQuery)
-    console.log({queriedToken})
+    useEffect(() => {
+        if(queriedToken) setRenderTokenList(tokens => [...tokens, queriedToken])
+    }, [searchQuery])
+
     const handleSearchToken = async (
         e: ChangeEvent<HTMLInputElement>,
     ): Promise<void> => {
@@ -57,7 +60,6 @@ const TokenListModal = ({
             setRenderTokenList([])
             return
         }
-        if(queriedToken) setRenderTokenList([queriedToken])
         setRenderTokenList(tokens)
     }
 
@@ -77,7 +79,7 @@ const TokenListModal = ({
         const filteredByChainIdTokens = [
             ...sortedTokenList,
             ...newTokens,
-        ].filter((item) => item.chainId !== chainId)
+        ].filter((item) => item.chainId === chainId || item.address === NATIVE_COIN.address)
         setRenderTokenList(filteredByChainIdTokens)
     }
 

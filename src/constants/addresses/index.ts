@@ -14,14 +14,14 @@ const FACTORIES: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
     [ChainId.ZKTESTNET]: '0x02D74f4b3C3b55dC7Ecae36C7CFA696828CDF348',
     [ChainId.GOERLI]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
-    [ChainId.MUMBAI]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
+    [ChainId.MUMBAI]: '0x011DfB37B3d1AB94C9C598785aA6fe948D079Cb0',
 }
 
 const ROUTERS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
     [ChainId.ZKTESTNET]: '0x8Ad6de397Ab44bD0b7C34801A8D4d71CE75EfF4f',
     [ChainId.GOERLI]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
-    [ChainId.MUMBAI]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
+    [ChainId.MUMBAI]: '0x93Ff755a30F1C1F7cCEfD06a1412C88e700D87c7',
 }
 
 const INIT_CODE_HASHES: { [chainId: number]: string } = {
@@ -32,7 +32,7 @@ const INIT_CODE_HASHES: { [chainId: number]: string } = {
     [ChainId.GOERLI]:
         '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f',
     [ChainId.MUMBAI]:
-        '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f',
+        '0x17f3f03b4063530632eba024ef5b90dd5ab3efaa82f6a54a1a7d1025bb81c1dd',
 }
 
 export const WRAPPED_NATIVE_COIN: { [chainId in ChainId]: string } = {

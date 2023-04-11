@@ -35,6 +35,7 @@ const Swap = () => {
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
     const balanceIn = useCurrencyBalance(account, tokenIn)
     console.log({pair})
+
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
             onUserInput(field, value)
@@ -95,7 +96,7 @@ const Swap = () => {
                     <LabelButton name="Enter an amount" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
-                ) : !isInsufficientAllowance ? (
+                ) : isInsufficientAllowance ? (
                     <PrimaryButton
                         name={`Approve ${tokenIn?.symbol}`}
                         onClick={handleOnApprove}
@@ -163,7 +164,7 @@ const SwapContainer = styled(Columns)`
     margin: 0 auto;
     height: fit-content;
     max-width: 480px;
-    background: #130f0f;
+    background: var(--bg5)!important;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;

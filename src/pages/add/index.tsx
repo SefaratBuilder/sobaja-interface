@@ -44,17 +44,16 @@ const Swap = () => {
         try {
             
             if(inputAmount && outputAmount && tokenIn && tokenOut) {
-                // await routerContract?.addLiquidity(
-                //     tokenIn.address,
-                //     tokenOut.address,
-                //     mulNumberWithDecimal(inputAmount, tokenIn.decimals),
-                //     mulNumberWithDecimal(outputAmount, tokenIn.decimals),
-                //     mulNumberWithDecimal(inputAmount + 100000000000, tokenIn.decimals),
-                //     mulNumberWithDecimal(outputAmount + 10000000000, tokenIn.decimals),
-                //     account,
-                //     (new Date().getTime()/1000 + 1000).toFixed(0)
-                // )
-                await factoryContract?.createPair(tokenIn.address, tokenOut.address)
+                await routerContract?.addLiquidity(
+                    tokenIn.address,
+                    tokenOut.address,
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                    mulNumberWithDecimal(outputAmount, tokenOut.decimals),
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                    mulNumberWithDecimal(outputAmount, tokenOut.decimals),
+                    account,
+                    (new Date().getTime()/1000 + 1000).toFixed(0)
+                )
                 console.log('Add liquidity successfully')
             }
         }

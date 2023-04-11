@@ -79,5 +79,5 @@ export function useTokenApproval(
             allowance: value && FixedNumber.fromValue(value, token?.decimals),
             approve,
         }
-    }, [from, to, token])
+    }, [from, to, token, tokenContract])
 }
