@@ -7,13 +7,13 @@
 html {
     font-size: 16px;
     color: white;
-	font-family: "Montserrat", sans-serif !important;
+    font-family: "Montserrat", sans-serif !important;
     font-style: italic;
     font-weight: 300;
 }
 
 body {
-    background: url('/images/background.avif');
+    background: url('/images/background-sobaja.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
