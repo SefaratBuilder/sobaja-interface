@@ -108,13 +108,14 @@ const Swap = () => {
     const openWalletModal = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
     }
-
+    console.log({pair})
     useEffect(()=>{
         if(inputAmount && pair && tokenIn && tokenOut && swapType === Field.INPUT){
             const amountInWithDel = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
             const swapRate = pair?.calcSwapRate((amountInWithDel),tokenIn,tokenOut, Field.INPUT)
             // console.log({swapRate});
             // handleOnUserInput(Field.OUTPUT, swapRate)
+            console.log({swapRate})
             onChangeSwapState({
                 ...swapState,
                 outputAmount: swapRate
