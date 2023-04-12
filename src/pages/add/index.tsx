@@ -203,7 +203,7 @@ const Swap = () => {
 
 const SwapContainer = styled(Columns)`
     position: absolute;
-    top: 100px;
+    top: 40px;
     left: 0;
     right: 0;
     bottom: 0;
