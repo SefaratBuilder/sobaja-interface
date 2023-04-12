@@ -37,7 +37,8 @@ const Swap = () => {
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
     const balanceIn = useCurrencyBalance(account, tokenIn)
-    console.log({pair})
+    const routerContract = useRouterContract()
+    // console.log({pair})
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -53,8 +54,43 @@ const Swap = () => {
         [onTokenSelection, swapState],
     )
 
-    const handleOnSwap = () => {
 
+    const handleOnSwapExactTokensForTokens = async () => {
+        try {
+            if(inputAmount && tokenIn && tokenOut && outputAmount){
+                await routerContract?.swapExactTokensForTokens(
+                    mulNumberWithDecimal(inputAmount,tokenIn?.decimals),
+                    mulNumberWithDecimal(Number(outputAmount) * 0.999, tokenOut?.decimals),
+                    [tokenIn.address,tokenOut.address],
+                    account,
+                    (new Date().getTime()/1000 + 1000).toFixed(0)
+                )                
+                console.log('Successfully swapped');
+                
+            }
+
+        } catch (error) {
+            console.log(error);
+            
+        }
+    }
+
+    const handleOnSwapTokensForExactTokens = async () =>{
+        try {
+            if(inputAmount && tokenIn && tokenOut && outputAmount){
+                await routerContract?.swapTokensForExactTokens(
+                    mulNumberWithDecimal(outputAmount,  tokenOut.decimals),
+                    mulNumberWithDecimal(Number(inputAmount) * 1 / 0.999, tokenIn.decimals),
+                    [tokenIn.address,tokenOut.address],
+                    account,
+                    (new Date().getTime()/1000 + 1000).toFixed(0)
+                )         
+
+            }
+        } catch (error) {
+            console.log(error);
+            
+        }
     }
 
     const handleOnApprove = async () => {
@@ -74,6 +110,31 @@ const Swap = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
     }
 
+    useEffect(()=>{
+        if(inputAmount && pair && tokenIn && tokenOut && swapType === Field.INPUT){
+            const amountInWithDel = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
+            const swapRate = pair?.calcSwapRate((amountInWithDel),tokenIn,tokenOut, Field.INPUT)
+            // console.log({swapRate});
+            // handleOnUserInput(Field.OUTPUT, swapRate)
+            onChangeSwapState({
+                ...swapState,
+                outputAmount: swapRate
+            })
+        }
+    },[inputAmount, pair])
+
+    useEffect(()=>{
+        if(outputAmount &&pair && tokenIn && tokenOut && swapType === Field.OUTPUT){
+            const amountOutWithDel = mulNumberWithDecimal(outputAmount, tokenOut.decimals)
+            const swapRate = pair?.calcSwapRate((amountOutWithDel), tokenIn, tokenOut, Field.OUTPUT)
+            //console.log({swapRate});
+            onChangeSwapState({
+                ...swapState,
+                inputAmount: swapRate
+            }) 
+        }
+    },[outputAmount, pair])
+
     const [setting, setSetting] = useState(false)
 
     const SwapButton = () => {
@@ -85,7 +146,7 @@ const Swap = () => {
         const isUndefinedCurrencies = !tokenIn || !tokenOut
         const isInsufficientBalance =
             inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
-            console.log('alowwww>>>>>', tokenApproval?.allowance)
+            // console.log('alowwww>>>>>', tokenApproval?.allowance)
         const isInsufficientAllowance =
             Number(tokenApproval?.allowance) < Number(inputAmount)
 
@@ -113,7 +174,7 @@ const Swap = () => {
                     <LabelButton name="Insufficient Liquidity" />
                 ) : (
                     <PrimaryButton
-                        onClick={() => handleOnSwap()}
+                        onClick={() => swapType === Field.INPUT ? handleOnSwapExactTokensForTokens() : handleOnSwapTokensForExactTokens()}
                         name={'Swap'}
                     />
                 )}

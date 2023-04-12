@@ -25,7 +25,7 @@ const Swap = () => {
     const swapState = useSwapState()
     const router = useRouterContract();
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
-    const { inputAmount, outputAmount, tokenIn, tokenOut } = swapState
+    const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } = swapState
 
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
@@ -73,14 +73,43 @@ const Swap = () => {
             console.log(err)
         }
     }
+    /* function addLiquidityETH(
+  address token,
+  uint amountTokenDesired,
+  uint amountTokenMin,
+  uint amountETHMin,
+  address to,
+  uint deadline
+) external payable returns (uint amountToken, uint amountETH, uint liquidity);*/
+
+    const handleOnAddLiquidityETH = async () =>{
+        try {
+            
+        } catch (error) {
+            
+        }
+    }
 
     useEffect(() => {
-        if(inputAmount && pair && tokenIn && tokenOut) {
+        if(inputAmount && pair && tokenIn && tokenOut && swapType === Field.INPUT) {
             const amountInWithDel = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
             const addRate = pair?.calcAddRate((amountInWithDel), tokenIn, tokenOut, Field.INPUT)
-            console.log({addRate})
+            console.log('Amount out'+{addRate})
+            handleOnUserInput(Field.OUTPUT, addRate)
         }
-    }, [inputAmount])
+        
+    },[inputAmount, pair])
+
+    useEffect(()=>{
+        // when output amount change
+        if(outputAmount && pair && tokenIn && tokenOut && swapType === Field.OUTPUT){
+            const amountOutWithDel = mulNumberWithDecimal(outputAmount, tokenOut.decimals)
+            const addRate = pair?.calcAddRate((amountOutWithDel), tokenIn,tokenOut,Field.OUTPUT)
+            console.log('Amount In'+ {addRate});
+            handleOnUserInput(Field.INPUT,addRate)
+        }
+    },[outputAmount, pair])
+
 
     const AddButton = () => {
      

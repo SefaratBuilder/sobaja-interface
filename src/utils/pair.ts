@@ -20,7 +20,8 @@ export const calculateAmountOut = (
     reserveIn: string | number,
     reserveOut: string | number,
     fee: string | number,
-): FixedNumber => {
+): string => {
+    console.log({amountIn, reserveIn, reserveOut })
     const amountInWithFee = mul(amountIn, fee)
     const numerator = mul(amountInWithFee, reserveOut)
     const denominator = add(reserveIn, amountInWithFee)
@@ -33,10 +34,10 @@ export const calculateAmountIn = (
     reserve_in: string | number,
     reserve_out: string | number,
     fee: string | number,
-): FixedNumber => {
+): string => {
     const numerator = mul(reserve_in, amountOut)
     const denominator =  mul(fee,sub(reserve_out,amountOut))
-    const amount_in = add(div(numerator,denominator), (FixedNumber).fromValue(1)) 
+    const amount_in = add(div(numerator,denominator), 1) 
     return amount_in
 }
 
@@ -92,8 +93,8 @@ export class Pair {
         this.reserveLp = pair.reserveLp
     }
 
-    currentShareOfPool(reserveLp: FixedNumber) {
-        return mul(div(reserveLp, this.reserveLp), FixedNumber.fromValue(100))
+    currentShareOfPool(reserveLp: string) {
+        return mul(div(reserveLp, this.reserveLp), 100)
     }
 
     calcShareOfPool(
@@ -115,10 +116,10 @@ export class Pair {
             const addedLp = lpShare0.lt(lpShare1) ? lpShare0 : lpShare1
             const shareOfLp = addedLp
                 .div(addedLp.add(this.reserveLp))
-                .mul(FixedNumber.fromValue(100)) //%
+                .mul(100) //%
             return shareOfLp
         }
-        return FixedNumber.fromValue(100)
+        return 100
     }
 
     calcAddRate(
@@ -128,8 +129,6 @@ export class Pair {
         field: Field,
     ) {
         if (this.reserve0 && this.reserve1) {
-            // const result1 = amountIn.mul(this.reserve1).div(this.reserve0)
-            // const result0 = amountIn.mul(this.reserve0).div(this.reserve1)
 
             const result1 = div(mul(amountIn,this.reserve1), this.reserve0);
             const result0 = div(mul(amountIn,this.reserve0), this.reserve1);
@@ -139,13 +138,11 @@ export class Pair {
                 (field === Field.OUTPUT && !isSortedTokens(tokenIn, tokenOut))
             ) {
                 return divNumberWithDecimal(result1,(this.token1.decimals))
-                // return result1.div(FixedNumber.fromValue(this.token1.decimals))
             } else {
-                // return result0.div(FixedNumber.fromValue(this.token0.decimals))
                 return divNumberWithDecimal(result0, (this.token0.decimals))
             }
         }
-        return 0
+        return ''
     }
 
     calcSwapRate(
@@ -159,39 +156,39 @@ export class Pair {
                 amount,
                 this.reserve0,
                 this.reserve1, 
-                sub(FixedNumber.fromValue(1), this.fee),
+                sub(1, this.fee),
 
             )
             const isNotSortedAmountOut = calculateAmountOut(
                 amount,
                 this.reserve1,
                 this.reserve0,
-                sub(FixedNumber.fromValue(1),this.fee),
+                sub(1,this.fee),
             )
             const isSortedAmountIn = calculateAmountIn(
                 amount,
                 this.reserve0,
                 this.reserve1,
-                sub(FixedNumber.fromValue(1), this.fee),
+                sub(1, this.fee),
             )
             const isNotSortedAmountIn = calculateAmountIn(
                 amount,
                 this.reserve1,
                 this.reserve0,
-                sub(FixedNumber.fromValue(1), this.fee),
+                sub(1, this.fee),
             )
 
             if (field === Field.INPUT) {
-                if (isSortedTokens(tokenIn, tokenOut)) return isSortedAmountOut
-                else return isNotSortedAmountOut
+                if (isSortedTokens(tokenIn, tokenOut)) return divNumberWithDecimal(isSortedAmountOut, tokenOut.decimals)
+                else return divNumberWithDecimal(isNotSortedAmountOut, tokenOut.decimals)
             }
 
             if (field === Field.OUTPUT) {
-                if (isSortedTokens(tokenIn, tokenOut)) return isSortedAmountIn
-                else return isNotSortedAmountIn
+                if (isSortedTokens(tokenIn, tokenOut)) return divNumberWithDecimal(isSortedAmountIn, tokenIn.decimals)
+                else return divNumberWithDecimal(isNotSortedAmountIn, tokenIn.decimals)
             }
         }
-        return 0
+        return ''
     }
 
     calcLPAmount(
@@ -211,7 +208,7 @@ export class Pair {
             return addedLp
         }
         const addedLp = Number(mul(amount0,amount1).toString()) - 1000
-        return FixedNumber.fromValue(addedLp)
+        return addedLp
     }
 
     getToken0PerToken1Rate() {
