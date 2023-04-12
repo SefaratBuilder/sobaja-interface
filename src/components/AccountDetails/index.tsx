@@ -512,13 +512,13 @@ const RowTransaction = styled.div`
 const WrapConnectModal = styled(Container)`
     max-width: 350px;
     left: unset;
-    right: 10px;
-    top: 67px;
+    right: 20px;
+    top: 76px;
     transform: unset;
     margin: unset;
     overflow: unset;
     @media screen and (max-width: 1200px) {
-        right: 70px;
+        right: 58px;
     }
     @media screen and (max-width: 576px) {
         left: 50%;

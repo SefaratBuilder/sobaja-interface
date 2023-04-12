@@ -11,8 +11,10 @@ import AppUpdater from 'states/application/updater'
 import MulticallUpdater from 'states/multicall/updater'
 import Polling from 'components/Polling'
 import Pools from 'pages/pool'
+import ToastMessage from 'components/ToastMessage'
 
 const App = () => {
+
     const Updater = () => {
         return (
             <>
@@ -30,6 +32,7 @@ const App = () => {
                 <Updater />
                 <Header />
                 <AppContainer>
+                    <ToastMessage />
                     <Routes>
                         <Route path="/swap" element={<Swap />} />
                         <Route path="/pools" element={<Pools />} />
