@@ -108,51 +108,62 @@ const Swap = () => {
     const openWalletModal = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
     }
-    console.log({pair})
+
     useEffect(()=>{
         if(inputAmount && pair && tokenIn && tokenOut && swapType === Field.INPUT){
             const amountInWithDel = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
             const swapRate = pair?.calcSwapRate((amountInWithDel),tokenIn,tokenOut, Field.INPUT)
-            // console.log({swapRate});
-            // handleOnUserInput(Field.OUTPUT, swapRate)
-            console.log({swapRate})
             onChangeSwapState({
                 ...swapState,
                 outputAmount: swapRate
             })
+        } 
+        if(!pair || !inputAmount) {
+            onChangeSwapState({
+                ...swapState,
+                outputAmount: ''
+            }) 
         }
     },[inputAmount, pair])
 
     useEffect(()=>{
-        if(outputAmount &&pair && tokenIn && tokenOut && swapType === Field.OUTPUT){
+        if(outputAmount && pair && tokenIn && tokenOut && swapType === Field.OUTPUT){
             const amountOutWithDel = mulNumberWithDecimal(outputAmount, tokenOut.decimals)
             const swapRate = pair?.calcSwapRate((amountOutWithDel), tokenIn, tokenOut, Field.OUTPUT)
-            //console.log({swapRate});
             onChangeSwapState({
                 ...swapState,
                 inputAmount: swapRate
             }) 
         }
+        if(!pair || !outputAmount) {
+            onChangeSwapState({
+                ...swapState,
+                inputAmount: ''
+            }) 
+        }
     },[outputAmount, pair])
 
     const [setting, setSetting] = useState(false)
-
+    console.log({tokenIn, tokenOut})
     const SwapButton = () => {
         const isNotConnected = !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
-        const isUndefinedAmount = !inputAmount || !outputAmount
-        const isInffuficientLiquidity = !pair
+        const isUndefinedAmount = !inputAmount && !outputAmount
+        const isInffuficientLiquidity = !pair || Number(inputAmount) < 0
         const isUndefinedCurrencies = !tokenIn || !tokenOut
         const isInsufficientBalance =
             inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
-            // console.log('alowwww>>>>>', tokenApproval?.allowance)
         const isInsufficientAllowance =
             Number(tokenApproval?.allowance) < Number(inputAmount)
 
         return (
             <Row>
-                {isNotConnected ? (
+                <PrimaryButton
+                    onClick={() => { console.log('coming soon') }}
+                    name={'Coming Soon'}
+                />
+                {/* {isNotConnected ? (
                     <PrimaryButton
                         name="Connect Wallet"
                         onClick={openWalletModal}
@@ -165,19 +176,19 @@ const Swap = () => {
                     <LabelButton name="Enter an amount" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
+                ) : !isInffuficientLiquidity ? (
+                    <LabelButton name="Insufficient Liquidity" />
                 ) : isInsufficientAllowance ? (
                     <PrimaryButton
                         name={`Approve ${tokenIn?.symbol}`}
                         onClick={handleOnApprove}
                     />
-                ) : isInffuficientLiquidity ? (
-                    <LabelButton name="Insufficient Liquidity" />
                 ) : (
                     <PrimaryButton
                         onClick={() => swapType === Field.INPUT ? handleOnSwapExactTokensForTokens() : handleOnSwapTokensForExactTokens()}
                         name={'Swap'}
                     />
-                )}
+                )} */}
             </Row>
         )
     }

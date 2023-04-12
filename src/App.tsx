@@ -32,7 +32,7 @@ const App = () => {
                 <Updater />
                 <Header />
                 <AppContainer>
-                    <ToastMessage />
+                    {/* <ToastMessage /> */}
                     <Routes>
                         <Route path="/swap" element={<Swap />} />
                         <Route path="/pools" element={<Pools />} />

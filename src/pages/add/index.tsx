@@ -128,6 +128,10 @@ const Swap = () => {
 
         return (
             <Row>
+                <PrimaryButton
+                    onClick={() => { console.log('coming soon') }}
+                    name={'Coming Soon'}
+                />
                 {/* {isNotConnected ? (
                     <PrimaryButton
                         // onClick={() => setIsConnected(!isConnected)}
@@ -157,10 +161,6 @@ const Swap = () => {
                         name={'Swap'}
                     />
                 )} */}
-                <PrimaryButton
-                        onClick={() => handleOnAddLiquidity()}
-                        name={'Add Liquidity'}
-                    />
             </Row>
         )
     }
