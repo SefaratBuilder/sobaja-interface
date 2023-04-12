@@ -45,7 +45,7 @@
         "decimals": 18,
         "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/usdc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
         "name": "DAI",
-        "chainId": 324
+        "chainId": 280
     },
     {
         "address": "0x355d88ef9CCB06078a10cF7111091cAe7756c210",
@@ -53,7 +53,7 @@
         "decimals": 18,
         "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/usdc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
         "name": "Spece",
-        "chainId": 324
+        "chainId": 280
     },
     {
         "address": "0x0BfcE1D53451B4a8175DD94e6e029F7d8a701e9c",
@@ -75,16 +75,8 @@
         "address": "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa",
         "symbol": "WETH",
         "decimals": 18,
-        "logoURI": "",
+        "logoURI": "https://raw.githubusercontent.com/forbitspace/icons/main/token/eth.jpg",
         "name": "Wrapped Ethereum",
-        "chainId": 80001
-    },    
-    {
-        "address": "0x2958c4F56fc4d40ad99E06759b548e02cA2c5ab7",
-        "symbol": "SBJ",
-        "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "Sobaja token",
         "chainId": 80001
     },
     {

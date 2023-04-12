@@ -21,11 +21,11 @@ export const calculateAmountOut = (
     reserveOut: string | number,
     fee: string | number,
 ): string => {
-    console.log({amountIn, reserveIn, reserveOut })
+    console.log({ amountIn, reserveIn, reserveOut })
     const amountInWithFee = mul(amountIn, fee)
     const numerator = mul(amountInWithFee, reserveOut)
     const denominator = add(reserveIn, amountInWithFee)
-    const amountOut = div(numerator,denominator)
+    const amountOut = div(numerator, denominator)
     return amountOut
 }
 
@@ -36,8 +36,8 @@ export const calculateAmountIn = (
     fee: string | number,
 ): string => {
     const numerator = mul(reserve_in, amountOut)
-    const denominator =  mul(fee,sub(reserve_out,amountOut))
-    const amount_in = add(div(numerator,denominator), 1) 
+    const denominator = mul(fee, sub(reserve_out, amountOut))
+    const amount_in = add(div(numerator, denominator), 1)
     return amount_in
 }
 
@@ -111,7 +111,7 @@ export class Pair {
             // const lpShare1 = amount1.mul(this.reserveLp).div(this.reserve1)
 
             const lpShare0 = div(mul(amount0, this.reserveLp), this.reserve0)
-            const lpShare1 = div(mul(amount1, this.reserveLp),this.reserve1)
+            const lpShare1 = div(mul(amount1, this.reserveLp), this.reserve1)
 
             const addedLp = lpShare0.lt(lpShare1) ? lpShare0 : lpShare1
             const shareOfLp = addedLp
@@ -130,14 +130,14 @@ export class Pair {
     ) {
         if (this.reserve0 && this.reserve1) {
 
-            const result1 = div(mul(amountIn,this.reserve1), this.reserve0);
-            const result0 = div(mul(amountIn,this.reserve0), this.reserve1);
+            const result1 = div(mul(amountIn, this.reserve1), this.reserve0);
+            const result0 = div(mul(amountIn, this.reserve0), this.reserve1);
 
             if (
                 (field === Field.INPUT && isSortedTokens(tokenIn, tokenOut)) ||
                 (field === Field.OUTPUT && !isSortedTokens(tokenIn, tokenOut))
             ) {
-                return divNumberWithDecimal(result1,(this.token1.decimals))
+                return divNumberWithDecimal(result1, (this.token1.decimals))
             } else {
                 return divNumberWithDecimal(result0, (this.token0.decimals))
             }
@@ -155,7 +155,7 @@ export class Pair {
             const isSortedAmountOut = calculateAmountOut(
                 amount,
                 this.reserve0,
-                this.reserve1, 
+                this.reserve1,
                 sub(1, this.fee),
 
             )
@@ -163,7 +163,7 @@ export class Pair {
                 amount,
                 this.reserve1,
                 this.reserve0,
-                sub(1,this.fee),
+                sub(1, this.fee),
             )
             const isSortedAmountIn = calculateAmountIn(
                 amount,
@@ -179,13 +179,17 @@ export class Pair {
             )
 
             if (field === Field.INPUT) {
-                if (isSortedTokens(tokenIn, tokenOut)) return divNumberWithDecimal(isSortedAmountOut, tokenOut.decimals)
-                else return divNumberWithDecimal(isNotSortedAmountOut, tokenOut.decimals)
+                if (isSortedTokens(tokenIn, tokenOut))
+                    return divNumberWithDecimal(isSortedAmountOut, tokenOut.decimals)
+                else
+                    return divNumberWithDecimal(isNotSortedAmountOut, tokenOut.decimals)
             }
 
             if (field === Field.OUTPUT) {
-                if (isSortedTokens(tokenIn, tokenOut)) return divNumberWithDecimal(isSortedAmountIn, tokenIn.decimals)
-                else return divNumberWithDecimal(isNotSortedAmountIn, tokenIn.decimals)
+                if (isSortedTokens(tokenIn, tokenOut))
+                    return divNumberWithDecimal(isSortedAmountIn, tokenIn.decimals)
+                else
+                    return divNumberWithDecimal(isNotSortedAmountIn, tokenIn.decimals)
             }
         }
         return ''
@@ -207,7 +211,7 @@ export class Pair {
             const addedLp = lpShare0.lt(lpShare1) ? lpShare0 : lpShare1
             return addedLp
         }
-        const addedLp = Number(mul(amount0,amount1).toString()) - 1000
+        const addedLp = Number(mul(amount0, amount1).toString()) - 1000
         return addedLp
     }
 

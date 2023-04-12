@@ -4,6 +4,7 @@ const { calculator } = JSBI
 
 export const fixNum = (number: number | string): string => {
     const checkStr: any = number.toString()
+
     if (checkStr.includes('-') && !checkStr.includes('e')) {
         const a = checkStr
             .toLocaleString('fullwide', { useGrouping: false })

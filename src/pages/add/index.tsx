@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
-import Setting from 'components/Setting'
+import Setting from 'components/HeaderLiquidity'
 import Bridge from 'components/Bridge'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
 import { Field, Token } from 'interfaces'
@@ -128,6 +128,10 @@ const Swap = () => {
 
         return (
             <Row>
+                <PrimaryButton
+                    onClick={() => { console.log('coming soon') }}
+                    name={'Coming Soon'}
+                />
                 {/* {isNotConnected ? (
                     <PrimaryButton
                         // onClick={() => setIsConnected(!isConnected)}
@@ -157,10 +161,6 @@ const Swap = () => {
                         name={'Swap'}
                     />
                 )} */}
-                <PrimaryButton
-                        onClick={() => handleOnAddLiquidity()}
-                        name={'Add Liquidity'}
-                    />
             </Row>
         )
     }
@@ -171,9 +171,10 @@ const Swap = () => {
                 <Row gap="20px">
                     <Link to="/swap">Swap</Link>
                     <Link to="/add">Add</Link>
-                    <Link to="/pools">Pool</Link>
+                    {/* <Link to="/pools">Pool</Link> */}
+                    <Link to="/limit">Limit</Link>
                 </Row>
-                {/* <Setting /> */}
+                <Setting />
             </Row>
             <Bridge />
             <Columns>
@@ -209,7 +210,7 @@ const SwapContainer = styled(Columns)`
     margin: 0 auto;
     height: fit-content;
     max-width: 480px;
-    background: #130f0f;
+    background: var(--bg5)!important;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
@@ -219,6 +220,9 @@ const SwapContainer = styled(Columns)`
         rgba(0, 28, 44, 0.3)
     );
     gap: 15px;
+    @media screen and (max-width: 767px) {
+        margin: 0 20px;
+    }
 `
 
 const Icon = styled.div`
