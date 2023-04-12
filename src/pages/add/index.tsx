@@ -202,12 +202,7 @@ const Swap = () => {
 }
 
 const SwapContainer = styled(Columns)`
-    position: absolute;
-    top: 40px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: 0 auto;
+    margin: 40px auto;
     height: fit-content;
     max-width: 480px;
     background: var(--bg5)!important;

@@ -48,6 +48,7 @@ const App = () => {
 
 const AppContainer = styled.div`
     position: relative;
+    padding: 20px 0;
 `
 
 export default App
