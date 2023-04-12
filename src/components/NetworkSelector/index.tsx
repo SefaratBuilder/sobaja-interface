@@ -136,7 +136,7 @@ const NetworkButton = styled.div`
     }
 
     img:nth-child(3) {
-        width: 22px;
+        width: 12px;
     }
 `
 const DropDownMainNet = styled.div<{ networkModal: boolean }>`

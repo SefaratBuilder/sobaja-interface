@@ -243,7 +243,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                                         </div>
                                     ) : (
                                         <div>
-                                            <p>inittial</p>
+                                            <p>{account ? 'Connected' : 'Connecting...'}</p>
                                         </div>
                                     )}
                                 </WrapItem>
@@ -261,9 +261,9 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
 }
 
 const WrapContentPending = styled.div`
-    width: 60%;
+    width: 90%;
     border-radius: 20px;
-    background: linear-gradient(180deg, #002033 0%, rgba(0, 38, 60, 0.8) 100%);
+    background: var(--bg5);
     border: 1px solid #003b5c;
     opacity: 1;
 `

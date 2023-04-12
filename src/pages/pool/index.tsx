@@ -31,6 +31,7 @@ import SearchIcon from 'assets/icons/search.svg'
 import PairTokens from 'components/LogoToken/PairTokens'
 import imgDownArrowWhite from 'assets/icons/chevron-white.svg'
 import arrowDown from 'assets/icons/arrowDown.svg'
+import { useNavigate } from 'react-router-dom'
 
 interface Data {
     name: string
@@ -231,6 +232,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 function EnhancedTableToolbar() {
+    const navigate = useNavigate()
     return (
         <Typography
             sx={{ flex: '1 1 100%' }}
@@ -246,7 +248,7 @@ function EnhancedTableToolbar() {
                     </div>
                 </div>
                 <div className="new-position">
-                    <PrimaryButton name="+ New Position" />
+                    <PrimaryButton name="+ New Position" onClick={() => { navigate('/add') }} />
                 </div>
             </HeadTitle>
         </Typography>
@@ -263,6 +265,7 @@ export default function Pools() {
     const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE)
     const [paddingHeight, setPaddingHeight] = useState(0)
     const [searchName, setSearchName] = useState('')
+    const [isMyPositionPage, setIsMyPositionPage] = useState(false)
 
     useEffect(() => {
         let rowsOnMount = stableSort(
@@ -347,10 +350,18 @@ export default function Pools() {
                             <PrimaryButton
                                 name="Pools"
                                 height="35px"
-                                color="rgba(0, 178, 255, 1)"
+                                color={!isMyPositionPage ? "rgba(0, 178, 255, 1)" : "none"}
+                                onClick={() => setIsMyPositionPage(false)}
                             />
                         </div>
-                        <div>My Positions</div>
+                        <div>
+                            <PrimaryButton
+                                name="My positions"
+                                height="35px"
+                                color={isMyPositionPage ? "rgba(0, 178, 255, 1)" : "none"}
+                                onClick={() => setIsMyPositionPage(true)}
+                            />
+                        </div>
                         <div className="circle">0</div>
                     </HeadLabelLeft>
                     <HeadLabelRight>

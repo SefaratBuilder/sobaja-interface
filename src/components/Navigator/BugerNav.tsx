@@ -1,6 +1,7 @@
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
+import SobajaswapLogo from 'assets/brand/sobajaswap-logo.svg'
 
 interface BurgerNavProps {
     burgerNav: boolean
@@ -23,7 +24,7 @@ const BurgerNav = ({ burgerNav, setBurgerNav }: BurgerNavProps) => {
                 <Logo>
                     <img
                         className="logo"
-                        src="/images/logo.svg"
+                        src={SobajaswapLogo}
                         alt="sobaja swap logo"
                     />
                 </Logo>
@@ -50,12 +51,7 @@ const Container = styled.div<{ burgerNav: boolean }>`
     top: 0;
     bottom: 0;
     left: 0;
-    background: ${({ theme }) => theme.bg11};
-    background: linear-gradient(
-        to right top,
-        rgba(157, 195, 230, 0.3) 0%,
-        #0e1740 100%
-    );
+    background: var(--bg5);
     backdrop-filter: blur(10px);
 
     width: 300px;
@@ -72,7 +68,7 @@ const Container = styled.div<{ burgerNav: boolean }>`
 
     a {
         padding: 15px 0;
-        border-bottom: 1px solid black;
+        border-bottom: 1px solid white;
         color: ${({ theme }) => theme.text1};
     }
     @media screen and (max-width: 390px) {

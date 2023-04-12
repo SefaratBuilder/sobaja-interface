@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
-import Transaction from 'components/Setting'
 import Bridge from 'components/Bridge'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
 import { Field, Token } from 'interfaces'
@@ -13,7 +12,7 @@ import LabelButton from 'components/Buttons/LabelButton'
 import SwapIcon from 'assets/icons/swap-icon.svg'
 import { useActiveWeb3React } from 'hooks'
 import { usePair, usePairAddressesByIds } from 'hooks/useAllPairs'
-import HeaderLiquidity from 'components/HeaderLiquidity'
+import Setting from 'components/HeaderLiquidity'
 import { useToken, useTokenApproval } from 'hooks/useToken'
 import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
@@ -22,8 +21,10 @@ import { ROUTERS } from 'constants/addresses'
 import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
+import { useRouterContract } from 'hooks/useContract'
 
 const Swap = () => {
+
     const swapState = useSwapState()
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
@@ -35,7 +36,8 @@ const Swap = () => {
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
     const balanceIn = useCurrencyBalance(account, tokenIn)
-    console.log({pair})
+    const routerContract = useRouterContract()
+    // console.log({pair})
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -51,7 +53,44 @@ const Swap = () => {
         [onTokenSelection, swapState],
     )
 
-    const handleOnSwap = () => {}
+
+    const handleOnSwapExactTokensForTokens = async () => {
+        try {
+            if(inputAmount && tokenIn && tokenOut && outputAmount){
+                await routerContract?.swapExactTokensForTokens(
+                    mulNumberWithDecimal(inputAmount,tokenIn?.decimals),
+                    mulNumberWithDecimal(Number(outputAmount) * 0.999, tokenOut?.decimals),
+                    [tokenIn.address,tokenOut.address],
+                    account,
+                    (new Date().getTime()/1000 + 1000).toFixed(0)
+                )                
+                console.log('Successfully swapped');
+                
+            }
+
+        } catch (error) {
+            console.log(error);
+            
+        }
+    }
+
+    const handleOnSwapTokensForExactTokens = async () =>{
+        try {
+            if(inputAmount && tokenIn && tokenOut && outputAmount){
+                await routerContract?.swapTokensForExactTokens(
+                    mulNumberWithDecimal(outputAmount,  tokenOut.decimals),
+                    mulNumberWithDecimal(Number(inputAmount) * 1 / 0.999, tokenIn.decimals),
+                    [tokenIn.address,tokenOut.address],
+                    account,
+                    (new Date().getTime()/1000 + 1000).toFixed(0)
+                )         
+
+            }
+        } catch (error) {
+            console.log(error);
+            
+        }
+    }
 
     const handleOnApprove = async () => {
         try {
@@ -70,14 +109,48 @@ const Swap = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
     }
 
-    const [setting, setSetting] = useState(false)
+    useEffect(()=>{
+        if(inputAmount && pair && tokenIn && tokenOut && swapType === Field.INPUT){
+            const amountInWithDel = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
+            const swapRate = pair?.calcSwapRate((amountInWithDel),tokenIn,tokenOut, Field.INPUT)
+            onChangeSwapState({
+                ...swapState,
+                outputAmount: swapRate
+            })
+        } 
+        if(!pair || !inputAmount) {
+            onChangeSwapState({
+                ...swapState,
+                outputAmount: ''
+            }) 
+        }
+    },[inputAmount, pair])
 
+    useEffect(()=>{
+        if(outputAmount && pair && tokenIn && tokenOut && swapType === Field.OUTPUT){
+            const amountOutWithDel = mulNumberWithDecimal(outputAmount, tokenOut.decimals)
+            const swapRate = pair?.calcSwapRate((amountOutWithDel), tokenIn, tokenOut, Field.OUTPUT)
+            onChangeSwapState({
+                ...swapState,
+                inputAmount: swapRate
+            }) 
+        }
+        if(!pair || !outputAmount) {
+            onChangeSwapState({
+                ...swapState,
+                inputAmount: ''
+            }) 
+        }
+    },[outputAmount, pair])
+
+    const [setting, setSetting] = useState(false)
+    console.log({tokenIn, tokenOut})
     const SwapButton = () => {
         const isNotConnected = !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
-        const isUndefinedAmount = !inputAmount || !outputAmount
-        const isInffuficientLiquidity = !pair
+        const isUndefinedAmount = !inputAmount && !outputAmount
+        const isInffuficientLiquidity = !pair || Number(inputAmount) < 0
         const isUndefinedCurrencies = !tokenIn || !tokenOut
         const isInsufficientBalance =
             inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
@@ -86,7 +159,11 @@ const Swap = () => {
 
         return (
             <Row>
-                {isNotConnected ? (
+                <PrimaryButton
+                    onClick={() => { console.log('coming soon') }}
+                    name={'Coming Soon'}
+                />
+                {/* {isNotConnected ? (
                     <PrimaryButton
                         name="Connect Wallet"
                         onClick={openWalletModal}
@@ -99,19 +176,19 @@ const Swap = () => {
                     <LabelButton name="Enter an amount" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
+                ) : !isInffuficientLiquidity ? (
+                    <LabelButton name="Insufficient Liquidity" />
                 ) : isInsufficientAllowance ? (
                     <PrimaryButton
                         name={`Approve ${tokenIn?.symbol}`}
                         onClick={handleOnApprove}
                     />
-                ) : isInffuficientLiquidity ? (
-                    <LabelButton name="Insufficient Liquidity" />
                 ) : (
                     <PrimaryButton
-                        onClick={() => handleOnSwap()}
+                        onClick={() => swapType === Field.INPUT ? handleOnSwapExactTokensForTokens() : handleOnSwapTokensForExactTokens()}
                         name={'Swap'}
                     />
-                )}
+                )} */}
             </Row>
         )
     }
@@ -125,12 +202,12 @@ const Swap = () => {
                 <Row gap="20px">
                     <Link to="/swap">Swap</Link>
                     <Link to="/add">Add</Link>
-                    <Link to="/pools">Pool</Link>
+                    {/* <Link to="/pools">Pool</Link> */}
+                    <Link to="/limit">Limit</Link>
                 </Row>
-                {/* <Transaction /> */}
-                <HeaderLiquidity name="Swap" />
+                <Setting />
             </Row>
-            {/* <Bridge /> */}
+            <Bridge />
             <Columns>
                 <CurrencyInputPanel
                     token={tokenIn}
@@ -161,7 +238,7 @@ const Swap = () => {
 
 const SwapContainer = styled(Columns)`
     position: absolute;
-    top: 100px;
+    top: 40px;
     left: 0;
     right: 0;
     bottom: 0;

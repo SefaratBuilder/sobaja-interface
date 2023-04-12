@@ -33,6 +33,7 @@ const TokenListModal = ({
     const allTokenBalances = useAllTokenBalances()
     const { chainId } = useActiveWeb3React()
     const queriedToken = useToken(searchQuery)
+    
     useEffect(() => {
         if(queriedToken) setRenderTokenList(tokens => [...tokens, queriedToken])
     }, [searchQuery])
@@ -75,6 +76,7 @@ const TokenListModal = ({
             return token && sortedTokenList.push(token)
         })
         const newTokens = tokens.filter((t) => !sortedTokenList.includes(t))
+
         const filteredByChainIdTokens = [
             ...sortedTokenList,
             ...newTokens,

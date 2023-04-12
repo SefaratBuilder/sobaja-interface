@@ -4,7 +4,7 @@ import { FACTORIES, INIT_CODE_HASHES } from 'constants/addresses'
 import { ChainId } from 'constants/index'
 import { Field, Token } from 'interfaces'
 import { FixedNumber } from 'ethers'
-import { mul } from './math'
+import { mul, div, add, sub, divNumberWithDecimal } from './math'
 
 export const isSortedTokens = (tokenA: Token, tokenB: Token): Boolean => {
     const result = tokenA.address.toLowerCase() < tokenB.address.toLowerCase()
@@ -16,27 +16,28 @@ export const sortsToken = (tokenA: Token, tokenB: Token): Token[] => {
 }
 
 export const calculateAmountOut = (
-    amountIn: FixedNumber,
-    reserveIn: FixedNumber,
-    reserveOut: FixedNumber,
-    fee: FixedNumber,
-): FixedNumber => {
-    const amountInWithFee = amountIn.mul(fee)
-    const numerator = amountInWithFee.mul(reserveOut)
-    const denominator = reserveIn.add(amountInWithFee)
-    const amountOut = numerator.div(denominator)
+    amountIn: string | number,
+    reserveIn: string | number,
+    reserveOut: string | number,
+    fee: string | number,
+): string => {
+    console.log({ amountIn, reserveIn, reserveOut })
+    const amountInWithFee = mul(amountIn, fee)
+    const numerator = mul(amountInWithFee, reserveOut)
+    const denominator = add(reserveIn, amountInWithFee)
+    const amountOut = div(numerator, denominator)
     return amountOut
 }
 
 export const calculateAmountIn = (
-    amountOut: FixedNumber,
-    reserve_in: FixedNumber,
-    reserve_out: FixedNumber,
-    fee: FixedNumber,
-): FixedNumber => {
-    const numerator = reserve_in.mul(amountOut)
-    const denominator = reserve_out.sub(amountOut).mul(fee)
-    const amount_in = numerator.div(denominator).add(FixedNumber.fromValue(1))
+    amountOut: string | number,
+    reserve_in: string | number,
+    reserve_out: string | number,
+    fee: string | number,
+): string => {
+    const numerator = mul(reserve_in, amountOut)
+    const denominator = mul(fee, sub(reserve_out, amountOut))
+    const amount_in = add(div(numerator, denominator), 1)
     return amount_in
 }
 
@@ -65,19 +66,19 @@ export interface IPair {
     token0: Token
     token1: Token
     tokenLp: Token
-    reserve0: FixedNumber
-    reserve1: FixedNumber
-    reserveLp: FixedNumber
+    reserve0: string | number
+    reserve1: string | number
+    reserveLp: string | number
 }
 
 export class Pair {
     token0: Token
     token1: Token
     tokenLp: Token
-    reserve0: FixedNumber
-    reserve1: FixedNumber
-    reserveLp: FixedNumber
-    fee = FixedNumber.fromValue(25, 4) //25
+    reserve0: string | number
+    reserve1: string | number
+    reserveLp: string | number
+    fee = 0.0025 //25
 
     constructor(pair: IPair) {
         const isSorted = isSortedTokens(pair.token0, pair.token1)
@@ -92,13 +93,13 @@ export class Pair {
         this.reserveLp = pair.reserveLp
     }
 
-    currentShareOfPool(reserveLp: FixedNumber) {
-        return reserveLp.div(this.reserveLp).mul(FixedNumber.fromValue(100))
+    currentShareOfPool(reserveLp: string) {
+        return mul(div(reserveLp, this.reserveLp), 100)
     }
 
     calcShareOfPool(
-        amount0: FixedNumber,
-        amount1: FixedNumber,
+        amount0: string | number,
+        amount1: string | number,
         token0: Token,
         token1: Token,
     ) {
@@ -106,41 +107,46 @@ export class Pair {
         amount0 = isSortedTokens(token0, token1) ? amount0 : amount1
         amount1 = isSortedTokens(token0, token1) ? amount1 : tempAmount
         if (this.reserve0 && this.reserve1 && this.reserveLp) {
-            const lpShare0 = amount0.mul(this.reserveLp).div(this.reserve0)
-            const lpShare1 = amount1.mul(this.reserveLp).div(this.reserve1)
+            // const lpShare0 = amount0.mul(this.reserveLp).div(this.reserve0)
+            // const lpShare1 = amount1.mul(this.reserveLp).div(this.reserve1)
+
+            const lpShare0 = div(mul(amount0, this.reserveLp), this.reserve0)
+            const lpShare1 = div(mul(amount1, this.reserveLp), this.reserve1)
 
             const addedLp = lpShare0.lt(lpShare1) ? lpShare0 : lpShare1
             const shareOfLp = addedLp
                 .div(addedLp.add(this.reserveLp))
-                .mul(FixedNumber.fromValue(100)) //%
+                .mul(100) //%
             return shareOfLp
         }
-        return FixedNumber.fromValue(100)
+        return 100
     }
 
     calcAddRate(
-        amountIn: FixedNumber,
+        amountIn: string | number,
         tokenIn: Token,
         tokenOut: Token,
         field: Field,
     ) {
         if (this.reserve0 && this.reserve1) {
-            const result1 = amountIn.mul(this.reserve1).div(this.reserve0)
-            const result0 = amountIn.mul(this.reserve0).div(this.reserve1)
+
+            const result1 = div(mul(amountIn, this.reserve1), this.reserve0);
+            const result0 = div(mul(amountIn, this.reserve0), this.reserve1);
+
             if (
                 (field === Field.INPUT && isSortedTokens(tokenIn, tokenOut)) ||
                 (field === Field.OUTPUT && !isSortedTokens(tokenIn, tokenOut))
             ) {
-                return result1.div(FixedNumber.fromValue(this.token1.decimals))
+                return divNumberWithDecimal(result1, (this.token1.decimals))
             } else {
-                return result0.div(FixedNumber.fromValue(this.token0.decimals))
+                return divNumberWithDecimal(result0, (this.token0.decimals))
             }
         }
-        return 0
+        return ''
     }
 
     calcSwapRate(
-        amount: FixedNumber,
+        amount: string | number,
         tokenIn: Token,
         tokenOut: Token,
         field: Field,
@@ -150,43 +156,48 @@ export class Pair {
                 amount,
                 this.reserve0,
                 this.reserve1,
-                FixedNumber.fromValue(1).sub(this.fee),
+                sub(1, this.fee),
+
             )
             const isNotSortedAmountOut = calculateAmountOut(
                 amount,
                 this.reserve1,
                 this.reserve0,
-                FixedNumber.fromValue(1).sub(this.fee),
+                sub(1, this.fee),
             )
             const isSortedAmountIn = calculateAmountIn(
                 amount,
                 this.reserve0,
                 this.reserve1,
-                FixedNumber.fromValue(1).sub(this.fee),
+                sub(1, this.fee),
             )
             const isNotSortedAmountIn = calculateAmountIn(
                 amount,
                 this.reserve1,
                 this.reserve0,
-                FixedNumber.fromValue(1).sub(this.fee),
+                sub(1, this.fee),
             )
 
             if (field === Field.INPUT) {
-                if (isSortedTokens(tokenIn, tokenOut)) return isSortedAmountOut
-                else return isNotSortedAmountOut
+                if (isSortedTokens(tokenIn, tokenOut))
+                    return divNumberWithDecimal(isSortedAmountOut, tokenOut.decimals)
+                else
+                    return divNumberWithDecimal(isNotSortedAmountOut, tokenOut.decimals)
             }
 
             if (field === Field.OUTPUT) {
-                if (isSortedTokens(tokenIn, tokenOut)) return isSortedAmountIn
-                else return isNotSortedAmountIn
+                if (isSortedTokens(tokenIn, tokenOut))
+                    return divNumberWithDecimal(isSortedAmountIn, tokenIn.decimals)
+                else
+                    return divNumberWithDecimal(isNotSortedAmountIn, tokenIn.decimals)
             }
         }
-        return 0
+        return ''
     }
 
     calcLPAmount(
-        amount0: FixedNumber,
-        amount1: FixedNumber,
+        amount0: string | number,
+        amount1: string | number,
         token0: Token,
         token1: Token,
     ) {
@@ -194,21 +205,21 @@ export class Pair {
         amount0 = isSortedTokens(token0, token1) ? amount0 : amount1
         amount1 = isSortedTokens(token0, token1) ? amount1 : tempAmount
         if (this.reserve0 && this.reserve1 && this.reserveLp) {
-            const lpShare0 = amount0.mul(this.reserveLp).div(this.reserve0)
-            const lpShare1 = amount1.mul(this.reserveLp).div(this.reserve1)
+            const lpShare0 = div(mul(amount0, this.reserveLp), this.reserve0)
+            const lpShare1 = div(mul(amount1, this.reserveLp), this.reserve1)
 
             const addedLp = lpShare0.lt(lpShare1) ? lpShare0 : lpShare1
             return addedLp
         }
-        const addedLp = Number(amount0.mul(amount1).toString()) - 1000
-        return FixedNumber.fromValue(addedLp)
+        const addedLp = Number(mul(amount0, amount1).toString()) - 1000
+        return addedLp
     }
 
     getToken0PerToken1Rate() {
-        return this.reserve1.div(this.reserve0)
+        return div(this.reserve1, this.reserve0)
     }
 
     getToken1PerToken0Rate() {
-        return this.reserve0.div(this.reserve1)
+        return div(this.reserve0, this.reserve1)
     }
 }
