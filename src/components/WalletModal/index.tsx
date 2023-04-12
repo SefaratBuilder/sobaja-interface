@@ -243,7 +243,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                                         </div>
                                     ) : (
                                         <div>
-                                            <p>inittial</p>
+                                            <p>{account ? 'Connected' : 'Connecting...'}</p>
                                         </div>
                                     )}
                                 </WrapItem>
