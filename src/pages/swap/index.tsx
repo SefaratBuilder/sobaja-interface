@@ -26,7 +26,7 @@ import { useRouterContract } from 'hooks/useContract'
 const Swap = () => {
 
     const swapState = useSwapState()
-    const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
+    const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(false)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
@@ -237,12 +237,7 @@ const Swap = () => {
 }
 
 const SwapContainer = styled(Columns)`
-    position: absolute;
-    top: 40px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: 0 auto;
+    margin: 40px auto;
     height: fit-content;
     max-width: 480px;
     background: var(--bg5)!important;
