@@ -14,7 +14,8 @@ const Bridge = () => {
                 <div className="b">Bridge</div>
             </Row>
             <Row al="center">
-                <Switch onClick={() => setIsOpen(!isOpen)} checked={isOpen} />
+                {/* <Switch onClick={() => setIsOpen(!isOpen)} checked={isOpen} /> */}
+                <Switch onClick={() => console.log('coming soon')} />
             </Row>
         </BridgeWrapper>
     )

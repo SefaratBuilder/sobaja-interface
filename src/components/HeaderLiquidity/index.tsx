@@ -7,10 +7,7 @@ import styled from 'styled-components'
 // import imgSettingLight from "../../assets/svg/setting-light.svg";
 import SettingIcon from 'assets/icons/setting.svg'
 
-interface HeaderLiquidityProps {
-    name: string
-}
-const HeaderLiquidity = ({ name }: HeaderLiquidityProps) => {
+const HeaderLiquidity = () => {
     const [setting, setSetting] = useState(false)
     const { userDarkMode } = useAppState()
     return (

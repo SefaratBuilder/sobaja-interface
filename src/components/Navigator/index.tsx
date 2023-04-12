@@ -12,7 +12,7 @@ const Navigator = ({ burgerNav, setBurgerNav }: NavigationProps) => {
         <>
             <NavigatorWrapper>
                 <Link to="swap">Swap</Link>
-                <Link to="pools">Pool</Link>
+                <Link to="pools">Pools</Link>
                 <Link to="earn">Earn</Link>
                 <Link to="nft">NFTs</Link>
                 <Link to="launchpad">Launchpad</Link>
