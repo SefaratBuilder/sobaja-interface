@@ -91,9 +91,15 @@ export function usePair(
             token0: tokenA,
             token1: tokenB,
             tokenLp,
-            reserve0: FixedNumber.fromValue(reserves[0]._hex, 0),
-            reserve1: FixedNumber.fromValue(reserves[1]._hex, 0),
-            reserveLp: FixedNumber.fromValue(balance._hex, 0),
+            reserve0: Number(reserves[0]._hex),
+            reserve1: Number(reserves[1]._hex),
+            reserveLp: Number(balance._hex),
+
+            // reserve0: (reserves[0]._hex, 0),
+            // reserve1: (reserves[1]._hex, 0),
+            // reserveLp: (balance._hex, 0),
+
+
         })
 
     return useMemo(() => pair, [lpAddress])
