@@ -8,6 +8,7 @@ import { Columns } from 'components/Layouts'
 import { useNavigate } from 'react-router-dom'
 import Faucet from 'components/Faucet'
 import { useActiveWeb3React } from 'hooks'
+
 const Header = () => {
     const [burgerNav, setBurgerNav] = useState(false)
     const navigate = useNavigate()
@@ -24,12 +25,12 @@ const Header = () => {
                 />
             </Logo>
             <Navigator burgerNav={burgerNav} setBurgerNav={setBurgerNav} />
-
+            <Faucet />
             <Connector>
-                {chainId == 280 && account && <Faucet></Faucet>}
                 <NetworkSelector />
                 <Web3Status />
-                <WrapperNavigator onClick={() => setBurgerNav((i) => !i)}>
+            </Connector>
+            <WrapperNavigator onClick={() => setBurgerNav((i) => !i)}>
                     {!burgerNav ? (
                         <>
                             <MenuIcon>
@@ -42,30 +43,30 @@ const Header = () => {
                         'X'
                     )}
                 </WrapperNavigator>
-            </Connector>
         </HeaderWrapper>
     )
 }
 
 export const HeaderWrapper = styled.div`
     display: grid;
-    grid-template-columns: 1fr 1fr 2fr;
+    grid-template-columns: 1fr 2fr 80px 300px;
     grid-gap: 20px;
     width: 100%;
     padding: 20px;
+    align-items: center;
+    justify-content: flex-end;
 
-    @media screen and (max-width: 992px) {
-        grid-template-columns: 1fr 1fr;
+    @media screen and (max-width: 1100px) {
+        grid-template-columns: 1fr 80px 38px;
     }
-
     @media screen and (max-width: 576px) {
-        grid-template-columns: 22% 74% 4%;
+        grid-gap: 10px;
     }
 `
 
 const WrapperNavigator = styled.div`
     display: none;
-    @media screen and (max-width: 992px) {
+    @media screen and (max-width: 1100px) {
         width: 38px;
         display: flex;
         height: 38px;
@@ -104,6 +105,7 @@ export const Logo = styled.div`
         img:nth-child(2) {
             display: flex;
         }
+        width: 100px;
     }
 `
 
@@ -113,10 +115,14 @@ export const Connector = styled.div`
     align-items: center;
     justify-content: flex-end;
 
-    @media screen and (max-width: 768px) {
-        /* div:nth-child(1) {
-            display: none;
-        } */
+    @media screen and (max-width: 1100px) {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: var(--bg3);
+        backdrop-filter: blur(3px);
+        padding: 8px;
     }
 `
 

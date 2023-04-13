@@ -255,7 +255,7 @@ const Swap = () => {
             <Row jus="space-between">
                 <Nav gap="20px">
                     <Link to="/swap" className='active-link'>Swap</Link>
-                    <Link to="/add">Add</Link>
+                    {/* <Link to="/add">Add</Link> */}
                     {/* <Link to="/pools">Pool</Link> */}
                     <Link to="/limit">Limit</Link>
                 </Nav>
