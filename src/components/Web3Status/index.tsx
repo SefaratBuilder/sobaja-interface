@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react'
 import styled from 'styled-components'
 import PrimaryButton, { Button } from 'components/Buttons/PrimaryButton'
 import WalletModal from 'components/WalletModal'
+import { Activity } from 'react-feather'
 import { shortenAddress } from 'utils'
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
@@ -38,7 +39,6 @@ const Web3Status = () => {
                     height={undefined}
                     id="web3-status-connected"
                     onClick={() => setToggleWalletModal(!toggleWalletModal)}
-                    // pending={hasPendingTransactions}
                 >
                     {formatConnectorName(account)}
                 </Web3StatusConnect>
@@ -46,6 +46,7 @@ const Web3Status = () => {
         } else if (error) {
             return (
                 <Web3StatusConnect height={undefined}>
+                    <NetworkIcon></NetworkIcon>
                     <span>
                         {error instanceof UnsupportedChainIdError ? (
                             <p>Wrong Network</p>
@@ -61,7 +62,6 @@ const Web3Status = () => {
                     height={undefined}
                     id="connect-wallet"
                     onClick={() => setToggleWalletModal(!toggleWalletModal)}
-                    // faded={!account}
                 >
                     <div>
                         <p>Connect wallet</p>
@@ -82,6 +82,13 @@ const Web3Status = () => {
         </Web3StatusWrapper>
     )
 }
+
+const NetworkIcon = styled(Activity)`
+    margin-left: 0.25rem;
+    margin-right: 0.5rem;
+    width: 16px;
+    height: 16px;
+`
 
 const IconArrow = styled.img`
     height: 12px;

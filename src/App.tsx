@@ -31,6 +31,7 @@ const App = () => {
                 <GlobalStyle />
                 <Updater />
                 <Header />
+
                 <AppContainer>
                     {/* <ToastMessage /> */}
                     <Routes>
