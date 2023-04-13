@@ -339,7 +339,7 @@ export default function Pools() {
                 sx={{
                     backgroundColor: 'transparent',
                     color: 'white',
-                    paddingTop: '80px',
+                    paddingTop: '15px',
                 }}
             >
                 <EnhancedTableToolbar />
