@@ -7,6 +7,15 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   base: "/#/swap",
   define: {
-    'process.env': {}
-  }
+    'process.env': {},
+    global: "globalThis",
+  },
+  resolve: {
+    alias: {
+      "@binance-chain/bsc-connector": "@binance-chain/bsc-connector/dist/bsc-connector.cjs.production.min.js",
+      "@web3-react/walletconnect-connector": "@web3-react/walletconnect-connector/dist/walletconnect-connector.cjs.production.min.js",
+      "@web3-react/walletlink-connector": "@web3-react/walletlink-connector/dist/walletlink-connector.cjs.production.min.js",
+    },
+  },
+
 })
