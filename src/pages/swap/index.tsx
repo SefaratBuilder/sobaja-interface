@@ -90,7 +90,8 @@ const Swap = () => {
                 return {
                     args: [
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        // mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        '0x00',
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline)
