@@ -76,11 +76,11 @@ const Faucet = () => {
                             <CoinButton>
                                 {showMintCoins()}
                                 {
-                                chainId === 280 && (
-                                    <Row>
-                                        <Error fontSize='14px'>Wrong network! Please switch to ZkSync Goerli network to faucet tokens.</Error>
-                                    </Row>
-                                )
+                                    chainId !== 280 && (
+                                        <Row>
+                                            <Error fontSize='14px'>Wrong network! Please switch to ZkSync Goerli network to faucet tokens.</Error>
+                                        </Row>
+                                    )
                                 }
                             </CoinButton>
                         </BodyModalFaucet>
