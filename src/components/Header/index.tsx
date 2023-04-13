@@ -5,13 +5,15 @@ import NetworkSelector from 'components/NetworkSelector'
 import Web3Status from 'components/Web3Status'
 import SobajaLogo from 'assets/brand/sobajaswap-logo.svg'
 import { Columns } from 'components/Layouts'
+import { useNavigate } from 'react-router-dom'
 
 const Header = () => {
     const [burgerNav, setBurgerNav] = useState(false)
+    const navigate = useNavigate()
 
     return (
         <HeaderWrapper>
-            <Logo>
+            <Logo onClick={() => navigate('/')}>
                 <img
                     className="logo"
                     src={SobajaLogo}
@@ -80,6 +82,7 @@ const WrapperNavigator = styled.div`
 export const Logo = styled.div`
     display: flex;
     width: 280px;
+    cursor: pointer;
 
     img {
         width: 100%;
