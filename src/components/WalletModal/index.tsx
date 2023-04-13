@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import imgClose from 'assets/icons/icon-close.svg'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
@@ -20,12 +19,8 @@ const WALLET_VIEWS = {
 }
 
 const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
-    const ref = useRef<any>(false)
     const [isAgreePolicy, setIsAgreePolicy] = useState<boolean>(false)
     const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT)
-    useOnClickOutside(ref, () => {
-        setToggleWalletModal(false)
-    })
     const { activate, deactivate, connector, error, account } = useWeb3React()
     const [pendingError, setPendingError] = useState<boolean>(false)
     const [pendingWallet, setPendingWallet] = useState<
@@ -157,13 +152,16 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             )
         }
         return (
-            <Container isConnected={true} ref={ref}>
+            <Container isConnected={true}>
                 <Header>
                     <span>Connect a wallet</span>
                     <div>
                         {' '}
                         <BtnClose
-                            onClick={() => setToggleWalletModal(false)}
+                            onClick={() => {
+                                console.log('vooo du dko ')
+                                setToggleWalletModal(false)
+                            }}
                             src={imgClose}
                             alt=""
                         />
