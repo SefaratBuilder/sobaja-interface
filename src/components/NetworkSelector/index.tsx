@@ -20,7 +20,7 @@ const NetworkSelector = () => {
     const listNetwork = [
         { name: 'Ethereum', logo: LogoETH, className: 'button-eth', url: '' },
         { name: 'BNB Chain', logo: LogoBNB, className: 'button-bnb', url: '' },
-        { name: 'Mainet', logo: LogoERA, className: 'button-era', url: '' },
+        { name: 'Mainnet', logo: LogoERA, className: 'button-era', url: '' },
         { name: 'Testnet', logo: LogoERA, className: 'button-era', url: '' },
     ]
 

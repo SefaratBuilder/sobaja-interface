@@ -29,7 +29,8 @@ const Header = () => {
                 {chainId == 280 && account && <Faucet></Faucet>}
                 <NetworkSelector />
                 <Web3Status />
-                <WrapperNavigator onClick={() => setBurgerNav((i) => !i)}>
+            </Connector>
+            <WrapperNavigator onClick={() => setBurgerNav((i) => !i)}>
                     {!burgerNav ? (
                         <>
                             <MenuIcon>
@@ -42,7 +43,6 @@ const Header = () => {
                         'X'
                     )}
                 </WrapperNavigator>
-            </Connector>
         </HeaderWrapper>
     )
 }
@@ -53,9 +53,10 @@ export const HeaderWrapper = styled.div`
     grid-gap: 20px;
     width: 100%;
     padding: 20px;
+    align-items: center;
 
     @media screen and (max-width: 992px) {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 38px;
     }
 
     @media screen and (max-width: 576px) {
@@ -113,10 +114,13 @@ export const Connector = styled.div`
     align-items: center;
     justify-content: flex-end;
 
-    @media screen and (max-width: 768px) {
-        /* div:nth-child(1) {
-            display: none;
-        } */
+    @media screen and (max-width: 992px) {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: white;
+        padding: 5px;
     }
 `
 
