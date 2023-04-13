@@ -1,4 +1,3 @@
-import { ChainId } from 'constants/index'
 import { FixedNumber } from 'ethers'
 import { Token } from 'interfaces'
 import { useMemo } from 'react'
@@ -11,6 +10,9 @@ import { computePairAddress, Pair } from 'utils/pair'
 import { useFactoryContract } from './useContract'
 import { useToken } from './useToken'
 import PAIR_INTERFACE from 'constants/jsons/pair'
+import { WRAPPED_NATIVE_COIN } from 'constants/index';
+import { ChainId } from 'interfaces'
+import { isNativeCoin } from 'utils'
 
 /**
  * Returns pairs length.
@@ -64,43 +66,42 @@ export function usePair(
     tokenA: Token | undefined,
     tokenB: Token | undefined,
 ): Pair | undefined {
+    tokenA = chainId && isNativeCoin(tokenA) ? WRAPPED_NATIVE_COIN[chainId] : tokenA
+    tokenB = chainId && isNativeCoin(tokenB) ? WRAPPED_NATIVE_COIN[chainId] : tokenB
     const lpAddress = computePairAddress({ chainId, tokenA, tokenB })
-    console.log({ lpAddress })
     const tokenLp = useToken(lpAddress)
-    const balance = useMultipleContractSingleData(
+
+    const balanceResult = useMultipleContractSingleData(
         [lpAddress],
         PAIR_INTERFACE,
         'totalSupply',
         [],
-    )?.[0].result?.[0]
+    )
 
-    const reserves = useMultipleContractSingleData(
+    const reservesResult = useMultipleContractSingleData(
         [lpAddress],
         PAIR_INTERFACE,
         'getReserves',
         [],
-    )?.[0].result
+    )
 
-    const pair =
-        tokenA &&
-        tokenB &&
-        reserves &&
-        balance &&
-        tokenLp &&
-        new Pair({
-            token0: tokenA,
-            token1: tokenB,
-            tokenLp,
-            reserve0: Number(reserves[0]._hex),
-            reserve1: Number(reserves[1]._hex),
-            reserveLp: Number(balance._hex),
-
-            // reserve0: (reserves[0]._hex, 0),
-            // reserve1: (reserves[1]._hex, 0),
-            // reserveLp: (balance._hex, 0),
-
-
-        })
-
-    return useMemo(() => pair, [lpAddress])
+    return useMemo(() => {
+        const balance = balanceResult?.[0]?.result?.[0]
+        const reserves = reservesResult?.[0]?.result
+        const pair =
+            tokenA &&
+            tokenB &&
+            reserves &&
+            balance &&
+            tokenLp &&
+            new Pair({
+                token0: tokenA,
+                token1: tokenB,
+                tokenLp,
+                reserve0: Number(reserves[0]._hex),
+                reserve1: Number(reserves[1]._hex),
+                reserveLp: Number(balance._hex),
+            })
+        return pair
+    }, [lpAddress, balanceResult, reservesResult])
 }
