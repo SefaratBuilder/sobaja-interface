@@ -1,6 +1,7 @@
 import MULTICALL_ABI from '../jsons/multicall.json'
 import FACTORY_ABI from '../jsons/factory.json'
 import ROUTER_ABI from '../jsons/router.json'
+import FAUCET_ABI from '../jsons/faucet.json'
 import { ChainId } from '..'
 
 const MULTICALL_NETWORKS: { [chainId: number]: string } = {
@@ -42,6 +43,11 @@ export const WRAPPED_NATIVE_COIN: { [chainId in ChainId]: string } = {
     [ChainId.MUMBAI]: '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
 }
 
+const Faucet: { [chainId: number]: string } = {
+    [ChainId.ZKTESTNET]: '0x512f8823C8541e371c6eAB6eee22d5CaB9945a7E',
+}
+
+
 export {
     MULTICALL_ABI,
     MULTICALL_NETWORKS,
@@ -49,5 +55,7 @@ export {
     FACTORY_ABI,
     ROUTERS,
     ROUTER_ABI,
+    FAUCET_ABI,
+    Faucet,
     INIT_CODE_HASHES,
 }

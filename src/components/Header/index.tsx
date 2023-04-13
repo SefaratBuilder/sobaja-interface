@@ -5,18 +5,16 @@ import NetworkSelector from 'components/NetworkSelector'
 import Web3Status from 'components/Web3Status'
 import SobajaLogo from 'assets/brand/sobajaswap-logo.svg'
 import { Columns } from 'components/Layouts'
+import Faucet from 'components/Faucet'
+import { useActiveWeb3React } from 'hooks'
 
 const Header = () => {
     const [burgerNav, setBurgerNav] = useState(false)
-
+    const { account, chainId } = useActiveWeb3React()
     return (
         <HeaderWrapper>
             <Logo>
-                <img
-                    className="logo"
-                    src={SobajaLogo}
-                    alt="sobaja swap logo"
-                />
+                <img className="logo" src={SobajaLogo} alt="sobaja swap logo" />
                 <img
                     className="logo-mobile"
                     src="/favicon.ico"
@@ -24,17 +22,23 @@ const Header = () => {
                 />
             </Logo>
             <Navigator burgerNav={burgerNav} setBurgerNav={setBurgerNav} />
+
             <Connector>
+                {chainId == 280 && account && <Faucet></Faucet>}
                 <NetworkSelector />
                 <Web3Status />
                 <WrapperNavigator onClick={() => setBurgerNav((i) => !i)}>
-                    {!burgerNav ? (<>
-                        <MenuIcon>
-                            <span />
-                            <span />
-                            <span />
-                        </MenuIcon>
-                    </>) : 'X'}
+                    {!burgerNav ? (
+                        <>
+                            <MenuIcon>
+                                <span />
+                                <span />
+                                <span />
+                            </MenuIcon>
+                        </>
+                    ) : (
+                        'X'
+                    )}
                 </WrapperNavigator>
             </Connector>
         </HeaderWrapper>

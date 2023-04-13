@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import PrimaryButton, { Button } from 'components/Buttons/PrimaryButton'
 import WalletModal from 'components/WalletModal'
@@ -8,10 +8,16 @@ import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { injected } from 'connectors'
 import arrowDown from 'assets/icons/arrow-down.svg'
+import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 
 const Web3Status = () => {
     const { account, connector, error } = useWeb3React()
     const [toggleWalletModal, setToggleWalletModal] = useState<boolean>(false)
+    const ref = useRef<any>()
+
+    useOnClickOutside(ref, () => {
+        setToggleWalletModal(false)
+    })
 
     function formatConnectorName(account: any) {
         const { ethereum } = window
@@ -72,16 +78,33 @@ const Web3Status = () => {
     }
 
     return (
-        <Web3StatusWrapper>
-            {Web3StatusInner(account, error)}
-            {toggleWalletModal ? (
-                <WalletModal setToggleWalletModal={setToggleWalletModal} />
-            ) : (
-                ''
-            )}
-        </Web3StatusWrapper>
+        <>
+            <Web3StatusWrapper>
+                {Web3StatusInner(account, error)}
+                {toggleWalletModal ? (
+                    <div ref={ref}>
+                        <WalletModal
+                            setToggleWalletModal={setToggleWalletModal}
+                        />
+                    </div>
+                ) : (
+                    ''
+                )}
+            </Web3StatusWrapper>
+            {toggleWalletModal ? <OpacityModal></OpacityModal> : ''}
+        </>
     )
 }
+
+export const OpacityModal = styled.div`
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-color: #00000073;
+    right: 0;
+    top: 0;
+`
 
 const NetworkIcon = styled(Activity)`
     margin-left: 0.25rem;
