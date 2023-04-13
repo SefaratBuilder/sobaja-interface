@@ -1,7 +1,7 @@
 import MULTICALL_ABI from '../jsons/multicall.json'
 import FACTORY_ABI from '../jsons/factory.json'
 import ROUTER_ABI from '../jsons/router.json'
-import { ChainId } from '..'
+import { ChainId } from 'interfaces'
 
 const MULTICALL_NETWORKS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441',
@@ -21,7 +21,7 @@ const ROUTERS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
     [ChainId.ZKTESTNET]: '0x8092Ab17e351ac382143a84e4a6F8424dF2F9976',
     [ChainId.GOERLI]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
-    [ChainId.MUMBAI]: '0x93Ff755a30F1C1F7cCEfD06a1412C88e700D87c7',
+    [ChainId.MUMBAI]: '0x6D0DB9992Fa4309CbF781Ea6134f50CB437d9Ad4',
 }
 
 const INIT_CODE_HASHES: { [chainId: number]: string } = {
@@ -35,7 +35,7 @@ const INIT_CODE_HASHES: { [chainId: number]: string } = {
         '0x17f3f03b4063530632eba024ef5b90dd5ab3efaa82f6a54a1a7d1025bb81c1dd',
 }
 
-export const WRAPPED_NATIVE_COIN: { [chainId in ChainId]: string } = {
+export const WRAPPED_NATIVE_ADDRESSES: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
     [ChainId.ZKTESTNET]: '0x20b28b1e4665fff290650586ad76e977eab90c5d',
     [ChainId.GOERLI]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',

@@ -12,7 +12,7 @@ import LabelButton from 'components/Buttons/LabelButton'
 import PlusIcon from 'assets/icons/plus.svg'
 import {ROUTERS} from 'constants/addresses'
 import { useTokenApproval } from 'hooks/useToken'
-import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/index'
+import { ALL_SUPPORTED_CHAIN_IDS, ZERO_ADDESS } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { ethers } from 'ethers'
 import { useFactoryContract, useRouterContract } from 'hooks/useContract'
@@ -20,20 +20,19 @@ import { useActiveWeb3React } from 'hooks'
 import { mulNumberWithDecimal } from 'utils/math'
 import { usePair } from 'hooks/useAllPairs'
 import { FixedNumber } from '@ethersproject/bignumber'
+import { isNativeCoin } from 'utils'
 
 const Swap = () => {
     const swapState = useSwapState()
     const router = useRouterContract();
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } = swapState
-
-    const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
-        useSwapActionHandlers()
-       const { account, chainId } = useActiveWeb3React()
- const routerContract = useRouterContract()
+    const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =  useSwapActionHandlers()
+    const { account, chainId } = useActiveWeb3React()
+    const routerContract = useRouterContract()
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
-
-    const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
+    const tokenInApproval = useTokenApproval(account, routerAddress, tokenIn)
+    const tokenOutApproval = useTokenApproval(account, routerAddress, tokenOut)
 
     const factoryContract = useFactoryContract()
     const pair = usePair(chainId, tokenIn, tokenOut)
@@ -54,39 +53,56 @@ const Swap = () => {
     
     const handleOnAddLiquidity = async() => {
         try {
-            
             if(inputAmount && outputAmount && tokenIn && tokenOut) {
-                await routerContract?.addLiquidity(
+                const isEthTxn = isNativeCoin(tokenIn) || isNativeCoin(tokenOut)
+                const method = isEthTxn ? 'addLiquidityETH' : 'addLiquidity'
+                const token = isNativeCoin(tokenIn) ? tokenOut : tokenIn
+                const amountToken = isNativeCoin(tokenOut) ? outputAmount : inputAmount
+
+                let value = isNativeCoin(tokenIn) ? mulNumberWithDecimal(inputAmount, tokenIn.decimals) : mulNumberWithDecimal(outputAmount, tokenOut.decimals)
+                value = isEthTxn ? value : '0x00'
+                const args = isEthTxn ? [
+                    token.address,
+                    mulNumberWithDecimal(amountToken, token.decimals),
+                    '0',
+                    '0',
+                    account,
+                    (new Date().getTime()/1000 + 1000).toFixed(0)
+                ] : [
                     tokenIn.address,
                     tokenOut.address,
                     mulNumberWithDecimal(inputAmount, tokenIn.decimals),
                     mulNumberWithDecimal(outputAmount, tokenOut.decimals),
-                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
-                    mulNumberWithDecimal(outputAmount, tokenOut.decimals),
+                    '0',
+                    '0',
                     account,
                     (new Date().getTime()/1000 + 1000).toFixed(0)
-                )
-                console.log('Add liquidity successfully')
+                ]
+                console.log({...args, value})
+                const gasLimit = await routerContract?.estimateGas?.[method]?.(...args, { value })
+                const callResult = await routerContract?.[method]?.(...args, { value , gasLimit: gasLimit && gasLimit.add(1000) })
+                const txn = await callResult.wait()
+
+                if(txn.status === 1) {
+                    console.log('Successfull...', txn)
+                }
             }
         }
         catch(err) {
             console.log(err)
         }
     }
-    /* function addLiquidityETH(
-  address token,
-  uint amountTokenDesired,
-  uint amountTokenMin,
-  uint amountETHMin,
-  address to,
-  uint deadline
-) external payable returns (uint amountToken, uint amountETH, uint liquidity);*/
 
-    const handleOnAddLiquidityETH = async () =>{
+    const handleOnApprove = async (approve: (to: string, amount: string) => void, amount: string | undefined, decimals: number | undefined) => {
         try {
-            
-        } catch (error) {
-            
+            if (amount && decimals && routerAddress) {
+                await approve(
+                    routerAddress,
+                    mulNumberWithDecimal(amount, decimals)
+                )
+            }
+        } catch (err) {
+            console.log('Failed to approve token: ', err)
         }
     }
 
@@ -97,8 +113,13 @@ const Swap = () => {
             console.log('Amount out'+{addRate})
             handleOnUserInput(Field.OUTPUT, addRate)
         }
-        
-    },[inputAmount, pair])
+        // if(!pair) {
+        //     onChangeSwapState({
+        //         ...swapState,
+        //         outputAmount: ''
+        //     }) 
+        // }
+    },[inputAmount, tokenIn, tokenOut])
 
     useEffect(()=>{
         // when output amount change
@@ -108,12 +129,18 @@ const Swap = () => {
             console.log('Amount In'+ {addRate});
             handleOnUserInput(Field.INPUT,addRate)
         }
-    },[outputAmount, pair])
+        // if(!pair) {
+        //     onChangeSwapState({
+        //         ...swapState,
+        //         inputAmount: ''
+        //     }) 
+        // }
+    },[outputAmount, tokenIn, tokenOut])
 
 
     const AddButton = () => {
-     
         const balanceIn = useCurrencyBalance(account, tokenIn)
+        const balanceOut = useCurrencyBalance(account, tokenOut)
         const isNotConnected = !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
@@ -121,18 +148,16 @@ const Swap = () => {
         const isInffuficientLiquidity = false
         const isUndefinedCurrencies = !tokenIn || !tokenOut
         const isInsufficientBalance =
-            inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
-        const isInsufficientAllowance =
-            Number(tokenApproval?.allowance) < Number(inputAmount)
-
-
+            inputAmount && balanceIn && (Number(balanceIn) < Number(inputAmount) || Number(balanceOut) < Number(outputAmount))
+        const isInsufficientAllowanceTokenIn =
+            Number(tokenInApproval?.allowance) < Number(inputAmount) && tokenIn?.address !== ZERO_ADDESS
+        const isInsufficientAllowanceTokenOut = 
+            Number(tokenOutApproval?.allowance) < Number(outputAmount) && tokenOut?.address !== ZERO_ADDESS
+        const isInsufficientAllowance = isInsufficientAllowanceTokenIn || isInsufficientAllowanceTokenOut
+        console.log({allowIn: tokenInApproval?.allowance, allowOut: tokenOutApproval?.allowance})
         return (
             <Row>
-                <PrimaryButton
-                    onClick={() => { console.log('coming soon') }}
-                    name={'Coming Soon'}
-                />
-                {/* {isNotConnected ? (
+                {isNotConnected ? (
                     <PrimaryButton
                         // onClick={() => setIsConnected(!isConnected)}
                         name="Connect Wallet"
@@ -145,22 +170,36 @@ const Swap = () => {
                 ) : isUndefinedAmount ? (
                     <LabelButton name="Enter an amount" />
                 ) 
-                // : isInsufficientBalance ? (
-                //     <LabelButton name="Insufficient Balance" />
-                // ) : isInsufficientAllowance ? (
-                //     <PrimaryButton 
-                //         name={`Approve ${tokenIn?.symbol}`}
-                //         onClick={handleOnApprove}
-                //     />
-                // ) : isInffuficientLiquidity ? (
-                //     <LabelButton name="Insufficient Liquidity" />
-                // )
+                : isInsufficientBalance ? (
+                    <LabelButton name="Insufficient Balance" />
+                ) : isInsufficientAllowance ? (
+                    <ButtonGroup>
+                        {
+                            isInsufficientAllowanceTokenIn && (
+                                <PrimaryButton 
+                                    name={`Approve ${tokenIn?.symbol}`}
+                                    onClick={() => handleOnApprove(tokenInApproval.approve, inputAmount, tokenIn?.decimals)}
+                                />
+                            )
+                        }
+                        {
+                            isInsufficientAllowanceTokenOut && (
+                                <PrimaryButton 
+                                    name={`Approve ${tokenOut?.symbol}`}
+                                    onClick={() => handleOnApprove(tokenOutApproval.approve, outputAmount, tokenOut?.decimals)}
+                                />
+                            )
+                        }
+                    </ButtonGroup>
+                ) : isInffuficientLiquidity ? (
+                    <LabelButton name="Insufficient Liquidity" />
+                )
                  : (
                     <PrimaryButton
                         onClick={() => handleOnAddLiquidity()}
-                        name={'Swap'}
+                        name={'Add liquidty'}
                     />
-                )} */}
+                )}
             </Row>
         )
     }
@@ -168,12 +207,11 @@ const Swap = () => {
     return (
         <SwapContainer>
             <Row jus="space-between">
-                <Row gap="20px">
+                <Nav gap="20px">
                     <Link to="/swap">Swap</Link>
-                    <Link to="/add">Add</Link>
-                    {/* <Link to="/pools">Pool</Link> */}
+                    <Link to="/add" className="active-link">Add</Link>
                     <Link to="/limit">Limit</Link>
-                </Row>
+                </Nav>
                 <Setting />
             </Row>
             <Bridge />
@@ -215,8 +253,24 @@ const SwapContainer = styled(Columns)`
         rgba(0, 28, 44, 0.3)
     );
     gap: 15px;
-    @media screen and (max-width: 767px) {
-        margin: 0 20px;
+    @media(max-width: 500px) {
+        width: 90%;
+    }
+`
+
+const Nav = styled(Row)`
+
+    a {
+        padding: 5px 8px;
+        border-radius: 4px;
+        text-decoration: none!important;
+        :hover {
+            text-decoration: none!important;
+        }
+    }
+
+    .active-link {
+        background: var(--bg6);
     }
 `
 
@@ -237,6 +291,11 @@ const Icon = styled.div`
     img {
         width: 20px;
     }
+`
+
+const ButtonGroup = styled(Row)`
+    width: 100%;
+    gap: 5px;
 `
 
 export default Swap

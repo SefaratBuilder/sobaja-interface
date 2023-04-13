@@ -10,7 +10,7 @@ const LabelButton = ({ height, name, type = '' }: any) => {
 
 export default LabelButton
 
-const Button = styled.button<{ height: any }>`
+const Button = styled.button<{ height?: any }>`
     display: flex;
     align-items: center;
     justify-content: center;
