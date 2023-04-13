@@ -1,13 +1,5 @@
 [
     {
-        "address": "0x0000000000000000000000000000000000000000",
-        "symbol": "ETH",
-        "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/eth.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "Ethereum",
-        "chainId": 324
-    },
-    {
         "address": "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
         "symbol": "USDC",
         "decimals": 18,
@@ -40,14 +32,6 @@
         "chainId": 324
     },
     {
-        "address": "0x0000000000000000000000000000000000000000",
-        "symbol": "ETH",
-        "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/eth.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "Ethereum",
-        "chainId": 280
-    },
-    {
         "address": "0x0faF6df7054946141266420b43783387A78d82A9",
         "symbol": "USDC",
         "decimals": 18,
@@ -56,11 +40,19 @@
         "chainId": 280
     },
     {
-        "address": "0x3e7676937A7E96CFB7616f255b9AD9FF47363D4b",
+        "address": "0x7f17E2e9FCc20308108B594FE68e20055D7CD8d3",
         "symbol": "DAI",
         "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/dai.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/usdc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
         "name": "DAI",
+        "chainId": 280
+    },
+    {
+        "address": "0x355d88ef9CCB06078a10cF7111091cAe7756c210",
+        "symbol": "SP",
+        "decimals": 18,
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/usdc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "name": "Spece",
         "chainId": 280
     },
     {
@@ -78,5 +70,37 @@
         "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
         "name": "ChainLink Token",
         "chainId": 280
+    },
+    {
+        "address": "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa",
+        "symbol": "WETH",
+        "decimals": 18,
+        "logoURI": "https://raw.githubusercontent.com/forbitspace/icons/main/token/eth.jpg",
+        "name": "Wrapped Ethereum",
+        "chainId": 80001
+    },
+    {
+        "address": "0x116BDAC75BB21edc50ea54baa6feb33A022a6abc",
+        "symbol": "SP",
+        "decimals": 18,
+        "logoURI": "",
+        "name": "DAI",
+        "chainId": 324
+    },
+    {
+        "address": "0x2958c4F56fc4d40ad99E06759b548e02cA2c5ab7",
+        "symbol": "SBJ",
+        "decimals": 18,
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "name": "Sobaja token",
+        "chainId": 80001
+    },
+    {
+        "address": "0x116BDAC75BB21edc50ea54baa6feb33A022a6abc",
+        "symbol": "SP",
+        "decimals": 18,
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "name": "Space",
+        "chainId": 80001
     }
 ]

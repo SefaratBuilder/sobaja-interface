@@ -8,6 +8,7 @@ interface PrimaryButtonProps {
     onClick?: any
     disabled?: boolean
     type?: string
+    color?: string
 }
 
 const PrimaryButton = ({
@@ -17,6 +18,7 @@ const PrimaryButton = ({
     onClick,
     disabled,
     type,
+    color,
 }: PrimaryButtonProps) => {
     return (
         <Button
@@ -24,6 +26,7 @@ const PrimaryButton = ({
             onClick={() => onClick()}
             disabled={disabled}
             className={type}
+            color={color}
         >
             {img && <img src={img} alt="button image" />} <span>{name}</span>
         </Button>
@@ -32,7 +35,7 @@ const PrimaryButton = ({
 
 export default PrimaryButton
 
-export const Button = styled.button<{ height: any }>`
+export const Button = styled.button<{ height?: any; color?: any }>`
     display: flex;
     align-items: center;
     justify-content: center;
@@ -41,7 +44,10 @@ export const Button = styled.button<{ height: any }>`
     border-radius: 8px;
     border: 1px solid var(--border2);
     outline: none;
-    background: var(--btn1);
+    background: ${({ color }) =>
+        color
+            ? color
+            : 'linear-gradient(87.2deg, #00B2FF 2.69%, #003655 98.02%);'};
     font-size: 1rem;
     font-style: italic;
     font-weight: 300;

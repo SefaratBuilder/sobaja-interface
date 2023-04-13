@@ -4,7 +4,7 @@ import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import imgClose from 'assets/icons/icon-close.svg'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
-import { injected, binance } from 'components/Connectors/index'
+import { injected, binance } from 'connectors/index'
 import AccountDetails from 'components/AccountDetails'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import Loader from 'components/Loader'
@@ -261,6 +261,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             </Container>
         )
     }
+
     return <>{getModalContent()}</>
 }
 
@@ -285,7 +286,7 @@ const StyledLoader = styled(Loader)`
 const WrapContentPending = styled.div`
     width: 70%;
     border-radius: 20px;
-    background: linear-gradient(180deg, #002033 0%, rgba(0, 38, 60, 0.8) 100%);
+    background: var(--bg5);
     border: 1px solid #003b5c;
     opacity: 1;
 `
@@ -302,10 +303,10 @@ const ContainerPending = styled.div`
 
 const Container = styled.div<{ isConnected: boolean }>`
     position: fixed;
-    background: linear-gradient(180deg, #002033 0%, rgba(0, 38, 60, 0.8) 100%);
     transition: all 10s ease-in-out 10s;
+    background: var(--bg5);
     opacity: 0.6;
-    border-radius: 20px;
+    border-radius: 12px;
     border: 1px solid #003b5c;
     /* backdrop-filter: blur(40px); */
     box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
@@ -313,7 +314,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     max-width: 500px;
     width: 100%;
     left: 0;
-    top: 50%;
+    top: 49%;
     right: 0;
     transform: translateY(-50%);
     margin: auto;
@@ -327,7 +328,7 @@ const Container = styled.div<{ isConnected: boolean }>`
         max-width: 410px;
     }
     @media screen and (max-width: 390px) {
-        max-width: 365px;
+        max-width: 335px;
     }
 `
 

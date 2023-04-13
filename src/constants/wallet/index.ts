@@ -4,13 +4,10 @@ import COINBASE_ICON_URL from "assets/icons/coinbase.svg";
 import BINANCECONNECT_ICON_URL from "assets/icons/binance.svg";
 import WALLETCONNECT_ICON_URL from "assets/icons/wallet-connect.svg"
 import { InjectedConnector } from '@web3-react/injected-connector'
-import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/chains'
 import {
     injected, CoinbaseWallet, walletconnect,
     binance
-} from 'components/Connectors'
-
-
+} from 'connectors'
 interface WalletInfo {
     connector?: AbstractConnector
     name: string

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react'
 import styled from 'styled-components'
-import { useActiveWeb3React } from 'hooks/web3'
+import { useActiveWeb3React } from 'hooks'
 import { shortenAddress } from 'utils'
 import { NavLink } from 'react-router-dom'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
@@ -10,6 +10,8 @@ import imgCopy from 'assets/icons/copy.svg'
 import imgDownArrow from 'assets/icons/arrow-down.svg'
 import imgPlusWallet from 'assets/icons/plus-wallet.svg'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
+import { useETHBalances } from 'hooks/useCurrencyBalance'
+
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
     openOptions: React.Dispatch<React.SetStateAction<void>>
@@ -18,9 +20,11 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account } = useActiveWeb3React()
+    const { account, library, chainId } = useActiveWeb3React()
     const ref = useRef<any>(false)
     const [isCopied, setIsCopied] = useState<boolean>(false)
+    const balance = account && useETHBalances([account])?.[account]
+
     useOnClickOutside(ref, () => {
         setToggleWalletModal(false)
     })
@@ -71,7 +75,10 @@ const AccountDetails = ({
             </Header>
             <WrapContent>
                 <NameBalance>ETH Balance</NameBalance>
-                <Name>ETH</Name>
+                <Balance className={'to'}>
+                    {balance ? balance.toString() : 0}
+                </Balance>
+                <Balance>ETH</Balance>
                 <WrapButton>
                     <NavLink to="">
                         <PrimaryButton
@@ -183,9 +190,9 @@ const NameBalance = styled.div`
     color: #d9d9d9;
     text-align: center;
 `
-const Name = styled.div`
+const Balance = styled.div`
     font-weight: 600;
-    font-size: 36px;
+    font-size: 32px;
     line-height: 44px;
     text-align: center;
 `
@@ -505,13 +512,13 @@ const RowTransaction = styled.div`
 const WrapConnectModal = styled(Container)`
     max-width: 350px;
     left: unset;
-    right: 10px;
-    top: 67px;
+    right: 20px;
+    top: 76px;
     transform: unset;
     margin: unset;
     overflow: unset;
     @media screen and (max-width: 1200px) {
-        right: 70px;
+        right: 58px;
     }
     @media screen and (max-width: 576px) {
         left: 50%;

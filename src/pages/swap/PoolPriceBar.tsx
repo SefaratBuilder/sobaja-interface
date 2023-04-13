@@ -154,10 +154,13 @@ const WrapExpectedOutput = styled.div<{ dropDown: boolean }>`
     transition: all 0.1s ease-in-out;
     overflow: hidden;
     height: 0;
-    margin-top: 10px;
+    margin: 10px 0;
 
     &.active {
-        height: 115px;
+        height: 116px;
+        @media(max-width: 576px) {
+            height: 130px;
+        }
     }
 `
 

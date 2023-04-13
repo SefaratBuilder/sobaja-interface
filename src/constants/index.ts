@@ -11,14 +11,20 @@ export const NATIVE_COIN: Token = {
     decimals: 18,
 }
 
-export const CommonBaseTokens: Token[] = [
-    NATIVE_COIN,
-    NATIVE_COIN,
-    NATIVE_COIN,
-    NATIVE_COIN,
-    NATIVE_COIN,
-    NATIVE_COIN,
-    NATIVE_COIN,
-]
+export const CommonBaseTokens: Token[] = [NATIVE_COIN, ...tokenList.slice(0, 5)]
 
 export const DEFAULT_TOKEN_LIST: TokenList = [NATIVE_COIN, ...tokenList]
+
+export enum ChainId {
+    ZKMAINNET = 324,
+    ZKTESTNET = 280,
+    GOERLI = 5,
+    MUMBAI = 80001,
+}
+
+export const ALL_SUPPORTED_CHAIN_IDS: ChainId[] = [
+    ChainId.ZKMAINNET,
+    ChainId.ZKTESTNET,
+    ChainId.GOERLI,
+    ChainId.MUMBAI,
+]
