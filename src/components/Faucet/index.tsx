@@ -8,6 +8,8 @@ import { useFaucetContract } from 'hooks/useContract'
 import usdt from 'assets/icons/usdt.jpeg'
 import { OpacityModal } from 'components/Web3Status'
 import { useActiveWeb3React } from 'hooks'
+import { Error } from 'components/Text'
+import { Row } from 'components/Layouts'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
@@ -71,7 +73,16 @@ const Faucet = () => {
                                     nullify the reality of Mainnet.
                                 </TextCoin>
                             </ContentFaucet>
-                            <CoinButton>{showMintCoins()}</CoinButton>
+                            <CoinButton>
+                                {showMintCoins()}
+                                {
+                                chainId === 280 && (
+                                    <Row>
+                                        <Error fontSize='14px'>Wrong network! Please switch to ZkSync Goerli network to faucet tokens.</Error>
+                                    </Row>
+                                )
+                                }
+                            </CoinButton>
                         </BodyModalFaucet>
                     </ContainerFaucetModal>
                 </FaucetModalDiv>
@@ -159,8 +170,13 @@ const FaucetModalDiv = styled.div<{ isDislayFaucet: boolean }>`
     top: 0;
     left: 0;
     right: 0;
+    bottom: 0;
+    margin: auto;
     z-index: ${({ isDislayFaucet }) => (isDislayFaucet ? 3 : -1)};
     display: flex;    
+    @media(max-width: 576px) {
+        width: 90%;
+    }
 `
 const ContainerFaucetModal = styled.div<{ isDislayFaucet: boolean }>`
     border: 1px solid #003b5c;

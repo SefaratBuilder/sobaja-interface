@@ -27,7 +27,7 @@ const NavigatorWrapper = styled.div`
     align-items: center;
     gap: 20px;
 
-    @media screen and (max-width: 992px) {
+    @media screen and (max-width: 1100px) {
         display: none;
         /* position: absolute;
         flex-direction: column;

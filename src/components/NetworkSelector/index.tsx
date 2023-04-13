@@ -112,10 +112,6 @@ const NetworkSelectorWrapper = styled.div`
     position: relative;
     display: flex;
     justify-content: flex-end;
-
-    @media screen and (max-width: 576px) {
-        display: none;
-    }
 `
 
 const NetworkButton = styled.div`
@@ -124,9 +120,9 @@ const NetworkButton = styled.div`
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    background: linear-gradient(90deg, #002033 0%, rgba(0, 38, 60, 0.39) 100%);
+    background: var(--bg2);
     z-index: 1;
-    padding: 3px;
+    padding: 0 10px;
     border: 1px solid #003b5c;
     border-radius: 6px;
     cursor: pointer;
