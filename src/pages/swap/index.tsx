@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
-import Transaction from 'components/Setting'
 import Bridge from 'components/Bridge'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
 import { Field, Token } from 'interfaces'
@@ -13,21 +12,23 @@ import LabelButton from 'components/Buttons/LabelButton'
 import SwapIcon from 'assets/icons/swap-icon.svg'
 import { useActiveWeb3React } from 'hooks'
 import { usePair, usePairAddressesByIds } from 'hooks/useAllPairs'
-import HeaderLiquidity from 'components/HeaderLiquidity'
+import Setting from 'components/HeaderLiquidity'
 import { useToken, useTokenApproval } from 'hooks/useToken'
 import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
 import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/index'
-import { ROUTERS } from 'constants/addresses'
+import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
 import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
 import { useRouterContract } from 'hooks/useContract'
+import { calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
+import { useTransactionDeadline } from 'states/application/hooks'
 
 const Swap = () => {
 
     const swapState = useSwapState()
-    const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
+    const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(false)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
@@ -38,7 +39,7 @@ const Swap = () => {
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
     const balanceIn = useCurrencyBalance(account, tokenIn)
     const routerContract = useRouterContract()
-    // console.log({pair})
+    const { deadline } = useTransactionDeadline()
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -54,42 +55,111 @@ const Swap = () => {
         [onTokenSelection, swapState],
     )
 
-
-    const handleOnSwapExactTokensForTokens = async () => {
-        try {
-            if(inputAmount && tokenIn && tokenOut && outputAmount){
-                await routerContract?.swapExactTokensForTokens(
-                    mulNumberWithDecimal(inputAmount,tokenIn?.decimals),
-                    mulNumberWithDecimal(Number(outputAmount) * 0.999, tokenOut?.decimals),
-                    [tokenIn.address,tokenOut.address],
-                    account,
-                    (new Date().getTime()/1000 + 1000).toFixed(0)
-                )                
-                console.log('Successfully swapped');
-                
-            }
-
-        } catch (error) {
-            console.log(error);
-            
+    const getSwapMethod = () => {
+        if(swapType === Field.INPUT) {
+            if(isNativeCoin(tokenIn))
+                return 'swapExactETHForTokens'
+            else if(isNativeCoin(tokenOut))
+                return 'swapExactTokensForETH'
+            else 
+                return 'swapExactTokensForTokens'
+        } else {
+            if(isNativeCoin(tokenOut))
+                return 'swapTokensForExactETH'
+            else if(isNativeCoin(tokenIn))
+                return 'swapETHForExactTokens'
+            else    
+                return 'swapTokensForExactTokens'
         }
     }
 
-    const handleOnSwapTokensForExactTokens = async () =>{
-        try {
-            if(inputAmount && tokenIn && tokenOut && outputAmount){
-                await routerContract?.swapTokensForExactTokens(
-                    mulNumberWithDecimal(outputAmount,  tokenOut.decimals),
-                    mulNumberWithDecimal(Number(inputAmount) * 1 / 0.999, tokenIn.decimals),
-                    [tokenIn.address,tokenOut.address],
-                    account,
-                    (new Date().getTime()/1000 + 1000).toFixed(0)
-                )         
+    const getSwapArguments = () => {
+        if(!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId) return 
+        if(swapType === Field.INPUT) {
+            if(isNativeCoin(tokenIn))
+                return {
+                    args: [
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
+                        account,
+                        calcTransactionDeadline(deadline)
+                    ],
+                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals) //amountIn
+                }
+            else if(isNativeCoin(tokenOut))
+                return {
+                    args: [
+                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
+                        account,
+                        calcTransactionDeadline(deadline)
+                    ],
+                    value: '0x00'
+                }
+            else
+                return {
+                    args: [
+                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        [tokenIn.address, tokenOut.address],
+                        account,
+                        calcTransactionDeadline(deadline)
+                    ],
+                    value: '0x00'
+                }
+        } else {
+            if(isNativeCoin(tokenOut))
+                return {
+                    args: [
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
+                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
+                        [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
+                        account,
+                        calcTransactionDeadline(deadline)
+                    ],
+                    value: '0x00'
+                }
+            else if(isNativeCoin(tokenIn))
+                return {
+                    args: [
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
+                        [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
+                        account,
+                        calcTransactionDeadline(deadline)
+                    ],
+                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals) //amountInMax
+                }
+            else
+                return {
+                    args: [
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
+                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
+                        [tokenIn.address, tokenOut.address],
+                        account,
+                        calcTransactionDeadline(deadline)
+                    ],
+                    value: '0x00'
+                }
+        }
+    }
 
+    const handleOnSwap = async () => {
+        try {
+            if(inputAmount && outputAmount && tokenIn && tokenOut) {
+                const method = getSwapMethod()
+                const swapArguments = getSwapArguments()
+                if(!swapArguments) return
+                const { args, value } = swapArguments
+                const gasLimit = await routerContract?.estimateGas[method](...args, { value })
+                const callResult = await routerContract?.[method](...args, { value, gasLimit: computeGasLimit(gasLimit)})
+                const txn = await callResult.wait()
+                if(txn.status === 1) {
+                    console.log('Swap successfully...')
+                }
             }
-        } catch (error) {
-            console.log(error);
-            
+        } catch(error) {
+            console.log('failed to swap', error)
         }
     }
 
@@ -99,7 +169,7 @@ const Swap = () => {
                 await tokenApproval?.approve(
                     routerAddress,
                     mulNumberWithDecimal(inputAmount, tokenIn.decimals)
-                )
+                )                
             }
         } catch (err) {
             console.log('Failed to approve token: ', err)
@@ -114,41 +184,35 @@ const Swap = () => {
         if(inputAmount && pair && tokenIn && tokenOut && swapType === Field.INPUT){
             const amountInWithDel = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
             const swapRate = pair?.calcSwapRate((amountInWithDel),tokenIn,tokenOut, Field.INPUT)
-            // console.log({swapRate});
-            // handleOnUserInput(Field.OUTPUT, swapRate)
             onChangeSwapState({
                 ...swapState,
                 outputAmount: swapRate
             })
-        }
-    },[inputAmount, pair])
+        } 
+    },[inputAmount, tokenIn, tokenOut])
 
     useEffect(()=>{
-        if(outputAmount &&pair && tokenIn && tokenOut && swapType === Field.OUTPUT){
+        if(outputAmount && pair && tokenIn && tokenOut && swapType === Field.OUTPUT){
             const amountOutWithDel = mulNumberWithDecimal(outputAmount, tokenOut.decimals)
             const swapRate = pair?.calcSwapRate((amountOutWithDel), tokenIn, tokenOut, Field.OUTPUT)
-            //console.log({swapRate});
             onChangeSwapState({
                 ...swapState,
                 inputAmount: swapRate
             }) 
         }
-    },[outputAmount, pair])
-
-    const [setting, setSetting] = useState(false)
+    },[outputAmount, tokenIn, tokenOut])
 
     const SwapButton = () => {
         const isNotConnected = !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
-        const isUndefinedAmount = !inputAmount || !outputAmount
-        const isInffuficientLiquidity = !pair
+        const isUndefinedAmount = !inputAmount && !outputAmount
+        const isInffuficientLiquidity = !pair || Number(inputAmount) < 0
         const isUndefinedCurrencies = !tokenIn || !tokenOut
         const isInsufficientBalance =
             inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
-            // console.log('alowwww>>>>>', tokenApproval?.allowance)
         const isInsufficientAllowance =
-            Number(tokenApproval?.allowance) < Number(inputAmount)
+            Number(tokenApproval?.allowance) < Number(inputAmount) && !isNativeCoin(tokenIn)
 
         return (
             <Row>
@@ -165,16 +229,16 @@ const Swap = () => {
                     <LabelButton name="Enter an amount" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
+                ) : isInffuficientLiquidity ? (
+                    <LabelButton name="Insufficient Liquidity" />
                 ) : isInsufficientAllowance ? (
                     <PrimaryButton
                         name={`Approve ${tokenIn?.symbol}`}
                         onClick={handleOnApprove}
                     />
-                ) : isInffuficientLiquidity ? (
-                    <LabelButton name="Insufficient Liquidity" />
                 ) : (
                     <PrimaryButton
-                        onClick={() => swapType === Field.INPUT ? handleOnSwapExactTokensForTokens() : handleOnSwapTokensForExactTokens()}
+                        onClick={() => handleOnSwap()}
                         name={'Swap'}
                     />
                 )}
@@ -188,15 +252,15 @@ const Swap = () => {
                 <WalletModal setToggleWalletModal={openWalletModal} />
             )}
             <Row jus="space-between">
-                <Row gap="20px">
-                    <Link to="/swap">Swap</Link>
+                <Nav gap="20px">
+                    <Link to="/swap" className='active-link'>Swap</Link>
                     <Link to="/add">Add</Link>
-                    <Link to="/pools">Pool</Link>
-                </Row>
-                {/* <Transaction /> */}
-                <HeaderLiquidity name="Swap" />
+                    {/* <Link to="/pools">Pool</Link> */}
+                    <Link to="/limit">Limit</Link>
+                </Nav>
+                <Setting />
             </Row>
-            {/* <Bridge /> */}
+            <Bridge />
             <Columns>
                 <CurrencyInputPanel
                     token={tokenIn}
@@ -226,12 +290,7 @@ const Swap = () => {
 }
 
 const SwapContainer = styled(Columns)`
-    position: absolute;
-    top: 100px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: 0 auto;
+    margin: 40px auto;
     height: fit-content;
     max-width: 480px;
     background: var(--bg5)!important;
@@ -244,8 +303,23 @@ const SwapContainer = styled(Columns)`
         rgba(0, 28, 44, 0.3)
     );
     gap: 15px;
-    @media screen and (max-width: 767px) {
-        margin: 0 20px;
+    @media(max-width: 500px) {
+        width: 90%;
+    }
+`
+
+const Nav = styled(Row)`
+    a {
+        padding: 5px 8px;
+        border-radius: 4px;
+        text-decoration: none!important;
+        :hover {
+            text-decoration: none!important;
+        }
+    }
+
+    .active-link {
+        background: var(--bg6);
     }
 `
 

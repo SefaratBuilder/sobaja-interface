@@ -4,9 +4,11 @@ import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import imgClose from 'assets/icons/icon-close.svg'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
-import { injected } from 'connectors/index'
+import { injected, binance } from 'connectors/index'
 import AccountDetails from 'components/AccountDetails'
 import { AbstractConnector } from '@web3-react/abstract-connector'
+import Loader from 'components/Loader'
+import PrimaryButton from 'components/Buttons/PrimaryButton'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -29,15 +31,18 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
     const [pendingWallet, setPendingWallet] = useState<
         AbstractConnector | undefined
     >()
+    const [pendingNameWallet, setPendingNameWallet] = useState<
+        string | undefined
+    >()
     const toggleAgreement = () => {
         setIsAgreePolicy(!isAgreePolicy)
     }
 
-    // useEffect(() => {
-    //     if (connector) {
-    //         setToggleWalletModal(false)
-    //     }
-    // }, [connector])
+    useEffect(() => {
+        if (account && walletView == WALLET_VIEWS.PENDING) {
+            setToggleWalletModal(false)
+        }
+    }, [account])
 
     const tryActivation = async (connector: AbstractConnector | undefined) => {
         let name = ''
@@ -47,12 +52,12 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             }
             return true
         })
-        setWalletView(WALLET_VIEWS.PENDING)
         setPendingWallet(connector)
+        setWalletView(WALLET_VIEWS.PENDING)
         connector &&
             activate(connector, undefined, true).catch((error) => {
                 if (error instanceof UnsupportedChainIdError) {
-                    activate(connector) // a little janky...can't use setError because the connector isn't set
+                    activate(connector)
                 } else {
                     setPendingError(true)
                 }
@@ -69,18 +74,19 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     if (option.name === 'MetaMask') {
                         return (
                             <Item
-                                isChecked={true}
-                                // id={`connect-${key}`}
-                                key={key}
-                                // color={'#E8831D'}
-
-                                // header={<Trans>Install Metamask</Trans>}
-                                // subheader={null}
-                                // link={'https://metamask.io/'}
-                                // icon={MetamaskIcon}
+                                isChecked={isAgreePolicy}
+                                key={key + option.name}
                             >
-                                {' '}
-                                Install Metamask
+                                <ItemContent
+                                    onClick={() =>
+                                        option.href &&
+                                        option.href !== null &&
+                                        window.open(option.href)
+                                    }
+                                >
+                                    <img src={option.iconURL}></img>
+                                    <span>Install Metamask</span>
+                                </ItemContent>
                             </Item>
                         )
                     } else {
@@ -92,13 +98,42 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     return null
                 }
             }
+            if (option.connector == binance) {
+                //don't show injected if there's no injected provider
+                if (!window.BinanceChain) {
+                    if (option.name === 'Binance Chain Wallet') {
+                        return (
+                            <Item
+                                isChecked={isAgreePolicy}
+                                key={key + option.name}
+                            >
+                                <ItemContent
+                                    onClick={() =>
+                                        option.href &&
+                                        option.href !== null &&
+                                        window.open(option.href)
+                                    }
+                                >
+                                    <img src={option.iconURL}></img>
+                                    <span>Install Binance</span>
+                                </ItemContent>
+                            </Item>
+                        )
+                    } else {
+                        return null //dont want to return install twice
+                    }
+                }
+            }
             return (
-                <Item isChecked={isAgreePolicy}>
+                <Item isChecked={isAgreePolicy} key={key + option.name}>
                     <ItemContent
                         onClick={() => {
                             if (!isAgreePolicy) return
-                            if (option.connector) {
+                            if (option.connector != connector) {
+                                setPendingNameWallet(option.name)
                                 tryActivation(option.connector)
+                            } else {
+                                setWalletView(WALLET_VIEWS.ACCOUNT)
                             }
                         }}
                     >
@@ -115,10 +150,9 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             return (
                 <AccountDetails
                     setToggleWalletModal={setToggleWalletModal}
-                    // pendingTransactions={pendingTransactions}
-                    // confirmedTransactions={confirmedTransactions}
-                    // ENSName={ENSName}
-                    openOptions={() => setWalletView(WALLET_VIEWS.OPTIONS)}
+                    openOptions={() => {
+                        setWalletView(WALLET_VIEWS.OPTIONS)
+                    }}
                 />
             )
         }
@@ -140,19 +174,11 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                         <div>
                             By connecting a wallet, you agree to&nbsp;
                             <b>SobajaSwap</b>&nbsp;
-                            <a
-                                href="https://forbitswap.com/terms-of-service.pdf"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
+                            <a href="#" target="_blank" rel="noreferrer">
                                 Terms of Service
                             </a>
                             &nbsp;and&nbsp;
-                            <a
-                                href="https://forbitswap.com/privacy-policy.pdf"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
+                            <a href="#" target="_blank" rel="noreferrer">
                                 Privacy Policy.
                             </a>
                         </div>
@@ -179,7 +205,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     <ContainerPending>
                         <WrapContentPending>
                             <Header>
-                                <span>Connect a wallet</span>
+                                <span>Connect a {pendingNameWallet}</span>
                                 <div>
                                     {' '}
                                     <BtnClose
@@ -192,59 +218,38 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                                 </div>
                             </Header>
                             <WrapContent>
-                                <Title>
-                                    <div>
-                                        By connecting a wallet, you agree
-                                        to&nbsp;
-                                        <b>SobajaSwap</b>&nbsp;
-                                        <a
-                                            href="https://forbitswap.com/terms-of-service.pdf"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            Terms of Service
-                                        </a>
-                                        &nbsp;and&nbsp;
-                                        <a
-                                            href="https://forbitswap.com/privacy-policy.pdf"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            Privacy Policy.
-                                        </a>
-                                    </div>
-                                    <div>
-                                        <input
-                                            type="checkbox"
-                                            onChange={toggleAgreement}
-                                            checked={isAgreePolicy}
-                                        />
-                                        <span>
-                                            I agree to Terms of Service and
-                                            Privacy Policy.
-                                        </span>
-                                    </div>
-                                </Title>
                                 <WrapItem
                                     className={`${
                                         isAgreePolicy ? 'active' : ''
                                     }`}
                                 >
                                     {pendingError ? (
-                                        <div>
-                                            <span>Error connecting.</span>
-                                            <span
-                                                onClick={() =>
-                                                    tryActivation(pendingWallet)
-                                                }
-                                            >
-                                                Try Again
+                                        <LoadingWrapper
+                                            borderError={pendingError}
+                                        >
+                                            <span style={{ color: 'red' }}>
+                                                Error connecting.
                                             </span>
-                                        </div>
+                                            <span>
+                                                <PrimaryButton
+                                                    type="configbtn"
+                                                    height="25px"
+                                                    onClick={() =>
+                                                        tryActivation(
+                                                            pendingWallet,
+                                                        )
+                                                    }
+                                                    name="Try again"
+                                                />
+                                            </span>
+                                        </LoadingWrapper>
                                     ) : (
-                                        <div>
-                                            <p>inittial</p>
-                                        </div>
+                                        <LoadingWrapper
+                                            borderError={pendingError}
+                                        >
+                                            <StyledLoader />
+                                            <p>Initializing...</p>
+                                        </LoadingWrapper>
                                     )}
                                 </WrapItem>
                             </WrapContent>
@@ -260,10 +265,28 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
     return <>{getModalContent()}</>
 }
 
+const LoadingWrapper = styled.div<{ borderError: boolean }>`
+    gap: 2px;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    display: flex;
+    /* border: ${({ borderError }) =>
+        borderError ? '1px solid red' : '1px solid #ffffff'}; */
+
+    border-radius: 8px;
+    padding: 4px 0px;
+    .configbtn {
+        padding: 0px 5px;
+    }
+`
+const StyledLoader = styled(Loader)`
+    margin-right: 1rem;
+`
 const WrapContentPending = styled.div`
-    width: 60%;
+    width: 70%;
     border-radius: 20px;
-    background: linear-gradient(180deg, #002033 0%, rgba(0, 38, 60, 0.8) 100%);
+    background: var(--bg5);
     border: 1px solid #003b5c;
     opacity: 1;
 `
@@ -278,95 +301,9 @@ const ContainerPending = styled.div`
     align-items: center;
 `
 
-const WrapModalTransaction = styled.div<{ showTrans: boolean }>`
-    overflow: hidden scroll;
-    transition: all 0.3s linear;
-    height: ${({ showTrans }) => (showTrans ? '115px' : '0')};
-    p {
-        text-align: center;
-    }
-`
-const WrapItemFooter = styled.div`
-    padding: 0.45rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    &.fade {
-        cursor: no-drop;
-        opacity: 0.7;
-    }
-    img {
-        height: 12px;
-        width: 12px;
-    }
-    :last-child {
-        margin-bottom: 0.4rem;
-    }
-`
-const WrapFooterImg = styled.div`
-    display: flex;
-    gap: 5px;
-    align-items: center;
-`
-const NameBalance = styled.div`
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 20px;
-    color: #d9d9d9;
-    text-align: center;
-`
-const Name = styled.div`
-    font-weight: 600;
-    font-size: 36px;
-    line-height: 44px;
-    text-align: center;
-`
-const CopyBtn = styled.div`
-    position: relative;
-    :hover .tooltip {
-        transition: all 0.1s ease-in-out;
-        opacity: 1;
-        visibility: visible;
-    }
-`
-const Tooltip = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    visibility: hidden;
-    position: absolute;
-    width: 100px;
-    height: 30px;
-    font-size: 12px;
-    right: -45px;
-    text-align: center;
-    border: 1px solid;
-    border-radius: 6px;
-    background: rgba(157, 195, 230, 0.1);
-    backdrop-filter: blur(3px);
-`
-const WrapBtnHeader = styled.div`
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    img {
-        height: 17px;
-        width: 17px;
-    }
-    button {
-        background: none;
-        border: none;
-    }
-`
-const WrapFooterBtn = styled.div`
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-`
 const Container = styled.div<{ isConnected: boolean }>`
     position: fixed;
+    transition: all 10s ease-in-out 10s;
     background: var(--bg5);
     opacity: 0.6;
     border-radius: 12px;
@@ -389,26 +326,21 @@ const Container = styled.div<{ isConnected: boolean }>`
 
     @media screen and (max-width: 576px) {
         max-width: 410px;
+        width: 90%;
     }
     @media screen and (max-width: 390px) {
         max-width: 335px;
+        width: 90%;
     }
 `
-const WrapBlur = styled.div`
-    div {
-        opacity: 0;
-        z-index: -1;
-    }
-    &.active {
-        div {
-            opacity: 1;
-            z-index: 2;
-        }
-    }
-`
+
 const BtnClose = styled.img`
     height: 20px;
     cursor: pointer;
+
+    :hover {
+        background: #003b5c;
+    }
 `
 
 const Header = styled.div`
@@ -482,7 +414,7 @@ const WrapItem = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-evenly;
-    flex-wrap: wrap-reverse;
+    flex-wrap: wrap;
     padding: 2rem 0;
     cursor: pointer;
     opacity: 0.3;
@@ -510,7 +442,7 @@ const Item = styled.div<{ isChecked: boolean }>`
     transition: all ease-in-out 0.1s;
 
     :hover {
-        background: ${({ isChecked, theme }) => (isChecked ? theme.hv0 : '')};
+        background: rgba(146, 129, 129, 0.13);
     }
     @media screen and (max-width: 576px) {
         width: 45%;
@@ -564,90 +496,6 @@ const Footer = styled.div`
     }
     @media screen and (max-width: 390px) {
         padding: 0.7rem 1.5rem;
-    }
-`
-
-const WrapButton = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    cursor: no-drop;
-
-    a {
-        pointer-events: none;
-    }
-
-    @media screen and (max-width: 390px) {
-        gap: 0px;
-        button:first-child {
-            margin-right: 5px;
-        }
-    }
-    a {
-        text-decoration: none;
-        button {
-            gap: 5px;
-            img {
-                height: 25px;
-                width: 25px;
-            }
-        }
-    }
-`
-const WrapAccountInfo = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 5px;
-`
-const ImgAccount = styled.img`
-    height: 20px;
-    border-radius: 50%;
-`
-const IdAccount = styled.div``
-const CopyAccountAddress = styled.img`
-    height: 12px;
-    cursor: pointer;
-`
-
-const RowTransaction = styled.div`
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 1.5rem 0.2rem 1.5rem;
-
-    &:hover {
-        background-color: #9dc3e699;
-        cursor: pointer;
-        border-bottom: 1px solid rgba(157, 195, 230, 0.6);
-    }
-
-    div {
-        text-align: end;
-    }
-
-    @media screen and (max-width: 576px) {
-        width: 100%;
-    }
-`
-
-const WrapConnectModal = styled(Container)`
-    max-width: 350px;
-    left: unset;
-    right: 90px;
-    top: unset;
-    transform: unset;
-    margin: unset;
-    overflow: unset;
-    @media screen and (max-width: 1200px) {
-        right: 70px;
-    }
-    @media screen and (max-width: 576px) {
-        left: 50%;
-        right: unset;
-        top: unset;
-        bottom: unset;
-        transform: translateX(-50%);
     }
 `
 
