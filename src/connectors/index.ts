@@ -1,11 +1,13 @@
 import { Web3Provider } from '@ethersproject/providers'
 import { InjectedConnector } from '@web3-react/injected-connector'
-import { ALL_SUPPORTED_CHAIN_IDS, ChainId } from 'constants/index'
+import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/index'
 import getLibrary from 'utils/getLibrary'
 import { NetworkConnector } from './NetworkConnector'
 import { WalletLinkConnector } from "@web3-react/walletlink-connector";
 import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 import { BscConnector } from '@binance-chain/bsc-connector'
+import { ChainId } from 'interfaces'
+
 const NETWORK_URLS: { [key in ChainId]: string } = {
     [ChainId.ZKMAINNET]: `https://mainnet.era.zksync.io`,
     [ChainId.ZKTESTNET]: `https://zksync2-testnet.zksync.dev`,

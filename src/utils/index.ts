@@ -3,7 +3,8 @@ import { getAddress } from '@ethersproject/address'
 import { AddressZero } from '@ethersproject/constants'
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
 import { BigNumber } from '@ethersproject/bignumber'
-import { ChainId } from 'constants/index'
+import { ChainId, Token } from 'interfaces'
+import { add, divNumberWithDecimal } from './math'
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {
@@ -12,6 +13,18 @@ export function isAddress(value: any): string | false {
     } catch {
         return false
     }
+}
+
+//gas limit + 1000
+export function computeGasLimit(gas: BigNumber | undefined) {
+    if (!gas) return
+    return gas.add(1000)
+}
+
+//is native coin
+export function isNativeCoin(token: Token | undefined) {
+    if (!token) return
+    return token.address === AddressZero
 }
 
 // shorten the checksummed version of the input address to have 0x + 4 characters at start and end
@@ -69,9 +82,8 @@ export function getEtherscanLink(
     data: string,
     type: 'transaction' | 'token' | 'address' | 'block',
 ): string {
-    const prefix = `https://${
-        ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[ChainId.ZKMAINNET]
-    }`
+    const prefix = `https://${ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[ChainId.ZKMAINNET]
+        }`
 
     switch (type) {
         case 'transaction': {
@@ -88,4 +100,10 @@ export function getEtherscanLink(
             return `${prefix}/address/${data}`
         }
     }
+}
+
+
+//current time + deadline second
+export function calcTransactionDeadline(deadline: number) {
+    return (new Date().getTime() / 1000 + deadline).toFixed()
 }

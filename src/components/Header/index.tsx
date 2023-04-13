@@ -5,15 +5,17 @@ import NetworkSelector from 'components/NetworkSelector'
 import Web3Status from 'components/Web3Status'
 import SobajaLogo from 'assets/brand/sobajaswap-logo.svg'
 import { Columns } from 'components/Layouts'
+import { useNavigate } from 'react-router-dom'
 import Faucet from 'components/Faucet'
 import { useActiveWeb3React } from 'hooks'
-
 const Header = () => {
     const [burgerNav, setBurgerNav] = useState(false)
+    const navigate = useNavigate()
     const { account, chainId } = useActiveWeb3React()
+
     return (
         <HeaderWrapper>
-            <Logo>
+            <Logo onClick={() => navigate('/')}>
                 <img className="logo" src={SobajaLogo} alt="sobaja swap logo" />
                 <img
                     className="logo-mobile"
@@ -84,6 +86,7 @@ const WrapperNavigator = styled.div`
 export const Logo = styled.div`
     display: flex;
     width: 280px;
+    cursor: pointer;
 
     img {
         width: 100%;

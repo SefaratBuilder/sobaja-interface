@@ -28,7 +28,7 @@ const initialState: ApplicationState = {
     },
     isAgreePolicy: false,
     slippage: '0.3', //%
-    deadline: 0.5, //ms,
+    deadline: 1200, //default 20m,
     isUpdateApplication: false,
     userDarkMode: false,
     refAddress: undefined,

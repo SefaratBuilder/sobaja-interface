@@ -1,10 +1,9 @@
 import { pack, keccak256 } from '@ethersproject/solidity'
 import { getCreate2Address } from '@ethersproject/address'
 import { FACTORIES, INIT_CODE_HASHES } from 'constants/addresses'
-import { ChainId } from 'constants/index'
 import { Field, Token } from 'interfaces'
-import { FixedNumber } from 'ethers'
 import { mul, div, add, sub, divNumberWithDecimal } from './math'
+import { ChainId } from 'interfaces'
 
 export const isSortedTokens = (tokenA: Token, tokenB: Token): Boolean => {
     const result = tokenA.address.toLowerCase() < tokenB.address.toLowerCase()
@@ -35,6 +34,7 @@ export const calculateAmountIn = (
     reserve_out: string | number,
     fee: string | number,
 ): string => {
+    if (Number(reserve_out) === Number(amountOut)) return '0'
     const numerator = mul(reserve_in, amountOut)
     const denominator = mul(fee, sub(reserve_out, amountOut))
     const amount_in = add(div(numerator, denominator), 1)
@@ -78,7 +78,7 @@ export class Pair {
     reserve0: string | number
     reserve1: string | number
     reserveLp: string | number
-    fee = 0.0025 //25
+    fee = 0.003 //25
 
     constructor(pair: IPair) {
         const isSorted = isSortedTokens(pair.token0, pair.token1)
@@ -107,9 +107,6 @@ export class Pair {
         amount0 = isSortedTokens(token0, token1) ? amount0 : amount1
         amount1 = isSortedTokens(token0, token1) ? amount1 : tempAmount
         if (this.reserve0 && this.reserve1 && this.reserveLp) {
-            // const lpShare0 = amount0.mul(this.reserveLp).div(this.reserve0)
-            // const lpShare1 = amount1.mul(this.reserveLp).div(this.reserve1)
-
             const lpShare0 = div(mul(amount0, this.reserveLp), this.reserve0)
             const lpShare1 = div(mul(amount1, this.reserveLp), this.reserve1)
 

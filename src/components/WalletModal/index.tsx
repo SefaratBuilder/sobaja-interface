@@ -324,9 +324,11 @@ const Container = styled.div<{ isConnected: boolean }>`
 
     @media screen and (max-width: 576px) {
         max-width: 410px;
+        width: 90%;
     }
     @media screen and (max-width: 390px) {
         max-width: 335px;
+        width: 90%;
     }
 `
 
@@ -410,7 +412,7 @@ const WrapItem = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-evenly;
-    flex-wrap: wrap-reverse;
+    flex-wrap: wrap;
     padding: 2rem 0;
     cursor: pointer;
     opacity: 0.3;

@@ -17,11 +17,13 @@ import { useToken, useTokenApproval } from 'hooks/useToken'
 import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
 import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/index'
-import { ROUTERS } from 'constants/addresses'
+import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
 import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
 import { useRouterContract } from 'hooks/useContract'
+import { calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
+import { useTransactionDeadline } from 'states/application/hooks'
 
 const Swap = () => {
 
@@ -37,7 +39,7 @@ const Swap = () => {
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
     const balanceIn = useCurrencyBalance(account, tokenIn)
     const routerContract = useRouterContract()
-    // console.log({pair})
+    const { deadline } = useTransactionDeadline()
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -53,42 +55,112 @@ const Swap = () => {
         [onTokenSelection, swapState],
     )
 
-
-    const handleOnSwapExactTokensForTokens = async () => {
-        try {
-            if(inputAmount && tokenIn && tokenOut && outputAmount){
-                await routerContract?.swapExactTokensForTokens(
-                    mulNumberWithDecimal(inputAmount,tokenIn?.decimals),
-                    mulNumberWithDecimal(Number(outputAmount) * 0.999, tokenOut?.decimals),
-                    [tokenIn.address,tokenOut.address],
-                    account,
-                    (new Date().getTime()/1000 + 1000).toFixed(0)
-                )                
-                console.log('Successfully swapped');
-                
-            }
-
-        } catch (error) {
-            console.log(error);
-            
+    const getSwapMethod = () => {
+        if(swapType === Field.INPUT) {
+            if(isNativeCoin(tokenIn))
+                return 'swapExactETHForTokens'
+            else if(isNativeCoin(tokenOut))
+                return 'swapExactTokensForETH'
+            else 
+                return 'swapExactTokensForTokens'
+        } else {
+            if(isNativeCoin(tokenOut))
+                return 'swapTokensForExactETH'
+            else if(isNativeCoin(tokenIn))
+                return 'swapETHForExactTokens'
+            else    
+                return 'swapTokensForExactTokens'
         }
     }
 
-    const handleOnSwapTokensForExactTokens = async () =>{
-        try {
-            if(inputAmount && tokenIn && tokenOut && outputAmount){
-                await routerContract?.swapTokensForExactTokens(
-                    mulNumberWithDecimal(outputAmount,  tokenOut.decimals),
-                    mulNumberWithDecimal(Number(inputAmount) * 1 / 0.999, tokenIn.decimals),
-                    [tokenIn.address,tokenOut.address],
-                    account,
-                    (new Date().getTime()/1000 + 1000).toFixed(0)
-                )         
+    const getSwapArguments = () => {
+        if(!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId) return 
+        if(swapType === Field.INPUT) {
+            if(isNativeCoin(tokenIn))
+                return {
+                    args: [
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
+                        account,
+                        calcTransactionDeadline(deadline)
+                    ],
+                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals) //amountIn
+                }
+            else if(isNativeCoin(tokenOut))
+                return {
+                    args: [
+                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
+                        // mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        '0x00',
+                        [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
+                        account,
+                        calcTransactionDeadline(deadline)
+                    ],
+                    value: '0x00'
+                }
+            else
+                return {
+                    args: [
+                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        [tokenIn.address, tokenOut.address],
+                        account,
+                        calcTransactionDeadline(deadline)
+                    ],
+                    value: '0x00'
+                }
+        } else {
+            if(isNativeCoin(tokenOut))
+                return {
+                    args: [
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
+                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
+                        [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
+                        account,
+                        calcTransactionDeadline(deadline)
+                    ],
+                    value: '0x00'
+                }
+            else if(isNativeCoin(tokenIn))
+                return {
+                    args: [
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
+                        [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
+                        account,
+                        calcTransactionDeadline(deadline)
+                    ],
+                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals) //amountInMax
+                }
+            else
+                return {
+                    args: [
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
+                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
+                        [tokenIn.address, tokenOut.address],
+                        account,
+                        calcTransactionDeadline(deadline)
+                    ],
+                    value: '0x00'
+                }
+        }
+    }
 
+    const handleOnSwap = async () => {
+        try {
+            if(inputAmount && outputAmount && tokenIn && tokenOut) {
+                const method = getSwapMethod()
+                const swapArguments = getSwapArguments()
+                if(!swapArguments) return
+                const { args, value } = swapArguments
+                const gasLimit = await routerContract?.estimateGas[method](...args, { value })
+                const callResult = await routerContract?.[method](...args, { value, gasLimit: computeGasLimit(gasLimit)})
+                const txn = await callResult.wait()
+                if(txn.status === 1) {
+                    console.log('Swap successfully...')
+                }
             }
-        } catch (error) {
-            console.log(error);
-            
+        } catch(error) {
+            console.log('failed to swap', error)
         }
     }
 
@@ -98,7 +170,7 @@ const Swap = () => {
                 await tokenApproval?.approve(
                     routerAddress,
                     mulNumberWithDecimal(inputAmount, tokenIn.decimals)
-                )
+                )                
             }
         } catch (err) {
             console.log('Failed to approve token: ', err)
@@ -118,13 +190,7 @@ const Swap = () => {
                 outputAmount: swapRate
             })
         } 
-        if(!pair || !inputAmount) {
-            onChangeSwapState({
-                ...swapState,
-                outputAmount: ''
-            }) 
-        }
-    },[inputAmount, pair])
+    },[inputAmount, tokenIn, tokenOut])
 
     useEffect(()=>{
         if(outputAmount && pair && tokenIn && tokenOut && swapType === Field.OUTPUT){
@@ -135,16 +201,8 @@ const Swap = () => {
                 inputAmount: swapRate
             }) 
         }
-        if(!pair || !outputAmount) {
-            onChangeSwapState({
-                ...swapState,
-                inputAmount: ''
-            }) 
-        }
-    },[outputAmount, pair])
+    },[outputAmount, tokenIn, tokenOut])
 
-    const [setting, setSetting] = useState(false)
-    console.log({tokenIn, tokenOut})
     const SwapButton = () => {
         const isNotConnected = !account
         const unSupportedNetwork =
@@ -155,15 +213,11 @@ const Swap = () => {
         const isInsufficientBalance =
             inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
         const isInsufficientAllowance =
-            Number(tokenApproval?.allowance) < Number(inputAmount)
+            Number(tokenApproval?.allowance) < Number(inputAmount) && !isNativeCoin(tokenIn)
 
         return (
             <Row>
-                <PrimaryButton
-                    onClick={() => { console.log('coming soon') }}
-                    name={'Coming Soon'}
-                />
-                {/* {isNotConnected ? (
+                {isNotConnected ? (
                     <PrimaryButton
                         name="Connect Wallet"
                         onClick={openWalletModal}
@@ -176,7 +230,7 @@ const Swap = () => {
                     <LabelButton name="Enter an amount" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
-                ) : !isInffuficientLiquidity ? (
+                ) : isInffuficientLiquidity ? (
                     <LabelButton name="Insufficient Liquidity" />
                 ) : isInsufficientAllowance ? (
                     <PrimaryButton
@@ -185,10 +239,10 @@ const Swap = () => {
                     />
                 ) : (
                     <PrimaryButton
-                        onClick={() => swapType === Field.INPUT ? handleOnSwapExactTokensForTokens() : handleOnSwapTokensForExactTokens()}
+                        onClick={() => handleOnSwap()}
                         name={'Swap'}
                     />
-                )} */}
+                )}
             </Row>
         )
     }
@@ -199,12 +253,12 @@ const Swap = () => {
                 <WalletModal setToggleWalletModal={openWalletModal} />
             )}
             <Row jus="space-between">
-                <Row gap="20px">
-                    <Link to="/swap">Swap</Link>
+                <Nav gap="20px">
+                    <Link to="/swap" className='active-link'>Swap</Link>
                     <Link to="/add">Add</Link>
                     {/* <Link to="/pools">Pool</Link> */}
                     <Link to="/limit">Limit</Link>
-                </Row>
+                </Nav>
                 <Setting />
             </Row>
             <Bridge />
@@ -250,8 +304,23 @@ const SwapContainer = styled(Columns)`
         rgba(0, 28, 44, 0.3)
     );
     gap: 15px;
-    @media screen and (max-width: 767px) {
-        margin: 0 20px;
+    @media(max-width: 500px) {
+        width: 90%;
+    }
+`
+
+const Nav = styled(Row)`
+    a {
+        padding: 5px 8px;
+        border-radius: 4px;
+        text-decoration: none!important;
+        :hover {
+            text-decoration: none!important;
+        }
+    }
+
+    .active-link {
+        background: var(--bg6);
     }
 `
 
