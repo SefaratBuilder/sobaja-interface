@@ -7,11 +7,15 @@ import tokenList from 'constants/jsons/tokenList.json'
 import { useFaucetContract } from 'hooks/useContract'
 import usdt from 'assets/icons/usdt.jpeg'
 import { OpacityModal } from 'components/Web3Status'
+import { useActiveWeb3React } from 'hooks'
+import { Error } from 'components/Text'
+import { Row } from 'components/Layouts'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
+    const { chainId } = useActiveWeb3React()
     useOnClickOutside(ref, () => {
         setIsDisplayFaucet(false)
     })
@@ -49,7 +53,7 @@ const Faucet = () => {
                 Faucet
             </BtnFaucet>
             {isDislayFaucet ? (
-                <FaucetModalDiv isDislayFaucet={isDislayFaucet}>
+                <FaucetModalDiv>
                     <ContainerFaucetModal
                         isDislayFaucet={isDislayFaucet}
                         ref={ref}
@@ -64,12 +68,23 @@ const Faucet = () => {
                         <BodyModalFaucet>
                             <ContentFaucet>
                                 <TextCoin>
-                                    Get BTC,USDT,USDC,DAI for testing ZkSync
+                                    Get BTC, USDT, USDC, DAI for testing ZkSync
                                     Testnet on Sobajaswap, test token can
                                     nullify the reality of Mainnet.
                                 </TextCoin>
                             </ContentFaucet>
-                            <CoinButton>{showMintCoins()}</CoinButton>
+                            <CoinButton>
+                                {showMintCoins()}
+                                {chainId !== 280 && (
+                                    <Row>
+                                        <Error fontSize="14px">
+                                            Wrong network! Please switch to
+                                            ZkSync Goerli network to faucet
+                                            tokens.
+                                        </Error>
+                                    </Row>
+                                )}
+                            </CoinButton>
                         </BodyModalFaucet>
                     </ContainerFaucetModal>
                 </FaucetModalDiv>
@@ -150,15 +165,20 @@ const BtnFaucet = styled(Button)`
     width: unset;
     padding: 0px 12px;
 `
-const FaucetModalDiv = styled.div<{ isDislayFaucet: boolean }>`
+const FaucetModalDiv = styled.div`
     position: fixed;
     height: 100%;
     width: 100%;
     top: 0;
     left: 0;
     right: 0;
-    z-index: ${({ isDislayFaucet }) => (isDislayFaucet ? 3 : -1)};
+    bottom: 0;
+    margin: auto;
+    z-index: 3;
     display: flex;
+    @media (max-width: 576px) {
+        width: 90%;
+    }
 `
 const ContainerFaucetModal = styled.div<{ isDislayFaucet: boolean }>`
     border: 1px solid #003b5c;
@@ -173,6 +193,9 @@ const ContainerFaucetModal = styled.div<{ isDislayFaucet: boolean }>`
     z-index: ${({ isDislayFaucet }) => (isDislayFaucet ? 3 : -1)};
     scale: ${({ isDislayFaucet }) => (isDislayFaucet ? 1 : 0.95)};
     opacity: ${({ isDislayFaucet }) => (isDislayFaucet ? 1 : 0)};
+    padding: 10px;
+    border-radius: 12px;
+
     @media screen and (max-width: 576px) {
         max-width: 410px;
     }

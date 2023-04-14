@@ -1,9 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react'
 import styled from 'styled-components'
-import PrimaryButton from 'components/Buttons/PrimaryButton'
-import LogoETH from 'assets/token-logos/eth.svg'
-import LogoBNB from 'assets/token-logos/bnb.svg'
-import LogoERA from 'assets/token-logos/era.svg'
 import imgDownArrowWhite from 'assets/icons/chevron-white.svg'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { useActiveWeb3React } from 'hooks'
@@ -17,6 +13,9 @@ const NetworkSelector = () => {
     const [networkModal, setNetworkModal] = useState(false)
     const [networkModalMobile, setNetworkModalMobile] = useState(false)
     const { chainId } = useActiveWeb3React()
+    const [activeDot, setActiveDot] = useState(0)
+    const ref = useRef<any>()
+    // const { address, network, wallet } = useActiveWeb3React()
 
     const networkRef = useRef<any>()
     useOnClickOutside(networkRef, () => {
@@ -130,12 +129,20 @@ const NetworkSelectorWrapper = styled.div`
     /* img:nth-child(3) {
         width: 12px;
     } */
+    display: flex;
+    justify-content: flex-end;
 `
 
 const NetworkButton = styled.div`
     display: flex;
     /* justify-content: flex-end; */
     width: 160px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg2);
+    z-index: 1;
+    padding: 0 10px;
     border: 1px solid #003b5c;
     background: linear-gradient(90deg, #002033 0%, rgba(0, 38, 60, 0.39) 100%);
     border-radius: 6px;
@@ -144,9 +151,9 @@ const NetworkButton = styled.div`
     align-items: center;
     height: 40px;
     padding: 0px 8px;
-    @media screen and (max-width: 576px) {
+    /* @media screen and (max-width: 576px) {
         display: none;
-    }
+    } */
     > div {
         display: flex;
         gap: 5px;
@@ -160,7 +167,8 @@ const NetworkButton = styled.div`
 `
 const DropDownMainNet = styled.div<{ networkModal: boolean }>`
     display: ${({ networkModal }) => (networkModal ? 'block' : 'none')};
-    z-index: ${({ networkModal }) => (networkModal ? '2' : '0')};
+    /* z-index: ${({ networkModal }) => (networkModal ? '2' : '0')}; */
+    z-index: 3;
     height: fit-content;
     border: 1px solid #ffffff;
     width: 160px;
@@ -171,7 +179,10 @@ const DropDownMainNet = styled.div<{ networkModal: boolean }>`
     top: 50px;
     right: 0;
     cursor: pointer;
-
+    @media screen and (max-width: 1100px) {
+        bottom: 50px;
+        top: unset;
+    }
     ul {
         padding: 10px;
         display: flex;

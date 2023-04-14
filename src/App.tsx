@@ -14,7 +14,6 @@ import Pools from 'pages/pool'
 import ToastMessage from 'components/ToastMessage'
 
 const App = () => {
-
     const Updater = () => {
         return (
             <>
@@ -50,6 +49,7 @@ const App = () => {
 const AppContainer = styled.div`
     position: relative;
     padding: 20px 0;
+    z-index: -1;
 `
 
 export default App

@@ -32,6 +32,7 @@ import PairTokens from 'components/LogoToken/PairTokens'
 import imgDownArrowWhite from 'assets/icons/chevron-white.svg'
 import arrowDown from 'assets/icons/arrowDown.svg'
 import { useNavigate } from 'react-router-dom'
+import MyPools from 'components/MyPools'
 
 interface Data {
     name: string
@@ -248,7 +249,12 @@ function EnhancedTableToolbar() {
                     </div>
                 </div>
                 <div className="new-position">
-                    <PrimaryButton name="+ New Position" onClick={() => { navigate('/add') }} />
+                    <PrimaryButton
+                        name="+ New Position"
+                        onClick={() => {
+                            navigate('/add')
+                        }}
+                    />
                 </div>
             </HeadTitle>
         </Typography>
@@ -350,7 +356,11 @@ export default function Pools() {
                             <PrimaryButton
                                 name="Pools"
                                 height="35px"
-                                color={!isMyPositionPage ? "rgba(0, 178, 255, 1)" : "none"}
+                                color={
+                                    !isMyPositionPage
+                                        ? 'rgba(0, 178, 255, 1)'
+                                        : 'none'
+                                }
                                 onClick={() => setIsMyPositionPage(false)}
                             />
                         </div>
@@ -358,7 +368,11 @@ export default function Pools() {
                             <PrimaryButton
                                 name="My positions"
                                 height="35px"
-                                color={isMyPositionPage ? "rgba(0, 178, 255, 1)" : "none"}
+                                color={
+                                    isMyPositionPage
+                                        ? 'rgba(0, 178, 255, 1)'
+                                        : 'none'
+                                }
                                 onClick={() => setIsMyPositionPage(true)}
                             />
                         </div>
@@ -472,6 +486,8 @@ export default function Pools() {
                         </TableBody>
                     </Table>
                 </TableContainer>
+
+                {/* <MyPools></MyPools> */}
             </Box>
         </Container>
     )
