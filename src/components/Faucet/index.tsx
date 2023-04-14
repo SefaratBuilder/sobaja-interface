@@ -16,6 +16,7 @@ const Faucet = () => {
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
     const { chainId } = useActiveWeb3React()
+    
     useOnClickOutside(ref, () => {
         setIsDisplayFaucet(false)
     })

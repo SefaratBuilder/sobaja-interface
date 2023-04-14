@@ -16,7 +16,7 @@ import Setting from 'components/HeaderLiquidity'
 import { useToken, useTokenApproval } from 'hooks/useToken'
 import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
-import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/index'
+import { ALL_SUPPORTED_CHAIN_IDS, WRAPPED_NATIVE_COIN } from 'constants/index'
 import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
 import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
@@ -70,10 +70,16 @@ const Swap = () => {
         if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
             return
         if (swapType === Field.INPUT) {
+            console.log({
+                amountOutmin: mulNumberWithDecimal(
+                    outputAmount,
+                    tokenOut.decimals,
+                ),
+            })
             if (isNativeCoin(tokenIn))
                 return {
                     args: [
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        '0', //amountOutMin
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
@@ -84,7 +90,6 @@ const Swap = () => {
                 return {
                     args: [
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        // mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
                         '0x00',
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
@@ -187,24 +192,39 @@ const Swap = () => {
             pair &&
             tokenIn &&
             tokenOut &&
-            swapType === Field.INPUT
+            swapType === Field.INPUT &&
+            chainId
         ) {
             const amountInWithDel = mulNumberWithDecimal(
                 inputAmount,
                 tokenIn.decimals,
             )
+            const tI = isNativeCoin(tokenIn)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenIn
+            const tO = isNativeCoin(tokenOut)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenOut
             const swapRate = pair?.calcSwapRate(
                 amountInWithDel,
-                tokenIn,
-                tokenOut,
+                tI,
+                tO,
                 Field.INPUT,
             )
             onChangeSwapState({
                 ...swapState,
                 outputAmount: swapRate,
             })
+            return
         }
-    }, [inputAmount, tokenIn, tokenOut])
+        return () => {
+            // onChangeSwapState({
+            //     ...swapState,
+            //     outputAmount: '',
+            //     inputAmount: ''
+            // })
+        }
+    }, [inputAmount, chainId])
 
     useEffect(() => {
         if (
@@ -212,16 +232,23 @@ const Swap = () => {
             pair &&
             tokenIn &&
             tokenOut &&
-            swapType === Field.OUTPUT
+            swapType === Field.OUTPUT &&
+            chainId
         ) {
             const amountOutWithDel = mulNumberWithDecimal(
                 outputAmount,
                 tokenOut.decimals,
             )
+            const tI = isNativeCoin(tokenIn)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenIn
+            const tO = isNativeCoin(tokenOut)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenOut
             const swapRate = pair?.calcSwapRate(
                 amountOutWithDel,
-                tokenIn,
-                tokenOut,
+                tI,
+                tO,
                 Field.OUTPUT,
             )
             onChangeSwapState({
@@ -229,7 +256,14 @@ const Swap = () => {
                 inputAmount: swapRate,
             })
         }
-    }, [outputAmount, tokenIn, tokenOut])
+        return () => {
+            // onChangeSwapState({
+            //     ...swapState,
+            //     outputAmount: '',
+            //     inputAmount: ''
+            // })
+        }
+    }, [outputAmount, chainId])
 
     const SwapButton = () => {
         const isNotConnected = !account
