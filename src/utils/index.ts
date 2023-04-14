@@ -4,7 +4,7 @@ import { AddressZero } from '@ethersproject/constants'
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { ChainId, Token } from 'interfaces'
-import { add, divNumberWithDecimal } from './math'
+import { add, divNumberWithDecimal, mul, sub } from './math'
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {
@@ -106,4 +106,15 @@ export function getEtherscanLink(
 //current time + deadline second
 export function calcTransactionDeadline(deadline: number) {
     return (new Date().getTime() / 1000 + deadline).toFixed()
+}
+
+//amountOut * (1 - 0.3 /100)
+//amountIn / (1 - 0.3 /100)
+
+export const calcAmountWithSlippage = (
+    amount: any,
+    slippage : any,
+)=>{
+    if(amount < 0 || amount >1) throw new Error('Unexpected slippage')
+    return [mul(sub(1,slippage),amount).getQuotient, mul(add(1,slippage),amount).getQuotient]
 }
