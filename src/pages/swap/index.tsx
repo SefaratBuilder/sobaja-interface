@@ -22,8 +22,9 @@ import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
 import { useRouterContract } from 'hooks/useContract'
-import { calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
+import { calcSlippageAmount, calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
 import { useTransactionDeadline } from 'states/application/hooks'
+import { useSlippageTolerance } from 'states/application/hooks'
 
 const Swap = () => {
 
@@ -40,6 +41,8 @@ const Swap = () => {
     const balanceIn = useCurrencyBalance(account, tokenIn)
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
+    
+    const { slippage, setSlippage } = useSlippageTolerance()
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -79,7 +82,7 @@ const Swap = () => {
             if(isNativeCoin(tokenIn))
                 return {
                     args: [
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), // amountOutMin
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline)
@@ -90,7 +93,7 @@ const Swap = () => {
                 return {
                     args: [
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), //amountOutMin
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline)
@@ -101,7 +104,7 @@ const Swap = () => {
                 return {
                     args: [
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), //amountOutMin
                         [tokenIn.address, tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline)
@@ -113,7 +116,7 @@ const Swap = () => {
                 return {
                     args: [
                         mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
+                        mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals), //amountInMax
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline)
@@ -128,13 +131,13 @@ const Swap = () => {
                         account,
                         calcTransactionDeadline(deadline)
                     ],
-                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals) //amountInMax
+                    value: mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals) //amountInMax
                 }
             else
                 return {
                     args: [
                         mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
+                        mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals), //amountInMax
                         [tokenIn.address, tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline)

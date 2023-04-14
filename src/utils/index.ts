@@ -4,7 +4,7 @@ import { AddressZero } from '@ethersproject/constants'
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { ChainId, Token } from 'interfaces'
-import { add, divNumberWithDecimal, mul, sub } from './math'
+import { add, div, divNumberWithDecimal, mul, sub } from './math'
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {
@@ -111,10 +111,19 @@ export function calcTransactionDeadline(deadline: number) {
 //amountOut * (1 - 0.3 /100)
 //amountIn / (1 - 0.3 /100)
 
-export const calcAmountWithSlippage = (
-    amount: any,
-    slippage : any,
-)=>{
-    if(amount < 0 || amount >1) throw new Error('Unexpected slippage')
-    return [mul(sub(1,slippage),amount).getQuotient, mul(add(1,slippage),amount).getQuotient]
+export const calcSlippageAmount = (
+    amount: string,
+    slippage: string
+): [ string, string] =>{
+
+    if(Number(slippage) <0 || Number(slippage) > 1){
+        throw new Error (`Please input properly slippage amount`)
+    }
+
+    const amountIn = div(amount,((sub(1,slippage))))
+    const amountOut = mul(amount,((sub(1,slippage))))
+
+    return [amountOut, amountIn]
 }
+
+
