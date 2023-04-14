@@ -60,9 +60,17 @@ export function useTokenApproval(
     to = to == null ? undefined : to
     const tokenContract = useTokenContract(token?.address)
 
-    const approve = (to: string, amount: number | string) => {
-        if (!isAddress(to)) return
-        return tokenContract?.approve(to, amount)
+    const approve = async (to: string, amount: number | string) => {
+        try {
+            if (!isAddress(to)) return
+            const gasLimit = await tokenContract?.estimateGas.approve(to, amount)
+            console.log({ gasLimit: gasLimit && gasLimit.add(1000) })
+            return tokenContract?.approve(to, amount, {
+                gasLimit: gasLimit && gasLimit.add(1000)
+            })
+        } catch (err) {
+            return
+        }
     }
 
     const allowance = useMultipleContractSingleData(
@@ -79,5 +87,5 @@ export function useTokenApproval(
             allowance: value && FixedNumber.fromValue(value, token?.decimals),
             approve,
         }
-    }, [from, to, token, tokenContract])
+    }, [from, to, token, tokenContract, allowance])
 }
