@@ -2,7 +2,7 @@ import { pack, keccak256 } from '@ethersproject/solidity'
 import { getCreate2Address } from '@ethersproject/address'
 import { FACTORIES, INIT_CODE_HASHES } from 'constants/addresses'
 import { Field, Token } from 'interfaces'
-import { mul, div, add, sub, divNumberWithDecimal } from './math'
+import { mul, div, add, sub, divNumberWithDecimal, fixNum } from './math'
 import { ChainId } from 'interfaces'
 
 export const isSortedTokens = (tokenA: Token, tokenB: Token): Boolean => {
@@ -20,12 +20,15 @@ export const calculateAmountOut = (
     reserveOut: string | number,
     fee: string | number,
 ): string => {
-    console.log({ amountIn, reserveIn, reserveOut })
+    console.log({ amountIn, reserveIn, reserveOut, fee })
+    if (!amountIn || !reserveIn || !reserveOut || !fee) return '0'
+
     const amountInWithFee = mul(amountIn, fee)
     const numerator = mul(amountInWithFee, reserveOut)
     const denominator = add(reserveIn, amountInWithFee)
     const amountOut = div(numerator, denominator)
-    return amountOut
+
+    return amountOut.split('.')[0]
 }
 
 export const calculateAmountIn = (
