@@ -16,7 +16,10 @@ const HeaderLiquidity = () => {
                 <WrapNav>
                     {/* <label>{name}</label> */}
                     <img
-                        onClick={() => setSetting(true)}
+                        onClick={() => {
+                            console.log('asjfkhakjshdfkajsh')
+                            setSetting(true)
+                        }}
                         src={userDarkMode ? SettingIcon : SettingIcon}
                         alt=""
                     />

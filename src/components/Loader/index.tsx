@@ -16,7 +16,7 @@ const StyledSVG = styled.svg<{ size: string; stroke?: string }>`
     }
 `
 export default function Loader({
-    size = '16px',
+    size,
     stroke,
     ...rest
 }: {
@@ -29,7 +29,7 @@ export default function Loader({
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            size={size}
+            size={size || '16px'}
             stroke={stroke}
             {...rest}
         >

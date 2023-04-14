@@ -100,10 +100,16 @@ export const OpacityModal = styled.div`
     position: fixed;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    z-index: 2;
     background-color: #00000073;
     right: 0;
     top: 0;
+
+    @media screen and (max-width: 1100px) {
+        top: unset;
+        height: 3000px;
+        bottom: 0px;
+    }
 `
 
 const NetworkIcon = styled(Activity)`
@@ -128,7 +134,9 @@ const Icon = styled.img`
     width: 20px;
 `
 
-const Web3StatusConnect = styled(Button)``
+const Web3StatusConnect = styled(Button)`
+    padding: 0px 8px;
+`
 
 export const Web3StatusWrapper = styled.div`
     width: 160px;
