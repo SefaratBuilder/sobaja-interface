@@ -123,7 +123,8 @@ export const calcSlippageAmount = (
     const amountIn = div(amount,(div((sub(1,slippage)),100)))
     const amountOut = mul(amount,(div((sub(1,slippage)),100)))
 
+    //   const amountIn = div(amount,(((sub(1,slippage)))))
+    //   const amountOut = mul(amount,(((sub(1,slippage)))))
+
     return [amountOut, amountIn]
 }
-
-

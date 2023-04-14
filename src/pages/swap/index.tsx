@@ -76,6 +76,7 @@ const Swap = () => {
                 return 'swapTokensForExactTokens'
         }
     }
+    console.log(pair);
 
     const getSwapArguments = () => {
         if(!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId) return 

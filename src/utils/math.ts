@@ -84,3 +84,4 @@ export const mulNumberWithDecimal = (
         return fixNum(mul(n, 10 ** decimals))
     }
 }
+

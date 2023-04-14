@@ -11,20 +11,19 @@ import PrimaryButton from 'components/Buttons/PrimaryButton'
 import LabelButton from 'components/Buttons/LabelButton'
 import PlusIcon from 'assets/icons/plus.svg'
 import {ROUTERS} from 'constants/addresses'
-import { useTokenApproval } from 'hooks/useToken'
+import { useToken, useTokenApproval } from 'hooks/useToken'
 import { ALL_SUPPORTED_CHAIN_IDS, ZERO_ADDESS } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
-import { ethers } from 'ethers'
 import { useFactoryContract, useRouterContract } from 'hooks/useContract'
 import { useActiveWeb3React } from 'hooks'
-import { mulNumberWithDecimal } from 'utils/math'
+import { div, divNumberWithDecimal, mul, mulNumberWithDecimal } from 'utils/math'
 import { usePair } from 'hooks/useAllPairs'
-import { FixedNumber } from '@ethersproject/bignumber'
-import { isNativeCoin } from 'utils'
+import { calcSlippageAmount, isNativeCoin } from 'utils'
+import { useTokenBalance } from 'hooks/useCurrencyBalance'
+import { useSlippageTolerance } from 'states/application/hooks'
 
 const Swap = () => {
     const swapState = useSwapState()
-    const router = useRouterContract();
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =  useSwapActionHandlers()
@@ -33,10 +32,17 @@ const Swap = () => {
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenInApproval = useTokenApproval(account, routerAddress, tokenIn)
     const tokenOutApproval = useTokenApproval(account, routerAddress, tokenOut)
-
-    const factoryContract = useFactoryContract()
+    const { slippage, setSlippage } = useSlippageTolerance()
     const pair = usePair(chainId, tokenIn, tokenOut)
-    console.log({pair})
+    const lpToken = pair && pair.tokenLp
+    const lpBalance = useCurrencyBalance(account, lpToken)
+    // console.log(lpBalance?.value);
+    // console.log(pair);
+    const reserve0 = pair && pair.reserve0 // reserve of token 0
+    const reserve1 = pair && pair.reserve1 // reserve of token 1
+    const reserveLp = pair && pair.reserveLp // reserve of LP
+    
+
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
             onUserInput(field, value)
@@ -64,8 +70,8 @@ const Swap = () => {
                 const args = isEthTxn ? [
                     token.address,
                     mulNumberWithDecimal(amountToken, token.decimals),
-                    mulNumberWithDecimal(amountToken, token.decimals),//
-                    value,
+                    mulNumberWithDecimal(amountToken, token.decimals),//amountTokenMin
+                    value, // amountETHMin
                     account,
                     (new Date().getTime()/1000 + 1000).toFixed(0)
                 ] : [
@@ -92,6 +98,56 @@ const Swap = () => {
             console.log(err)
         }
     }
+//(resRemoveLP / totalLp) * reserve0 
+//(resRemoveLP / totalLp) * reserve1
+
+    const handleOnRemoveLiquidity = async() =>{
+        const percentAmounts = {
+            //percentage
+        }
+        try {
+            if(lpBalance && lpToken && reserve0 && reserve1 && reserveLp){
+                const isEthTxn = isNativeCoin(pair.token0) || isNativeCoin(pair.token1) // is Pool contain native coin ?
+                const method = isEthTxn ? 'removeLiquidityETH' : 'removeLiquidity'
+                const token = isNativeCoin(tokenIn)? tokenOut : tokenIn
+                const args = isEthTxn ?  [
+                    pair.tokenLp.address,
+                    mulNumberWithDecimal(lpBalance._value,lpToken.decimals), // amount of L token to remove 
+                    // mulNumberWithDecimal(amountToken,token.decimals), // minimum amount of token must received
+                    mulNumberWithDecimal(calcSlippageAmount(mul(div(lpBalance._value,reserveLp),reserve0),slippage)[0], 18),
+                    mulNumberWithDecimal(calcSlippageAmount(mul(div(lpBalance._value,reserveLp),reserve1),slippage)[0], 18),
+                    account,
+                    (new Date().getTime()/1000 + 1000).toFixed(0)
+                ] : [
+                    pair.token0.address,
+                    pair.token1.address,
+                    mulNumberWithDecimal(lpBalance._value, lpToken.decimals ), // liquidity amount
+                    // mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[0], tokenIn.decimals), // amountAMin
+                    // mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0],tokenOut.decimals), // amountBMin
+                    mulNumberWithDecimal(calcSlippageAmount(mul(div(lpBalance._value,reserveLp),reserve0),slippage)[0], 18),
+                    mulNumberWithDecimal(calcSlippageAmount(mul(div(lpBalance._value,reserveLp),reserve1),slippage)[0], 18),
+                    account,
+                    (new Date().getTime()/1000 + 1000).toFixed(0)
+                ]
+                console.log(...args);
+                const gasLimit = await routerContract?.estimateGas?.[method]?.(...args)
+                const callResult = await routerContract?.[method]?.(...args, { gasLimit: gasLimit && gasLimit.add(1000) })
+                const txn = await callResult.wait()
+
+                if(txn.status === 1) {
+                    console.log('Successfull...', txn)
+                }
+        }
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+
+
+
 
     const handleOnApprove = async (approve: (to: string, amount: string) => void, amount: string | undefined, decimals: number | undefined) => {
         try {
@@ -154,7 +210,7 @@ const Swap = () => {
         const isInsufficientAllowanceTokenOut = 
             Number(tokenOutApproval?.allowance) < Number(outputAmount) && tokenOut?.address !== ZERO_ADDESS
         const isInsufficientAllowance = isInsufficientAllowanceTokenIn || isInsufficientAllowanceTokenOut
-        console.log({allowIn: tokenInApproval?.allowance, allowOut: tokenOutApproval?.allowance})
+        // console.log({allowIn: tokenInApproval?.allowance, allowOut: tokenOutApproval?.allowance})
         return (
             <Row>
                 {isNotConnected ? (
@@ -199,7 +255,12 @@ const Swap = () => {
                         onClick={() => handleOnAddLiquidity()}
                         name={'Add liquidty'}
                     />
+
                 )}
+                                     <PrimaryButton
+                        onClick={() => handleOnRemoveLiquidity()}
+                        name={'Remove liquidty'}
+                    />
             </Row>
         )
     }

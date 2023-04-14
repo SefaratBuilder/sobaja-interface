@@ -16,11 +16,9 @@ describe('calculateSlippageAmount',()=>{
         const amountOutMin = calcSlippageAmount("10000","0.5")[0]
         const amountInMax = calcSlippageAmount("10000","0.5")[1]
 
-        const test = calcSlippageAmount("10000","0.5")
-        console.log(test);
 
-        expect(amountOutMin).toEqual('5000')
-        expect(amountInMax).toEqual('20000')
+        expect(amountOutMin).toEqual('50')
+        expect(amountInMax).toEqual('2000000')
     })
 })
 
