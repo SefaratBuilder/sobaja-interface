@@ -444,7 +444,7 @@ const Swap = () => {
 }
 
 const SwapContainer = styled(Columns)`
-    margin: 40px auto;
+    margin: 0 auto 40px;
     height: fit-content;
     max-width: 480px;
     background: var(--bg5) !important;

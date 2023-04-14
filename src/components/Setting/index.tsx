@@ -227,7 +227,7 @@ const Container = styled.div`
     transform: translateX(-50%);
     opacity: 0;
     transition: all 0.2s linear;
-    z-index: -1;
+    /* z-index: -1; */
     &.active {
         opacity: 1;
         z-index: 3;
