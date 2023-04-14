@@ -20,14 +20,10 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account, library, chainId } = useActiveWeb3React()
-    const ref = useRef<any>(false)
+    const { account } = useActiveWeb3React()
+
     const [isCopied, setIsCopied] = useState<boolean>(false)
     const balance = account && useETHBalances([account])?.[account]
-
-    useOnClickOutside(ref, () => {
-        setToggleWalletModal(false)
-    })
 
     const handleCopyAddress = () => {
         if (account && navigator.clipboard) {
@@ -41,7 +37,7 @@ const AccountDetails = ({
     }
 
     return (
-        <WrapConnectModal isConnected={true} ref={ref}>
+        <WrapConnectModal isConnected={true}>
             <Header>
                 <WrapAccountInfo>
                     <ImgAccount src="https://picsum.photos/50/50" />
@@ -296,14 +292,14 @@ const Header = styled.div`
         cursor: pointer;
         color: ${({ theme }) => theme.text1};
     }
-    ::before {
+    /* ::before {
         content: '';
         position: absolute;
         right: -10px;
         width: 50%;
         height: 35px;
         top: -62px;
-    }
+    } */
     @media screen and (max-width: 390px) {
         padding: 0.5rem 1rem;
     }
@@ -513,7 +509,7 @@ const WrapConnectModal = styled(Container)`
     max-width: 350px;
     left: unset;
     right: 20px;
-    top: 76px;
+    top: 90px;
     transform: unset;
     margin: unset;
     overflow: unset;
