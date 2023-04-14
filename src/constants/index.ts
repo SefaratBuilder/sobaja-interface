@@ -15,6 +15,21 @@ export const NATIVE_COIN: Token = {
     decimals: 18,
 }
 
+export const URLSCAN_BY_CHAINID: { [chainId in number]: { url: string } } = {
+    [ChainId.GOERLI]: {
+        url: 'https://goerli.etherscan.io/',
+    },
+    [ChainId.MUMBAI]: {
+        url: 'https://mumbai.polygonscan.com/',
+    },
+    [ChainId.ZKMAINNET]: {
+        url: 'https://explorer.zksync.io/',
+    },
+    [ChainId.ZKTESTNET]: {
+        url: 'https://goerli.explorer.zksync.io/',
+    },
+}
+
 export const WRAPPED_NATIVE_COIN: { [chainId in number]: Token } = {
     [ChainId.GOERLI]: {
         address: WRAPPED_NATIVE_ADDRESSES[ChainId.GOERLI],

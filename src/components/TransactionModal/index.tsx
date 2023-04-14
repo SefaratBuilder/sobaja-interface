@@ -1,8 +1,9 @@
 import ToastMessage from 'components/ToastMessage'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ConfirmTransactionModal from './ConfirmTransaction'
 import WaitingTransactionModal from './WaitingTransaction'
 import ResultTransactionModal from './ResultTransaction'
+import { useTransactionHandler } from 'states/transactions/hooks'
 
 export interface CompTransaction {
     payload: any
@@ -69,6 +70,21 @@ export const InitCompTransaction = (): CompTransaction => {
 }
 
 const ComponentsTransaction = ({ data, onConfirm }: Data) => {
+    console.log('🤦‍♂️ ⟹ ComponentsTransaction ⟹ data:', data)
+    // console.log('🤦‍♂️ ⟹ ComponentsTransaction ⟹ onConfirm:', onConfirm)
+    // const { addTxn } = useTransactionHandler()
+
+    // // useEffect(() => {
+    // //     console.log('🤦‍♂️ ⟹ ComponentsTransaction ⟹ data:', data)
+    // //     if (data.isOpenToastMessageModal) {
+    // //         addTxn({
+    // //             hash: data.payload?.hash || '',
+    // //             msg: data.payload?.msg || '',
+    // //             status: data.payload?.status || false,
+    // //         })
+    // //     }
+    // // }, [data])
+
     return (
         <>
             {data.isOpenConfirmModal && (
@@ -94,10 +110,10 @@ const ComponentsTransaction = ({ data, onConfirm }: Data) => {
             )}
             {data.isOpenToastMessageModal && (
                 <ToastMessage
-                    payload={data.payload}
-                    setToastMessageModal={data.setIsOpenToastMessageModal}
-                    isSuccess={data.isTransactionSuccess}
-                    txnHash={data.TransactionHash}
+                // payload={data.payload}
+                // setToastMessageModal={data.setIsOpenToastMessageModal}
+                // isSuccess={data.isTransactionSuccess}
+                // txnHash={data.TransactionHash}
                 />
             )}
         </>

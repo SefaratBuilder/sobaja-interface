@@ -8,12 +8,14 @@ import {
 import { Txn } from 'states/transactions/reducer'
 import styled from 'styled-components'
 import SuccessIcon from 'assets/icons/success.svg'
+import ErrorIcon from 'assets/icons/close.png'
+import { InitCompTransaction } from 'components/TransactionModal'
 
 const Toast = ({ txn }: { txn: Txn }) => {
     const { removeTxn } = useTransactionHandler()
 
     useEffect(() => {
-        console.log('asdasdadsadsads')
+        // console.log('asdasdadsadsads')
         let timeX = setTimeout(() => {
             removeTxn(txn)
         }, 5000)
@@ -28,25 +30,33 @@ const Toast = ({ txn }: { txn: Txn }) => {
             <Row al={'center'} jus={'space-between'} gap={'10px'}>
                 <div>{txn.msg}</div>
                 <span className="icon">
-                    <img src={SuccessIcon} alt="toast message icon" />
+                    <img
+                        src={txn.status ? SuccessIcon : ErrorIcon}
+                        alt="toast message icon"
+                    />
                 </span>
             </Row>
-            <span className="view-link">View on explorer</span>
+            <span
+                className="view-link"
+                onClick={() => txn.hash && window.open(txn.hash)}
+            >
+                View on explorer
+            </span>
         </ToastWrapper>
     )
 }
 
 interface ToastMsg {
-    payload: any
-    setToastMessageModal: React.Dispatch<React.SetStateAction<boolean>>
-    isSuccess: boolean
-    txnHash?: string | undefined
+    payload?: any
+    setToastMessageModal?: React.Dispatch<React.SetStateAction<boolean>>
+    // isSuccess: boolean
+    // txnHash?: string | undefined
 }
 
 const ToastMessage = ({ payload, setToastMessageModal }: ToastMsg) => {
     const { txnList } = useTransactionsState()
-    const [hash, setHash] = useState<number>(0)
-    const { addTxn, removeTxn } = useTransactionHandler()
+    // const [hash, setHash] = useState<number>(0)
+    // const { addTxn, removeTxn } = useTransactionHandler()
 
     return (
         <ToastMessageWrapper>
@@ -74,28 +84,18 @@ const ToastMessage = ({ payload, setToastMessageModal }: ToastMsg) => {
                 /> */}
                 {txnList.map((txn, index: any) => {
                     return (
-                        <>
-                            <Toast
-                                txn={{
-                                    hash: txn.hash,
-                                    msg: `Sent transaction success ${txn.msg}`,
-                                    status: true,
-                                }}
-                                key={index + 1}
-                            />
-                            {/* <ToastLoader /> */}
-                        </>
+                        <Toast
+                            txn={{
+                                hash: txn.hash,
+                                msg: `${txn.msg} ${
+                                    txn.status ? 'successful' : 'failed'
+                                }`,
+                                status: txn.status,
+                            }}
+                            key={index + 1}
+                        />
                     )
                 })}
-                {/* 
-                <Toast
-                    txn={{
-                        hash: '0x123785127531826491274912749812734',
-                        msg: 'Sent transaction success',
-                        status: true,
-                    }}
-                    key={1}
-                /> */}
             </>
         </ToastMessageWrapper>
     )

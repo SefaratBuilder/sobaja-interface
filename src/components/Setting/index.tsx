@@ -117,7 +117,13 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
                                         validateInputNumber(e.target.value)
                                     }
                                 />
-                                <Percent>%</Percent>
+                                <Percent
+                                    className={`${
+                                        active === 'setWarning' ? 'red' : ''
+                                    }`}
+                                >
+                                    %
+                                </Percent>
                             </WrapInputPercent>
                         </GroupButton>
                         <WarningText
@@ -214,22 +220,21 @@ const TransactionSetting = styled.div`
 const InterfaceSetting = styled(TransactionSetting)``
 const Container = styled.div`
     position: absolute;
-    width: 360px;
+    /* width: 360px; */
     height: fit-content;
     top: 54px;
     left: -140px;
     transform: translateX(-50%);
     opacity: 0;
     transition: all 0.2s linear;
-    scale: 0.8;
     z-index: -1;
     &.active {
         opacity: 1;
-        scale: 1;
         z-index: 3;
     }
     @media screen and (max-width: 375px) {
-        width: 310px;
+        /* width: 310px; */
+        scale: 0.8;
     }
 `
 
@@ -240,7 +245,7 @@ const Wrap = styled.div`
     margin: auto;
     color: ${({ theme }) => theme.text1};
     font-size: 14px;
-    max-width: 385px;
+    /* max-width: 385px; */
     width: 100%;
     backdrop-filter: blur(10px);
 
@@ -254,7 +259,7 @@ const Wrap = styled.div`
     border: 1px solid #003b5c;
 
     @media screen and (max-width: 390px) {
-        max-width: 370px;
+        /* max-width: 370px; */
     }
     @media screen and (max-width: 375px) {
         padding: 15px 8px;
@@ -290,7 +295,7 @@ const WrapButton = styled.div`
     backdrop-filter: blur(2.9465px);
     border-radius: 6px;
     @media screen and (max-width: 375px) {
-        margin-right: 6px;
+        /* margin-right: 6px; */
     }
     p {
         padding: 10px 20px;
@@ -310,34 +315,6 @@ const Item = styled.div<{ setting: boolean }>`
         background: ${({ theme }) => theme.bg1};
     }
     @media screen and (max-width: 375px) {
-    }
-`
-
-const Input = styled.input`
-    position: relative;
-    padding: 0px 0.5rem;
-    flex: 1 1 0%;
-    min-width: unset;
-    margin-left: 30px;
-    align-items: center;
-    height: 2rem;
-    font-size: 1rem;
-    text-align: right;
-    width: auto;
-    min-width: 3.5rem;
-    outline: none;
-    background: none;
-    // border: 0.589301px solid #FFFFFF;
-    // backdrop-filter: blur(2.9465px);
-    // border-radius: 6px;
-    border: unset;
-    color: #c9c9c9;
-    &.red {
-        border: 1px solid rgb(255, 67, 67);
-        color: rgb(255, 67, 67);
-    }
-    ::placeholder {
-        color: #c9c9c9;
     }
 `
 
@@ -381,24 +358,9 @@ const Percent = styled.div`
 
     right: 10px;
     transform: translate(0, -50%);
-`
-const WrapInputPercent = styled.div`
-    position: relative;
-    border: 0.589301px solid #ffffff;
-    backdrop-filter: blur(2.9465px);
-    border-radius: 6px;
-    flex: 1 1 0%;
-    span {
-        color: rgb(243, 132, 30);
-        position: absolute;
-        top: 50%;
-        left: 10px;
-        transform: translate(0, -50%);
-        z-index: 1;
-        display: none;
-        &.active {
-            display: block;
-        }
+
+    &.red {
+        color: red;
     }
 `
 
@@ -436,5 +398,51 @@ const SlippageText = styled.div`
         top: -5px;
         left: 42%;
         margin: auto;
+    }
+`
+
+const WrapInputPercent = styled.div`
+    border: 0.589301px solid #ffffff;
+    border-radius: 5px;
+    position: relative;
+    span {
+        color: rgb(243, 132, 30);
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        transform: translate(0, -50%);
+        z-index: 1;
+        display: none;
+        &.active {
+            display: block;
+        }
+    }
+`
+
+const Input = styled.input`
+    border: none;
+    height: 2rem;
+    position: relative;
+    padding: 0px 0.5rem;
+    flex: 1 1 0%;
+    /* min-width: unset; */
+    /* max-width: 90px; */
+    color: #c9c9c9;
+    align-items: center;
+    height: 2rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    text-align: right;
+    width: auto;
+    min-width: 1.5rem;
+    /* border: 1px solid ${({ theme }) => theme.bd1}; */
+    outline: none;
+    background: none;
+    &.red {
+        /* border: 1px solid rgb(255, 67, 67); */
+        color: rgb(255, 67, 67);
+    }
+    ::placeholder {
+        color: ${({ theme }) => theme.text2};
     }
 `

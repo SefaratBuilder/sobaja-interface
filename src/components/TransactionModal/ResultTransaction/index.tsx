@@ -6,7 +6,7 @@ import imgError from 'assets/icons/error.svg'
 
 import { useAppState } from 'states/application/hooks'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
 interface ResultModal {
     isSuccess: boolean

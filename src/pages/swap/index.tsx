@@ -16,14 +16,23 @@ import Setting from 'components/HeaderLiquidity'
 import { useToken, useTokenApproval } from 'hooks/useToken'
 import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
-import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/index'
+import {
+    ALL_SUPPORTED_CHAIN_IDS,
+    URLSCAN_BY_CHAINID,
+    WRAPPED_NATIVE_COIN,
+} from 'constants/index'
 import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
 import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
 import { useRouterContract } from 'hooks/useContract'
 import { calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
-import { useTransactionDeadline } from 'states/application/hooks'
+import { useAppState, useTransactionDeadline } from 'states/application/hooks'
+import { useTransactionHandler } from 'states/transactions/hooks'
+import ComponentsTransaction, {
+    InitCompTransaction,
+} from 'components/TransactionModal'
+import ToastMessage from 'components/ToastMessage'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -39,6 +48,8 @@ const Swap = () => {
     const balanceIn = useCurrencyBalance(account, tokenIn)
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
+    const { addTxn } = useTransactionHandler()
+    const initDataTransaction = InitCompTransaction()
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -70,10 +81,16 @@ const Swap = () => {
         if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
             return
         if (swapType === Field.INPUT) {
+            console.log({
+                amountOutmin: mulNumberWithDecimal(
+                    outputAmount,
+                    tokenOut.decimals,
+                ),
+            })
             if (isNativeCoin(tokenIn))
                 return {
                     args: [
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        '0', //amountOutMin
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
@@ -84,7 +101,6 @@ const Swap = () => {
                 return {
                     args: [
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        // mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
                         '0x00',
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
@@ -142,22 +158,16 @@ const Swap = () => {
     const handleOnSwap = async () => {
         try {
             if (inputAmount && outputAmount && tokenIn && tokenOut) {
-                const method = getSwapMethod()
-                const swapArguments = getSwapArguments()
-                if (!swapArguments) return
-                const { args, value } = swapArguments
-                const gasLimit = await routerContract?.estimateGas[method](
-                    ...args,
-                    { value },
-                )
-                const callResult = await routerContract?.[method](...args, {
-                    value,
-                    gasLimit: computeGasLimit(gasLimit),
+                console.log('swaping...')
+                initDataTransaction.setError('')
+                initDataTransaction.setPayload({
+                    method: 'swap',
+                    input: inputAmount,
+                    output: outputAmount,
+                    tokenIn,
+                    tokenOut,
                 })
-                const txn = await callResult.wait()
-                if (txn.status === 1) {
-                    console.log('Swap successfully...')
-                }
+                initDataTransaction.setIsOpenConfirmModal(true)
             }
         } catch (error) {
             console.log('failed to swap', error)
@@ -166,16 +176,83 @@ const Swap = () => {
 
     const handleOnApprove = async () => {
         try {
+            initDataTransaction.setError('')
+
             if (tokenIn && inputAmount && routerAddress) {
-                await tokenApproval?.approve(
+                console.log('approving....')
+                initDataTransaction.setIsOpenWaitingModal(true)
+                const callResult: any = await tokenApproval?.approve(
                     routerAddress,
                     mulNumberWithDecimal(inputAmount, tokenIn.decimals),
                 )
+
+                initDataTransaction.setIsOpenWaitingModal(false)
+                initDataTransaction.setIsOpenResultModal(true)
+
+                const txn = await callResult.wait()
+                initDataTransaction.setIsOpenResultModal(false)
+
+                addTxn({
+                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                        callResult.hash || ''
+                    }`,
+                    // hash: tx?.hash || '',
+                    msg: 'Approve',
+                    status: txn.status === 1 ? true : false,
+                })
             }
         } catch (err) {
             console.log('Failed to approve token: ', err)
+            initDataTransaction.setError('Failed')
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
         }
     }
+
+    const onConfirm = useCallback(async () => {
+        try {
+            initDataTransaction.setIsOpenConfirmModal(false)
+            initDataTransaction.setIsOpenWaitingModal(true)
+
+            const method = getSwapMethod()
+            const swapArguments = getSwapArguments()
+            if (!swapArguments) {
+                initDataTransaction.setError('Failed')
+                initDataTransaction.setIsOpenWaitingModal(false)
+                return initDataTransaction.setIsOpenResultModal(true)
+            }
+
+            const { args, value } = swapArguments
+            const gasLimit = await routerContract?.estimateGas[method](
+                ...args,
+                { value },
+            )
+            const callResult = await routerContract?.[method](...args, {
+                value,
+                gasLimit: computeGasLimit(gasLimit),
+            })
+
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
+
+            console.log('🤦‍♂️ ⟹ handleOnSwap ⟹ callResult:', { callResult })
+            const txn = await callResult.wait()
+            initDataTransaction.setIsOpenResultModal(false)
+
+            addTxn({
+                hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                    callResult.hash || ''
+                }`,
+                // hash: tx?.hash || '',
+                msg: 'Swap',
+                status: txn.status === 1 ? true : false,
+            })
+        } catch (error) {
+            // initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setError('Failed')
+            initDataTransaction.setIsOpenResultModal(true)
+        }
+    }, [initDataTransaction])
 
     const openWalletModal = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
@@ -187,25 +264,39 @@ const Swap = () => {
             pair &&
             tokenIn &&
             tokenOut &&
-            swapType === Field.INPUT
+            swapType === Field.INPUT &&
+            chainId
         ) {
             const amountInWithDel = mulNumberWithDecimal(
                 inputAmount,
                 tokenIn.decimals,
             )
+            const tI = isNativeCoin(tokenIn)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenIn
+            const tO = isNativeCoin(tokenOut)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenOut
             const swapRate = pair?.calcSwapRate(
                 amountInWithDel,
-                tokenIn,
-                tokenOut,
+                tI,
+                tO,
                 Field.INPUT,
             )
-            console.log('🤦‍♂️ ⟹ useEffect ⟹ swapRate:', swapRate)
             onChangeSwapState({
                 ...swapState,
                 outputAmount: swapRate,
             })
+            return
         }
-    }, [inputAmount, tokenIn, tokenOut])
+        return () => {
+            // onChangeSwapState({
+            //     ...swapState,
+            //     outputAmount: '',
+            //     inputAmount: ''
+            // })
+        }
+    }, [inputAmount, chainId])
 
     useEffect(() => {
         if (
@@ -213,25 +304,38 @@ const Swap = () => {
             pair &&
             tokenIn &&
             tokenOut &&
-            swapType === Field.OUTPUT
+            swapType === Field.OUTPUT &&
+            chainId
         ) {
             const amountOutWithDel = mulNumberWithDecimal(
                 outputAmount,
                 tokenOut.decimals,
             )
+            const tI = isNativeCoin(tokenIn)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenIn
+            const tO = isNativeCoin(tokenOut)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenOut
             const swapRate = pair?.calcSwapRate(
                 amountOutWithDel,
-                tokenIn,
-                tokenOut,
+                tI,
+                tO,
                 Field.OUTPUT,
             )
-            console.log('🤦‍♂️ ⟹ useEffect ⟹ swapRate:', swapRate)
             onChangeSwapState({
                 ...swapState,
                 inputAmount: swapRate,
             })
         }
-    }, [outputAmount, tokenIn, tokenOut])
+        return () => {
+            // onChangeSwapState({
+            //     ...swapState,
+            //     outputAmount: '',
+            //     inputAmount: ''
+            // })
+        }
+    }, [outputAmount, chainId])
 
     const SwapButton = () => {
         const isNotConnected = !account
@@ -279,47 +383,63 @@ const Swap = () => {
     }
 
     return (
-        <SwapContainer>
-            {!account && isOpenWalletModal && (
-                <WalletModal setToggleWalletModal={openWalletModal} />
-            )}
-            <Row jus="space-between">
-                <Nav gap="20px">
-                    <Link to="/swap" className="active-link">
-                        Swap
-                    </Link>
-                    {/* <Link to="/add">Add</Link> */}
-                    {/* <Link to="/pools">Pool</Link> */}
-                    <Link to="/limit">Limit</Link>
-                </Nav>
-                <Setting />
-            </Row>
-            <Bridge />
-            <Columns>
-                <CurrencyInputPanel
-                    token={tokenIn}
-                    value={inputAmount}
-                    onUserInput={handleOnUserInput}
-                    onUserSelect={handleOnTokenSelection}
-                    field={Field.INPUT}
-                />
-                <Icon>
-                    <img src={SwapIcon} alt="icon" onClick={onSwitchTokens} />
-                </Icon>
-                <CurrencyInputPanel
-                    token={tokenOut}
-                    value={outputAmount}
-                    onUserInput={handleOnUserInput}
-                    onUserSelect={handleOnTokenSelection}
-                    field={Field.OUTPUT}
-                />
-            </Columns>
-            <PoolPriceBar
-                dropDown={poolPriceBarOpen}
-                setDropDown={setPoolPriceBarOpen}
+        <>
+            <ComponentsTransaction
+                data={initDataTransaction}
+                onConfirm={
+                    Number(tokenApproval?.allowance) < Number(inputAmount) &&
+                    !isNativeCoin(tokenIn)
+                        ? handleOnApprove
+                        : onConfirm
+                }
             />
-            <SwapButton />
-        </SwapContainer>
+            <ToastMessage />
+            <SwapContainer>
+                {!account && isOpenWalletModal && (
+                    <WalletModal setToggleWalletModal={openWalletModal} />
+                )}
+                <Row jus="space-between">
+                    <Nav gap="20px">
+                        <Link to="/swap" className="active-link">
+                            Swap
+                        </Link>
+                        {/* <Link to="/add">Add</Link> */}
+                        {/* <Link to="/pools">Pool</Link> */}
+                        <Link to="/limit">Limit</Link>
+                    </Nav>
+                    <Setting />
+                </Row>
+                <Bridge />
+                <Columns>
+                    <CurrencyInputPanel
+                        token={tokenIn}
+                        value={inputAmount}
+                        onUserInput={handleOnUserInput}
+                        onUserSelect={handleOnTokenSelection}
+                        field={Field.INPUT}
+                    />
+                    <Icon>
+                        <img
+                            src={SwapIcon}
+                            alt="icon"
+                            onClick={onSwitchTokens}
+                        />
+                    </Icon>
+                    <CurrencyInputPanel
+                        token={tokenOut}
+                        value={outputAmount}
+                        onUserInput={handleOnUserInput}
+                        onUserSelect={handleOnTokenSelection}
+                        field={Field.OUTPUT}
+                    />
+                </Columns>
+                <PoolPriceBar
+                    dropDown={poolPriceBarOpen}
+                    setDropDown={setPoolPriceBarOpen}
+                />
+                <SwapButton />
+            </SwapContainer>
+        </>
     )
 }
 

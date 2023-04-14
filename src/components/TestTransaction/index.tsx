@@ -30,6 +30,12 @@ const TestTransaction = () => {
     useEffect(() => {
         if (isDone) {
             let timeX = setTimeout(() => {
+                addTxn({
+                    hash: '1289731289738912',
+                    msg: '324789237fh2iufh',
+                    status: true,
+                })
+
                 initDataTransaction.setIsOpenResultModal(false)
                 initDataTransaction.setIsTransactionSuccess(true)
                 initDataTransaction.setIsOpenToastMessageModal(true)
@@ -37,6 +43,7 @@ const TestTransaction = () => {
             })
             return () => {
                 clearTimeout(timeX)
+                initDataTransaction.setIsOpenToastMessageModal(false)
             }
         }
     }, [isDone])
@@ -56,11 +63,11 @@ const TestTransaction = () => {
                     ...initDataTransaction.payload,
                     msg: new Date().getTime(),
                 })
-                addTxn({
-                    hash: Math.random().toString(),
-                    msg: Math.random().toString(),
-                    status: true,
-                })
+                // addTxn({
+                //     hash: Math.random().toString(),
+                //     msg: Math.random().toString(),
+                //     status: true,
+                // })
 
                 setIsDone(true)
             }, 4000)

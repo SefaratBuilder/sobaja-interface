@@ -40,18 +40,18 @@ const ConfirmTransactionModal = ({
                 </Header>
                 <EstimatedNotice>
                     <TitleEstimate style={{ gap: '5px' }}>
-                        <h2>999</h2>
-                        <h2>ETH</h2>
+                        <h2>{payload?.input || 999}</h2>
+                        <h2>{payload?.tokenIn?.symbol || 'X'}</h2>
                     </TitleEstimate>
                     <h3>for</h3>
                     <TitleEstimate style={{ gap: '5px' }}>
-                        <h2>999.000</h2>
-                        <h2>USDC</h2>
+                        <h2>{payload?.output || 9999}</h2>
+                        <h2>{payload?.tokenOut?.symbol || 'Y'}</h2>
                     </TitleEstimate>
                     {/* <h2>{payload.tokenIn + "/" + payload.tokenOut} Pool Tokens</h2> */}
                     <span>
                         Output is estimated. If the price changes by more than{' '}
-                        {0.99}% your transaction will revert.
+                        {slippage || 0}% your transaction will revert.
                     </span>
                 </EstimatedNotice>
                 <ContentBottom>

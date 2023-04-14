@@ -20,7 +20,7 @@ export const calculateAmountOut = (
     reserveOut: string | number,
     fee: string | number,
 ): string => {
-    console.log({ amountIn, reserveIn, reserveOut, fee })
+    // console.log({ amountIn, reserveIn, reserveOut, fee })
     if (!amountIn || !reserveIn || !reserveOut || !fee) return '0'
 
     const amountInWithFee = mul(amountIn, fee)
