@@ -40,6 +40,7 @@ const Swap = () => {
     const balanceIn = useCurrencyBalance(account, tokenIn)
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
+    console.log({pair})
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {

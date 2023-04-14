@@ -9,7 +9,6 @@ import { FixedNumber } from 'ethers'
 
 export function useToken(address: string | undefined): Token | undefined {
     const { chainId } = useActiveWeb3React()
-    address = isAddress(address) ? address : undefined
     const symbolResult = useMultipleContractSingleData(
         [address],
         ERC20_INTERFACE,
@@ -46,6 +45,48 @@ export function useToken(address: string | undefined): Token | undefined {
             logoURI: '',
         }
     }, [address, chainId, symbolResult, nameResult, decimalsResult])
+}
+
+export function useTokens(addresses: (string | undefined)[]): (Token | undefined)[] {
+    const { chainId } = useActiveWeb3React()
+    const symbolResult = useMultipleContractSingleData(
+        addresses,
+        ERC20_INTERFACE,
+        'symbol',
+        [],
+    )
+
+    const nameResult = useMultipleContractSingleData(
+        addresses,
+        ERC20_INTERFACE,
+        'name',
+        [],
+    )
+
+    const decimalsResult = useMultipleContractSingleData(
+        addresses,
+        ERC20_INTERFACE,
+        'decimals',
+        [],
+    )
+
+    return useMemo(() => {
+        return addresses.map((address, index) => {
+            const symbol = symbolResult?.[index]?.result?.[0]
+            const name = nameResult?.[index]?.result?.[0]
+            const decimals = decimalsResult?.[index]?.result?.[0]
+
+            if (!symbol || !name || !decimals || !chainId || !address) return
+            return {
+                address,
+                name,
+                decimals,
+                chainId,
+                symbol,
+                logoURI: '',
+            }
+        })
+    }, [addresses, chainId])
 }
 
 export function useTokenApproval(

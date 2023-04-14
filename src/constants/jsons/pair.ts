@@ -1,7 +1,7 @@
 import { Interface } from '@ethersproject/abi'
 import PAIR_ABI from './pair.json'
 
-const ERC20_INTERFACE = new Interface(PAIR_ABI)
+const PAIR_INTERFACE = new Interface(PAIR_ABI)
 
-export default ERC20_INTERFACE
+export default PAIR_INTERFACE
 export { PAIR_ABI }
