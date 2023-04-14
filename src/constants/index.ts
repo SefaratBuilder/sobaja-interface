@@ -60,3 +60,4 @@ export const ALL_SUPPORTED_CHAIN_IDS: ChainId[] = [
     ChainId.GOERLI,
     ChainId.MUMBAI,
 ]
+
