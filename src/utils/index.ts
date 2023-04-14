@@ -120,8 +120,8 @@ export const calcSlippageAmount = (
         throw new Error (`Please input properly slippage amount`)
     }
 
-    const amountIn = div(amount,((sub(1,slippage))))
-    const amountOut = mul(amount,((sub(1,slippage))))
+    const amountIn = div(amount,(div((sub(1,slippage)),100)))
+    const amountOut = mul(amount,(div((sub(1,slippage)),100)))
 
     return [amountOut, amountIn]
 }

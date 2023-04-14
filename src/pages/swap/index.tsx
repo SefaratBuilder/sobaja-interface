@@ -16,15 +16,16 @@ import Setting from 'components/HeaderLiquidity'
 import { useToken, useTokenApproval } from 'hooks/useToken'
 import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
-import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/index'
+import { ALL_SUPPORTED_CHAIN_IDS, WRAPPED_NATIVE_COIN } from 'constants/index'
 import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
 import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
 import { useRouterContract } from 'hooks/useContract'
-import { calcSlippageAmount, calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
+import { calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
 import { useTransactionDeadline } from 'states/application/hooks'
-import { useSlippageTolerance } from 'states/application/hooks'
+import { useSlippageTolerance } from '../../states/application/hooks'
+import {calcSlippageAmount} from '../../utils/index'
 
 const Swap = () => {
 
@@ -79,6 +80,7 @@ const Swap = () => {
     const getSwapArguments = () => {
         if(!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId) return 
         if(swapType === Field.INPUT) {
+            console.log({amountOutmin: mulNumberWithDecimal(outputAmount, tokenOut.decimals)})
             if(isNativeCoin(tokenIn))
                 return {
                     args: [
@@ -184,26 +186,45 @@ const Swap = () => {
     }
 
     useEffect(()=>{
-        if(inputAmount && pair && tokenIn && tokenOut && swapType === Field.INPUT){
+        if(inputAmount && pair && tokenIn && tokenOut && swapType === Field.INPUT && chainId){
             const amountInWithDel = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
-            const swapRate = pair?.calcSwapRate((amountInWithDel),tokenIn,tokenOut, Field.INPUT)
+            const tI = isNativeCoin(tokenIn) ? WRAPPED_NATIVE_COIN[chainId] : tokenIn
+            const tO = isNativeCoin(tokenOut) ? WRAPPED_NATIVE_COIN[chainId] : tokenOut
+            const swapRate = pair?.calcSwapRate((amountInWithDel), tI, tO, Field.INPUT)
             onChangeSwapState({
                 ...swapState,
                 outputAmount: swapRate
             })
+            return
         } 
-    },[inputAmount, tokenIn, tokenOut])
+        return () => {
+            // onChangeSwapState({
+            //     ...swapState,
+            //     outputAmount: '',
+            //     inputAmount: ''
+            // })
+        }
+    },[inputAmount, chainId])
 
     useEffect(()=>{
-        if(outputAmount && pair && tokenIn && tokenOut && swapType === Field.OUTPUT){
+        if(outputAmount && pair && tokenIn && tokenOut && swapType === Field.OUTPUT && chainId){
             const amountOutWithDel = mulNumberWithDecimal(outputAmount, tokenOut.decimals)
-            const swapRate = pair?.calcSwapRate((amountOutWithDel), tokenIn, tokenOut, Field.OUTPUT)
+            const tI = isNativeCoin(tokenIn) ? WRAPPED_NATIVE_COIN[chainId] : tokenIn
+            const tO = isNativeCoin(tokenOut) ? WRAPPED_NATIVE_COIN[chainId] : tokenOut
+            const swapRate = pair?.calcSwapRate((amountOutWithDel), tI, tO, Field.OUTPUT)
             onChangeSwapState({
                 ...swapState,
                 inputAmount: swapRate
             }) 
         }
-    },[outputAmount, tokenIn, tokenOut])
+        return () => {
+            // onChangeSwapState({
+            //     ...swapState,
+            //     outputAmount: '',
+            //     inputAmount: ''
+            // })
+        }
+    },[outputAmount, chainId])
 
     const SwapButton = () => {
         const isNotConnected = !account

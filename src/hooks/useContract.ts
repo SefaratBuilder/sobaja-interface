@@ -61,6 +61,6 @@ export function useTokenContract(address: string | undefined): Contract | null {
 
 export function useFaucetContract(): Contract | null {
     const { chainId } = useActiveWeb3React();
-    if (chainId != 280) return null;
+    if (!chainId) return null;
     return useContract(Faucet[chainId], FAUCET_ABI)
 }
