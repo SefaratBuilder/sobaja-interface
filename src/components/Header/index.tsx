@@ -31,18 +31,18 @@ const Header = () => {
                 <Web3Status />
             </Connector>
             <WrapperNavigator onClick={() => setBurgerNav((i) => !i)}>
-                    {!burgerNav ? (
-                        <>
-                            <MenuIcon>
-                                <span />
-                                <span />
-                                <span />
-                            </MenuIcon>
-                        </>
-                    ) : (
-                        'X'
-                    )}
-                </WrapperNavigator>
+                {!burgerNav ? (
+                    <>
+                        <MenuIcon>
+                            <span />
+                            <span />
+                            <span />
+                        </MenuIcon>
+                    </>
+                ) : (
+                    'X'
+                )}
+            </WrapperNavigator>
         </HeaderWrapper>
     )
 }

@@ -26,7 +26,6 @@ import { calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
 import { useTransactionDeadline } from 'states/application/hooks'
 
 const Swap = () => {
-
     const swapState = useSwapState()
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(false)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
@@ -56,47 +55,47 @@ const Swap = () => {
     )
 
     const getSwapMethod = () => {
-        if(swapType === Field.INPUT) {
-            if(isNativeCoin(tokenIn))
-                return 'swapExactETHForTokens'
-            else if(isNativeCoin(tokenOut))
-                return 'swapExactTokensForETH'
-            else 
-                return 'swapExactTokensForTokens'
+        if (swapType === Field.INPUT) {
+            if (isNativeCoin(tokenIn)) return 'swapExactETHForTokens'
+            else if (isNativeCoin(tokenOut)) return 'swapExactTokensForETH'
+            else return 'swapExactTokensForTokens'
         } else {
-            if(isNativeCoin(tokenOut))
-                return 'swapTokensForExactETH'
-            else if(isNativeCoin(tokenIn))
-                return 'swapETHForExactTokens'
-            else    
-                return 'swapTokensForExactTokens'
+            if (isNativeCoin(tokenOut)) return 'swapTokensForExactETH'
+            else if (isNativeCoin(tokenIn)) return 'swapETHForExactTokens'
+            else return 'swapTokensForExactTokens'
         }
     }
 
     const getSwapArguments = () => {
-        if(!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId) return 
-        if(swapType === Field.INPUT) {
-            console.log({amountOutmin: mulNumberWithDecimal(outputAmount, tokenOut.decimals)})
-            if(isNativeCoin(tokenIn))
+        if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
+            return
+        if (swapType === Field.INPUT) {
+            console.log({
+                amountOutmin: mulNumberWithDecimal(
+                    outputAmount,
+                    tokenOut.decimals,
+                ),
+            })
+            if (isNativeCoin(tokenIn))
                 return {
                     args: [
                         '0', //amountOutMin
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
-                        calcTransactionDeadline(deadline)
+                        calcTransactionDeadline(deadline),
                     ],
-                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals) //amountIn
+                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
                 }
-            else if(isNativeCoin(tokenOut))
+            else if (isNativeCoin(tokenOut))
                 return {
                     args: [
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
                         '0x00',
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
-                        calcTransactionDeadline(deadline)
+                        calcTransactionDeadline(deadline),
                     ],
-                    value: '0x00'
+                    value: '0x00',
                 }
             else
                 return {
@@ -105,31 +104,31 @@ const Swap = () => {
                         mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
                         [tokenIn.address, tokenOut.address],
                         account,
-                        calcTransactionDeadline(deadline)
+                        calcTransactionDeadline(deadline),
                     ],
-                    value: '0x00'
+                    value: '0x00',
                 }
         } else {
-            if(isNativeCoin(tokenOut))
+            if (isNativeCoin(tokenOut))
                 return {
                     args: [
                         mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
-                        calcTransactionDeadline(deadline)
+                        calcTransactionDeadline(deadline),
                     ],
-                    value: '0x00'
+                    value: '0x00',
                 }
-            else if(isNativeCoin(tokenIn))
+            else if (isNativeCoin(tokenIn))
                 return {
                     args: [
                         mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
-                        calcTransactionDeadline(deadline)
+                        calcTransactionDeadline(deadline),
                     ],
-                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals) //amountInMax
+                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
                 }
             else
                 return {
@@ -138,28 +137,34 @@ const Swap = () => {
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
                         [tokenIn.address, tokenOut.address],
                         account,
-                        calcTransactionDeadline(deadline)
+                        calcTransactionDeadline(deadline),
                     ],
-                    value: '0x00'
+                    value: '0x00',
                 }
         }
     }
 
     const handleOnSwap = async () => {
         try {
-            if(inputAmount && outputAmount && tokenIn && tokenOut) {
+            if (inputAmount && outputAmount && tokenIn && tokenOut) {
                 const method = getSwapMethod()
                 const swapArguments = getSwapArguments()
-                if(!swapArguments) return
+                if (!swapArguments) return
                 const { args, value } = swapArguments
-                const gasLimit = await routerContract?.estimateGas[method](...args, { value })
-                const callResult = await routerContract?.[method](...args, { value, gasLimit: computeGasLimit(gasLimit)})
+                const gasLimit = await routerContract?.estimateGas[method](
+                    ...args,
+                    { value },
+                )
+                const callResult = await routerContract?.[method](...args, {
+                    value,
+                    gasLimit: computeGasLimit(gasLimit),
+                })
                 const txn = await callResult.wait()
-                if(txn.status === 1) {
+                if (txn.status === 1) {
                     console.log('Swap successfully...')
                 }
             }
-        } catch(error) {
+        } catch (error) {
             console.log('failed to swap', error)
         }
     }
@@ -169,8 +174,8 @@ const Swap = () => {
             if (tokenIn && inputAmount && routerAddress) {
                 await tokenApproval?.approve(
                     routerAddress,
-                    mulNumberWithDecimal(inputAmount, tokenIn.decimals)
-                )                
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                )
             }
         } catch (err) {
             console.log('Failed to approve token: ', err)
@@ -181,18 +186,37 @@ const Swap = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
     }
 
-    useEffect(()=>{
-        if(inputAmount && pair && tokenIn && tokenOut && swapType === Field.INPUT && chainId){
-            const amountInWithDel = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
-            const tI = isNativeCoin(tokenIn) ? WRAPPED_NATIVE_COIN[chainId] : tokenIn
-            const tO = isNativeCoin(tokenOut) ? WRAPPED_NATIVE_COIN[chainId] : tokenOut
-            const swapRate = pair?.calcSwapRate((amountInWithDel), tI, tO, Field.INPUT)
+    useEffect(() => {
+        if (
+            inputAmount &&
+            pair &&
+            tokenIn &&
+            tokenOut &&
+            swapType === Field.INPUT &&
+            chainId
+        ) {
+            const amountInWithDel = mulNumberWithDecimal(
+                inputAmount,
+                tokenIn.decimals,
+            )
+            const tI = isNativeCoin(tokenIn)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenIn
+            const tO = isNativeCoin(tokenOut)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenOut
+            const swapRate = pair?.calcSwapRate(
+                amountInWithDel,
+                tI,
+                tO,
+                Field.INPUT,
+            )
             onChangeSwapState({
                 ...swapState,
-                outputAmount: swapRate
+                outputAmount: swapRate,
             })
             return
-        } 
+        }
         return () => {
             // onChangeSwapState({
             //     ...swapState,
@@ -200,18 +224,37 @@ const Swap = () => {
             //     inputAmount: ''
             // })
         }
-    },[inputAmount, chainId])
+    }, [inputAmount, chainId])
 
-    useEffect(()=>{
-        if(outputAmount && pair && tokenIn && tokenOut && swapType === Field.OUTPUT && chainId){
-            const amountOutWithDel = mulNumberWithDecimal(outputAmount, tokenOut.decimals)
-            const tI = isNativeCoin(tokenIn) ? WRAPPED_NATIVE_COIN[chainId] : tokenIn
-            const tO = isNativeCoin(tokenOut) ? WRAPPED_NATIVE_COIN[chainId] : tokenOut
-            const swapRate = pair?.calcSwapRate((amountOutWithDel), tI, tO, Field.OUTPUT)
+    useEffect(() => {
+        if (
+            outputAmount &&
+            pair &&
+            tokenIn &&
+            tokenOut &&
+            swapType === Field.OUTPUT &&
+            chainId
+        ) {
+            const amountOutWithDel = mulNumberWithDecimal(
+                outputAmount,
+                tokenOut.decimals,
+            )
+            const tI = isNativeCoin(tokenIn)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenIn
+            const tO = isNativeCoin(tokenOut)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenOut
+            const swapRate = pair?.calcSwapRate(
+                amountOutWithDel,
+                tI,
+                tO,
+                Field.OUTPUT,
+            )
             onChangeSwapState({
                 ...swapState,
-                inputAmount: swapRate
-            }) 
+                inputAmount: swapRate,
+            })
         }
         return () => {
             // onChangeSwapState({
@@ -220,7 +263,7 @@ const Swap = () => {
             //     inputAmount: ''
             // })
         }
-    },[outputAmount, chainId])
+    }, [outputAmount, chainId])
 
     const SwapButton = () => {
         const isNotConnected = !account
@@ -232,7 +275,8 @@ const Swap = () => {
         const isInsufficientBalance =
             inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
         const isInsufficientAllowance =
-            Number(tokenApproval?.allowance) < Number(inputAmount) && !isNativeCoin(tokenIn)
+            Number(tokenApproval?.allowance) < Number(inputAmount) &&
+            !isNativeCoin(tokenIn)
 
         return (
             <Row>
@@ -273,7 +317,9 @@ const Swap = () => {
             )}
             <Row jus="space-between">
                 <Nav gap="20px">
-                    <Link to="/swap" className='active-link'>Swap</Link>
+                    <Link to="/swap" className="active-link">
+                        Swap
+                    </Link>
                     {/* <Link to="/add">Add</Link> */}
                     {/* <Link to="/pools">Pool</Link> */}
                     <Link to="/limit">Limit</Link>
@@ -310,10 +356,10 @@ const Swap = () => {
 }
 
 const SwapContainer = styled(Columns)`
-    margin: 40px auto;
+    margin: 0 auto 40px;
     height: fit-content;
     max-width: 480px;
-    background: var(--bg5)!important;
+    background: var(--bg5) !important;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
@@ -323,7 +369,7 @@ const SwapContainer = styled(Columns)`
         rgba(0, 28, 44, 0.3)
     );
     gap: 15px;
-    @media(max-width: 500px) {
+    @media (max-width: 500px) {
         width: 90%;
     }
 `
@@ -332,9 +378,9 @@ const Nav = styled(Row)`
     a {
         padding: 5px 8px;
         border-radius: 4px;
-        text-decoration: none!important;
+        text-decoration: none !important;
         :hover {
-            text-decoration: none!important;
+            text-decoration: none !important;
         }
     }
 

@@ -54,7 +54,7 @@ const Faucet = () => {
                 Faucet
             </BtnFaucet>
             {isDislayFaucet ? (
-                <FaucetModalDiv isDislayFaucet={isDislayFaucet}>
+                <FaucetModalDiv>
                     <ContainerFaucetModal
                         isDislayFaucet={isDislayFaucet}
                         ref={ref}
@@ -76,13 +76,15 @@ const Faucet = () => {
                             </ContentFaucet>
                             <CoinButton>
                                 {showMintCoins()}
-                                {
-                                    chainId !== 280 && (
-                                        <Row>
-                                            <Error fontSize='14px'>Wrong network! Please switch to ZkSync Goerli network to faucet tokens.</Error>
-                                        </Row>
-                                    )
-                                }
+                                {chainId !== 280 && (
+                                    <Row>
+                                        <Error fontSize="14px">
+                                            Wrong network! Please switch to
+                                            ZkSync Goerli network to faucet
+                                            tokens.
+                                        </Error>
+                                    </Row>
+                                )}
                             </CoinButton>
                         </BodyModalFaucet>
                     </ContainerFaucetModal>
@@ -164,7 +166,7 @@ const BtnFaucet = styled(Button)`
     width: unset;
     padding: 0px 12px;
 `
-const FaucetModalDiv = styled.div<{ isDislayFaucet: boolean }>`
+const FaucetModalDiv = styled.div`
     position: fixed;
     height: 100%;
     width: 100%;
@@ -173,9 +175,9 @@ const FaucetModalDiv = styled.div<{ isDislayFaucet: boolean }>`
     right: 0;
     bottom: 0;
     margin: auto;
-    z-index: ${({ isDislayFaucet }) => (isDislayFaucet ? 3 : -1)};
-    display: flex;    
-    @media(max-width: 576px) {
+    z-index: 3;
+    display: flex;
+    @media (max-width: 576px) {
         width: 90%;
     }
 `
