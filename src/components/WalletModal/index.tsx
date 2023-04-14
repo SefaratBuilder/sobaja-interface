@@ -312,9 +312,9 @@ const Container = styled.div<{ isConnected: boolean }>`
     max-width: 500px;
     width: 100%;
     left: 0;
-    top: 49%;
+    /* top: 49%; */
     right: 0;
-    transform: translateY(-50%);
+    transform: translateY(-130%);
     margin: auto;
     transition: all 0.1s ease-in-out;
     z-index: 3;
@@ -324,7 +324,7 @@ const Container = styled.div<{ isConnected: boolean }>`
 
     @media screen and (max-width: 1100px) {
         top: unset;
-        bottom: 50%;
+        /* bottom: 50%; */
     }
     @media screen and (max-width: 576px) {
         max-width: 410px;

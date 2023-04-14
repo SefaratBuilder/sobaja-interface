@@ -268,7 +268,6 @@ const Container = styled.div<{ isConnected: boolean }>`
 const WrapBlur = styled.div`
     div {
         opacity: 0;
-        z-index: -1;
     }
     &.active {
         div {

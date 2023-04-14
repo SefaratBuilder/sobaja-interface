@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Routes, Route, Navigate, HashRouter } from 'react-router-dom'
 import { GlobalStyle } from './styles'
 import Swap from 'pages/swap'
@@ -12,6 +12,7 @@ import MulticallUpdater from 'states/multicall/updater'
 import Polling from 'components/Polling'
 import Pools from 'pages/pool'
 import ToastMessage from 'components/ToastMessage'
+import TestTransaction from 'components/TestTransaction'
 
 const App = () => {
     const Updater = () => {
@@ -33,6 +34,7 @@ const App = () => {
 
                 <AppContainer>
                     {/* <ToastMessage /> */}
+                    {/* <TestTransaction /> */}
                     <Routes>
                         <Route path="/swap" element={<Swap />} />
                         <Route path="/pools" element={<Pools />} />
@@ -49,7 +51,6 @@ const App = () => {
 const AppContainer = styled.div`
     position: relative;
     padding: 20px 0;
-    z-index: -1;
 `
 
 export default App
