@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, Fragment } from 'react'
 import styled from 'styled-components'
 import PrimaryButton, { Button } from 'components/Buttons/PrimaryButton'
 import WalletModal from 'components/WalletModal'
@@ -8,16 +8,10 @@ import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { injected } from 'connectors'
 import arrowDown from 'assets/icons/arrow-down.svg'
-import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 
 const Web3Status = () => {
     const { account, connector, error } = useWeb3React()
     const [toggleWalletModal, setToggleWalletModal] = useState<boolean>(false)
-    const ref = useRef<any>()
-
-    useOnClickOutside(ref, () => {
-        setToggleWalletModal(false)
-    })
 
     function formatConnectorName(account: any) {
         const { ethereum } = window
@@ -31,11 +25,13 @@ const Web3Status = () => {
             )
             .map((k) => SUPPORTED_WALLETS[k].iconURL)[0]
         return (
-            <WalletName>
-                <Icon src={logo}></Icon>
-                <span>{account && shortenAddress(account)}</span>
+            <Fragment>
+                <WalletName>
+                    <Icon src={logo}></Icon>
+                    <span>{account && shortenAddress(account)}</span>
+                </WalletName>
                 <IconArrow src={arrowDown}></IconArrow>
-            </WalletName>
+            </Fragment>
         )
     }
     const Web3StatusInner = (account: any, error: any) => {
@@ -69,30 +65,24 @@ const Web3Status = () => {
                     id="connect-wallet"
                     onClick={() => setToggleWalletModal(!toggleWalletModal)}
                 >
-                    <div>
-                        <p>Connect wallet</p>
-                    </div>
+                    Connect wallet
                 </Web3StatusConnect>
             )
         }
     }
 
     return (
-        <>
+        <Fragment>
             <Web3StatusWrapper>
                 {Web3StatusInner(account, error)}
-                {toggleWalletModal ? (
-                    <div ref={ref}>
-                        <WalletModal
-                            setToggleWalletModal={setToggleWalletModal}
-                        />
-                    </div>
-                ) : (
-                    ''
-                )}
             </Web3StatusWrapper>
+            {toggleWalletModal ? (
+                <WalletModal setToggleWalletModal={setToggleWalletModal} />
+            ) : (
+                ''
+            )}
             {toggleWalletModal ? <OpacityModal></OpacityModal> : ''}
-        </>
+        </Fragment>
     )
 }
 
@@ -128,6 +118,7 @@ const WalletName = styled.div`
     align-items: center;
     display: flex;
     gap: 5px;
+    margin-right: 20px;
 `
 const Icon = styled.img`
     height: 20px;
@@ -135,11 +126,10 @@ const Icon = styled.img`
 `
 
 const Web3StatusConnect = styled(Button)`
-    padding: 0px 8px;
+    padding: 0 8px;
+    width: unset;
 `
 
-export const Web3StatusWrapper = styled.div`
-    width: 160px;
-`
+export const Web3StatusWrapper = styled.div``
 
 export default Web3Status

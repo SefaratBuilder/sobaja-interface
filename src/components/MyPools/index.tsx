@@ -2,13 +2,14 @@ import React, { useState, Fragment } from 'react'
 import styled from 'styled-components'
 import ETH from 'assets/token-logos/eth.svg'
 import USDC from 'assets/token-logos/usdc.svg'
+import imgClose from 'assets/icons/icon-close.svg'
 const MyPools = () => {
     let arrMyPools = [1, 2, 3, 4]
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
-    const [percentValue, setPercentValue] = useState(7)
-
+    const [percentValue, setPercentValue] = useState(1)
+    const arrPrecent = [0, 25, 50, 75, 100]
     const handleChangeInput = (value: any) => {
-        setPercentValue(+value)
+        setPercentValue(value)
     }
     return (
         <WrapMyPools>
@@ -61,78 +62,113 @@ const MyPools = () => {
                 })}
             </RowMyPools>
 
-            <ModalRemovePool>
-                <WrapRemovePool>
-                    <Title>Remove</Title>
-                    <WrapTip>
-                        <span>
-                            Tip:Tip: Lorem ipsum dolor sit amet, consectetuer
-                            adipiscing elit, sed diam nonummy nibh euismod
-                            tincidunt ut laoreet dolore magna aliquam erat
-                            volutpat. Ut wisi enim ad minim veniam.
-                        </span>
-                    </WrapTip>
-                    <WrapRemoveAmount>
-                        <WrapAmount>
-                            <TitleRemove>Remove Amount</TitleRemove>
-                            <WrapPercent>
-                                <Percent>{percentValue}%</Percent>
-                            </WrapPercent>
-                        </WrapAmount>
-                        <WrapInputRange>
-                            <Input
-                                onChange={(e) =>
-                                    handleChangeInput(e.target.value)
-                                }
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={percentValue}
-                                disabled={false}
-                            />
-                            <TEsst>
-                                <div>
-                                    <span>0</span>
-                                </div>
-                                <div>
-                                    <span>25</span>
-                                </div>
-                                <div>
-                                    <span>50</span>
-                                </div>
-                                <div>
-                                    <span>75</span>
-                                </div>
-                                <div>
-                                    <span>Max</span>
-                                </div>
-                            </TEsst>
-                        </WrapInputRange>
-                    </WrapRemoveAmount>
-                    <WrapContentRemove>
-                        <RowContentRemove>
-                            <WrapText>
-                                <Logo src={ETH}></Logo>
-                                <div>ETH</div>
-                            </WrapText>
-                            <Value>9.76543</Value>
-                        </RowContentRemove>
-                        <RowContentRemove>
-                            <WrapText>
-                                <Logo src={USDC}></Logo>
-                                <div>USDC</div>
-                            </WrapText>
-                            <Value>9.76543</Value>
-                        </RowContentRemove>
-                    </WrapContentRemove>
-
-                    <BtnConfirm>Confirm</BtnConfirm>
-                </WrapRemovePool>
-            </ModalRemovePool>
+            {modalRemovePool ? (
+                <ModalRemovePool onClick={() => setModalRemovePool(false)}>
+                    <WrapRemovePool>
+                        <WrapTitle>
+                            <Title>Remove</Title>
+                            <BtnClose src={imgClose}></BtnClose>
+                        </WrapTitle>
+                        <WrapTip>
+                            <span>
+                                Tip:Tip: Lorem ipsum dolor sit amet,
+                                consectetuer adipiscing elit, sed diam nonummy
+                                nibh euismod tincidunt ut laoreet dolore magna
+                                aliquam erat volutpat. Ut wisi enim ad minim
+                                veniam.
+                            </span>
+                        </WrapTip>
+                        <WrapRemoveAmount>
+                            <WrapAmount>
+                                <TitleRemove>Remove Amount</TitleRemove>
+                                <WrapPercent>
+                                    <Percent>
+                                        {arrPrecent[percentValue - 1]}%
+                                    </Percent>
+                                </WrapPercent>
+                            </WrapAmount>
+                            <WrapInputRange>
+                                <Input
+                                    onChange={(e) =>
+                                        handleChangeInput(e.target.value)
+                                    }
+                                    type="range"
+                                    min="1"
+                                    max="5"
+                                    value={percentValue}
+                                    disabled={false}
+                                />
+                                <DotPercent>
+                                    {arrPrecent.map((item) => {
+                                        return (
+                                            <div key={item}>
+                                                <span>
+                                                    {item == 100 ? 'Max' : item}
+                                                </span>
+                                            </div>
+                                        )
+                                    })}
+                                </DotPercent>
+                            </WrapInputRange>
+                        </WrapRemoveAmount>
+                        <WrapContentRemove>
+                            <RowContentRemove>
+                                <WrapText>
+                                    <Logo src={ETH}></Logo>
+                                    <div>ETH</div>
+                                </WrapText>
+                                <Value>9.76543</Value>
+                            </RowContentRemove>
+                            <RowContentRemove>
+                                <WrapText>
+                                    <Logo src={USDC}></Logo>
+                                    <div>USDC</div>
+                                </WrapText>
+                                <Value>9.76543</Value>
+                            </RowContentRemove>
+                        </WrapContentRemove>
+                        <WrapPrice>
+                            <TextPrice>Price:</TextPrice>
+                            <ValuePrice>1 ETH = 1,981.58 USDC </ValuePrice>
+                        </WrapPrice>
+                        <WrapPrice>
+                            <TextPrice></TextPrice>
+                            <ValuePrice>1 USDT = 0.00050 </ValuePrice>
+                        </WrapPrice>
+                        <BtnConfirm onClick={() => setPercentValue(25)}>
+                            Confirm
+                        </BtnConfirm>
+                    </WrapRemovePool>
+                </ModalRemovePool>
+            ) : (
+                ''
+            )}
         </WrapMyPools>
     )
 }
 
+const BtnClose = styled.img`
+    width: unset;
+    height: 20px;
+    cursor: pointer;
+    :hover {
+        background: #003b5c;
+    }
+`
+const WrapTitle = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`
+const WrapPrice = styled.div`
+    padding: 0px 15px;
+    margin-top: 20px;
+    display: flex;
+`
+const TextPrice = styled.div`
+    width: 15%;
+`
+const ValuePrice = styled.div``
 const WrapInputRange = styled.div`
     position: relative;
     height: 5px;
@@ -140,7 +176,7 @@ const WrapInputRange = styled.div`
     margin: auto;
 `
 
-const TEsst = styled.div`
+const DotPercent = styled.div`
     position: absolute;
     top: 0px;
     display: flex;
@@ -148,12 +184,11 @@ const TEsst = styled.div`
     width: 100%;
     height: 3px;
     > div {
-        /* z-index: 1; */
         height: 10px;
         width: 10px;
         background: #ffffff;
         border-radius: 50%;
-
+        z-index: -1;
         > span {
             position: relative;
             left: -7px;
@@ -182,13 +217,15 @@ const Input = styled.input`
     -webkit-appearance: none;
     background: #ffffff;
     width: 100%;
+    /* z-index: -1; */
     ::-webkit-slider-thumb {
         appearance: none;
-        width: 25px;
-        height: 25px;
+        width: 20px;
+        height: 20px;
         border-radius: 50%;
         background: #00b2ff;
         cursor: pointer;
+        z-index: 999999;
     }
 `
 
@@ -274,6 +311,10 @@ const ModalRemovePool = styled.div`
     max-width: 500px;
     width: 100%;
     margin: auto;
+
+    @media screen and (max-width: 1100px) {
+        width: 90%;
+    }
 `
 const WrapLogo = styled.div`
     display: flex;
