@@ -222,8 +222,6 @@ export const useTokensUrl = (tokens: Array<string>) => {
                 tkl.address.toLowerCase() === i?.toLowerCase())?.logoURI
         ]
     })
-    console.log("🤦‍♂️ ⟹ entries ⟹ entries:", entries)
-
     return Object.fromEntries(entries)
 }
 
@@ -233,8 +231,8 @@ export const useMyPosition = () => {
     const mapPairs: any = Object.values(allPairs)
     const lpTokens = mapPairs?.map((i: any) => i?.tokenLp)
     const tokenList: Array<string> = []
-    // const balances = useTokenBalances(account, lpTokens)
-    const balances = useTokenBalances('0x998f5d682a11dAEA3Adf8cd4D3cC6EC73405c770', lpTokens)
+    const balances = useTokenBalances(account, lpTokens)
+    // const balances = useTokenBalances('0x998f5d682a11dAEA3Adf8cd4D3cC6EC73405c770', lpTokens)
     const lpBalancesUser = Object.entries(balances).map(i => {
         if (i?.[1]?.value && Number(i?.[1]?.value) > 0) {
             const index = mapPairs.findIndex((lp: any) => lp?.tokenLp?.address === i?.[0])
@@ -245,13 +243,9 @@ export const useMyPosition = () => {
             !tokenList.includes(mapPairs?.[index]?.token0?.address) && tokenList.push(mapPairs?.[index]?.token0?.address)
             !tokenList.includes(mapPairs?.[index]?.token1?.address) && tokenList.push(mapPairs?.[index]?.token1?.address)
 
-            console.log("uri 0", TokenList.find(tkl =>
-                tkl.address.toLowerCase() === mapPairs?.[index]?.token0?.address?.toLowerCase()));
-            console.log("uri", TokenList.find(tkl =>
-                tkl.address.toLowerCase() === mapPairs?.[index]?.token1?.address?.toLowerCase()));
-
             return {
                 value: divNumberWithDecimal(i?.[1]?.value?.toString(), lpTokens?.[index]?.decimals),
+                valueWithDec: i?.[1]?.value?.toString(),
                 tokenLp: { ...lpTokens?.[index] },
                 token0: {
                     ...mapPairs?.[index]?.token0,
@@ -265,7 +259,10 @@ export const useMyPosition = () => {
                     logoURI: TokenList.find(tkl =>
                         tkl.address.toLowerCase() == mapPairs?.[index]?.token1?.address?.toLowerCase())?.logoURI
                 },
-                percent
+                percent,
+                totalLp: mapPairs?.[index]?.reserveLp,
+                totalReserve0: mapPairs?.[index]?.reserve0,
+                totalReserve1: mapPairs?.[index]?.reserve1,
             }
         }
     }).filter(i => i)

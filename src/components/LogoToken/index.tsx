@@ -6,7 +6,7 @@ const LogoToken = ({ token, size }: { token: Token; size?: string }) => {
     return (
         <WrapperLogo size={size}>
             <img
-                src={token.logoURI}
+                src={token.logoURI || imgQuestionDark}
                 alt={`${token.name} logo`}
                 onError={(e: any) => {
                     e.target.onerror = null

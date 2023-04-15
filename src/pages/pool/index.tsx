@@ -508,6 +508,7 @@ const Container = styled.div`
     font-style: italic;
     font-weight: 300;
     overflow: hidden;
+    margin-bottom: 50px;
 `
 
 const HeadTitle = styled.div`
