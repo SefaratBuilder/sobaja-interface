@@ -144,7 +144,7 @@ export function usePair(
     tokenB = chainId && isNativeCoin(tokenB) ? WRAPPED_NATIVE_COIN[chainId] : tokenB
     const lpAddress = computePairAddress({ chainId, tokenA, tokenB })
     const tokenLp = useToken(lpAddress)
-
+    console.log({ lpAddress })
     const balanceResult = useMultipleContractSingleData(
         [lpAddress],
         PAIR_INTERFACE,
@@ -200,6 +200,7 @@ export function useAllPairs(): {
     )
     const addresses: (string | undefined)[] = allPairsResult && allPairsResult.map(i => i.result?.[0])
     const pairs = usePairByAddresses(addresses)
+    console.log({ pairs })
 
     return useMemo(
         () => pairs,
