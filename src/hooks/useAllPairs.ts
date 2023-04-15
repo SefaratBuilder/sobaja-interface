@@ -237,8 +237,8 @@ export const useMyPosition = () => {
     const mapPairs: any = Object.values(allPairs)
     const lpTokens = mapPairs?.map((i: any) => i?.tokenLp)
     const tokenList: Array<string> = []
-    // const balances = useTokenBalances(account, lpTokens)
-    const balances = useTokenBalances('0x998f5d682a11dAEA3Adf8cd4D3cC6EC73405c770', lpTokens)
+    const balances = useTokenBalances(account, lpTokens)
+    // const balances = useTokenBalances('0x998f5d682a11dAEA3Adf8cd4D3cC6EC73405c770', lpTokens)
     const lpBalancesUser = Object.entries(balances).map(i => {
         if (i?.[1]?.value && Number(i?.[1]?.value) > 0) {
             const index = mapPairs.findIndex((lp: any) => lp?.tokenLp?.address === i?.[0])
