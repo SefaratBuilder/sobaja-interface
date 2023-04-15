@@ -265,11 +265,14 @@ const WrapRemovePool = styled.div`
 `
 const ModalRemovePool = styled.div`
     position: fixed;
-    top: 50%;
-    width: 100%;
-    left: 0px;
-    right: 0px;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    height: fit-content;
+    z-index: 1;
     max-width: 500px;
+    width: 100%;
     margin: auto;
 `
 const WrapLogo = styled.div`
