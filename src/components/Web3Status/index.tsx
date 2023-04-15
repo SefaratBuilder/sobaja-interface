@@ -81,7 +81,13 @@ const Web3Status = () => {
             ) : (
                 ''
             )}
-            {toggleWalletModal ? <OpacityModal></OpacityModal> : ''}
+            {toggleWalletModal ? (
+                <OpacityModal
+                    onClick={() => setToggleWalletModal(!toggleWalletModal)}
+                ></OpacityModal>
+            ) : (
+                ''
+            )}
         </Fragment>
     )
 }
