@@ -42,7 +42,16 @@ const NetworkSelector = () => {
     }
 
     const showNameNetworkCurrent = (chainId: any) => {
-        if (!chainId && !InfoNetwork[chainId]) return 'Unknown network'
+        if (chainId && !InfoNetwork[chainId]) {
+            return (
+                <>
+                    <div>
+                        <TextUnknownNetwork>Unknown network</TextUnknownNetwork>
+                    </div>
+                    <DownArrow src={imgDownArrowWhite} alt="arrow-down" />
+                </>
+            )
+        }
         return (
             <>
                 <div>
@@ -56,7 +65,7 @@ const NetworkSelector = () => {
             </>
         )
     }
-    console.log('chainId', chainId)
+
     return (
         <NetworkSelectorWrapper>
             <NetworkButton
@@ -116,6 +125,10 @@ const NetworkSelector = () => {
     )
 }
 
+const TextUnknownNetwork = styled.span`
+    font-size: 13px;
+`
+
 const TextNetwork = styled.span`
     font-size: 14px;
 `
@@ -147,7 +160,7 @@ const NetworkSelectorWrapper = styled.div`
 const NetworkButton = styled.div`
     display: flex;
     /* justify-content: flex-end; */
-    width: 160px;
+
     justify-content: space-between;
     align-items: center;
     gap: 10px;
