@@ -142,9 +142,14 @@ export function usePair(
 ): Pair | undefined {
     tokenA = chainId && isNativeCoin(tokenA) ? WRAPPED_NATIVE_COIN[chainId] : tokenA
     tokenB = chainId && isNativeCoin(tokenB) ? WRAPPED_NATIVE_COIN[chainId] : tokenB
-    const lpAddress = computePairAddress({ chainId, tokenA, tokenB })
+    const factory = useFactoryContract()
+    const lpAddressResult = useSingleCallResult(
+        factory,
+        'getPair',
+        [tokenA?.address, tokenB?.address]
+    )
+    const lpAddress = lpAddressResult?.result?.[0]
     const tokenLp = useToken(lpAddress)
-    console.log({ lpAddress })
     const balanceResult = useMultipleContractSingleData(
         [lpAddress],
         PAIR_INTERFACE,
