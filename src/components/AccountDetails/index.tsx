@@ -11,6 +11,7 @@ import imgDownArrow from 'assets/icons/arrow-down.svg'
 import imgPlusWallet from 'assets/icons/plus-wallet.svg'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
+import iconSetting from 'assets/icons/setting.svg'
 
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -20,7 +21,7 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account } = useActiveWeb3React()
+    const { account, deactivate } = useActiveWeb3React()
 
     const [isCopied, setIsCopied] = useState<boolean>(false)
 
@@ -61,11 +62,11 @@ const AccountDetails = ({
                             </Tooltip>
                         </CopyBtn>
                     )}
-                    <button
-                        onClick={() => {
-                            openOptions()
-                        }}
-                    >
+
+                    <button onClick={() => openOptions()}>
+                        <img src={iconSetting} alt="#" />
+                    </button>
+                    <button onClick={() => deactivate()}>
                         <img src={imgPower} alt="#" />
                     </button>
                 </WrapBtnHeader>

@@ -12,7 +12,7 @@ import { useActiveWeb3React } from 'hooks'
 const Header = () => {
     const [burgerNav, setBurgerNav] = useState(false)
     const navigate = useNavigate()
-    const { account, chainId } = useActiveWeb3React()
+    const { account, chainId, deactivate } = useActiveWeb3React()
 
     return (
         <HeaderWrapper>
