@@ -23,6 +23,7 @@ const AccountDetails = ({
     const { account } = useActiveWeb3React()
 
     const [isCopied, setIsCopied] = useState<boolean>(false)
+
     const balance = account && useETHBalances([account])?.[account]
 
     const handleCopyAddress = () => {
@@ -514,11 +515,10 @@ const WrapConnectModal = styled(Container)`
     overflow: unset;
     @media screen and (max-width: 1100px) {
         right: 10px;
-        top: -420px;
     }
     @media screen and (max-width: 391px) {
+        right: 10px;
         max-width: 300px;
-        top: -390px;
     }
 `
 

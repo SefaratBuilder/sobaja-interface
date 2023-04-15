@@ -10,10 +10,11 @@ import UnknowToken from 'assets/icons/question-mark-button-dark.svg'
 import { useNavigate } from 'react-router-dom'
 import { useSwapActionHandlers } from 'states/swap/hooks'
 import { Field } from 'interfaces'
+import imgClose from 'assets/icons/icon-close.svg'
 
 const MyPools = () => {
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
-    const [percentValue, setPercentValue] = useState(7)
+    const [percentValue, setPercentValue] = useState(0)
     const { position, tokenList } = useMyPosition()
     const [poolRemove, setPoolRemove] = useState<(typeof position)[0]>()
     const navigate = useNavigate()
@@ -22,9 +23,10 @@ const MyPools = () => {
     // const { slippage } = useAppState()
     // const { account } = useActiveWeb3React()
     // const routerContract = useRouterContract()
+    const arrPrecent = [0, 25, 50, 75, 100]
 
     const handleChangeInput = (value: any) => {
-        setPercentValue(+value)
+        setPercentValue(value)
     }
 
     const handleOnAdd = (item: (typeof position)[0]) => {
@@ -220,7 +222,13 @@ const MyPools = () => {
             {modalRemovePool && (
                 <ModalRemovePool>
                     <WrapRemovePool>
-                        <Title>Remove</Title>
+                        <WrapTitle>
+                            <Title>Remove</Title>
+                            <BtnClose
+                                src={imgClose}
+                                onClick={() => setModalRemovePool(false)}
+                            ></BtnClose>
+                        </WrapTitle>
                         {/* <WrapTip>
                             <span>
                                 Tip:Tip: Lorem ipsum dolor sit amet,
@@ -248,23 +256,17 @@ const MyPools = () => {
                                     value={percentValue}
                                     disabled={false}
                                 />
-                                <TEsst>
-                                    <div>
-                                        <span>0</span>
-                                    </div>
-                                    <div>
-                                        <span>25</span>
-                                    </div>
-                                    <div>
-                                        <span>50</span>
-                                    </div>
-                                    <div>
-                                        <span>75</span>
-                                    </div>
-                                    <div>
-                                        <span>Max</span>
-                                    </div>
-                                </TEsst>
+                                <DotPercent>
+                                    {arrPrecent.map((item) => {
+                                        return (
+                                            <div key={item}>
+                                                <span>
+                                                    {item == 100 ? 'Max' : item}
+                                                </span>
+                                            </div>
+                                        )
+                                    })}
+                                </DotPercent>
                             </WrapInputRange>
                         </WrapRemoveAmount>
                         <WrapContentRemove>
@@ -307,9 +309,17 @@ const MyPools = () => {
                                 </Value>
                             </RowContentRemove>
                         </WrapContentRemove>
+                        {/* <WrapPrice>
+                            <TextPrice>Price:</TextPrice>
+                            <ValuePrice>1 ETH = 1,981.58 USDC </ValuePrice>
+                        </WrapPrice>
+                        <WrapPrice>
+                            <TextPrice></TextPrice>
+                            <ValuePrice>1 USDT = 0.00050 </ValuePrice>
+                        </WrapPrice> */}
 
                         <BtnConfirm onClick={() => setModalRemovePool(false)}>
-                            Confirm
+                            Remove
                         </BtnConfirm>
                     </WrapRemovePool>
                 </ModalRemovePool>
@@ -318,6 +328,28 @@ const MyPools = () => {
     )
 }
 
+const BtnClose = styled.img`
+    width: unset;
+    height: 20px;
+    cursor: pointer;
+    :hover {
+        background: #003b5c;
+    }
+`
+const WrapTitle = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`
+const WrapPrice = styled.div`
+    padding: 0px 15px;
+    margin-top: 20px;
+    display: flex;
+`
+const TextPrice = styled.div`
+    width: 15%;
+`
+const ValuePrice = styled.div``
 const WrapInputRange = styled.div`
     position: relative;
     height: 5px;
@@ -325,7 +357,7 @@ const WrapInputRange = styled.div`
     margin: auto;
 `
 
-const TEsst = styled.div`
+const DotPercent = styled.div`
     position: absolute;
     top: 0px;
     display: flex;
@@ -333,12 +365,11 @@ const TEsst = styled.div`
     width: 100%;
     height: 3px;
     > div {
-        /* z-index: 1; */
         height: 10px;
         width: 10px;
         background: #ffffff;
         border-radius: 50%;
-
+        z-index: -1;
         > span {
             position: relative;
             left: -7px;
@@ -367,13 +398,15 @@ const Input = styled.input`
     -webkit-appearance: none;
     background: #ffffff;
     width: 100%;
+    /* z-index: -1; */
     ::-webkit-slider-thumb {
         appearance: none;
-        width: 25px;
-        height: 25px;
+        width: 20px;
+        height: 20px;
         border-radius: 50%;
         background: #00b2ff;
         cursor: pointer;
+        z-index: 999999;
     }
 `
 
@@ -460,6 +493,10 @@ const ModalRemovePool = styled.div`
     max-width: 500px;
     width: 100%;
     margin: auto;
+
+    @media screen and (max-width: 1100px) {
+        width: 90%;
+    }
 `
 const WrapLogo = styled.div`
     display: flex;
