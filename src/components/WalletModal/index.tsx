@@ -171,7 +171,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     <Title>
                         <div>
                             By connecting a wallet, you agree to&nbsp;
-                            <b>SobajaSwap</b>&nbsp;
+                            <b>Sobajaswap</b>&nbsp;
                             <a href="#" target="_blank" rel="noreferrer">
                                 Terms of Service
                             </a>
@@ -312,16 +312,20 @@ const Container = styled.div<{ isConnected: boolean }>`
     max-width: 500px;
     width: 100%;
     left: 0;
-    top: 49%;
+    /* top: 49%; */
     right: 0;
-    transform: translateY(-50%);
+    transform: translateY(-130%);
     margin: auto;
     transition: all 0.1s ease-in-out;
-    z-index: ${({ isConnected }) => (isConnected ? 3 : -1)};
+    z-index: 3;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
     color: ${({ theme }) => theme.text1};
 
+    @media screen and (max-width: 1100px) {
+        top: unset;
+        /* bottom: 50%; */
+    }
     @media screen and (max-width: 576px) {
         max-width: 410px;
         width: 90%;

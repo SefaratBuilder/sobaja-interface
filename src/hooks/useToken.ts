@@ -5,7 +5,7 @@ import { useMultipleContractSingleData } from 'states/multicall/hooks'
 import { useActiveWeb3React } from 'hooks'
 import { isAddress } from 'utils'
 import { useTokenContract } from './useContract'
-import { FixedNumber } from 'ethers'
+import { Contract, FixedNumber } from 'ethers'
 
 export function useToken(address: string | undefined): Token | undefined {
     const { chainId } = useActiveWeb3React()
@@ -100,9 +100,9 @@ export function useTokenApproval(
     from = from == null ? undefined : from
     to = to == null ? undefined : to
     const tokenContract = useTokenContract(token?.address)
-
     const approve = async (to: string, amount: number | string) => {
         try {
+            console.log("🤦‍♂️ ⟹ tokenContract:", tokenContract)
             if (!isAddress(to)) return
             const gasLimit = await tokenContract?.estimateGas.approve(to, amount)
             console.log({ gasLimit: gasLimit && gasLimit.add(1000) })

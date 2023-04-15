@@ -268,7 +268,6 @@ const Container = styled.div<{ isConnected: boolean }>`
 const WrapBlur = styled.div`
     div {
         opacity: 0;
-        z-index: -1;
     }
     &.active {
         div {
@@ -513,15 +512,13 @@ const WrapConnectModal = styled(Container)`
     transform: unset;
     margin: unset;
     overflow: unset;
-    @media screen and (max-width: 1200px) {
-        right: 58px;
+    @media screen and (max-width: 1100px) {
+        right: 10px;
+        top: -420px;
     }
-    @media screen and (max-width: 576px) {
-        left: 50%;
-        right: unset;
-        top: unset;
-        bottom: unset;
-        transform: translateX(-50%);
+    @media screen and (max-width: 391px) {
+        max-width: 300px;
+        top: -390px;
     }
 `
 

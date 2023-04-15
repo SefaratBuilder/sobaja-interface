@@ -32,7 +32,7 @@ import PairTokens from 'components/LogoToken/PairTokens'
 import imgDownArrowWhite from 'assets/icons/chevron-white.svg'
 import arrowDown from 'assets/icons/arrowDown.svg'
 import { useNavigate } from 'react-router-dom'
-import Positions from './Positions'
+import MyPools from 'components/MyPools'
 
 interface Data {
     name: string
@@ -249,7 +249,12 @@ function EnhancedTableToolbar() {
                     </div>
                 </div>
                 <div className="new-position">
-                    <PrimaryButton name="+ New Position" onClick={() => { navigate('/add') }} />
+                    <PrimaryButton
+                        name="+ New Position"
+                        onClick={() => {
+                            navigate('/add')
+                        }}
+                    />
                 </div>
             </HeadTitle>
         </Typography>
@@ -351,7 +356,11 @@ export default function Pools() {
                             <PrimaryButton
                                 name="Pools"
                                 height="35px"
-                                color={!isMyPositionPage ? "rgba(0, 178, 255, 1)" : "none"}
+                                color={
+                                    !isMyPositionPage
+                                        ? 'rgba(0, 178, 255, 1)'
+                                        : 'none'
+                                }
                                 onClick={() => setIsMyPositionPage(false)}
                             />
                         </div>
@@ -359,7 +368,11 @@ export default function Pools() {
                             <PrimaryButton
                                 name="My positions"
                                 height="35px"
-                                color={isMyPositionPage ? "rgba(0, 178, 255, 1)" : "none"}
+                                color={
+                                    isMyPositionPage
+                                        ? 'rgba(0, 178, 255, 1)'
+                                        : 'none'
+                                }
                                 onClick={() => setIsMyPositionPage(true)}
                             />
                         </div>
@@ -381,7 +394,8 @@ export default function Pools() {
                     </HeadLabelRight>
                 </HeadLabel>
                 {
-                    !isMyPositionPage && <TableContainer>
+                    !isMyPositionPage && (
+                        <TableContainer>
                         <Table
                             sx={{ minWidth: 650 }}
                             aria-labelledby="tableTitle"
@@ -398,84 +412,85 @@ export default function Pools() {
                             <TableBody>
                                 {visibleRows
                                     ? visibleRows.map((row, index) => {
-                                        const isItemSelected = isSelected(
-                                            row.name,
-                                        )
-                                        const labelId = `enhanced-table-checkbox-${index}`
-
-                                        return (
-                                            <RowTable
-                                                role="checkbox"
-                                                aria-checked={isItemSelected}
-                                                tabIndex={-1}
-                                                key={index}
-                                                selected={isItemSelected}
-                                                sx={{
-                                                    cursor: 'pointer',
-                                                }}
-                                            >
-                                                <CellTable
-                                                    component="th"
-                                                    id={labelId}
-                                                    scope="row"
-                                                    padding="none"
-                                                    sx={{
-                                                        width: '100px',
-                                                    }}
-                                                    align="center"
-                                                >
-                                                    <img
-                                                        className="network"
-                                                        src={LogoETH}
-                                                        alt=""
-                                                    />
-                                                </CellTable>
-                                                <CellTable align="center">
-                                                    <div className="label">
-                                                        <PairTokens
-                                                            tokenA={
-                                                                Logos?.[
-                                                                    row.name.split(
-                                                                        '/',
-                                                                    )?.[0]
-                                                                ]
-                                                            }
-                                                            tokenB={
-                                                                Logos?.[
-                                                                    row.name.split(
-                                                                        '/',
-                                                                    )?.[1]
-                                                                ]
-                                                            }
-                                                        />
-                                                        <div className="name">
-                                                            {row.name}
-                                                        </div>
-                                                        <Badge>30%</Badge>
-                                                    </div>
-                                                </CellTable>
-                                                <CellTable align="right">
-                                                    {row.tvl}
-                                                </CellTable>
-                                                <CellTable align="right">
-                                                    {row.volume}
-                                                </CellTable>
-                                                <CellTable align="right">
-                                                    {row.fee}
-                                                </CellTable>
-                                                <CellTable align="right">
-                                                    {row.apr}
-                                                </CellTable>
-                                            </RowTable>
-                                        )
-                                    })
+                                          const isItemSelected = isSelected(
+                                              row.name,
+                                          )
+                                          const labelId = `enhanced-table-checkbox-${index}`
+    
+                                          return (
+                                              <RowTable
+                                                  role="checkbox"
+                                                  aria-checked={isItemSelected}
+                                                  tabIndex={-1}
+                                                  key={index}
+                                                  selected={isItemSelected}
+                                                  sx={{
+                                                      cursor: 'pointer',
+                                                  }}
+                                              >
+                                                  <CellTable
+                                                      component="th"
+                                                      id={labelId}
+                                                      scope="row"
+                                                      padding="none"
+                                                      sx={{
+                                                          width: '100px',
+                                                      }}
+                                                      align="center"
+                                                  >
+                                                      <img
+                                                          className="network"
+                                                          src={LogoETH}
+                                                          alt=""
+                                                      />
+                                                  </CellTable>
+                                                  <CellTable align="center">
+                                                      <div className="label">
+                                                          <PairTokens
+                                                              tokenA={
+                                                                  Logos?.[
+                                                                      row.name.split(
+                                                                          '/',
+                                                                      )?.[0]
+                                                                  ]
+                                                              }
+                                                              tokenB={
+                                                                  Logos?.[
+                                                                      row.name.split(
+                                                                          '/',
+                                                                      )?.[1]
+                                                                  ]
+                                                              }
+                                                          />
+                                                          <div className="name">
+                                                              {row.name}
+                                                          </div>
+                                                          <Badge>30%</Badge>
+                                                      </div>
+                                                  </CellTable>
+                                                  <CellTable align="right">
+                                                      {row.tvl}
+                                                  </CellTable>
+                                                  <CellTable align="right">
+                                                      {row.volume}
+                                                  </CellTable>
+                                                  <CellTable align="right">
+                                                      {row.fee}
+                                                  </CellTable>
+                                                  <CellTable align="right">
+                                                      {row.apr}
+                                                  </CellTable>
+                                              </RowTable>
+                                          )
+                                      })
                                     : null}
                             </TableBody>
                         </Table>
                     </TableContainer>
+                    )
                 }
                 {
-                    isMyPositionPage && <Positions />
+                    isMyPositionPage && <MyPools />
                 }
             </Box>
         </Container>

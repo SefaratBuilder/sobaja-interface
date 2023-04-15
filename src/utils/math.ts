@@ -45,6 +45,7 @@ export const mul = (numberA: any, numberB: any) => {
 }
 
 export const div = (numberA: any, numberB: any) => {
+    if (numberB == 0 || !numberB) return 0
     const data = fixNum(numberA) + '/' + fixNum(numberB)
     return calculator(data)
 }
@@ -70,6 +71,7 @@ export const mulNumberWithDecimal = (
     n: number | string,
     decimals: number,
 ): string => {
+    if (!n) return '0'
     if (n?.toString().includes('.')) {
         if (n.toString().split('.')[1].length >= decimals) {
             const a = n.toString().split('.')

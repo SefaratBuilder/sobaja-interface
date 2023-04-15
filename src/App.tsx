@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Routes, Route, Navigate, HashRouter } from 'react-router-dom'
 import { GlobalStyle } from './styles'
 import Swap from 'pages/swap'
@@ -12,9 +12,9 @@ import MulticallUpdater from 'states/multicall/updater'
 import Polling from 'components/Polling'
 import Pools from 'pages/pool'
 import ToastMessage from 'components/ToastMessage'
+import TestTransaction from 'components/TestTransaction'
 
 const App = () => {
-
     const Updater = () => {
         return (
             <>
@@ -34,6 +34,7 @@ const App = () => {
 
                 <AppContainer>
                     {/* <ToastMessage /> */}
+                    {/* <TestTransaction /> */}
                     <Routes>
                         <Route path="/swap" element={<Swap />} />
                         <Route path="/pools" element={<Pools />} />
