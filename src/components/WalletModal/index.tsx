@@ -8,7 +8,6 @@ import AccountDetails from 'components/AccountDetails'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import Loader from 'components/Loader'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
-import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -30,11 +29,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
     const [pendingNameWallet, setPendingNameWallet] = useState<
         string | undefined
     >()
-    const ref = useRef<any>()
 
-    useOnClickOutside(ref, () => {
-        setToggleWalletModal(false)
-    })
     const toggleAgreement = () => {
         setIsAgreePolicy(!isAgreePolicy)
     }
@@ -158,7 +153,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             )
         }
         return (
-            <Container isConnected={true} ref={ref}>
+            <Container isConnected={true}>
                 <Header>
                     <span>Connect a wallet</span>
                     <div>
