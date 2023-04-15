@@ -83,7 +83,7 @@
         "address": "0x116BDAC75BB21edc50ea54baa6feb33A022a6abc",
         "symbol": "SP",
         "decimals": 18,
-        "logoURI": "",
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
         "name": "DAI",
         "chainId": 324
     },

@@ -2,133 +2,206 @@ import React, { useState, Fragment } from 'react'
 import styled from 'styled-components'
 import ETH from 'assets/token-logos/eth.svg'
 import USDC from 'assets/token-logos/usdc.svg'
+import { useAllPairs, useMyPosition, useTokensUrl } from 'hooks/useAllPairs'
+import { useAllTokenBalances, useTokenBalances } from 'hooks/useCurrencyBalance'
+import TokenList from 'constants/jsons/tokenList.json'
+import UnknowToken from 'assets/icons/question-mark-button-dark.svg'
+
 const MyPools = () => {
     let arrMyPools = [1, 2, 3, 4]
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
     const [percentValue, setPercentValue] = useState(7)
+    const { position, tokenList } = useMyPosition()
+    const [poolRemove, setPoolRemove] = useState<(typeof position)[0]>()
+    // console.log('🤦‍♂️ ⟹ MyPools ⟹ tokenList:', tokenList)
+    console.log('🤦‍♂️ ⟹ MyPools ⟹ position:', position)
+
+    const urlTokens = useTokensUrl(tokenList)
+    // console.log('🤦‍♂️ ⟹ MyPools ⟹ urlTokens:', urlTokens)
 
     const handleChangeInput = (value: any) => {
+        console.log('🤦‍♂️ ⟹ poolRemove ⟹ poolRemove:', poolRemove)
+
         setPercentValue(+value)
     }
     return (
         <WrapMyPools>
             <RowMyPools>
-                {arrMyPools.map((item) => {
-                    return (
-                        <ColMyPools key={item}>
-                            <WrapContent>
-                                <WrapText>
-                                    <WrapLogo>
-                                        <Logo src={ETH}></Logo>
-                                        <LogoTwo src={USDC}></LogoTwo>
-                                    </WrapLogo>
-                                    <div> USDC/ETH</div>
-                                </WrapText>
-                                <Value>1.23456789</Value>
-                            </WrapContent>
+                {position &&
+                    position?.length > 0 &&
+                    position.map((item, index) => {
+                        return (
+                            <ColMyPools key={index}>
+                                <WrapContent>
+                                    <WrapText>
+                                        <WrapLogo>
+                                            <Logo
+                                                src={
+                                                    urlTokens?.[
+                                                        item?.token0?.address
+                                                    ] || UnknowToken
+                                                }
+                                            ></Logo>
+                                            <LogoTwo
+                                                src={
+                                                    urlTokens?.[
+                                                        item?.token1?.address
+                                                    ] || UnknowToken
+                                                }
+                                            ></LogoTwo>
+                                        </WrapLogo>
+                                        <div>
+                                            {' '}
+                                            {item?.token0?.symbol}/
+                                            {item?.token1?.symbol}
+                                        </div>
+                                    </WrapText>
+                                    <Value>{item?.value}</Value>
+                                </WrapContent>
 
-                            <WrapContent>
-                                <WrapText>Your pool share:</WrapText>
-                                <Value>0.97654321 %</Value>
-                            </WrapContent>
-                            <HrTag></HrTag>
-                            <WrapContent>
-                                <WrapText>
-                                    <Logo src={ETH}></Logo>
-                                    <div>ETH</div>
-                                </WrapText>
-                                <Value>0.12345</Value>
-                            </WrapContent>
-                            <WrapContent>
-                                <WrapText>
-                                    <Logo src={USDC}></Logo>
-                                    <div>USDC</div>
-                                </WrapText>
-                                <Value>9.76543</Value>
-                            </WrapContent>
-                            <WrapAddAndRemove>
-                                <BtnAdd>Add</BtnAdd>
-                                <BtnRemove
-                                    onClick={() =>
-                                        setModalRemovePool(!modalRemovePool)
-                                    }
-                                >
-                                    Remove
-                                </BtnRemove>
-                            </WrapAddAndRemove>
-                        </ColMyPools>
-                    )
-                })}
+                                <WrapContent>
+                                    <WrapText>Your pool share:</WrapText>
+                                    <Value>{item?.percent} %</Value>
+                                </WrapContent>
+                                <HrTag></HrTag>
+                                <WrapContent>
+                                    <WrapText>
+                                        <Logo
+                                            src={
+                                                urlTokens?.[
+                                                    item?.token0?.address
+                                                ] || UnknowToken
+                                            }
+                                        ></Logo>
+                                        <div>{item?.token0?.symbol}</div>
+                                    </WrapText>
+                                    <Value>{item?.token0?.value}</Value>
+                                </WrapContent>
+                                <WrapContent>
+                                    <WrapText>
+                                        <Logo
+                                            src={
+                                                urlTokens?.[
+                                                    item?.token1?.address
+                                                ] || UnknowToken
+                                            }
+                                        ></Logo>
+                                        <div>{item?.token1?.symbol}</div>
+                                    </WrapText>
+                                    <Value>{item?.token1?.value}</Value>
+                                </WrapContent>
+                                <WrapAddAndRemove>
+                                    <BtnAdd>Add</BtnAdd>
+                                    <BtnRemove
+                                        onClick={() => {
+                                            setPoolRemove(item)
+                                            setModalRemovePool(!modalRemovePool)
+                                        }}
+                                    >
+                                        Remove
+                                    </BtnRemove>
+                                </WrapAddAndRemove>
+                            </ColMyPools>
+                        )
+                    })}
             </RowMyPools>
+            {modalRemovePool && (
+                <ModalRemovePool>
+                    <WrapRemovePool>
+                        <Title>Remove</Title>
+                        <WrapTip>
+                            <span>
+                                Tip:Tip: Lorem ipsum dolor sit amet,
+                                consectetuer adipiscing elit, sed diam nonummy
+                                nibh euismod tincidunt ut laoreet dolore magna
+                                aliquam erat volutpat. Ut wisi enim ad minim
+                                veniam.
+                            </span>
+                        </WrapTip>
+                        <WrapRemoveAmount>
+                            <WrapAmount>
+                                <TitleRemove>Remove Amount</TitleRemove>
+                                <WrapPercent>
+                                    <Percent>{percentValue}%</Percent>
+                                </WrapPercent>
+                            </WrapAmount>
+                            <WrapInputRange>
+                                <Input
+                                    onChange={(e) =>
+                                        handleChangeInput(e.target.value)
+                                    }
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={percentValue}
+                                    disabled={false}
+                                />
+                                <TEsst>
+                                    <div>
+                                        <span>0</span>
+                                    </div>
+                                    <div>
+                                        <span>25</span>
+                                    </div>
+                                    <div>
+                                        <span>50</span>
+                                    </div>
+                                    <div>
+                                        <span>75</span>
+                                    </div>
+                                    <div>
+                                        <span>Max</span>
+                                    </div>
+                                </TEsst>
+                            </WrapInputRange>
+                        </WrapRemoveAmount>
+                        <WrapContentRemove>
+                            <RowContentRemove>
+                                <WrapText>
+                                    <Logo
+                                        src={
+                                            urlTokens?.[
+                                                poolRemove?.token0?.address
+                                            ] || UnknowToken
+                                        }
+                                    ></Logo>
+                                    <div>{poolRemove?.token0?.symbol}</div>
+                                </WrapText>
+                                <Value>
+                                    {(
+                                        (poolRemove?.token0?.value *
+                                            percentValue) /
+                                        100
+                                    ).toFixed(4)}
+                                </Value>
+                            </RowContentRemove>
+                            <RowContentRemove>
+                                <WrapText>
+                                    <Logo
+                                        src={
+                                            urlTokens?.[
+                                                poolRemove?.token1?.address
+                                            ] || UnknowToken
+                                        }
+                                    ></Logo>
+                                    <div>{poolRemove?.token1?.symbol}</div>
+                                </WrapText>
+                                <Value>
+                                    {(
+                                        (poolRemove?.token1?.value *
+                                            percentValue) /
+                                        100
+                                    ).toFixed(4)}
+                                </Value>
+                            </RowContentRemove>
+                        </WrapContentRemove>
 
-            <ModalRemovePool>
-                <WrapRemovePool>
-                    <Title>Remove</Title>
-                    <WrapTip>
-                        <span>
-                            Tip:Tip: Lorem ipsum dolor sit amet, consectetuer
-                            adipiscing elit, sed diam nonummy nibh euismod
-                            tincidunt ut laoreet dolore magna aliquam erat
-                            volutpat. Ut wisi enim ad minim veniam.
-                        </span>
-                    </WrapTip>
-                    <WrapRemoveAmount>
-                        <WrapAmount>
-                            <TitleRemove>Remove Amount</TitleRemove>
-                            <WrapPercent>
-                                <Percent>{percentValue}%</Percent>
-                            </WrapPercent>
-                        </WrapAmount>
-                        <WrapInputRange>
-                            <Input
-                                onChange={(e) =>
-                                    handleChangeInput(e.target.value)
-                                }
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={percentValue}
-                                disabled={false}
-                            />
-                            <TEsst>
-                                <div>
-                                    <span>0</span>
-                                </div>
-                                <div>
-                                    <span>25</span>
-                                </div>
-                                <div>
-                                    <span>50</span>
-                                </div>
-                                <div>
-                                    <span>75</span>
-                                </div>
-                                <div>
-                                    <span>Max</span>
-                                </div>
-                            </TEsst>
-                        </WrapInputRange>
-                    </WrapRemoveAmount>
-                    <WrapContentRemove>
-                        <RowContentRemove>
-                            <WrapText>
-                                <Logo src={ETH}></Logo>
-                                <div>ETH</div>
-                            </WrapText>
-                            <Value>9.76543</Value>
-                        </RowContentRemove>
-                        <RowContentRemove>
-                            <WrapText>
-                                <Logo src={USDC}></Logo>
-                                <div>USDC</div>
-                            </WrapText>
-                            <Value>9.76543</Value>
-                        </RowContentRemove>
-                    </WrapContentRemove>
-
-                    <BtnConfirm>Confirm</BtnConfirm>
-                </WrapRemovePool>
-            </ModalRemovePool>
+                        <BtnConfirm onClick={() => setModalRemovePool(false)}>
+                            Confirm
+                        </BtnConfirm>
+                    </WrapRemovePool>
+                </ModalRemovePool>
+            )}
         </WrapMyPools>
     )
 }
@@ -284,11 +357,13 @@ const WrapLogo = styled.div`
 const Logo = styled.img`
     width: 25px;
     height: 25px;
+    border-radius: 50%;
 `
 const LogoTwo = styled(Logo)`
     position: absolute;
     left: 15px;
     top: 0px;
+    border-radius: 50%;
 `
 const HrTag = styled.div`
     height: 1px;
@@ -347,6 +422,8 @@ const RowMyPools = styled.div`
     gap: 20px;
     flex-wrap: wrap;
 `
-const WrapMyPools = styled.div``
+const WrapMyPools = styled.div`
+    max-width: 500px;
+`
 
 export default MyPools
