@@ -131,6 +131,17 @@ const NetworkSelectorWrapper = styled.div`
     } */
     display: flex;
     justify-content: flex-end;
+
+    @media screen and (max-width: 1100px) {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: var(--bg3);
+        backdrop-filter: blur(3px);
+        padding: 8px;
+        z-index: 999999;
+    }
 `
 
 const NetworkButton = styled.div`
@@ -175,13 +186,14 @@ const DropDownMainNet = styled.div<{ networkModal: boolean }>`
     backdrop-filter: blur(10px);
     position: absolute;
     background: linear-gradient(180deg, #002033 0%, rgba(0, 38, 60, 0.8) 100%);
-    border-radius: 8px;
+    border-radius: 6px;
     top: 50px;
     right: 0;
     cursor: pointer;
     @media screen and (max-width: 1100px) {
-        bottom: 50px;
+        bottom: 54px;
         top: unset;
+        right: 10px;
     }
     ul {
         padding: 10px;
