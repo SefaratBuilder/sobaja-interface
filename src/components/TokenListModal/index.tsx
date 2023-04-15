@@ -33,7 +33,7 @@ const TokenListModal = ({
     const allTokenBalances = useAllTokenBalances()
     const { chainId } = useActiveWeb3React()
     const queriedToken = useToken(searchQuery)
-    
+
     useEffect(() => {
         if(queriedToken) setRenderTokenList(tokens => [...tokens, queriedToken])
     }, [searchQuery])
@@ -71,16 +71,18 @@ const TokenListModal = ({
 
     const sortTokenList = () => {
         let sortedTokenList: TokenList = []
-        Object.entries(allTokenBalances).map(([k]) => {
-            const token = tokens.find((t) => t.address === k)
+        Object.entries(allTokenBalances).map(([k, v]) => {
+            const token = tokens.find((t) => t.address === k && Number(v?._value) > 0)
             return token && sortedTokenList.push(token)
         })
+
         const newTokens = tokens.filter((t) => !sortedTokenList.includes(t))
 
         const filteredByChainIdTokens = [
             ...sortedTokenList,
             ...newTokens,
-        ].filter((item) => item.chainId === chainId || item.address === NATIVE_COIN.address)
+        ]
+        .filter((item) => item.chainId === chainId || item.address === NATIVE_COIN.address)
         setRenderTokenList(filteredByChainIdTokens)
     }
 
