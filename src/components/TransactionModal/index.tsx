@@ -70,7 +70,6 @@ export const InitCompTransaction = (): CompTransaction => {
 }
 
 const ComponentsTransaction = ({ data, onConfirm }: Data) => {
-    console.log('🤦‍♂️ ⟹ ComponentsTransaction ⟹ data:', data)
     // console.log('🤦‍♂️ ⟹ ComponentsTransaction ⟹ onConfirm:', onConfirm)
     // const { addTxn } = useTransactionHandler()
 

@@ -25,7 +25,7 @@ import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
 import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
-import { useRouterContract } from 'hooks/useContract'
+import { useFactoryContract, usePairContract, useRouterContract } from 'hooks/useContract'
 import { calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
 import { useAppState, useTransactionDeadline } from 'states/application/hooks'
 import { useTransactionHandler } from 'states/transactions/hooks'
@@ -50,6 +50,41 @@ const Swap = () => {
     const { deadline } = useTransactionDeadline()
     const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
+    const pairContract = usePairContract('0x1990D029794ffC74fC20908740A22de982152945')
+    const factoryContract = useFactoryContract()
+    console.log({pair, tokenIn, tokenOut})
+    const mintLp = async () => {
+        try {
+            if(account) {
+                console.log('111', pairContract)
+                // const token0 = await pairContract?.token0()
+                // const token1 = await pairContract?.token1()
+                // console.log('>>>>>>>>>>>>>>>', token0, token1)
+                const gasLimit = await pairContract?.estimateGas.mint(account)
+                const callResult = await pairContract?.mint(account, { gasLimit })
+
+                await callResult.wait()
+                if(callResult?.status === 1) console.log('mint okkkkk', callResult)
+            }
+        } catch(err) {
+            console.log('failed mint' ,err)
+        }
+    }
+
+    const create = async () => {
+        try {
+            if(account) {
+                console.log('111', factoryContract)
+                console.log('addressssss', tokenIn?.address, tokenOut?.address)
+                const gasLimit = await factoryContract?.estimateGas.createPair(tokenIn?.address, tokenOut?.address)
+                const callResult = await factoryContract?.createPair(tokenIn?.address, tokenOut?.address, { gasLimit: computeGasLimit(gasLimit) })
+                await callResult.wait()
+                if(callResult?.status === 1) console.log('create okkkkk', callResult)
+            }
+        } catch(err) {
+            console.log('failed mint' ,err)
+        }
+    }
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -378,6 +413,14 @@ const Swap = () => {
                         name={'Swap'}
                     />
                 )}
+                <PrimaryButton
+                        onClick={() => mintLp()}
+                        name={'Mint lp'}
+                />
+                <PrimaryButton
+                        onClick={() => create()}
+                        name={'Create pair'}
+                />
             </Row>
         )
     }
