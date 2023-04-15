@@ -13,6 +13,7 @@ import {
     Faucet
 } from 'constants/addresses'
 import ERC20 from 'constants/jsons/erc20.json'
+import { PAIR_ABI } from 'constants/jsons/pair'
 
 // returns null on errors
 export const useContract = (
@@ -63,4 +64,8 @@ export function useFaucetContract(): Contract | null {
     const { chainId } = useActiveWeb3React();
     if (!chainId) return null;
     return useContract(Faucet[chainId], FAUCET_ABI)
+}
+
+export function usePairContract(address: string | undefined): Contract | null {
+    return useContract(address, PAIR_ABI)
 }
