@@ -413,14 +413,14 @@ const Swap = () => {
                         name={'Swap'}
                     />
                 )}
-                <PrimaryButton
+                {/* <PrimaryButton
                         onClick={() => mintLp()}
                         name={'Mint lp'}
                 />
                 <PrimaryButton
                         onClick={() => create()}
                         name={'Create pair'}
-                />
+                /> */}
             </Row>
         )
     }
