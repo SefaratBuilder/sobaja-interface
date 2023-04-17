@@ -272,6 +272,7 @@ export const useMyPosition = () => {
             }
         }
     }).filter(i => i)
+    console.log({ lpBalancesUser, balances, allPairs })
 
     return useMemo(
         () => {
