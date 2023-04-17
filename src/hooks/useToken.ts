@@ -9,6 +9,7 @@ import { Contract, FixedNumber } from 'ethers'
 
 export function useToken(address: string | undefined): Token | undefined {
     const { chainId } = useActiveWeb3React()
+    address = isAddress(address) ? address : undefined
     const symbolResult = useMultipleContractSingleData(
         [address],
         ERC20_INTERFACE,
