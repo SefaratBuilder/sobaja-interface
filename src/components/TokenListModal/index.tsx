@@ -34,10 +34,6 @@ const TokenListModal = ({
     const { chainId } = useActiveWeb3React()
     const queriedToken = useToken(searchQuery)
 
-    useEffect(() => {
-        if(queriedToken) setRenderTokenList(tokens => [...tokens, queriedToken])
-    }, [searchQuery])
-
     const handleSearchToken = async (
         e: ChangeEvent<HTMLInputElement>,
     ): Promise<void> => {
@@ -167,6 +163,23 @@ const TokenListModal = ({
                             onAdd={() => handleAddToken(searchedToken)}
                         />
                     )}
+                    {
+                        queriedToken && 
+                        <TokenSelection 
+                            token={queriedToken} 
+                            balance={
+                                allTokenBalances?.[
+                                    queriedToken.address
+                                ]?.toString() || 0
+                            }
+                            onUserSelect={(e) => {
+                                onUserSelect(field, queriedToken)
+                                onClose()
+                            }}
+                            hideAddButton={true}
+                            onAdd={() => handleAddToken(queriedToken)}
+                        />
+                    }
                 </WrapList>
             </ModalContentWrapper>
         )
