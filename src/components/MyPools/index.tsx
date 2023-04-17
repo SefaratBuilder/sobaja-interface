@@ -16,6 +16,7 @@ const MyPools = () => {
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
     const [percentValue, setPercentValue] = useState(0)
     const { position, tokenList } = useMyPosition()
+    console.log('🤦‍♂️ ⟹ MyPools ⟹ position:', position)
     const [poolRemove, setPoolRemove] = useState<(typeof position)[0]>()
     const navigate = useNavigate()
     const urlTokens = useTokensUrl(tokenList)
@@ -164,12 +165,16 @@ const MyPools = () => {
                                             {item?.token1?.symbol}
                                         </div>
                                     </WrapText>
-                                    <Value>{item?.value}</Value>
+                                    <Value>
+                                        {Number(item?.value).toFixed(4)}
+                                    </Value>
                                 </WrapContent>
 
                                 <WrapContent>
                                     <WrapText>Your pool share:</WrapText>
-                                    <Value>{item?.percent} %</Value>
+                                    <Value>
+                                        {Number(item?.percent).toFixed(4)} %
+                                    </Value>
                                 </WrapContent>
                                 <HrTag></HrTag>
                                 <WrapContent>
@@ -183,7 +188,9 @@ const MyPools = () => {
                                         ></Logo>
                                         <div>{item?.token0?.symbol}</div>
                                     </WrapText>
-                                    <Value>{item?.token0?.value}</Value>
+                                    <Value>
+                                        {Number(item?.token0?.value).toFixed(4)}
+                                    </Value>
                                 </WrapContent>
                                 <WrapContent>
                                     <WrapText>
@@ -196,7 +203,9 @@ const MyPools = () => {
                                         ></Logo>
                                         <div>{item?.token1?.symbol}</div>
                                     </WrapText>
-                                    <Value>{item?.token1?.value}</Value>
+                                    <Value>
+                                        {Number(item?.token1?.value).toFixed(4)}
+                                    </Value>
                                 </WrapContent>
                                 <WrapAddAndRemove>
                                     <BtnAdd
@@ -481,6 +490,13 @@ const WrapRemovePool = styled.div`
     backdrop-filter: blur(25px);
     border-radius: 12px;
     padding: 20px;
+    min-width: 500px;
+
+    @media screen and (max-width: 550px) {
+        min-width: 300px;
+        font-size: 12px;
+        scale: 0.9;
+    }
 `
 const ModalRemovePool = styled.div`
     position: fixed;
@@ -490,12 +506,14 @@ const ModalRemovePool = styled.div`
     left: 0;
     height: fit-content;
     z-index: 1;
-    max-width: 500px;
-    width: 100%;
+    /* max-width: 500px; */
+    /* width: 100%; */
     margin: auto;
+    display: flex;
+    justify-content: center;
 
     @media screen and (max-width: 1100px) {
-        width: 90%;
+        /* width: 90%; */
     }
 `
 const WrapLogo = styled.div`
@@ -556,27 +574,42 @@ const ColMyPools = styled.div`
     border: 1px solid #888888;
     backdrop-filter: blur(15px);
     border-radius: 12px;
-    flex: 1;
+    width: 100%;
+    /* flex: 48%;
+    max-width: 48%; */
+
     @media screen and (max-width: 1440px) {
-        width: 32%;
-        flex: unset;
     }
     @media screen and (max-width: 1250px) {
-        flex: unset;
-        width: 48.5%;
     }
     @media screen and (max-width: 840px) {
-        flex: unset;
-        width: 100%;
+        max-width: 100%;
+        /* font-size: 12px; */
+    }
+    @media screen and (max-width: 390px) {
+        font-size: 12px;
     }
 `
 const RowMyPools = styled.div`
-    display: flex;
+    /* display: flex;
     gap: 20px;
     flex-wrap: wrap;
+    justify-content: space-between; */
+    display: grid;
+    grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr) minmax(
+            300px,
+            1fr
+        );
+
+    grid-gap: 10px;
+    @media screen and (max-width: 1160px) {
+        grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr);
+    }
+    @media screen and (max-width: 770px) {
+        /* flex-direction: column; */
+        grid-template-columns: minmax(100px, 1fr);
+    }
 `
-const WrapMyPools = styled.div`
-    max-width: 500px;
-`
+const WrapMyPools = styled.div``
 
 export default MyPools

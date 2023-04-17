@@ -26,10 +26,11 @@ const ConfirmTransactionModal = ({
     })
 
     const Swap = () => {
+        const detail = payload?.method === 'swap' ? 'for' : 'x'
         return (
             <ContainerItem>
                 <Header>
-                    <div className={'title'}>Confirm swap</div>
+                    <div className={'title'}>Confirm {payload?.method}</div>
                     <div>
                         <ImgClose
                             onClick={() => setConfirmTransaction(false)}
@@ -43,7 +44,7 @@ const ConfirmTransactionModal = ({
                         <h2>{payload?.input || 999}</h2>
                         <h2>{payload?.tokenIn?.symbol || 'X'}</h2>
                     </TitleEstimate>
-                    <h3>for</h3>
+                    <h3>{detail}</h3>
                     <TitleEstimate style={{ gap: '5px' }}>
                         <h2>{payload?.output || 9999}</h2>
                         <h2>{payload?.tokenOut?.symbol || 'Y'}</h2>

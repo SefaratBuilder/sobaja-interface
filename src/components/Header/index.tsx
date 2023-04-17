@@ -63,6 +63,9 @@ export const HeaderWrapper = styled.div`
     @media screen and (max-width: 576px) {
         grid-gap: 10px;
     }
+    @media screen and (max-width: 390px) {
+        font-size: 12px;
+    }
 `
 
 const WrapperNavigator = styled.div`
