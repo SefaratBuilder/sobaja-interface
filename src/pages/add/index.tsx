@@ -12,7 +12,11 @@ import LabelButton from 'components/Buttons/LabelButton'
 import PlusIcon from 'assets/icons/plus.svg'
 import { ROUTERS } from 'constants/addresses'
 import { useTokenApproval } from 'hooks/useToken'
-import { ALL_SUPPORTED_CHAIN_IDS, ZERO_ADDESS } from 'constants/index'
+import {
+    ALL_SUPPORTED_CHAIN_IDS,
+    URLSCAN_BY_CHAINID,
+    ZERO_ADDESS,
+} from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { ethers } from 'ethers'
 import { useFactoryContract, useRouterContract } from 'hooks/useContract'
@@ -21,11 +25,18 @@ import { mulNumberWithDecimal } from 'utils/math'
 import { usePair } from 'hooks/useAllPairs'
 import { FixedNumber } from '@ethersproject/bignumber'
 import { isNativeCoin } from 'utils'
+import WalletModal from 'components/WalletModal'
+import { InitCompTransaction } from 'components/TransactionModal'
+import { addTxn } from 'states/transactions/actions'
+import ComponentsTransaction from 'components/TransactionModal'
+import ToastMessage from 'components/ToastMessage'
 
 const Swap = () => {
     const swapState = useSwapState()
     const router = useRouterContract()
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
+    const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
+
     const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
@@ -36,8 +47,19 @@ const Swap = () => {
     const tokenOutApproval = useTokenApproval(account, routerAddress, tokenOut)
 
     const factoryContract = useFactoryContract()
+    const initDataTransaction = InitCompTransaction()
     const pair = usePair(chainId, tokenIn, tokenOut)
     console.log({ pair })
+
+    const isInsufficientAllowanceTokenIn =
+        Number(tokenInApproval?.allowance) < Number(inputAmount) &&
+        tokenIn?.address !== ZERO_ADDESS
+    const isInsufficientAllowanceTokenOut =
+        Number(tokenOutApproval?.allowance) < Number(outputAmount) &&
+        tokenOut?.address !== ZERO_ADDESS
+    const isInsufficientAllowance =
+        isInsufficientAllowanceTokenIn || isInsufficientAllowanceTokenOut
+
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
             onUserInput(field, value)
@@ -61,6 +83,8 @@ const Swap = () => {
                 const amountToken = isNativeCoin(tokenOut)
                     ? inputAmount
                     : outputAmount
+
+                console.log({ isEthTxn })
 
                 let value = isNativeCoin(tokenIn)
                     ? mulNumberWithDecimal(inputAmount, tokenIn.decimals)
@@ -111,15 +135,40 @@ const Swap = () => {
         decimals: number | undefined,
     ) => {
         try {
+            initDataTransaction.setError('')
             if (amount && decimals && routerAddress) {
-                await approve(
+                initDataTransaction.setIsOpenWaitingModal(true)
+                const callResult: any = await approve(
                     routerAddress,
                     mulNumberWithDecimal(amount, decimals),
                 )
+                console.log('🤦‍♂️ ⟹ Add ⟹ callResult:', callResult)
+
+                initDataTransaction.setIsOpenWaitingModal(false)
+                initDataTransaction.setIsOpenResultModal(true)
+
+                const txn = await callResult.wait()
+                console.log('🤦‍♂️ ⟹ Add ⟹ txn:', txn)
+                initDataTransaction.setIsOpenResultModal(false)
+
+                addTxn({
+                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                        callResult.hash || ''
+                    }`,
+                    msg: 'Approve',
+                    status: txn.status === 1 ? true : false,
+                })
             }
         } catch (err) {
             console.log('Failed to approve token: ', err)
+            initDataTransaction.setError('Failed')
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
         }
+    }
+
+    const openWalletModal = () => {
+        setIsOpenWalletModal(!isOpenWalletModal)
     }
 
     useEffect(() => {
@@ -195,14 +244,7 @@ const Swap = () => {
             balanceIn &&
             (Number(balanceIn) < Number(inputAmount) ||
                 Number(balanceOut) < Number(outputAmount))
-        const isInsufficientAllowanceTokenIn =
-            Number(tokenInApproval?.allowance) < Number(inputAmount) &&
-            tokenIn?.address !== ZERO_ADDESS
-        const isInsufficientAllowanceTokenOut =
-            Number(tokenOutApproval?.allowance) < Number(outputAmount) &&
-            tokenOut?.address !== ZERO_ADDESS
-        const isInsufficientAllowance =
-            isInsufficientAllowanceTokenIn || isInsufficientAllowanceTokenOut
+
         console.log({
             allowIn: tokenInApproval?.allowance,
             allowOut: tokenOutApproval?.allowance,
@@ -212,6 +254,9 @@ const Swap = () => {
                 {isNotConnected ? (
                     <PrimaryButton
                         // onClick={() => setIsConnected(!isConnected)}
+                        onClick={() => {
+                            openWalletModal()
+                        }}
                         name="Connect Wallet"
                     />
                 ) : unSupportedNetwork ? (
@@ -261,38 +306,70 @@ const Swap = () => {
         )
     }
 
+    const approveToken = () => {
+        console.log('aprove ')
+
+        return isInsufficientAllowanceTokenIn
+            ? handleOnApprove(
+                  tokenInApproval.approve,
+                  inputAmount,
+                  tokenIn?.decimals,
+              )
+            : isInsufficientAllowanceTokenOut &&
+                  handleOnApprove(
+                      tokenOutApproval.approve,
+                      outputAmount,
+                      tokenOut?.decimals,
+                  )
+    }
+
     return (
-        <SwapContainer>
-            <Row jus="space-between">
-                <Nav gap="20px">
-                    <Link to="/swap">Swap</Link>
-                    {/* <Link to="/add" className="active-link">Add</Link> */}
-                    <Link to="/limit">Limit</Link>
-                </Nav>
-                <Setting />
-            </Row>
-            <Bridge />
-            <Columns>
-                <CurrencyInputPanel
-                    token={tokenIn}
-                    value={inputAmount}
-                    onUserInput={handleOnUserInput}
-                    onUserSelect={handleOnTokenSelection}
-                    field={Field.INPUT}
-                />
-                <Icon>
-                    <img src={PlusIcon} alt="icon" />
-                </Icon>
-                <CurrencyInputPanel
-                    token={tokenOut}
-                    value={outputAmount}
-                    onUserInput={handleOnUserInput}
-                    onUserSelect={handleOnTokenSelection}
-                    field={Field.OUTPUT}
-                />
-            </Columns>
-            <AddButton />
-        </SwapContainer>
+        <>
+            <ComponentsTransaction
+                data={initDataTransaction}
+                onConfirm={approveToken}
+                //     // isInsufficientAllowance &&
+                //     // !isNativeCoin(tokenIn)
+                //     //     ? handleOnApprove
+                //     //     : onConfirm
+                //     // () => handleOnApprove()
+            />
+            <ToastMessage />
+            <SwapContainer>
+                {!account && isOpenWalletModal && (
+                    <WalletModal setToggleWalletModal={openWalletModal} />
+                )}
+                <Row jus="space-between">
+                    <Nav gap="20px">
+                        <Link to="/swap">Swap</Link>
+                        {/* <Link to="/add" className="active-link">Add</Link> */}
+                        <Link to="/limit">Limit</Link>
+                    </Nav>
+                    <Setting />
+                </Row>
+                <Bridge />
+                <Columns>
+                    <CurrencyInputPanel
+                        token={tokenIn}
+                        value={inputAmount}
+                        onUserInput={handleOnUserInput}
+                        onUserSelect={handleOnTokenSelection}
+                        field={Field.INPUT}
+                    />
+                    <Icon>
+                        <img src={PlusIcon} alt="icon" />
+                    </Icon>
+                    <CurrencyInputPanel
+                        token={tokenOut}
+                        value={outputAmount}
+                        onUserInput={handleOnUserInput}
+                        onUserSelect={handleOnTokenSelection}
+                        field={Field.OUTPUT}
+                    />
+                </Columns>
+                <AddButton />
+            </SwapContainer>
+        </>
     )
 }
 
