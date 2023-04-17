@@ -393,9 +393,8 @@ export default function Pools() {
                         </NetworkButton>
                     </HeadLabelRight>
                 </HeadLabel>
-                {
-                    !isMyPositionPage && (
-                        <TableContainer>
+                {!isMyPositionPage && (
+                    <TableContainer>
                         <Table
                             sx={{ minWidth: 650 }}
                             aria-labelledby="tableTitle"
@@ -416,7 +415,7 @@ export default function Pools() {
                                               row.name,
                                           )
                                           const labelId = `enhanced-table-checkbox-${index}`
-    
+
                                           return (
                                               <RowTable
                                                   role="checkbox"
@@ -487,11 +486,8 @@ export default function Pools() {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                    )
-                }
-                {
-                    isMyPositionPage && <MyPools />
-                }
+                )}
+                {isMyPositionPage && <MyPools />}
             </Box>
         </Container>
     )
@@ -512,6 +508,7 @@ const Container = styled.div`
     font-style: italic;
     font-weight: 300;
     overflow: hidden;
+    margin-bottom: 50px;
 `
 
 const HeadTitle = styled.div`

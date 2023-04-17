@@ -66,7 +66,12 @@ const AccountDetails = ({
                     <button onClick={() => openOptions()}>
                         <img src={iconSetting} alt="#" />
                     </button>
-                    <button onClick={() => deactivate()}>
+                    <button
+                        onClick={() => {
+                            deactivate()
+                            setToggleWalletModal(false)
+                        }}
+                    >
                         <img src={imgPower} alt="#" />
                     </button>
                 </WrapBtnHeader>
@@ -255,7 +260,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     transform: translateY(-50%);
     margin: auto;
     transition: all 0.1s ease-in-out;
-    z-index: ${({ isConnected }) => (isConnected ? 3 : -1)};
+    z-index: 999999;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
     color: ${({ theme }) => theme.text1};
@@ -516,8 +521,12 @@ const WrapConnectModal = styled(Container)`
     overflow: unset;
     @media screen and (max-width: 1100px) {
         right: 10px;
+        top: unset;
+        bottom: 60px;
     }
     @media screen and (max-width: 391px) {
+        width: 90%;
+        margin: auto;
         right: 10px;
         max-width: 300px;
     }
