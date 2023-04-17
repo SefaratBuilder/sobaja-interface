@@ -52,7 +52,7 @@ export const ListNetwork = [
                     symbol: "MATIC",
                     decimals: 18,
                 },
-                rpcUrls: ["https://endpoints.omniatech.io/v1/matic/mumbai/public"],
+                rpcUrls: ["https://rpc-mumbai.maticvigil.com"],
                 blockExplorerUrls: ["https://explorer-mumbai.maticvigil.com/"],
             },
         ]

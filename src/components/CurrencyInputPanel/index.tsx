@@ -24,7 +24,7 @@ const CurrencyInputPanel = ({
     onUserSelect,
 }: CurrencyInputPanelProps) => {
     const { account } = useActiveWeb3React()
-    const balance = account && useCurrencyBalance(account, token)
+    const balance = useCurrencyBalance(account, token)
 
     return (
         <Wrapper>

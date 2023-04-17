@@ -21,6 +21,7 @@ const MyPools = () => {
     const navigate = useNavigate()
     const urlTokens = useTokensUrl(tokenList)
     const { onTokenSelection } = useSwapActionHandlers()
+    console.log({position})
     // const { slippage } = useAppState()
     // const { account } = useActiveWeb3React()
     // const routerContract = useRouterContract()

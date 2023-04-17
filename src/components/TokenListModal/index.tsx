@@ -28,22 +28,17 @@ const TokenListModal = ({
     const [searchQuery, setSearchQuery] = useState<string | undefined>('')
     const { currentList: tokens } = useTokenList()
     const addTokenToCurrentList = useAddTokenToCurrentList()
-    const [searchedToken, setSearchedToken] = useState<Token | undefined>()
     const [renderedTokenList, setRenderTokenList] = useState<Token[] | []>([])
     const allTokenBalances = useAllTokenBalances()
     const { chainId } = useActiveWeb3React()
     const queriedToken = useToken(searchQuery)
-
-    useEffect(() => {
-        if(queriedToken) setRenderTokenList(tokens => [...tokens, queriedToken])
-    }, [searchQuery])
 
     const handleSearchToken = async (
         e: ChangeEvent<HTMLInputElement>,
     ): Promise<void> => {
         const searchQuery = e.target.value
         setSearchQuery(searchQuery)
-        searchedToken && setSearchedToken(undefined)
+        console.log({ tokens })
         const tokenHasAlreadyInList =
             searchQuery && tokens.length > 0
                 ? tokens.filter(
@@ -61,12 +56,15 @@ const TokenListModal = ({
             setRenderTokenList([])
             return
         }
-        setRenderTokenList(tokens)
+        if (!searchQuery) {
+            setRenderTokenList(tokens)
+            return
+        }
     }
 
     const handleAddToken = (token: Token) => {
         addTokenToCurrentList(token)
-        setSearchedToken(undefined)
+        setSearchQuery('')
     }
 
     const sortTokenList = () => {
@@ -82,13 +80,13 @@ const TokenListModal = ({
             ...sortedTokenList,
             ...newTokens,
         ]
-        .filter((item) => item.chainId === chainId || item.address === NATIVE_COIN.address)
+        
         setRenderTokenList(filteredByChainIdTokens)
     }
 
     useEffect(() => {
         sortTokenList()
-    }, [tokens, chainId])
+    }, [tokens])
 
     const ModalButton = (onOpen: () => void) => {
         return (
@@ -99,7 +97,7 @@ const TokenListModal = ({
             />
         )
     }
-
+    console.log({renderedTokenList})
     const ModalContent = (onClose: () => void) => {
         return (
             <ModalContentWrapper gap={'16px'}>
@@ -130,43 +128,31 @@ const TokenListModal = ({
                 </Row>
                 <Hr />
                 <WrapList>
-                    {!searchedToken ? (
-                        renderedTokenList.length > 0 &&
+                    {  renderedTokenList.length > 0 ?
                         renderedTokenList.map((token: Token, index: number) => {
                             return (
                                 <TokenSelection
                                     key={index + 1}
                                     token={token}
-                                    balance={
-                                        (allTokenBalances[token.address] &&
-                                            Number(
-                                                allTokenBalances[token.address],
-                                            ).toFixed(4)) ||
-                                        0
-                                    }
+                                    hideAddButton={true}
                                     onUserSelect={() => {
                                         onUserSelect(field, token)
                                         onClose()
                                     }}
                                 />
                             )
-                        })
-                    ) : (
-                        <TokenSelection
-                            token={searchedToken}
-                            balance={
-                                allTokenBalances?.[
-                                    searchedToken.address
-                                ]?.toString() || 0
-                            }
-                            onUserSelect={(e) => {
-                                onUserSelect(field, searchedToken)
-                                onClose()
-                            }}
-                            hideAddButton={false}
-                            onAdd={() => handleAddToken(searchedToken)}
-                        />
-                    )}
+                        }) : queriedToken ? (
+                            <TokenSelection 
+                                token={queriedToken} 
+                                onUserSelect={(e) => {
+                                    onUserSelect(field, queriedToken)
+                                    onClose()
+                                }}
+                                hideAddButton={false}
+                                onAdd={() => handleAddToken(queriedToken)}
+                            />
+                        ) : <></>
+                    }
                 </WrapList>
             </ModalContentWrapper>
         )
