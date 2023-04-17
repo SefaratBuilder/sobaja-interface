@@ -11,6 +11,7 @@ import imgDownArrow from 'assets/icons/arrow-down.svg'
 import imgPlusWallet from 'assets/icons/plus-wallet.svg'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
+import iconSetting from 'assets/icons/setting.svg'
 
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -20,7 +21,7 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account } = useActiveWeb3React()
+    const { account, deactivate } = useActiveWeb3React()
 
     const [isCopied, setIsCopied] = useState<boolean>(false)
 
@@ -61,9 +62,14 @@ const AccountDetails = ({
                             </Tooltip>
                         </CopyBtn>
                     )}
+
+                    <button onClick={() => openOptions()}>
+                        <img src={iconSetting} alt="#" />
+                    </button>
                     <button
                         onClick={() => {
-                            openOptions()
+                            deactivate()
+                            setToggleWalletModal(false)
                         }}
                     >
                         <img src={imgPower} alt="#" />
@@ -254,7 +260,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     transform: translateY(-50%);
     margin: auto;
     transition: all 0.1s ease-in-out;
-    z-index: ${({ isConnected }) => (isConnected ? 3 : -1)};
+    z-index: 999999;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
     color: ${({ theme }) => theme.text1};
@@ -515,8 +521,12 @@ const WrapConnectModal = styled(Container)`
     overflow: unset;
     @media screen and (max-width: 1100px) {
         right: 10px;
+        top: unset;
+        bottom: 60px;
     }
     @media screen and (max-width: 391px) {
+        width: 90%;
+        margin: auto;
         right: 10px;
         max-width: 300px;
     }
