@@ -112,8 +112,8 @@ export function usePairByAddresses(addresses: (string | undefined)[]): {
                     const balance = balanceResults?.[i]?.result?.[0]
                     const reserves = reservesResults?.[i]?.result
                     const tokenA = tokens?.[i]
-                    const tokenB = tokens?.[i + 3]
-                    const tokenLp = tokens?.[i + 6]
+                    const tokenB = tokens?.[i + addresses.length]
+                    const tokenLp = tokens?.[i + addresses.length * 2]
                     const pair =
                         tokenA &&
                         tokenB &&
@@ -242,7 +242,9 @@ export const useMyPosition = () => {
     const lpBalancesUser = Object.entries(balances).map(i => {
         if (i?.[1]?.value && Number(i?.[1]?.value) > 0) {
             const index = mapPairs.findIndex((lp: any) => lp?.tokenLp?.address === i?.[0])
-            const percent = mul(div(i?.[1]?.value.toString(), mapPairs?.[index]?.reserveLp), 100)
+            // const percent = mul(div(i?.[1]?.value.toString(), mapPairs?.[index]?.reserveLp), 100)
+            const percent = div(i?.[1]?.value.toString(), mapPairs?.[index]?.reserveLp)
+            console.log("🤦‍♂️ ⟹ lpBalancesUser ⟹ percent:", percent)
             const percent0 = divNumberWithDecimal(mul(mapPairs?.[index]?.reserve0, percent), mapPairs?.[index]?.token0?.decimals)
             const percent1 = divNumberWithDecimal(mul(mapPairs?.[index]?.reserve1, percent), mapPairs?.[index]?.token1?.decimals)
 
@@ -272,6 +274,7 @@ export const useMyPosition = () => {
             }
         }
     }).filter(i => i)
+    console.log({ lpBalancesUser, balances, allPairs })
 
     return useMemo(
         () => {
