@@ -72,7 +72,7 @@ export function useTokens(addresses: (string | undefined)[]): (Token | undefined
     )
 
     return useMemo(() => {
-        return addresses.map((address, index) => {
+        return addresses?.map((address, index) => {
             const symbol = symbolResult?.[index]?.result?.[0]
             const name = nameResult?.[index]?.result?.[0]
             const decimals = decimalsResult?.[index]?.result?.[0]
