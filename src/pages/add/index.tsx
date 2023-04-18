@@ -96,59 +96,6 @@ const Swap = () => {
         }
     }
 
-    // const handleOnAddLiquidity = async () => {
-    //     try {
-    //         if (inputAmount && outputAmount && tokenIn && tokenOut) {
-    //             const isEthTxn = isNativeCoin(tokenIn) || isNativeCoin(tokenOut)
-    //             const method = isEthTxn ? 'addLiquidityETH' : 'addLiquidity'
-    //             const token = isNativeCoin(tokenIn) ? tokenOut : tokenIn
-    //             const amountToken = isNativeCoin(tokenOut)
-    //                 ? inputAmount
-    //                 : outputAmount
-
-    //             let value = isNativeCoin(tokenIn)
-    //                 ? mulNumberWithDecimal(inputAmount, tokenIn.decimals)
-    //                 : mulNumberWithDecimal(outputAmount, tokenOut.decimals)
-    //             value = isEthTxn ? value : '0x00'
-    //             const args = isEthTxn
-    //                 ? [
-    //                       token.address,
-    //                       mulNumberWithDecimal(amountToken, token.decimals),
-    //                       mulNumberWithDecimal(amountToken, token.decimals), //
-    //                       value,
-    //                       account,
-    //                       (new Date().getTime() / 1000 + 1000).toFixed(0),
-    //                   ]
-    //                 : [
-    //                       tokenIn.address,
-    //                       tokenOut.address,
-    //                       mulNumberWithDecimal(inputAmount, tokenIn.decimals),
-    //                       mulNumberWithDecimal(outputAmount, tokenOut.decimals),
-    //                       mulNumberWithDecimal(inputAmount, tokenIn.decimals), //
-    //                       mulNumberWithDecimal(outputAmount, tokenOut.decimals), //
-    //                       account,
-    //                       (new Date().getTime() / 1000 + 1000).toFixed(0),
-    //                   ]
-    //             console.log({ ...args, value })
-    //             const gasLimit = await routerContract?.estimateGas?.[method]?.(
-    //                 ...args,
-    //                 { value },
-    //             )
-    //             const callResult = await routerContract?.[method]?.(...args, {
-    //                 value,
-    //                 gasLimit: gasLimit && gasLimit.add(1000),
-    //             })
-    //             const txn = await callResult.wait()
-
-    //             if (txn.status === 1) {
-    //                 console.log('Successfull...', txn)
-    //             }
-    //         }
-    //     } catch (err) {
-    //         console.log(err)
-    //     }
-    // }
-
     const onConfirm = useCallback(async () => {
         try {
             if (inputAmount && outputAmount && tokenIn && tokenOut) {

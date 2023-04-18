@@ -108,17 +108,17 @@ export function calcTransactionDeadline(deadline: number) {
     return (new Date().getTime() / 1000 + deadline).toFixed()
 }
 
-// export const calcSlippageAmount = (
-//     amount: string,
-//     slippage: string
-// ): [string, string] => {
+export const calcSlippageAmount = (
+    amount: string,
+    slippage: string
+): [string, string] => {
 
-//     if (Number(slippage) < 0 || Number(slippage) > 1) {
-//         throw new Error(`Please input properly slippage amount`)
-//     }
+    if (Number(slippage) < 0 || Number(slippage) > 1) {
+        throw new Error(`Please input properly slippage amount`)
+    }
 
-//     const amountIn = div(amount, (div((sub(1, slippage)), 100)))
-//     const amountOut = mul(amount, (div((sub(1, slippage)), 100)))
+    const amountIn = div(amount, (div((sub(1, slippage)), 100)))
+    const amountOut = mul(amount, (div((sub(1, slippage)), 100)))
 
-//     return [amountOut, amountIn]
-// }
+    return [amountOut, amountIn]
+}
