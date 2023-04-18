@@ -8,11 +8,12 @@ import { Columns } from 'components/Layouts'
 import { useNavigate } from 'react-router-dom'
 import Faucet from 'components/Faucet'
 import { useActiveWeb3React } from 'hooks'
+import ConnectorMobile from 'components/ConnectorMobile'
 
 const Header = () => {
     const [burgerNav, setBurgerNav] = useState(false)
     const navigate = useNavigate()
-    const { account, chainId } = useActiveWeb3React()
+    const { account, chainId, deactivate } = useActiveWeb3React()
 
     return (
         <HeaderWrapper>
@@ -26,46 +27,45 @@ const Header = () => {
             </Logo>
             <Navigator burgerNav={burgerNav} setBurgerNav={setBurgerNav} />
 
-            <Connector>
+            <WrapConnect>
                 <Faucet />
-                <NetworkSelector />
-                <Web3Status />
-            </Connector>
-            <WrapperNavigator onClick={() => setBurgerNav((i) => !i)}>
-                {!burgerNav ? (
-                    <>
-                        <MenuIcon>
-                            <span />
-                            <span />
-                            <span />
-                        </MenuIcon>
-                    </>
-                ) : (
-                    'X'
-                )}
-            </WrapperNavigator>
+
+                <ConnectorMobile />
+
+                <Connector>
+                    <NetworkSelector />
+                    <Web3Status />
+                </Connector>
+
+                <WrapperNavigator onClick={() => setBurgerNav((i) => !i)}>
+                    {!burgerNav ? (
+                        <>
+                            <MenuIcon>
+                                <span />
+                                <span />
+                                <span />
+                            </MenuIcon>
+                        </>
+                    ) : (
+                        'X'
+                    )}
+                </WrapperNavigator>
+            </WrapConnect>
         </HeaderWrapper>
     )
 }
+const WrapConnect = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+`
 
 export const HeaderWrapper = styled.div`
-    display: grid;
-    grid-template-columns: 1fr 2fr 400px;
-    grid-gap: 10px;
     width: 100%;
     padding: 20px;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: flex-end;
-
-    @media screen and (max-width: 1100px) {
-        grid-template-columns: 1fr 2fr 26px;
-    }
-    @media screen and (max-width: 576px) {
-        grid-gap: 10px;
-    }
-    @media screen and (max-width: 390px) {
-        font-size: 12px;
-    }
 `
 
 const WrapperNavigator = styled.div`
@@ -118,6 +118,10 @@ export const Connector = styled.div`
     gap: 10px;
     align-items: center;
     justify-content: flex-end;
+
+    @media screen and (max-width: 1100px) {
+        display: none;
+    }
 `
 
 const MenuIcon = styled(Columns)`
@@ -127,7 +131,7 @@ const MenuIcon = styled(Columns)`
     justify-content: center;
     span {
         height: 2px;
-        width: 100%;
+        width: 15px;
         background: white;
     }
 `

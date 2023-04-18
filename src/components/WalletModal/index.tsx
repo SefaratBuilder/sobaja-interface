@@ -317,7 +317,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     height: 480px;
     margin: auto;
     transition: all 0.1s ease-in-out;
-    z-index: 3;
+    z-index: 999999;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
     color: ${({ theme }) => theme.text1};

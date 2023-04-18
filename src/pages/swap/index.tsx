@@ -53,6 +53,7 @@ const Swap = () => {
     const pairContract = usePairContract('0x1990D029794ffC74fC20908740A22de982152945')
     const factoryContract = useFactoryContract()
     console.log({pair, tokenIn, tokenOut})
+
     const mintLp = async () => {
         try {
             if(account) {
@@ -60,11 +61,12 @@ const Swap = () => {
                 // const token0 = await pairContract?.token0()
                 // const token1 = await pairContract?.token1()
                 // console.log('>>>>>>>>>>>>>>>', token0, token1)
-                const gasLimit = await pairContract?.estimateGas.mint(account)
-                const callResult = await pairContract?.mint(account, { gasLimit })
-
-                await callResult.wait()
-                if(callResult?.status === 1) console.log('mint okkkkk', callResult)
+                // const gasLimit = await pairContract?.estimateGas.mint(account)
+                // const callResult = await pairContract?.mint(account, { gasLimit })
+                const factory = await routerContract?.factory()
+                console.log({factory})
+                // await callResult.wait()
+                // if(callResult?.status === 1) console.log('mint okkkkk', callResult)
             }
         } catch(err) {
             console.log('failed mint' ,err)
@@ -416,8 +418,8 @@ const Swap = () => {
                 {/* <PrimaryButton
                         onClick={() => mintLp()}
                         name={'Mint lp'}
-                />
-                <PrimaryButton
+                /> */}
+                {/* <PrimaryButton
                         onClick={() => create()}
                         name={'Create pair'}
                 /> */}

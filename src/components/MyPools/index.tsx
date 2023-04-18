@@ -22,8 +22,6 @@ import ComponentsTransaction, {
 import { useTokenApproval } from 'hooks/useToken'
 import { ROUTERS } from 'constants/addresses'
 import { useTransactionHandler } from 'states/transactions/hooks'
-import ToastMessage from 'components/ToastMessage'
-// import { URLSCAN_BY_CHAINID } from 'constants'
 
 const MyPools = () => {
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
@@ -106,105 +104,6 @@ const MyPools = () => {
         onTokenSelection(Field.OUTPUT, item?.token1)
 
         navigate('/add')
-    }
-
-    const handleOnRemoveLiquidity = async () => {
-        try {
-            if (poolRemove) {
-                const isEthTxn =
-                    isNativeCoin(poolRemove.token0) ||
-                    isNativeCoin(poolRemove.token1) // is Pool contain native coin ?
-                console.log(
-                    '🤦‍♂️ ⟹ handleOnRemoveLiquidity ⟹ isEthTxn:',
-                    isEthTxn,
-                )
-                const method = isEthTxn
-                    ? 'removeLiquidityETH'
-                    : 'removeLiquidity'
-                // const token = isNativeCoin(tokenIn)? tokenOut : tokenIn
-
-                const balanceToRemove = div(
-                    mul(poolRemove.value, percentValue),
-                    100,
-                )
-
-                const args = isEthTxn
-                    ? [
-                          poolRemove.tokenLp.address,
-                          mulNumberWithDecimal(
-                              poolRemove.value,
-                              poolRemove.tokenLp.decimals,
-                          ), // amount of L token to remove
-                          // mulNumberWithDecimal(amountToken,token.decimals), // minimum amount of token must received
-                          mulNumberWithDecimal(
-                              calcSlippageAmount(
-                                  mul(
-                                      div(balanceToRemove, poolRemove.totalLp),
-                                      poolRemove.totalReserve0,
-                                  ),
-                                  slippage,
-                              )[0],
-                              poolRemove.token0?.decimals,
-                          ),
-                          mulNumberWithDecimal(
-                              calcSlippageAmount(
-                                  mul(
-                                      div(balanceToRemove, poolRemove.totalLp),
-                                      poolRemove.totalReserve1,
-                                  ),
-                                  slippage,
-                              )[0],
-                              poolRemove.token1?.decimals,
-                          ),
-                          account,
-                          (new Date().getTime() / 1000 + 1000).toFixed(0),
-                      ]
-                    : [
-                          poolRemove.token0.address,
-                          poolRemove.token1.address,
-                          mulNumberWithDecimal(
-                              balanceToRemove,
-                              poolRemove.tokenLp.decimals,
-                          ), // liquidity amount
-                          mulNumberWithDecimal(
-                              calcSlippageAmount(
-                                  mul(
-                                      div(balanceToRemove, poolRemove.totalLp),
-                                      poolRemove.totalReserve0,
-                                  ),
-                                  slippage,
-                              )[0],
-                              poolRemove.token0?.decimals,
-                          ),
-                          mulNumberWithDecimal(
-                              calcSlippageAmount(
-                                  mul(
-                                      div(balanceToRemove, poolRemove.totalLp),
-                                      poolRemove.totalReserve1,
-                                  ),
-                                  slippage,
-                              )[0],
-                              poolRemove.token1?.decimals,
-                          ),
-                          account,
-                          (new Date().getTime() / 1000 + 1000).toFixed(0),
-                      ]
-                console.log(...args)
-                const gasLimit = await routerContract?.estimateGas?.[method]?.(
-                    ...args,
-                )
-                const callResult = await routerContract?.[method]?.(...args, {
-                    gasLimit: gasLimit && gasLimit.add(1000),
-                })
-                const txn = await callResult.wait()
-
-                if (txn.status === 1) {
-                    console.log('Successfull...', txn)
-                }
-            }
-        } catch (error) {
-            console.log(error)
-        }
     }
 
     const handleRemove = () => {
