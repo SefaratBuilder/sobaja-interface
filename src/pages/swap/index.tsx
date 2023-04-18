@@ -26,8 +26,8 @@ import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
 import { useFactoryContract, usePairContract, useRouterContract } from 'hooks/useContract'
-import { calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
-import { useAppState, useTransactionDeadline } from 'states/application/hooks'
+import { calcSlippageAmount, calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
+import { useAppState, useSlippageTolerance, useTransactionDeadline } from 'states/application/hooks'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import ComponentsTransaction, {
     InitCompTransaction,
@@ -36,7 +36,7 @@ import ToastMessage from 'components/ToastMessage'
 
 const Swap = () => {
     const swapState = useSwapState()
-    const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(false)
+    const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
@@ -52,6 +52,7 @@ const Swap = () => {
     const initDataTransaction = InitCompTransaction()
     const pairContract = usePairContract('0x1990D029794ffC74fC20908740A22de982152945')
     const factoryContract = useFactoryContract()
+    const { slippage } = useSlippageTolerance()
     console.log({pair, tokenIn, tokenOut})
 
     const mintLp = async () => {
@@ -115,30 +116,27 @@ const Swap = () => {
     }
 
     const getSwapArguments = () => {
-        if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
-            return
+        if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId) return
+        const amountIn = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
+        const amountOut = mulNumberWithDecimal(outputAmount, tokenOut.decimals)
+        const amountOutMin = mulNumberWithDecimal(calcSlippageAmount(outputAmount, slippage)[0], tokenOut.decimals)
+        const amountInMax = mulNumberWithDecimal(calcSlippageAmount(inputAmount, slippage)[1], tokenIn.decimals)
         if (swapType === Field.INPUT) {
-            console.log({
-                amountOutmin: mulNumberWithDecimal(
-                    outputAmount,
-                    tokenOut.decimals,
-                ),
-            })
             if (isNativeCoin(tokenIn))
                 return {
                     args: [
-                        '0', //amountOutMin
+                        amountOutMin, //amountOutMin
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
                     ],
-                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
+                    value: amountIn, //amountIn
                 }
             else if (isNativeCoin(tokenOut))
                 return {
                     args: [
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        '0x00',
+                        amountIn, //amountIn
+                        amountOutMin, //amountOutMin
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline),
@@ -148,8 +146,8 @@ const Swap = () => {
             else
                 return {
                     args: [
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        amountIn, //amountIn
+                        amountOutMin, //amountOutMin
                         [tokenIn.address, tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
@@ -160,8 +158,8 @@ const Swap = () => {
             if (isNativeCoin(tokenOut))
                 return {
                     args: [
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
+                        amountOut, //amountOut
+                        amountInMax, //amountInMax
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline),
@@ -171,18 +169,18 @@ const Swap = () => {
             else if (isNativeCoin(tokenIn))
                 return {
                     args: [
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
+                        amountOut, //amountOut
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
                     ],
-                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
+                    value: amountInMax, //amountInMax
                 }
             else
                 return {
                     args: [
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
+                        amountOut, //amountOut
+                        amountInMax, //amountInMax
                         [tokenIn.address, tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
@@ -454,7 +452,7 @@ const Swap = () => {
                     </Nav>
                     <Setting />
                 </Row>
-                <Bridge />
+                {/* <Bridge /> */}
                 <Columns>
                     <CurrencyInputPanel
                         token={tokenIn}
