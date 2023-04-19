@@ -2,20 +2,13 @@ import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import SobajaswapLogo from 'assets/brand/sobajaswap-logo.svg'
+import { itemNav } from '.'
 
 interface BurgerNavProps {
     burgerNav: boolean
     setBurgerNav: React.Dispatch<React.SetStateAction<boolean>>
 }
 const BurgerNav = ({ burgerNav, setBurgerNav }: BurgerNavProps) => {
-    const itemNav = [
-        { path: '/swap', name: 'Swap', img: '' },
-        { path: '/pools', name: 'Pools', img: '' },
-        { path: '/earns', name: 'Earn', img: '' },
-        { path: '/nfts', name: 'NFTs', img: '' },
-        { path: '/launchpad', name: 'Launchpad', img: '' },
-    ]
-
     const loca = useLocation()
 
     return (

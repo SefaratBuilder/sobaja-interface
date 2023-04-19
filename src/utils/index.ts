@@ -109,16 +109,16 @@ export function calcTransactionDeadline(deadline: number) {
 }
 
 export const calcSlippageAmount = (
-    amount: string,
-    slippage: string
+    amount: string | number,
+    slippage: string | number
 ): [string, string] => {
 
-    if (Number(slippage) < 0 || Number(slippage) > 1) {
+    if (Number(slippage) < 0 || Number(slippage) > 100) {
         throw new Error(`Please input properly slippage amount`)
     }
 
-    const amountIn = div(amount, (div((sub(1, slippage)), 100)))
-    const amountOut = mul(amount, (div((sub(1, slippage)), 100)))
+    const amountOut = mul(amount, ((sub(1, div(slippage, 100)))))
+    const amountIn = div(amount, ((sub(1, div(slippage, 100)))))
 
     return [amountOut, amountIn]
 }

@@ -32,46 +32,6 @@
         "chainId": 324
     },
     {
-        "address": "0x0faF6df7054946141266420b43783387A78d82A9",
-        "symbol": "USDC",
-        "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/usdc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "USD Coin",
-        "chainId": 280
-    },
-    {
-        "address": "0x7f17E2e9FCc20308108B594FE68e20055D7CD8d3",
-        "symbol": "DAI",
-        "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/usdc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "DAI",
-        "chainId": 280
-    },
-    {
-        "address": "0x355d88ef9CCB06078a10cF7111091cAe7756c210",
-        "symbol": "SP",
-        "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/usdc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "Spece",
-        "chainId": 280
-    },
-    {
-        "address": "0x0BfcE1D53451B4a8175DD94e6e029F7d8a701e9c",
-        "symbol": "wBTC",
-        "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/wbtc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "wBTC",
-        "chainId": 280
-    },
-    {
-        "address": "0x0faF6df7054946141266420b43783387A78d82A9",
-        "symbol": "LINK",
-        "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "ChainLink Token",
-        "chainId": 280
-    },
-    {
         "address": "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa",
         "symbol": "WETH",
         "decimals": 18,
@@ -116,7 +76,7 @@
         "address": "0xDf9acc0a00Ae6Ec5eBc8D219d12A0157e7F18A68",
         "symbol": "USDT",
         "decimals": 18,
-        "logoURI": "",
+        "logoURI": "https://raw.githubusercontent.com/forbitspace/icons/main/token/usdt.jpg",
         "name": "USDT Coin",
         "chainId": 280,
         "type": "faucet"

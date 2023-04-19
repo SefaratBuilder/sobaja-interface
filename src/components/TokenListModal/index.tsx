@@ -26,11 +26,10 @@ const TokenListModal = ({
     onUserSelect,
 }: TokenListModalProps) => {
     const [searchQuery, setSearchQuery] = useState<string | undefined>('')
-    const { currentList: tokens } = useTokenList()
     const addTokenToCurrentList = useAddTokenToCurrentList()
     const [renderedTokenList, setRenderTokenList] = useState<Token[] | []>([])
     const allTokenBalances = useAllTokenBalances()
-    const { chainId } = useActiveWeb3React()
+    const tokens = useTokenList()
     const queriedToken = useToken(searchQuery)
 
     const handleSearchToken = async (
@@ -38,7 +37,6 @@ const TokenListModal = ({
     ): Promise<void> => {
         const searchQuery = e.target.value
         setSearchQuery(searchQuery)
-        console.log({ tokens })
         const tokenHasAlreadyInList =
             searchQuery && tokens.length > 0
                 ? tokens.filter(
@@ -63,6 +61,7 @@ const TokenListModal = ({
     }
 
     const handleAddToken = (token: Token) => {
+        console.log('aaaa')
         addTokenToCurrentList(token)
         setSearchQuery('')
     }
@@ -70,7 +69,7 @@ const TokenListModal = ({
     const sortTokenList = () => {
         let sortedTokenList: TokenList = []
         Object.entries(allTokenBalances).map(([k, v]) => {
-            const token = tokens.find((t) => t.address === k && Number(v?._value) > 0)
+            const token = tokens.find((t) => t.address === k && Number(v) > 0)
             return token && sortedTokenList.push(token)
         })
 
@@ -97,7 +96,6 @@ const TokenListModal = ({
             />
         )
     }
-    console.log({renderedTokenList})
     const ModalContent = (onClose: () => void) => {
         return (
             <ModalContentWrapper gap={'16px'}>
