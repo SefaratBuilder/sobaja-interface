@@ -55,6 +55,7 @@ export const computePairAddress = ({
 }): string | undefined => {
     if (!tokenA || !tokenB || !chainId) return
     const [token0, token1] = sortsToken(tokenA, tokenB) // does safety checks
+
     return getCreate2Address(
         FACTORIES[chainId],
         keccak256(

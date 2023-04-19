@@ -33,6 +33,7 @@ import ComponentsTransaction, {
     InitCompTransaction,
 } from 'components/TransactionModal'
 import ToastMessage from 'components/ToastMessage'
+import { getContractAddress } from '@ethersproject/address'
 
 const Swap = () => {
     const swapState = useSwapState()
