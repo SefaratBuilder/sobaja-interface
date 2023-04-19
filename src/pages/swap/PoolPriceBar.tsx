@@ -4,19 +4,23 @@ import styled from 'styled-components'
 import imgDownArrowDark from 'assets/icons/chevron-grey.svg'
 import { useSwapState } from 'states/swap/hooks'
 import { Row } from 'components/Layouts'
-import { div } from 'utils/math'
+import { div, mulNumberWithDecimal } from 'utils/math'
 import NotiIcon from 'assets/icons/notification.svg'
+import { useAppState } from 'states/application/hooks'
+import { Pair } from 'utils/pair'
 
 const PoolPriceBar = ({
+    pair,
     dropDown,
     setDropDown,
 }: {
+    pair: Pair | undefined
     dropDown: boolean
     setDropDown: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
     const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } =
         useSwapState()
-    const slippage = 0
+    const { slippage } = useAppState()
     const maximumSent =
         Number(inputAmount) && slippage
             ? Number(inputAmount) * (1 + Number(slippage) / 100)
@@ -28,10 +32,12 @@ const PoolPriceBar = ({
         Number(inputAmount) && Number(outputAmount)
             ? Number(div(inputAmount, outputAmount)).toFixed(8)
             : 0
-    const priceImpact =
-        Number(inputAmount) && Number(outputAmount)
-            ? Number(div(inputAmount, outputAmount)).toFixed(8)
-            : 0
+    function getPriceImpact(fee: number, amountTrade: number, reservesA: number) {
+        let amount = amountTrade * (1 - fee);
+        return amount / (reservesA + amount) * 100;
+    }
+    const reserveIn = pair && (tokenIn?.symbol == pair.token0.address ? pair.reserve0 : pair.reserve1)
+    const priceImpact = tokenIn && inputAmount && pair ? getPriceImpact(Number(pair.fee), Number(mulNumberWithDecimal(inputAmount, tokenIn.decimals)), Number(reserveIn)) : 0
 
     return (
         <>

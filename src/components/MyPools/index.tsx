@@ -22,6 +22,7 @@ import ComponentsTransaction, {
 import { useTokenApproval } from 'hooks/useToken'
 import { ROUTERS } from 'constants/addresses'
 import { useTransactionHandler } from 'states/transactions/hooks'
+import { Row } from 'components/Layouts'
 
 const MyPools = () => {
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
@@ -351,6 +352,9 @@ const MyPools = () => {
                             )
                         })}
                 </RowMyPools>
+                {
+                    position.length <= 0 && <Row jus="center">You don't have a liquidity position yet. Try to add new position.</Row>
+                }
                 {modalRemovePool && (
                     <ModalRemovePool>
                         <WrapRemovePool>

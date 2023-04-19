@@ -31,7 +31,7 @@ import { InitCompTransaction } from 'components/TransactionModal'
 import ComponentsTransaction from 'components/TransactionModal'
 import ToastMessage from 'components/ToastMessage'
 import { useTransactionHandler } from 'states/transactions/hooks'
-import PoolPriceBar from 'pages/swap/PoolPriceBar'
+import PoolPriceBar from './PoolPriceBar'
 import BackArrow from 'assets/icons/arrow-left.svg'
 import { useSlippageTolerance } from 'states/application/hooks'
 
@@ -230,22 +230,17 @@ const Swap = () => {
                 ? WRAPPED_NATIVE_COIN[chainId]
                 : tokenOut
 
-            const addRate = pair?.calcAddRate(
+            const addRate = pair.calcAddRate(
                 amountInWithDel,
                 tI,
                 tO,
                 Field.INPUT,
             )
-            console.log('Amount out', addRate)
-            handleOnUserInput(Field.OUTPUT, addRate)
-            // onUserInput(Field.OUTPUT, addRate)
+            onChangeSwapState({
+                ...swapState,
+                outputAmount: addRate,
+            })
         }
-        // if(!pair) {
-        //     onChangeSwapState({
-        //         ...swapState,
-        //         outputAmount: ''
-        //     })
-        // }
     }, [inputAmount, tokenIn, tokenOut])
 
     useEffect(() => {
@@ -263,8 +258,6 @@ const Swap = () => {
                 tokenOut.decimals,
             )
 
-            console.log('🤦‍♂️ ⟹ useEffect ⟹ amountOutWithDel:', amountOutWithDel)
-
             const tI = isNativeCoin(tokenIn)
                 ? WRAPPED_NATIVE_COIN[chainId]
                 : tokenIn
@@ -278,16 +271,15 @@ const Swap = () => {
                 tO,
                 Field.OUTPUT,
             )
-            console.log('Amount In', addRate)
-            handleOnUserInput(Field.INPUT, addRate)
+            console.log({addRate})
+            onChangeSwapState({
+                ...swapState,
+                inputAmount: addRate,
+            })
         }
-        // if(!pair) {
-        //     onChangeSwapState({
-        //         ...swapState,
-        //         inputAmount: ''
-        //     })
-        // }
     }, [outputAmount, tokenIn, tokenOut])
+
+    console.log({pair})
 
     const AddButton = () => {
         const balanceIn = useCurrencyBalance(account, tokenIn)

@@ -22,8 +22,8 @@ const Navigator = ({ burgerNav, setBurgerNav }: NavigationProps) => {
         <>
             <NavigatorWrapper>
                 {
-                    itemNav.map(item => {
-                        return <Link to={item.path} target={item.target} >{item.name}</Link>
+                    itemNav.map((item, index) => {
+                        return <Link to={item.path} target={item.target} key={index} >{item.name}</Link>
                     })
                 }
             </NavigatorWrapper>

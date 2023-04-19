@@ -130,14 +130,15 @@ export class Pair {
         field: Field,
     ) {
         if (this.reserve0 && this.reserve1) {
-
+            console.log({ amountIn })
             const result1 = div(mul(amountIn, this.reserve1), this.reserve0);
             const result0 = div(mul(amountIn, this.reserve0), this.reserve1);
-
+            console.log({ result0, result1, amountIn, res0: this.reserve0, res1: this.reserve1 })
             if (
                 (field === Field.INPUT && isSortedTokens(tokenIn, tokenOut)) ||
                 (field === Field.OUTPUT && !isSortedTokens(tokenIn, tokenOut))
             ) {
+                console.log({ amountOut: divNumberWithDecimal(result1, (this.token1.decimals)) })
                 return divNumberWithDecimal(result1, (this.token1.decimals))
             } else {
                 return divNumberWithDecimal(result0, (this.token0.decimals))

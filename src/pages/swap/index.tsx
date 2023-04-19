@@ -475,12 +475,17 @@ const Swap = () => {
                         onUserInput={handleOnUserInput}
                         onUserSelect={handleOnTokenSelection}
                         field={Field.OUTPUT}
+                        hideMaxButton={true}
                     />
                 </Columns>
-                <PoolPriceBar
-                    dropDown={poolPriceBarOpen}
-                    setDropDown={setPoolPriceBarOpen}
-                />
+                {
+                    pair && 
+                    <PoolPriceBar
+                        pair={pair}
+                        dropDown={poolPriceBarOpen}
+                        setDropDown={setPoolPriceBarOpen}
+                    />
+                }
                 <SwapButton />
             </SwapContainer>
         </>

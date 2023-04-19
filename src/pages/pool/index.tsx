@@ -388,20 +388,24 @@ export default function Pools() {
                             </div>
                             <div className="circle">0</div>
                         </HeadLabelLeft>
-                        <HeadLabelRight>
-                            <InputSearchModal>
-                                <img src={SearchIcon} alt="" />
-                                <input
-                                    type="text"
-                                    placeholder="Search"
-                                    onChange={(e) => handleOnSearch(e)}
-                                />
-                            </InputSearchModal>
-                            <NetworkButton>
-                                <p>Networks</p>
-                                <img src={imgDownArrowWhite} alt="" />
-                            </NetworkButton>
-                        </HeadLabelRight>
+                    {
+                        !isMyPositionPage && (
+                            <HeadLabelRight>
+                                <InputSearchModal>
+                                    <img src={SearchIcon} alt="" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search"
+                                        onChange={(e) => handleOnSearch(e)}
+                                    />
+                                </InputSearchModal>
+                                {/* <NetworkButton>
+                                    <p>Networks</p>
+                                    <img src={imgDownArrowWhite} alt="" />
+                                </NetworkButton> */}
+                            </HeadLabelRight>
+                        )
+                    }   
                     </HeadLabel>
                     {!isMyPositionPage && (
                         <TableContainer>
