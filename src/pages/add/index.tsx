@@ -25,19 +25,21 @@ import { useActiveWeb3React } from 'hooks'
 import { mulNumberWithDecimal } from 'utils/math'
 import { usePair } from 'hooks/useAllPairs'
 import { FixedNumber } from '@ethersproject/bignumber'
-import { isNativeCoin } from 'utils'
+import { calcSlippageAmount, isNativeCoin } from 'utils'
 import WalletModal from 'components/WalletModal'
 import { InitCompTransaction } from 'components/TransactionModal'
 import ComponentsTransaction from 'components/TransactionModal'
 import ToastMessage from 'components/ToastMessage'
 import { useTransactionHandler } from 'states/transactions/hooks'
+import PoolPriceBar from './PoolPriceBar'
+import BackArrow from 'assets/icons/arrow-left.svg'
+import { useSlippageTolerance } from 'states/application/hooks'
 
 const Swap = () => {
     const swapState = useSwapState()
     const router = useRouterContract()
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
-
     const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
@@ -46,13 +48,11 @@ const Swap = () => {
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenInApproval = useTokenApproval(account, routerAddress, tokenIn)
     const tokenOutApproval = useTokenApproval(account, routerAddress, tokenOut)
-
+    const { slippage } = useSlippageTolerance()
     const factoryContract = useFactoryContract()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
-
     const pair = usePair(chainId, tokenIn, tokenOut)
-    console.log({ pair })
 
     const isInsufficientAllowanceTokenIn =
         Number(tokenInApproval?.allowance) < Number(inputAmount) &&
@@ -80,7 +80,6 @@ const Swap = () => {
     const handleOnAdd = async () => {
         try {
             if (inputAmount && outputAmount && tokenIn && tokenOut) {
-                console.log('adding...')
                 initDataTransaction.setError('')
                 initDataTransaction.setPayload({
                     method: 'add liquidity',
@@ -95,59 +94,6 @@ const Swap = () => {
             console.log('failed to add', error)
         }
     }
-
-    // const handleOnAddLiquidity = async () => {
-    //     try {
-    //         if (inputAmount && outputAmount && tokenIn && tokenOut) {
-    //             const isEthTxn = isNativeCoin(tokenIn) || isNativeCoin(tokenOut)
-    //             const method = isEthTxn ? 'addLiquidityETH' : 'addLiquidity'
-    //             const token = isNativeCoin(tokenIn) ? tokenOut : tokenIn
-    //             const amountToken = isNativeCoin(tokenOut)
-    //                 ? inputAmount
-    //                 : outputAmount
-
-    //             let value = isNativeCoin(tokenIn)
-    //                 ? mulNumberWithDecimal(inputAmount, tokenIn.decimals)
-    //                 : mulNumberWithDecimal(outputAmount, tokenOut.decimals)
-    //             value = isEthTxn ? value : '0x00'
-    //             const args = isEthTxn
-    //                 ? [
-    //                       token.address,
-    //                       mulNumberWithDecimal(amountToken, token.decimals),
-    //                       mulNumberWithDecimal(amountToken, token.decimals), //
-    //                       value,
-    //                       account,
-    //                       (new Date().getTime() / 1000 + 1000).toFixed(0),
-    //                   ]
-    //                 : [
-    //                       tokenIn.address,
-    //                       tokenOut.address,
-    //                       mulNumberWithDecimal(inputAmount, tokenIn.decimals),
-    //                       mulNumberWithDecimal(outputAmount, tokenOut.decimals),
-    //                       mulNumberWithDecimal(inputAmount, tokenIn.decimals), //
-    //                       mulNumberWithDecimal(outputAmount, tokenOut.decimals), //
-    //                       account,
-    //                       (new Date().getTime() / 1000 + 1000).toFixed(0),
-    //                   ]
-    //             console.log({ ...args, value })
-    //             const gasLimit = await routerContract?.estimateGas?.[method]?.(
-    //                 ...args,
-    //                 { value },
-    //             )
-    //             const callResult = await routerContract?.[method]?.(...args, {
-    //                 value,
-    //                 gasLimit: gasLimit && gasLimit.add(1000),
-    //             })
-    //             const txn = await callResult.wait()
-
-    //             if (txn.status === 1) {
-    //                 console.log('Successfull...', txn)
-    //             }
-    //         }
-    //     } catch (err) {
-    //         console.log(err)
-    //     }
-    // }
 
     const onConfirm = useCallback(async () => {
         try {
@@ -165,13 +111,18 @@ const Swap = () => {
                 let value = isNativeCoin(tokenIn)
                     ? mulNumberWithDecimal(inputAmount, tokenIn.decimals)
                     : mulNumberWithDecimal(outputAmount, tokenOut.decimals)
-                value = isEthTxn ? value : '0x00'
+                value = isEthTxn ? value : '0'
+                let valueMin = isNativeCoin(tokenIn)
+                    ? mulNumberWithDecimal(calcSlippageAmount(inputAmount, slippage)[0], tokenIn.decimals)
+                    : mulNumberWithDecimal(calcSlippageAmount(outputAmount, slippage)[0], tokenOut.decimals)
+                valueMin = isEthTxn ? value : '0'
+
                 const args = isEthTxn
                     ? [
                           token.address,
                           mulNumberWithDecimal(amountToken, token.decimals),
                           mulNumberWithDecimal(amountToken, token.decimals), //
-                          value,
+                          valueMin,
                           account,
                           (new Date().getTime() / 1000 + 1000).toFixed(0),
                       ]
@@ -180,12 +131,11 @@ const Swap = () => {
                           tokenOut.address,
                           mulNumberWithDecimal(inputAmount, tokenIn.decimals),
                           mulNumberWithDecimal(outputAmount, tokenOut.decimals),
-                          mulNumberWithDecimal(inputAmount, tokenIn.decimals), //
-                          mulNumberWithDecimal(outputAmount, tokenOut.decimals), //
+                          mulNumberWithDecimal(calcSlippageAmount(inputAmount, slippage)[0], tokenIn.decimals), //
+                          mulNumberWithDecimal(calcSlippageAmount(outputAmount, slippage)[0], tokenOut.decimals), //
                           account,
                           (new Date().getTime() / 1000 + 1000).toFixed(0),
                       ]
-                console.log({ ...args, value })
                 const gasLimit = await routerContract?.estimateGas?.[method]?.(
                     ...args,
                     { value },
@@ -205,7 +155,6 @@ const Swap = () => {
                     hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
                         callResult.hash || ''
                     }`,
-                    // hash: tx?.hash || '',
                     msg: 'Add liquidity',
                     status: txn.status === 1 ? true : false,
                 })
@@ -281,22 +230,17 @@ const Swap = () => {
                 ? WRAPPED_NATIVE_COIN[chainId]
                 : tokenOut
 
-            const addRate = pair?.calcAddRate(
+            const addRate = pair.calcAddRate(
                 amountInWithDel,
                 tI,
                 tO,
                 Field.INPUT,
             )
-            console.log('Amount out', addRate)
-            handleOnUserInput(Field.OUTPUT, addRate)
-            // onUserInput(Field.OUTPUT, addRate)
+            onChangeSwapState({
+                ...swapState,
+                outputAmount: addRate,
+            })
         }
-        // if(!pair) {
-        //     onChangeSwapState({
-        //         ...swapState,
-        //         outputAmount: ''
-        //     })
-        // }
     }, [inputAmount, tokenIn, tokenOut])
 
     useEffect(() => {
@@ -314,8 +258,6 @@ const Swap = () => {
                 tokenOut.decimals,
             )
 
-            console.log('🤦‍♂️ ⟹ useEffect ⟹ amountOutWithDel:', amountOutWithDel)
-
             const tI = isNativeCoin(tokenIn)
                 ? WRAPPED_NATIVE_COIN[chainId]
                 : tokenIn
@@ -329,16 +271,15 @@ const Swap = () => {
                 tO,
                 Field.OUTPUT,
             )
-            console.log('Amount In', addRate)
-            handleOnUserInput(Field.INPUT, addRate)
+            console.log({addRate})
+            onChangeSwapState({
+                ...swapState,
+                inputAmount: addRate,
+            })
         }
-        // if(!pair) {
-        //     onChangeSwapState({
-        //         ...swapState,
-        //         inputAmount: ''
-        //     })
-        // }
     }, [outputAmount, tokenIn, tokenOut])
+
+    console.log({pair})
 
     const AddButton = () => {
         const balanceIn = useCurrencyBalance(account, tokenIn)
@@ -421,12 +362,6 @@ const Swap = () => {
             <ComponentsTransaction
                 data={initDataTransaction}
                 onConfirm={onConfirm}
-                // onConfirm={approveToken}
-                //     // isInsufficientAllowance &&
-                //     // !isNativeCoin(tokenIn)
-                //     //     ? handleOnApprove
-                //     //     : onConfirm
-                //     // () => handleOnApprove()
             />
             <ToastMessage />
             <SwapContainer>
@@ -434,14 +369,12 @@ const Swap = () => {
                     <WalletModal setToggleWalletModal={openWalletModal} />
                 )}
                 <Row jus="space-between">
-                    <Nav gap="20px">
-                        <Link to="/swap">Swap</Link>
-                        {/* <Link to="/add" className="active-link">Add</Link> */}
-                        <Link to="/limit">Limit</Link>
-                    </Nav>
+                    <BackLink to="/pools">
+                        <img src={BackArrow} alt="back arrow" />
+                    </BackLink>
+                    <Title>Add Liquidity</Title>
                     <Setting />
                 </Row>
-                <Bridge />
                 <Columns>
                     <CurrencyInputPanel
                         token={tokenIn}
@@ -461,6 +394,7 @@ const Swap = () => {
                         field={Field.OUTPUT}
                     />
                 </Columns>
+                <PoolPriceBar dropDown={poolPriceBarOpen} setDropDown={setPoolPriceBarOpen} />
                 <AddButton />
             </SwapContainer>
         </>
@@ -501,6 +435,12 @@ const Nav = styled(Row)`
     }
 `
 
+const Title = styled.div`
+    font-size: 24px;
+    width: 100%;
+    text-align: center;
+`
+
 const Icon = styled.div`
     width: 35px;
     height: 35px;
@@ -523,6 +463,12 @@ const Icon = styled.div`
 const ButtonGroup = styled(Row)`
     width: 100%;
     gap: 5px;
+`
+
+const BackLink = styled(Link)`
+    img {
+        width: 30px;
+    }
 `
 
 export default Swap

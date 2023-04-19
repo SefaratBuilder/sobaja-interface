@@ -21,7 +21,7 @@ const TokenSelection = ({
 }: TokenSelectionProps) => {
     const { account } = useActiveWeb3React()
     const balance = useCurrencyBalance(account, token)
-
+    
     return (
         <WrapperSelection
             onClick={() => onUserSelect(token)}
@@ -36,7 +36,7 @@ const TokenSelection = ({
                 </div>
             </div>
             <div className={'element-selection'}>
-                <div>{balance ? Number(balance._value).toFixed(4) : 0}</div>
+                <div>{balance ? Number(balance).toFixed(4) : 0}</div>
                 {!hideAddButton && (
                     <div className={'add-btn'} onClick={onAdd}>Add to coin list</div>
                 )}

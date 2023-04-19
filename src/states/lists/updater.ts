@@ -4,9 +4,9 @@ import { useTokenList, useUpdateCurrentList } from './hooks'
 import { NATIVE_COIN, ZERO_ADDESS } from 'constants/index'
 
 const Updater = () => {
-    const { currentList } = useTokenList()
     const updateCurrentList = useUpdateCurrentList()
     const { chainId } = useActiveWeb3React()
+    const currentList = useTokenList()
 
     useEffect(() => {
         if (chainId) {

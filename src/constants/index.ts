@@ -67,7 +67,12 @@ export const WRAPPED_NATIVE_COIN: { [chainId in number]: Token } = {
 
 export const CommonBaseTokens: Token[] = [NATIVE_COIN, ...tokenList.slice(0, 5)]
 
-export const DEFAULT_TOKEN_LIST: TokenList = [NATIVE_COIN, ...tokenList]
+export const DEFAULT_TOKEN_LIST: { [chainId in number]: TokenList } = {
+    [ChainId.GOERLI]: [NATIVE_COIN, ...tokenList],
+    [ChainId.MUMBAI]: [NATIVE_COIN, ...tokenList],
+    [ChainId.ZKMAINNET]: [NATIVE_COIN, ...tokenList],
+    [ChainId.ZKTESTNET]: [NATIVE_COIN, ...tokenList]
+}
 
 export const ALL_SUPPORTED_CHAIN_IDS: ChainId[] = [
     ChainId.ZKMAINNET,
