@@ -453,7 +453,7 @@ const Swap = () => {
                     </Nav>
                     <Setting />
                 </Row>
-                {/* <Bridge /> */}
+                <Bridge />
                 <Columns>
                     <CurrencyInputPanel
                         token={tokenIn}

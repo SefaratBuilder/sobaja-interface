@@ -44,8 +44,7 @@ const CurrencyInputPanel = ({
             <Row>
                 <div className="t2">$</div>
                 <div className="t2 balance">
-                    <span className="tex">Balance: </span>
-                    <span className="to">{balance ? balance?.toString() : 0}</span>
+                    <span className="to">Balance: {balance ? balance?.toString() : 0}</span>
                     {!hideMaxButton && <span className="max-btn" onClick={handleOnMax}>Max</span>}
                 </div>
             </Row>
