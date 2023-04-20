@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
 import Bridge from 'components/Bridge'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
@@ -16,32 +16,53 @@ import Setting from 'components/HeaderLiquidity'
 import { useToken, useTokenApproval } from 'hooks/useToken'
 import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
+import { shortenAddress } from 'utils'
+
 import {
     ALL_SUPPORTED_CHAIN_IDS,
     URLSCAN_BY_CHAINID,
     WRAPPED_NATIVE_COIN,
 } from 'constants/index'
 import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
-import { FixedNumber } from 'ethers'
+import { FixedNumber, ZeroAddress } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
-import { useFactoryContract, usePairContract, useRouterContract } from 'hooks/useContract'
-import { calcSlippageAmount, calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
-import { useAppState, useSlippageTolerance, useTransactionDeadline } from 'states/application/hooks'
+import {
+    useFactoryContract,
+    usePairContract,
+    useRouterContract,
+} from 'hooks/useContract'
+import {
+    calcSlippageAmount,
+    calcTransactionDeadline,
+    computeGasLimit,
+    isNativeCoin,
+} from 'utils'
+import {
+    useAppState,
+    useSlippageTolerance,
+    useTransactionDeadline,
+    useUpdateRefAddress,
+} from 'states/application/hooks'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import ComponentsTransaction, {
     InitCompTransaction,
 } from 'components/TransactionModal'
 import ToastMessage from 'components/ToastMessage'
+import { AddressZero } from '@ethersproject/constants'
 import { getContractAddress } from '@ethersproject/address'
+import imgCopy from 'assets/icons/copy.svg'
+import imgCheckMark from 'assets/icons/check-mark.svg'
 
 const Swap = () => {
     const swapState = useSwapState()
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
+    const [isCopied, setIsCopied] = useState(false)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
     const { chainId, library, account } = useActiveWeb3React()
+    const { refAddress } = useAppState()
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
     const pair = usePair(chainId, tokenIn, tokenOut)
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
@@ -52,6 +73,14 @@ const Swap = () => {
     const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
     const { slippage } = useSlippageTolerance()
+
+    const updateRef = useUpdateRefAddress()
+
+    useEffect(() => {
+        if (loca.search && loca.search.includes('?')) {
+            updateRef(loca.search.slice(1))
+        }
+    }, [loca])
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -67,6 +96,26 @@ const Swap = () => {
         [onTokenSelection, swapState],
     )
 
+    const handleCopyAddress = () => {
+        console.log({ href: window.location.href })
+        console.log({ hostname: window.location.hostname })
+
+        if (account && navigator.clipboard) {
+            navigator.clipboard
+                .writeText(
+                    // window.location.href
+                    `https://app.sobajaswap.com/#/swap?
+                        ${account}`,
+                )
+                .then(() => {
+                    setIsCopied(true)
+                    setTimeout(() => {
+                        setIsCopied(false)
+                    }, 1000)
+                })
+        }
+    }
+
     const getSwapMethod = () => {
         if (swapType === Field.INPUT) {
             if (isNativeCoin(tokenIn)) return 'swapExactETHForTokens'
@@ -80,11 +129,18 @@ const Swap = () => {
     }
 
     const getSwapArguments = () => {
-        if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId) return
+        if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
+            return
         const amountIn = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
         const amountOut = mulNumberWithDecimal(outputAmount, tokenOut.decimals)
-        const amountOutMin = mulNumberWithDecimal(calcSlippageAmount(outputAmount, slippage)[0], tokenOut.decimals)
-        const amountInMax = mulNumberWithDecimal(calcSlippageAmount(inputAmount, slippage)[1], tokenIn.decimals)
+        const amountOutMin = mulNumberWithDecimal(
+            calcSlippageAmount(outputAmount, slippage)[0],
+            tokenOut.decimals,
+        )
+        const amountInMax = mulNumberWithDecimal(
+            calcSlippageAmount(inputAmount, slippage)[1],
+            tokenIn.decimals,
+        )
         if (swapType === Field.INPUT) {
             if (isNativeCoin(tokenIn))
                 return {
@@ -220,13 +276,20 @@ const Swap = () => {
                 initDataTransaction.setIsOpenWaitingModal(false)
                 return initDataTransaction.setIsOpenResultModal(true)
             }
-
             const { args, value } = swapArguments
+
+            const referralAddress = refAddress || ZeroAddress
+            const newArgs = [...args, referralAddress]
+            console.log('🤦‍♂️ ⟹ args:', newArgs)
+
             const gasLimit = await routerContract?.estimateGas[method](
-                ...args,
-                { value },
+                ...newArgs,
+                {
+                    value,
+                },
             )
-            const callResult = await routerContract?.[method](...args, {
+            console.log('🤦‍♂️ ⟹ onConfirm ⟹ gasLimit:', gasLimit)
+            const callResult = await routerContract?.[method](...newArgs, {
                 value,
                 gasLimit: computeGasLimit(gasLimit),
             })
@@ -247,6 +310,7 @@ const Swap = () => {
                 status: txn.status === 1 ? true : false,
             })
         } catch (error) {
+            console.log('🤦‍♂️ ⟹ onConfirm ⟹ error:', error)
             // initDataTransaction.setIsOpenWaitingModal(false)
             initDataTransaction.setError('Failed')
             initDataTransaction.setIsOpenResultModal(true)
@@ -446,15 +510,43 @@ const Swap = () => {
                         hideMaxButton={true}
                     />
                 </Columns>
-                {
-                    pair && 
+                {pair && (
                     <PoolPriceBar
                         pair={pair}
                         dropDown={poolPriceBarOpen}
                         setDropDown={setPoolPriceBarOpen}
                     />
-                }
+                )}
                 <SwapButton />
+                {/* <SwapButton /> */}
+                <Referral>
+                    <span>Referral:</span>
+                    <p>
+                        https://app.sobajaswap.com/#/swap?
+                        {account && shortenAddress(account, 7)}
+                    </p>
+                    {/* <span>
+                        <img src={imgCopy} alt="" />
+                    </span> */}
+                    <span>
+                        {isCopied ? (
+                            <CopyBtn>
+                                <CopyAccountAddress src={imgCheckMark} />
+                                <Tooltip className="tooltip">Copied</Tooltip>
+                            </CopyBtn>
+                        ) : (
+                            <CopyBtn>
+                                <CopyAccountAddress
+                                    onClick={() => handleCopyAddress()}
+                                    src={imgCopy}
+                                />
+                                <Tooltip className="tooltip">
+                                    Click to copy address
+                                </Tooltip>
+                            </CopyBtn>
+                        )}
+                    </span>
+                </Referral>
             </SwapContainer>
         </>
     )
@@ -479,6 +571,51 @@ const SwapContainer = styled(Columns)`
     }
 `
 
+const Referral = styled.div`
+    display: grid;
+    grid-template-columns: 55px 1fr 12px;
+    font-size: 14px;
+    span {
+        color: rgba(0, 255, 163, 1);
+    }
+    p {
+        opacity: 0.5;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        /* text-align: center; */
+    }
+    img {
+        cursor: pointer;
+    }
+`
+
+const CopyBtn = styled.div`
+    position: relative;
+    :hover .tooltip {
+        transition: all 0.1s ease-in-out;
+        opacity: 1;
+        visibility: visible;
+    }
+`
+const Tooltip = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    width: 100px;
+    height: 30px;
+    font-size: 12px;
+    right: -45px;
+    text-align: center;
+    border: 1px solid;
+    border-radius: 6px;
+    background: rgba(157, 195, 230, 0.1);
+    backdrop-filter: blur(3px);
+`
+
 const Nav = styled(Row)`
     a {
         padding: 5px 8px;
@@ -494,6 +631,10 @@ const Nav = styled(Row)`
     }
 `
 
+const CopyAccountAddress = styled.img`
+    height: 12px;
+    cursor: pointer;
+`
 const Icon = styled.div`
     width: 35px;
     height: 35px;
