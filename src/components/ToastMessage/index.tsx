@@ -1,42 +1,100 @@
-import React, { useState } from 'react'
-import PrimaryButton from 'components/Buttons/PrimaryButton';
-import { Columns, Row } from 'components/Layouts';
-import { useTransactionHandler, useTransactionsState } from 'states/transactions/hooks';
+import React, { useEffect, useState } from 'react'
+import PrimaryButton from 'components/Buttons/PrimaryButton'
+import { Columns, Row } from 'components/Layouts'
+import {
+    useTransactionHandler,
+    useTransactionsState,
+} from 'states/transactions/hooks'
 import { Txn } from 'states/transactions/reducer'
 import styled from 'styled-components'
 import SuccessIcon from 'assets/icons/success.svg'
+import ErrorIcon from 'assets/icons/close.png'
+import { InitCompTransaction } from 'components/TransactionModal'
 
-const Toast = ({ txn } : { txn: Txn }) => {
+const Toast = ({ txn }: { txn: Txn }) => {
+    const { removeTxn } = useTransactionHandler()
+
+    useEffect(() => {
+        // console.log('asdasdadsadsads')
+        let timeX = setTimeout(() => {
+            removeTxn(txn)
+        }, 5000)
+
+        return () => {
+            clearTimeout(timeX)
+        }
+    }, [txn])
+
     return (
-      <ToastWrapper className="toast" href="#">
-            <Row al={'center'} gap={'10px'}>
-                {txn.msg} 
+        <ToastWrapper className="toast" href="#">
+            <Row al={'center'} jus={'space-between'} gap={'10px'}>
+                <div>{txn.msg}</div>
                 <span className="icon">
-                    <img src={SuccessIcon} alt="toast message icon" />
+                    <img
+                        src={txn.status ? SuccessIcon : ErrorIcon}
+                        alt="toast message icon"
+                    />
                 </span>
             </Row>
-            <span className="view-link">View on explorer</span>
-      </ToastWrapper>
-    );
-};
+            <span
+                className="view-link"
+                onClick={() => txn.hash && window.open(txn.hash)}
+            >
+                View on explorer
+            </span>
+        </ToastWrapper>
+    )
+}
 
-const ToastMessage = () => {
+interface ToastMsg {
+    payload?: any
+    setToastMessageModal?: React.Dispatch<React.SetStateAction<boolean>>
+    // isSuccess: boolean
+    // txnHash?: string | undefined
+}
+
+const ToastMessage = ({ payload, setToastMessageModal }: ToastMsg) => {
     const { txnList } = useTransactionsState()
-    const [hash, setHash] = useState(0)
-    const { addTxn, removeTxn } = useTransactionHandler()
+    // const [hash, setHash] = useState<number>(0)
+    // const { addTxn, removeTxn } = useTransactionHandler()
 
-    return(
+    return (
         <ToastMessageWrapper>
             <>
-                <PrimaryButton name="Add" onClick={() => {
-                    setHash(hash => hash + 1)
-                    addTxn({ hash: 'asdasdsa', msg: 'asd kad asod asd asd asd as dqwiopejwq as da dasd asd asd a', status: true})
-                }} />
-                <PrimaryButton name="Remove" onClick={() => {
-                    removeTxn({ hash: 'asdasdsa', msg: 'asd kad asod asd asd asd as dqwiopejwq as da dasd asd asd a', status: true})
-                }} />
-                {txnList.map((txn, index) => {
-                    return <Toast txn={txn} key={index + 1} />
+                {/* <PrimaryButton
+                    name="Add"
+                    onClick={() => {
+                        setHash((hash) => hash + 1)
+                        addTxn({
+                            hash: 'asdasdsa',
+                            msg: 'asd kad asod asd asd asd as dqwiopejwq as da dasd asd asd a',
+                            status: true,
+                        })
+                    }}
+                />
+                <PrimaryButton
+                    name="Remove"
+                    onClick={() => {
+                        removeTxn({
+                            hash: 'asdasdsa',
+                            msg: 'asd kad asod asd asd asd as dqwiopejwq as da dasd asd asd a',
+                            status: true,
+                        })
+                    }}
+                /> */}
+                {txnList.map((txn, index: any) => {
+                    return (
+                        <Toast
+                            txn={{
+                                hash: txn.hash,
+                                msg: `${txn.msg} ${
+                                    txn.status ? 'successful' : 'failed'
+                                }`,
+                                status: txn.status,
+                            }}
+                            key={index + 1}
+                        />
+                    )
                 })}
             </>
         </ToastMessageWrapper>
@@ -51,25 +109,25 @@ const ToastMessageWrapper = styled(Columns)`
     width: 100%;
     z-index: 999;
     gap: 20px;
-    padding: 20px;
+    /* padding: 20px; */
+    margin-right: 20px;
     overflow: hidden;
 `
 
 const ToastWrapper = styled.a`
     background: var(--bg5);
     border-radius: 8px;
-    white-space: pre-wrap;       /* css-3 */
-    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-    white-space: -pre-wrap;      /* Opera 4-6 */
-    white-space: -o-pre-wrap;    /* Opera 7 */
-    word-wrap: break-word; 
+    white-space: pre-wrap; /* css-3 */
+    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+    white-space: -pre-wrap; /* Opera 4-6 */
+    white-space: -o-pre-wrap; /* Opera 7 */
+    word-wrap: break-word;
     min-height: 50px;
     border: 2px solid var(--border2);
     padding: 10px;
     cursor: pointer;
 
-    animation: move cubic-bezier(0.1, 0.4, 0.7, 1) 1 .5s;
-
+    animation: move cubic-bezier(0.1, 0.4, 0.7, 1) 1 0.5s;
     @keyframes move {
         from {
             transform: translateX(100%);
@@ -78,7 +136,7 @@ const ToastWrapper = styled.a`
             transform: translateX(0);
         }
     }
-    
+
     :hover {
         text-decoration: none;
     }
@@ -91,10 +149,57 @@ const ToastWrapper = styled.a`
 
     .icon {
         display: block;
-        width: 60px;
+        width: 24px;
 
-        img { 
+        img {
             width: 100%;
+        }
+    }
+`
+
+const ToastLoader = styled.div`
+    z-index: 1;
+    animation: bounceInRight 0.2s linear;
+    ::after {
+        content: '';
+        /* display: block;   */
+        transition: all 2s ease;
+        position: absolute;
+        z-index: 3;
+        height: 3px;
+        left: 2px;
+        bottom: 0;
+        background: linear-gradient(to right, rgba(157, 195, 230, 1), #d5dbf0);
+        /* box-shadow: 0 0 20px 0 rgb(0 64 120); */
+        border-radius: 0px 0px 5px 5px;
+        animation: setWidth 5s linear;
+    }
+    @keyframes setWidth {
+        0% {
+            width: 100%;
+        }
+        99% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+            width: 0%;
+        }
+    }
+    @keyframes bounceInRight {
+        0% {
+            opacity: 0;
+            transform: translateX(120%);
+        }
+        60% {
+            opacity: 1;
+            transform: translateX(-10%);
+        }
+        80% {
+            transform: translateX(10%);
+        }
+        100% {
+            transform: translateX(0);
         }
     }
 `

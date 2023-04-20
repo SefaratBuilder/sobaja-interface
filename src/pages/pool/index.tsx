@@ -32,6 +32,7 @@ import PairTokens from 'components/LogoToken/PairTokens'
 import imgDownArrowWhite from 'assets/icons/chevron-white.svg'
 import arrowDown from 'assets/icons/arrowDown.svg'
 import { useNavigate } from 'react-router-dom'
+import MyPools from 'components/MyPools'
 
 interface Data {
     name: string
@@ -248,7 +249,12 @@ function EnhancedTableToolbar() {
                     </div>
                 </div>
                 <div className="new-position">
-                    <PrimaryButton name="+ New Position" onClick={() => { navigate('/add') }} />
+                    <PrimaryButton
+                        name="+ New Position"
+                        onClick={() => {
+                            navigate('/add')
+                        }}
+                    />
                 </div>
             </HeadTitle>
         </Typography>
@@ -350,7 +356,11 @@ export default function Pools() {
                             <PrimaryButton
                                 name="Pools"
                                 height="35px"
-                                color={!isMyPositionPage ? "rgba(0, 178, 255, 1)" : "none"}
+                                color={
+                                    !isMyPositionPage
+                                        ? 'rgba(0, 178, 255, 1)'
+                                        : 'none'
+                                }
                                 onClick={() => setIsMyPositionPage(false)}
                             />
                         </div>
@@ -358,7 +368,11 @@ export default function Pools() {
                             <PrimaryButton
                                 name="My positions"
                                 height="35px"
-                                color={isMyPositionPage ? "rgba(0, 178, 255, 1)" : "none"}
+                                color={
+                                    isMyPositionPage
+                                        ? 'rgba(0, 178, 255, 1)'
+                                        : 'none'
+                                }
                                 onClick={() => setIsMyPositionPage(true)}
                             />
                         </div>
@@ -379,99 +393,101 @@ export default function Pools() {
                         </NetworkButton>
                     </HeadLabelRight>
                 </HeadLabel>
+                {!isMyPositionPage && (
+                    <TableContainer>
+                        <Table
+                            sx={{ minWidth: 650 }}
+                            aria-labelledby="tableTitle"
+                            size={dense ? 'small' : 'medium'}
+                        >
+                            <EnhancedTableHead
+                                numSelected={selected.length}
+                                order={order}
+                                orderBy={orderBy}
+                                onSelectAllClick={handleSelectAllClick}
+                                onRequestSort={handleRequestSort}
+                                rowCount={rows.length}
+                            />
+                            <TableBody>
+                                {visibleRows
+                                    ? visibleRows.map((row, index) => {
+                                          const isItemSelected = isSelected(
+                                              row.name,
+                                          )
+                                          const labelId = `enhanced-table-checkbox-${index}`
 
-                <TableContainer>
-                    <Table
-                        sx={{ minWidth: 650 }}
-                        aria-labelledby="tableTitle"
-                        size={dense ? 'small' : 'medium'}
-                    >
-                        <EnhancedTableHead
-                            numSelected={selected.length}
-                            order={order}
-                            orderBy={orderBy}
-                            onSelectAllClick={handleSelectAllClick}
-                            onRequestSort={handleRequestSort}
-                            rowCount={rows.length}
-                        />
-                        <TableBody>
-                            {visibleRows
-                                ? visibleRows.map((row, index) => {
-                                      const isItemSelected = isSelected(
-                                          row.name,
-                                      )
-                                      const labelId = `enhanced-table-checkbox-${index}`
-
-                                      return (
-                                          <RowTable
-                                              role="checkbox"
-                                              aria-checked={isItemSelected}
-                                              tabIndex={-1}
-                                              key={index}
-                                              selected={isItemSelected}
-                                              sx={{
-                                                  cursor: 'pointer',
-                                              }}
-                                          >
-                                              <CellTable
-                                                  component="th"
-                                                  id={labelId}
-                                                  scope="row"
-                                                  padding="none"
+                                          return (
+                                              <RowTable
+                                                  role="checkbox"
+                                                  aria-checked={isItemSelected}
+                                                  tabIndex={-1}
+                                                  key={index}
+                                                  selected={isItemSelected}
                                                   sx={{
-                                                      width: '100px',
+                                                      cursor: 'pointer',
                                                   }}
-                                                  align="center"
                                               >
-                                                  <img
-                                                      className="network"
-                                                      src={LogoETH}
-                                                      alt=""
-                                                  />
-                                              </CellTable>
-                                              <CellTable align="center">
-                                                  <div className="label">
-                                                      <PairTokens
-                                                          tokenA={
-                                                              Logos?.[
-                                                                  row.name.split(
-                                                                      '/',
-                                                                  )?.[0]
-                                                              ]
-                                                          }
-                                                          tokenB={
-                                                              Logos?.[
-                                                                  row.name.split(
-                                                                      '/',
-                                                                  )?.[1]
-                                                              ]
-                                                          }
+                                                  <CellTable
+                                                      component="th"
+                                                      id={labelId}
+                                                      scope="row"
+                                                      padding="none"
+                                                      sx={{
+                                                          width: '100px',
+                                                      }}
+                                                      align="center"
+                                                  >
+                                                      <img
+                                                          className="network"
+                                                          src={LogoETH}
+                                                          alt=""
                                                       />
-                                                      <div className="name">
-                                                          {row.name}
+                                                  </CellTable>
+                                                  <CellTable align="center">
+                                                      <div className="label">
+                                                          <PairTokens
+                                                              tokenA={
+                                                                  Logos?.[
+                                                                      row.name.split(
+                                                                          '/',
+                                                                      )?.[0]
+                                                                  ]
+                                                              }
+                                                              tokenB={
+                                                                  Logos?.[
+                                                                      row.name.split(
+                                                                          '/',
+                                                                      )?.[1]
+                                                                  ]
+                                                              }
+                                                          />
+                                                          <div className="name">
+                                                              {row.name}
+                                                          </div>
+                                                          <Badge>30%</Badge>
                                                       </div>
-                                                      <Badge>30%</Badge>
-                                                  </div>
-                                              </CellTable>
-                                              <CellTable align="right">
-                                                  {row.tvl}
-                                              </CellTable>
-                                              <CellTable align="right">
-                                                  {row.volume}
-                                              </CellTable>
-                                              <CellTable align="right">
-                                                  {row.fee}
-                                              </CellTable>
-                                              <CellTable align="right">
-                                                  {row.apr}
-                                              </CellTable>
-                                          </RowTable>
-                                      )
-                                  })
-                                : null}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                                  </CellTable>
+                                                  <CellTable align="right">
+                                                      {row.tvl}
+                                                  </CellTable>
+                                                  <CellTable align="right">
+                                                      {row.volume}
+                                                  </CellTable>
+                                                  <CellTable align="right">
+                                                      {row.fee}
+                                                  </CellTable>
+                                                  <CellTable align="right">
+                                                      {row.apr}
+                                                  </CellTable>
+                                              </RowTable>
+                                          )
+                                      })
+                                    : null}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                )}
+                {isMyPositionPage && <MyPools />}
             </Box>
         </Container>
     )
@@ -492,6 +508,7 @@ const Container = styled.div`
     font-style: italic;
     font-weight: 300;
     overflow: hidden;
+    margin-bottom: 50px;
 `
 
 const HeadTitle = styled.div`

@@ -29,6 +29,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
     const [pendingNameWallet, setPendingNameWallet] = useState<
         string | undefined
     >()
+
     const toggleAgreement = () => {
         setIsAgreePolicy(!isAgreePolicy)
     }
@@ -159,7 +160,6 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                         {' '}
                         <BtnClose
                             onClick={() => {
-                                console.log('vooo du dko ')
                                 setToggleWalletModal(false)
                             }}
                             src={imgClose}
@@ -171,7 +171,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     <Title>
                         <div>
                             By connecting a wallet, you agree to&nbsp;
-                            <b>SobajaSwap</b>&nbsp;
+                            <b>Sobajaswap</b>&nbsp;
                             <a href="#" target="_blank" rel="noreferrer">
                                 Terms of Service
                             </a>
@@ -306,28 +306,22 @@ const Container = styled.div<{ isConnected: boolean }>`
     opacity: 0.6;
     border-radius: 12px;
     border: 1px solid #003b5c;
-    /* backdrop-filter: blur(40px); */
     box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
     overflow: hidden;
     max-width: 500px;
     width: 100%;
-    left: 0;
-    top: 49%;
-    right: 0;
-    transform: translateY(-50%);
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    top: 0px;
+    height: 480px;
     margin: auto;
     transition: all 0.1s ease-in-out;
-    z-index: ${({ isConnected }) => (isConnected ? 3 : -1)};
+    z-index: 3;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
     color: ${({ theme }) => theme.text1};
-
-    @media screen and (max-width: 576px) {
-        max-width: 410px;
-        width: 90%;
-    }
-    @media screen and (max-width: 390px) {
-        max-width: 335px;
+    @media screen and (max-width: 1100px) {
         width: 90%;
     }
 `

@@ -25,39 +25,40 @@ const Header = () => {
                 />
             </Logo>
             <Navigator burgerNav={burgerNav} setBurgerNav={setBurgerNav} />
-            <Faucet />
+
             <Connector>
+                <Faucet />
                 <NetworkSelector />
                 <Web3Status />
             </Connector>
             <WrapperNavigator onClick={() => setBurgerNav((i) => !i)}>
-                    {!burgerNav ? (
-                        <>
-                            <MenuIcon>
-                                <span />
-                                <span />
-                                <span />
-                            </MenuIcon>
-                        </>
-                    ) : (
-                        'X'
-                    )}
-                </WrapperNavigator>
+                {!burgerNav ? (
+                    <>
+                        <MenuIcon>
+                            <span />
+                            <span />
+                            <span />
+                        </MenuIcon>
+                    </>
+                ) : (
+                    'X'
+                )}
+            </WrapperNavigator>
         </HeaderWrapper>
     )
 }
 
 export const HeaderWrapper = styled.div`
     display: grid;
-    grid-template-columns: 1fr 2fr 80px 300px;
-    grid-gap: 20px;
+    grid-template-columns: 1fr 2fr 400px;
+    grid-gap: 10px;
     width: 100%;
     padding: 20px;
     align-items: center;
     justify-content: flex-end;
 
     @media screen and (max-width: 1100px) {
-        grid-template-columns: 1fr 80px 38px;
+        grid-template-columns: 1fr 2fr 26px;
     }
     @media screen and (max-width: 576px) {
         grid-gap: 10px;
@@ -111,19 +112,9 @@ export const Logo = styled.div`
 
 export const Connector = styled.div`
     display: flex;
-    gap: 5px;
+    gap: 10px;
     align-items: center;
     justify-content: flex-end;
-
-    @media screen and (max-width: 1100px) {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: var(--bg3);
-        backdrop-filter: blur(3px);
-        padding: 8px;
-    }
 `
 
 const MenuIcon = styled(Columns)`
