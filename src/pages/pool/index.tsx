@@ -399,18 +399,12 @@ export default function Pools() {
                                         onChange={(e) => handleOnSearch(e)}
                                     />
                                 </InputSearchModal>
-                                {/* <NetworkButton>
-                                    <p>Networks</p>
-                                    <img src={imgDownArrowWhite} alt="" />
-                                </NetworkButton> */}
                             </HeadLabelRight>
                         )
                     }   
                     </HeadLabel>
                     {!isMyPositionPage && (
                         <TableContainer>
-                            <TableRow style={{ height: 5 }}></TableRow>
-
                             <Table
                                 sx={{ minWidth: 650 }}
                                 aria-labelledby="tableTitle"
@@ -424,7 +418,6 @@ export default function Pools() {
                                     onRequestSort={handleRequestSort}
                                     rowCount={rows.length}
                                 />
-                                {/* <TableRow style={{ height: 5 }}></TableRow> */}
                                 <TableBody>
                                     {visibleRows
                                         ? visibleRows.map((row, index) => {
