@@ -21,9 +21,10 @@ const FACTORIES: { [chainId: number]: string } = {
 const ROUTERS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0x2da10A1e27bF85cEdD8FFb1AbBe97e53391C0295',
     // [ChainId.ZKTESTNET]: '0x765B2f78AC65ca5C45e0108A45c771528910B848', old
-    [ChainId.ZKTESTNET]: '0xDCeA30E35Eb995Bc43DF40B9e43262afBc60795f', // test
+    [ChainId.ZKTESTNET]: '0xDCeA30E35Eb995Bc43DF40B9e43262afBc60795f', // ref
     [ChainId.GOERLI]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
-    [ChainId.MUMBAI]: '0x7bA65FB5B3491c767D0345891D13480E07d41fEE',
+    // [ChainId.MUMBAI]: '0x7bA65FB5B3491c767D0345891D13480E07d41fEE', // old
+    [ChainId.MUMBAI]: '0xd6E887A268b0422851c10e88D7e1CaA5F03Ee2E2', // ref
 }
 
 const INIT_CODE_HASHES: { [chainId: number]: string } = {

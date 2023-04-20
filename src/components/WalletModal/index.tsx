@@ -8,6 +8,7 @@ import AccountDetails from 'components/AccountDetails'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import Loader from 'components/Loader'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
+import { sendEvent } from 'utils/analytics'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -207,9 +208,14 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                                 <div>
                                     {' '}
                                     <BtnClose
-                                        onClick={() =>
+                                        onClick={() => {
+                                            sendEvent({
+                                                category: 'Wallet',
+                                                action: 'Connect Wallet',
+                                                label: pendingNameWallet,
+                                            })
                                             setToggleWalletModal(false)
-                                        }
+                                        }}
                                         src={imgClose}
                                         alt=""
                                     />

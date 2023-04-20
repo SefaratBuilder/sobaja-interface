@@ -10,13 +10,14 @@ import { OpacityModal } from 'components/Web3Status'
 import { useActiveWeb3React } from 'hooks'
 import { Error } from 'components/Text'
 import { Row } from 'components/Layouts'
+import { sendEvent } from 'utils/analytics'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
     const { chainId } = useActiveWeb3React()
-    
+
     useOnClickOutside(ref, () => {
         setIsDisplayFaucet(false)
     })
@@ -24,6 +25,11 @@ const Faucet = () => {
     const clickFaucetToken = (erc20: string) => {
         if (faucetContract == null) return
         faucetContract?.requestTokens(erc20)
+        sendEvent({
+            category: 'Defi',
+            action: 'Faucet',
+            label: [erc20],
+        })
     }
 
     const showMintCoins = () => {

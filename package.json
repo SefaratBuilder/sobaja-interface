@@ -43,6 +43,7 @@
         "react-device-detect": "^2.2.3",
         "react-dom": "^18.2.0",
         "react-feather": "^2.0.10",
+        "react-ga4": "^2.1.0",
         "react-redux": "^8.0.5",
         "react-router-dom": "^6.10.0",
         "redux-localstorage-simple": "^2.5.1",
