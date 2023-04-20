@@ -245,7 +245,7 @@ const MyPools = () => {
             initDataTransaction.setIsOpenResultModal(true)
         }
     }, [initDataTransaction])
-
+    console.log({position})
     return (
         <>
             <ComponentsTransaction
@@ -631,7 +631,14 @@ const WrapRemovePool = styled.div`
     backdrop-filter: blur(25px);
     border-radius: 12px;
     padding: 20px;
-    min-width: 500px;
+    max-width: 500px;
+    height: fit-content;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin: auto;
 
     @media screen and (max-width: 550px) {
         min-width: 300px;
@@ -647,11 +654,11 @@ const ModalRemovePool = styled.div`
     left: 0;
     height: fit-content;
     z-index: 1;
-    /* max-width: 500px; */
-    /* width: 100%; */
     margin: auto;
     display: flex;
     justify-content: center;
+    background: #00000055;
+    height: 100%;
 
     @media screen and (max-width: 1100px) {
         /* width: 90%; */
@@ -684,6 +691,11 @@ const BtnRemove = styled.div`
     text-align: center;
     padding: 5px 0px;
     cursor: pointer;
+    transition: all ease-in-out .3s;
+
+    &:hover {
+        background: var(--bg6);
+    }
 `
 const BtnAdd = styled(BtnRemove)``
 const WrapAddAndRemove = styled.div`
@@ -751,6 +763,8 @@ const RowMyPools = styled.div`
         grid-template-columns: minmax(100px, 1fr);
     }
 `
-const WrapMyPools = styled.div``
+const WrapMyPools = styled.div`
+    margin-top: 10px;
+`
 
 export default MyPools

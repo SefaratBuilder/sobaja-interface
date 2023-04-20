@@ -39,7 +39,7 @@ const WrapConnectorMobile = styled.div`
         background: var(--bg3);
         backdrop-filter: blur(3px);
         padding: 8px;
-        z-index: 999999;
+        z-index: 1;
     }
 
 `

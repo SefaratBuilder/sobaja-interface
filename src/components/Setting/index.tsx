@@ -49,6 +49,7 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
             .replace(' ', '')
             .replace(',', '.')
             .replace(/(\..*?)\..*/g, '$1')
+            console.log('asdasdasd')
         if (Number(value) < 1) {
             const value2 = e
             setDeadline(Number(value2) * 60)
@@ -145,7 +146,7 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
                         </SubTitle>
                         <SubTitle>
                             <InputTime
-                                placeholder="0.0 "
+                                placeholder={(deadline/60).toString()}
                                 type={'text'}
                                 // value={Number(deadline)/60}
                                 onChange={(e) =>
@@ -204,7 +205,6 @@ const InputTime = styled.input`
     border-radius: 6px;
     text-align: right;
     ::placeholder {
-        font-family: 'Montserrat', sans-serif;
         font-style: italic;
         color: #c9c9c9;
     }

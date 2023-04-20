@@ -72,55 +72,8 @@ const Swap = () => {
     const { deadline } = useTransactionDeadline()
     const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
-    const pairContract = usePairContract(
-        '0x1990D029794ffC74fC20908740A22de982152945',
-    )
-    const factoryContract = useFactoryContract()
-    const { slippage } = useSlippageTolerance()
     const loca = useLocation()
-    console.log({ pair, tokenIn, tokenOut })
-
-    const mintLp = async () => {
-        try {
-            if (account) {
-                console.log('111', pairContract)
-                // const token0 = await pairContract?.token0()
-                // const token1 = await pairContract?.token1()
-                // console.log('>>>>>>>>>>>>>>>', token0, token1)
-                // const gasLimit = await pairContract?.estimateGas.mint(account)
-                // const callResult = await pairContract?.mint(account, { gasLimit })
-                const factory = await routerContract?.factory()
-                console.log({ factory })
-                // await callResult.wait()
-                // if(callResult?.status === 1) console.log('mint okkkkk', callResult)
-            }
-        } catch (err) {
-            console.log('failed mint', err)
-        }
-    }
-
-    const create = async () => {
-        try {
-            if (account) {
-                console.log('111', factoryContract)
-                console.log('addressssss', tokenIn?.address, tokenOut?.address)
-                const gasLimit = await factoryContract?.estimateGas.createPair(
-                    tokenIn?.address,
-                    tokenOut?.address,
-                )
-                const callResult = await factoryContract?.createPair(
-                    tokenIn?.address,
-                    tokenOut?.address,
-                    { gasLimit: computeGasLimit(gasLimit) },
-                )
-                await callResult.wait()
-                if (callResult?.status === 1)
-                    console.log('create okkkkk', callResult)
-            }
-        } catch (err) {
-            console.log('failed mint', err)
-        }
-    }
+    const { slippage } = useSlippageTolerance()
 
     const updateRef = useUpdateRefAddress()
 
@@ -148,8 +101,8 @@ const Swap = () => {
         console.log({ href: window.location.href })
         console.log({ hostname: window.location.hostname })
 
-        if (account && navigator.clipboard) {
-            navigator.clipboard
+        if (account) {
+            window.navigator.clipboard
                 .writeText(
                     // window.location.href
                     `https://app.sobajaswap.com/#/swap?
@@ -394,18 +347,20 @@ const Swap = () => {
                 tO,
                 Field.INPUT,
             )
-            onChangeSwapState({
-                ...swapState,
-                outputAmount: swapRate,
-            })
+            if(isNaN(Number(swapRate))) {
+                onChangeSwapState({
+                    ...swapState,
+                    outputAmount: '',
+                })
+            } else {
+                onChangeSwapState({
+                    ...swapState,
+                    outputAmount: swapRate,
+                })
+            }
             return
         }
         return () => {
-            // onChangeSwapState({
-            //     ...swapState,
-            //     outputAmount: '',
-            //     inputAmount: ''
-            // })
         }
     }, [inputAmount, chainId])
 
@@ -434,17 +389,20 @@ const Swap = () => {
                 tO,
                 Field.OUTPUT,
             )
-            onChangeSwapState({
-                ...swapState,
-                inputAmount: swapRate,
-            })
+            console.log({swapRate})
+            if(isNaN(Number(swapRate))) {
+                onChangeSwapState({
+                    ...swapState,
+                    inputAmount: '',
+                })
+            } else {
+                onChangeSwapState({
+                    ...swapState,
+                    inputAmount: swapRate,
+                })
+            }
         }
         return () => {
-            // onChangeSwapState({
-            //     ...swapState,
-            //     outputAmount: '',
-            //     inputAmount: ''
-            // })
         }
     }, [outputAmount, chainId])
 
@@ -598,7 +556,7 @@ const Swap = () => {
 const SwapContainer = styled(Columns)`
     margin: 0 auto 40px;
     height: fit-content;
-    max-width: 480px;
+    max-width: 520px;
     background: var(--bg5) !important;
     border: 1.5px solid var(--border2);
     border-radius: 12px;

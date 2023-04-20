@@ -9,8 +9,9 @@ import {
     toggleDarkMode,
     updateRefAddress,
 } from './actions'
+import { ApplicationState } from './reducer'
 
-export function useAppState() {
+export function useAppState(): ApplicationState {
     return useSelector((state: AppState) => state.application)
 }
 
