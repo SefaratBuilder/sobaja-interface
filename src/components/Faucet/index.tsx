@@ -175,7 +175,7 @@ const FaucetModalDiv = styled.div`
     right: 0;
     bottom: 0;
     margin: auto;
-    z-index: 3;
+    z-index: 9999;
     display: flex;
     @media (max-width: 576px) {
         width: 90%;
@@ -191,7 +191,7 @@ const ContainerFaucetModal = styled.div<{ isDislayFaucet: boolean }>`
     width: 100%;
     margin: auto;
     transition: all 0.1s ease-in-out;
-    z-index: ${({ isDislayFaucet }) => (isDislayFaucet ? 3 : -1)};
+    z-index: ${({ isDislayFaucet }) => (isDislayFaucet ? 999 : -1)};
     scale: ${({ isDislayFaucet }) => (isDislayFaucet ? 1 : 0.95)};
     opacity: ${({ isDislayFaucet }) => (isDislayFaucet ? 1 : 0)};
     padding: 10px;

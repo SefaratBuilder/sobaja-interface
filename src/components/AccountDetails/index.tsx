@@ -28,8 +28,8 @@ const AccountDetails = ({
     const balance = account && useETHBalances([account])?.[account]
 
     const handleCopyAddress = () => {
-        if (account && navigator.clipboard) {
-            navigator.clipboard.writeText(account.toString()).then(() => {
+        if (account) {
+            window.navigator.clipboard.writeText(account.toString()).then(() => {
                 setIsCopied(true)
                 setTimeout(() => {
                     setIsCopied(false)
@@ -396,27 +396,7 @@ const Item = styled.div<{ isChecked: boolean }>`
         width: 45%;
     }
 `
-const ItemContent = styled.button`
-    font-family: 'Montserrat', sans-serif !important;
-    background: none;
-    border: none;
-    color: ${({ theme }) => theme.text1};
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
 
-    img {
-        height: 50px;
-        width: 50px;
-        object-fit: contain;
-    }
-    span {
-        font-size: 11.5px;
-        color: white;
-    }
-`
 const Footer = styled.div`
     display: flex;
     flex-direction: column;

@@ -753,8 +753,7 @@ const NetworkButton = styled.div`
     }
 
     p {
-        /* font-size: 18px !important; */
-        /* font-family: 'Montserrat'; */
+
         font-style: italic;
         font-weight: 500;
         color: #c9c9c9;

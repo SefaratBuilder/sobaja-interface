@@ -98,8 +98,8 @@ const Swap = () => {
         console.log({ href: window.location.href })
         console.log({ hostname: window.location.hostname })
 
-        if (account && navigator.clipboard) {
-            navigator.clipboard
+        if (account) {
+            window.navigator.clipboard
                 .writeText(
                     // window.location.href
                     `https://app.sobajaswap.com/#/swap?
@@ -486,7 +486,7 @@ const Swap = () => {
 const SwapContainer = styled(Columns)`
     margin: 0 auto 40px;
     height: fit-content;
-    max-width: 480px;
+    max-width: 520px;
     background: var(--bg5) !important;
     border: 1.5px solid var(--border2);
     border-radius: 12px;

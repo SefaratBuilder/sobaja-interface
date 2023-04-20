@@ -131,7 +131,6 @@ const MenuIcon = styled(Columns)`
     justify-content: center;
     span {
         height: 2px;
-        width: 15px;
         background: white;
     }
 `

@@ -1,6 +1,6 @@
 import { Token, TokenList, ChainId } from '../interfaces'
-import ETH_LOGO from '../assets/token-logos/eth.jpeg'
-import MATIC_LOGO from '../assets/token-logos/matic.png'
+import ETH_LOGO from 'assets/token-logos/eth.svg'
+import MATIC_LOGO from 'assets/token-logos/matic.png'
 import tokenList from './jsons/tokenList.json'
 import { WRAPPED_NATIVE_ADDRESSES } from './addresses'
 

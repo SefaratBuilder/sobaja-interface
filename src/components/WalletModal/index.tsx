@@ -441,7 +441,6 @@ const Item = styled.div<{ isChecked: boolean }>`
     }
 `
 const ItemContent = styled.button`
-    font-family: 'Montserrat', sans-serif !important;
     background: none;
     border: none;
     color: ${({ theme }) => theme.text1};
