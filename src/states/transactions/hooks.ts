@@ -1,4 +1,4 @@
-import { Txn, TxnState } from './reducer';
+import { Txn, TxnState } from './reducer'
 import { AppState } from './../index'
 import { useDispatch, useSelector } from 'react-redux'
 import { removeTxn, addTxn } from './actions'
@@ -12,6 +12,6 @@ export function useTransactionHandler() {
 
     return {
         removeTxn: (txn: Txn) => dispatch(removeTxn(txn)),
-        addTxn: (txn: Txn) => dispatch(addTxn(txn))
+        addTxn: (txn: Txn) => dispatch(addTxn(txn)),
     }
 }

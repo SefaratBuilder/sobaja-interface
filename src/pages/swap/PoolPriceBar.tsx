@@ -32,12 +32,25 @@ const PoolPriceBar = ({
         Number(inputAmount) && Number(outputAmount)
             ? Number(div(inputAmount, outputAmount)).toFixed(8)
             : 0
-    function getPriceImpact(fee: number, amountTrade: number, reservesA: number) {
-        let amount = amountTrade * (1 - fee);
-        return amount / (reservesA + amount) * 100;
+    function getPriceImpact(
+        fee: number,
+        amountTrade: number,
+        reservesA: number,
+    ) {
+        let amount = amountTrade * (1 - fee)
+        return (amount / (reservesA + amount)) * 100
     }
-    const reserveIn = pair && (tokenIn?.symbol == pair.token0.address ? pair.reserve0 : pair.reserve1)
-    const priceImpact = tokenIn && inputAmount && pair ? getPriceImpact(Number(pair.fee), Number(mulNumberWithDecimal(inputAmount, tokenIn.decimals)), Number(reserveIn)) : 0
+    const reserveIn =
+        pair &&
+        (tokenIn?.symbol == pair.token0.address ? pair.reserve0 : pair.reserve1)
+    const priceImpact =
+        tokenIn && inputAmount && pair
+            ? getPriceImpact(
+                  Number(pair.fee),
+                  Number(mulNumberWithDecimal(inputAmount, tokenIn.decimals)),
+                  Number(reserveIn),
+              )
+            : 0
 
     return (
         <>
@@ -164,7 +177,7 @@ const WrapExpectedOutput = styled.div<{ dropDown: boolean }>`
 
     &.active {
         height: 116px;
-        @media(max-width: 576px) {
+        @media (max-width: 576px) {
             height: 130px;
         }
     }

@@ -75,11 +75,8 @@ const TokenListModal = ({
 
         const newTokens = tokens.filter((t) => !sortedTokenList.includes(t))
 
-        const filteredByChainIdTokens = [
-            ...sortedTokenList,
-            ...newTokens,
-        ]
-        
+        const filteredByChainIdTokens = [...sortedTokenList, ...newTokens]
+
         setRenderTokenList(filteredByChainIdTokens)
     }
 
@@ -126,7 +123,7 @@ const TokenListModal = ({
                 </Row>
                 <Hr />
                 <WrapList>
-                    {  renderedTokenList.length > 0 ?
+                    {renderedTokenList.length > 0 ? (
                         renderedTokenList.map((token: Token, index: number) => {
                             return (
                                 <TokenSelection
@@ -139,18 +136,20 @@ const TokenListModal = ({
                                     }}
                                 />
                             )
-                        }) : queriedToken ? (
-                            <TokenSelection 
-                                token={queriedToken} 
-                                onUserSelect={(e) => {
-                                    onUserSelect(field, queriedToken)
-                                    onClose()
-                                }}
-                                hideAddButton={false}
-                                onAdd={() => handleAddToken(queriedToken)}
-                            />
-                        ) : <></>
-                    }
+                        })
+                    ) : queriedToken ? (
+                        <TokenSelection
+                            token={queriedToken}
+                            onUserSelect={(e) => {
+                                onUserSelect(field, queriedToken)
+                                onClose()
+                            }}
+                            hideAddButton={false}
+                            onAdd={() => handleAddToken(queriedToken)}
+                        />
+                    ) : (
+                        <></>
+                    )}
                 </WrapList>
             </ModalContentWrapper>
         )

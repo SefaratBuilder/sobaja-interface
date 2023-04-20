@@ -1,5 +1,5 @@
-import LogoERA from 'assets/token-logos/era.svg';
-import LogoMatic from 'assets/token-logos/matic.svg';
+import LogoERA from 'assets/token-logos/era.svg'
+import LogoMatic from 'assets/token-logos/matic.svg'
 import { Token, TokenList, ChainId } from 'interfaces/index'
 
 export const ListNetwork = [
@@ -19,7 +19,7 @@ export const ListNetwork = [
                 rpcUrls: ['https://zksync2-mainnet.zksync.io'],
                 blockExplorerUrls: ['https://explorer.zksync.io/'],
             },
-        ]
+        ],
     },
     {
         name: 'Testnet',
@@ -37,7 +37,7 @@ export const ListNetwork = [
                 rpcUrls: ['https://zksync2-testnet.zksync.dev'],
                 blockExplorerUrls: ['https://zksync2-testnet.zkscan.io'],
             },
-        ]
+        ],
     },
     {
         name: 'Mumbai',
@@ -45,34 +45,35 @@ export const ListNetwork = [
         logo: LogoMatic,
         switchNetwork: [
             {
-                chainId: "0x13881",
-                chainName: "Mumbai",
+                chainId: '0x13881',
+                chainName: 'Mumbai',
                 nativeCurrency: {
-                    name: "MATIC",
-                    symbol: "MATIC",
+                    name: 'MATIC',
+                    symbol: 'MATIC',
                     decimals: 18,
                 },
-                rpcUrls: ["https://rpc-mumbai.maticvigil.com"],
-                blockExplorerUrls: ["https://explorer-mumbai.maticvigil.com/"],
+                rpcUrls: ['https://rpc-mumbai.maticvigil.com'],
+                blockExplorerUrls: ['https://explorer-mumbai.maticvigil.com/'],
             },
-        ]
+        ],
     },
     // { name: 'Mainet', logo: LogoERA, className: 'button-era', url: '' },
     // { name: 'Testnet', logo: LogoERA, className: 'button-era', url: '' },
 ]
 
-
-export const InfoNetwork: { [chainId: number]: { name: string, logo: string } } = {
+export const InfoNetwork: {
+    [chainId: number]: { name: string; logo: string }
+} = {
     [ChainId.ZKMAINNET]: {
-        name: "Mainnet",
-        logo: LogoERA
+        name: 'Mainnet',
+        logo: LogoERA,
     },
     [ChainId.ZKTESTNET]: {
-        name: "Testnet",
-        logo: LogoERA
+        name: 'Testnet',
+        logo: LogoERA,
     },
     [ChainId.MUMBAI]: {
-        name: "Mumbai",
-        logo: LogoMatic
+        name: 'Mumbai',
+        logo: LogoMatic,
     },
 }

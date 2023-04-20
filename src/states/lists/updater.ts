@@ -10,7 +10,11 @@ const Updater = () => {
 
     useEffect(() => {
         if (chainId) {
-            const newList = currentList.filter((item) => item.chainId === chainId || item.address === NATIVE_COIN.address)
+            const newList = currentList.filter(
+                (item) =>
+                    item.chainId === chainId ||
+                    item.address === NATIVE_COIN.address,
+            )
             updateCurrentList(newList)
         }
     }, [chainId])

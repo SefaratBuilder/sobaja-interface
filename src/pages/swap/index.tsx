@@ -359,7 +359,7 @@ const Swap = () => {
                 tO,
                 Field.INPUT,
             )
-            if(isNaN(Number(swapRate))) {
+            if (isNaN(Number(swapRate))) {
                 onChangeSwapState({
                     ...swapState,
                     outputAmount: '',
@@ -372,8 +372,7 @@ const Swap = () => {
             }
             return
         }
-        return () => {
-        }
+        return () => {}
     }, [inputAmount, chainId])
 
     useEffect(() => {
@@ -401,8 +400,8 @@ const Swap = () => {
                 tO,
                 Field.OUTPUT,
             )
-            console.log({swapRate})
-            if(isNaN(Number(swapRate))) {
+            console.log({ swapRate })
+            if (isNaN(Number(swapRate))) {
                 onChangeSwapState({
                     ...swapState,
                     inputAmount: '',
@@ -414,8 +413,7 @@ const Swap = () => {
                 })
             }
         }
-        return () => {
-        }
+        return () => {}
     }, [outputAmount, chainId])
 
     const SwapButton = () => {

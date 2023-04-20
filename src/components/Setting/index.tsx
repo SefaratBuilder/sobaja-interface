@@ -49,8 +49,8 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
             .replace(' ', '')
             .replace(',', '.')
             .replace(/(\..*?)\..*/g, '$1')
-            console.log('eeeeeeee', e)
-            if (Number(e) < 1) {
+        console.log('eeeeeeee', e)
+        if (Number(e) < 1) {
             setDeadline(Number(e) * 60)
             setTextError('Your transaction may be failed')
         } else if (Number(e) > 60) {
@@ -144,9 +144,9 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
                         </SubTitle>
                         <SubTitle>
                             <InputTime
-                                placeholder={(deadline/60).toString()}
+                                placeholder={(deadline / 60).toString()}
                                 type={'text'}
-                                value={Number(deadline)/60}
+                                value={Number(deadline) / 60}
                                 onChange={(e) =>
                                     validateInputDealine(e.target.value)
                                 }

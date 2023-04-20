@@ -13,12 +13,10 @@ describe('shorten address', () => {
 
 describe('calculateSlippageAmount', () => {
     it('price is correct', () => {
-        const amountOutMin = calcSlippageAmount("10000", "50")[0]
-        const amountInMax = calcSlippageAmount("10000", "50")[1]
+        const amountOutMin = calcSlippageAmount('10000', '50')[0]
+        const amountInMax = calcSlippageAmount('10000', '50')[1]
 
         expect(amountOutMin).toEqual('5000')
         expect(amountInMax).toEqual('20000')
     })
 })
-
-

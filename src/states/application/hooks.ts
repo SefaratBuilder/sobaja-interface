@@ -60,7 +60,7 @@ export function useBlockNumber(): number | undefined {
 }
 
 export const useUpdateRefAddress = () => {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch()
     // const { refAddress } = useAppState();
     return (ref: string | undefined) => dispatch(updateRefAddress(ref))
 }

@@ -29,12 +29,14 @@ const AccountDetails = ({
 
     const handleCopyAddress = () => {
         if (account) {
-            window.navigator.clipboard.writeText(account.toString()).then(() => {
-                setIsCopied(true)
-                setTimeout(() => {
-                    setIsCopied(false)
-                }, 1000)
-            })
+            window.navigator.clipboard
+                .writeText(account.toString())
+                .then(() => {
+                    setIsCopied(true)
+                    setTimeout(() => {
+                        setIsCopied(false)
+                    }, 1000)
+                })
         }
     }
 

@@ -115,9 +115,7 @@ export class Pair {
             const lpShare1 = div(mul(amount1, this.reserveLp), this.reserve1)
 
             const addedLp = lpShare0.lt(lpShare1) ? lpShare0 : lpShare1
-            const shareOfLp = addedLp
-                .div(addedLp.add(this.reserveLp))
-                .mul(100) //%
+            const shareOfLp = addedLp.div(addedLp.add(this.reserveLp)).mul(100) //%
             return shareOfLp
         }
         return 100
@@ -131,17 +129,28 @@ export class Pair {
     ) {
         if (this.reserve0 && this.reserve1) {
             console.log({ amountIn })
-            const result1 = div(mul(amountIn, this.reserve1), this.reserve0);
-            const result0 = div(mul(amountIn, this.reserve0), this.reserve1);
-            console.log({ result0, result1, amountIn, res0: this.reserve0, res1: this.reserve1 })
+            const result1 = div(mul(amountIn, this.reserve1), this.reserve0)
+            const result0 = div(mul(amountIn, this.reserve0), this.reserve1)
+            console.log({
+                result0,
+                result1,
+                amountIn,
+                res0: this.reserve0,
+                res1: this.reserve1,
+            })
             if (
                 (field === Field.INPUT && isSortedTokens(tokenIn, tokenOut)) ||
                 (field === Field.OUTPUT && !isSortedTokens(tokenIn, tokenOut))
             ) {
-                console.log({ amountOut: divNumberWithDecimal(result1, (this.token1.decimals)) })
-                return divNumberWithDecimal(result1, (this.token1.decimals))
+                console.log({
+                    amountOut: divNumberWithDecimal(
+                        result1,
+                        this.token1.decimals,
+                    ),
+                })
+                return divNumberWithDecimal(result1, this.token1.decimals)
             } else {
-                return divNumberWithDecimal(result0, (this.token0.decimals))
+                return divNumberWithDecimal(result0, this.token0.decimals)
             }
         }
         return ''
@@ -159,7 +168,6 @@ export class Pair {
                 this.reserve0,
                 this.reserve1,
                 sub(1, this.fee),
-
             )
             const isNotSortedAmountOut = calculateAmountOut(
                 amount,
@@ -182,16 +190,28 @@ export class Pair {
 
             if (field === Field.INPUT) {
                 if (isSortedTokens(tokenIn, tokenOut))
-                    return divNumberWithDecimal(isSortedAmountOut, tokenOut.decimals)
+                    return divNumberWithDecimal(
+                        isSortedAmountOut,
+                        tokenOut.decimals,
+                    )
                 else
-                    return divNumberWithDecimal(isNotSortedAmountOut, tokenOut.decimals)
+                    return divNumberWithDecimal(
+                        isNotSortedAmountOut,
+                        tokenOut.decimals,
+                    )
             }
 
             if (field === Field.OUTPUT) {
                 if (isSortedTokens(tokenIn, tokenOut))
-                    return divNumberWithDecimal(isSortedAmountIn, tokenIn.decimals)
+                    return divNumberWithDecimal(
+                        isSortedAmountIn,
+                        tokenIn.decimals,
+                    )
                 else
-                    return divNumberWithDecimal(isNotSortedAmountIn, tokenIn.decimals)
+                    return divNumberWithDecimal(
+                        isNotSortedAmountIn,
+                        tokenIn.decimals,
+                    )
             }
         }
         return ''
