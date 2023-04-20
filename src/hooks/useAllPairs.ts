@@ -10,12 +10,17 @@ import { computePairAddress, Pair } from 'utils/pair'
 import { useFactoryContract } from './useContract'
 import { useToken, useTokens } from './useToken'
 import PAIR_INTERFACE from 'constants/jsons/pair'
-import { WRAPPED_NATIVE_COIN } from 'constants/index';
+import { WRAPPED_NATIVE_COIN } from 'constants/index'
 import { ChainId } from 'interfaces'
 import { isNativeCoin } from 'utils'
 import { useActiveWeb3React } from 'hooks'
 import { useTokenBalances } from './useCurrencyBalance'
-import { div, divNumberWithDecimal, mul, mulNumberWithDecimal } from 'utils/math'
+import {
+    div,
+    divNumberWithDecimal,
+    mul,
+    mulNumberWithDecimal,
+} from 'utils/math'
 import TokenList from 'constants/jsons/tokenList.json'
 
 /**
@@ -68,7 +73,6 @@ export function usePairAddressesByIds(ids: number[]): {
 export function usePairByAddresses(addresses: (string | undefined)[]): {
     [address: string]: (Pair | undefined)[]
 } {
-
     const tokenAResults = useMultipleContractSingleData(
         addresses,
         PAIR_INTERFACE,
@@ -97,11 +101,12 @@ export function usePairByAddresses(addresses: (string | undefined)[]): {
         [],
     )
 
-    const tokenAddresses = tokenAResults?.[0]?.result?.[0] && tokenBResult?.[0]?.result?.[0] && [
-        ...tokenAResults?.map((token) => token?.result?.[0]),
-        ...tokenBResult?.map((token) => token?.result?.[0]),
-        ...addresses
-    ]
+    const tokenAddresses = tokenAResults?.[0]?.result?.[0] &&
+        tokenBResult?.[0]?.result?.[0] && [
+            ...tokenAResults?.map((token) => token?.result?.[0]),
+            ...tokenBResult?.map((token) => token?.result?.[0]),
+            ...addresses,
+        ]
 
     const tokens = useTokens(tokenAddresses)
 
@@ -134,7 +139,13 @@ export function usePairByAddresses(addresses: (string | undefined)[]): {
                 {},
             ),
 
-        [addresses, tokenAResults, tokenBResult, balanceResults, reservesResults]
+        [
+            addresses,
+            tokenAResults,
+            tokenBResult,
+            balanceResults,
+            reservesResults,
+        ],
     )
 }
 
@@ -146,14 +157,15 @@ export function usePair(
     tokenA: Token | undefined,
     tokenB: Token | undefined,
 ): Pair | undefined {
-    tokenA = chainId && isNativeCoin(tokenA) ? WRAPPED_NATIVE_COIN[chainId] : tokenA
-    tokenB = chainId && isNativeCoin(tokenB) ? WRAPPED_NATIVE_COIN[chainId] : tokenB
+    tokenA =
+        chainId && isNativeCoin(tokenA) ? WRAPPED_NATIVE_COIN[chainId] : tokenA
+    tokenB =
+        chainId && isNativeCoin(tokenB) ? WRAPPED_NATIVE_COIN[chainId] : tokenB
     const factory = useFactoryContract()
-    const lpAddressResult = useSingleCallResult(
-        factory,
-        'getPair',
-        [tokenA?.address, tokenB?.address]
-    )
+    const lpAddressResult = useSingleCallResult(factory, 'getPair', [
+        tokenA?.address,
+        tokenB?.address,
+    ])
     const lpAddress = lpAddressResult?.result?.[0]
     const tokenLp = useToken(lpAddress)
     const balanceResult = useMultipleContractSingleData(
@@ -201,8 +213,7 @@ export function useAllPairs(): {
     const pairsLength = usePairsLength()
     let ids: number[] = []
     if (pairsLength?._value) {
-        for (let i = 0; i < Number(pairsLength._value); i++)
-            ids.push(i)
+        for (let i = 0; i < Number(pairsLength._value); i++) ids.push(i)
     }
 
     const allPairsResult = useSingleContractMultipleData(
@@ -210,22 +221,21 @@ export function useAllPairs(): {
         'allPairs',
         ids.map((id) => [id]),
     )
-    const addresses: (string | undefined)[] = allPairsResult && allPairsResult.map(i => i.result?.[0])
+    const addresses: (string | undefined)[] =
+        allPairsResult && allPairsResult.map((i) => i.result?.[0])
     const pairs = usePairByAddresses(addresses)
     // console.log({ pairs })
 
-    return useMemo(
-        () => pairs,
-        [pairs],
-    )
+    return useMemo(() => pairs, [pairs])
 }
 
 export const useTokensUrl = (tokens: Array<string>) => {
-    let entries = tokens.map(i => {
+    let entries = tokens.map((i) => {
         return [
             i,
-            TokenList.find(tkl =>
-                tkl.address.toLowerCase() === i?.toLowerCase())?.logoURI
+            TokenList.find(
+                (tkl) => tkl.address.toLowerCase() === i?.toLowerCase(),
+            )?.logoURI,
         ]
     })
     return Object.fromEntries(entries)
@@ -240,48 +250,76 @@ export const useMyPosition = () => {
     const balances = useTokenBalances(account, lpTokens)
     // const balances = useTokenBalances('0x998f5d682a11dAEA3Adf8cd4D3cC6EC73405c770', lpTokens)
     console.log({ balances, mapPairs })
-    const lpBalancesUser = Object.entries(balances).map(i => {
-        if (i?.[1] && Number(i?.[1]) > 0) {
-            const index = mapPairs.findIndex((lp: any) => lp?.tokenLp?.address === i?.[0])
-            const percent = div(mulNumberWithDecimal(i?.[1]?.toString(), lpTokens?.[index]?.decimals), mapPairs?.[index]?.reserveLp)
-            const valuePercent0 = divNumberWithDecimal(mul(mapPairs?.[index]?.reserve0, percent), mapPairs?.[index]?.token0?.decimals)
-            const valuePercent1 = divNumberWithDecimal(mul(mapPairs?.[index]?.reserve1, percent), mapPairs?.[index]?.token1?.decimals)
+    const lpBalancesUser = Object.entries(balances)
+        .map((i) => {
+            if (i?.[1] && Number(i?.[1]) > 0) {
+                const index = mapPairs.findIndex(
+                    (lp: any) => lp?.tokenLp?.address === i?.[0],
+                )
+                const percent = div(
+                    mulNumberWithDecimal(
+                        i?.[1]?.toString(),
+                        lpTokens?.[index]?.decimals,
+                    ),
+                    mapPairs?.[index]?.reserveLp,
+                )
+                const valuePercent0 = divNumberWithDecimal(
+                    mul(mapPairs?.[index]?.reserve0, percent),
+                    mapPairs?.[index]?.token0?.decimals,
+                )
+                const valuePercent1 = divNumberWithDecimal(
+                    mul(mapPairs?.[index]?.reserve1, percent),
+                    mapPairs?.[index]?.token1?.decimals,
+                )
 
-            !tokenList.includes(mapPairs?.[index]?.token0?.address) && tokenList.push(mapPairs?.[index]?.token0?.address)
-            !tokenList.includes(mapPairs?.[index]?.token1?.address) && tokenList.push(mapPairs?.[index]?.token1?.address)
+                !tokenList.includes(mapPairs?.[index]?.token0?.address) &&
+                    tokenList.push(mapPairs?.[index]?.token0?.address)
+                !tokenList.includes(mapPairs?.[index]?.token1?.address) &&
+                    tokenList.push(mapPairs?.[index]?.token1?.address)
 
-            return {
-                value: i?.[1]?.toString(),
-                valueWithDec: mulNumberWithDecimal(i?.[1]?.toString(), lpTokens?.[index]?.decimals),
-                tokenLp: { ...lpTokens?.[index] },
-                token0: {
-                    ...mapPairs?.[index]?.token0,
-                    value: valuePercent0,
-                    logoURI: TokenList.find(tkl =>
-                        tkl.address.toLowerCase() == mapPairs?.[index]?.token0?.address?.toLowerCase())?.logoURI
-                },
-                token1: {
-                    ...mapPairs?.[index]?.token1,
-                    value: valuePercent1,
-                    logoURI: TokenList.find(tkl =>
-                        tkl.address.toLowerCase() == mapPairs?.[index]?.token1?.address?.toLowerCase())?.logoURI
-                },
-                percent: percent * 100,
-                totalLp: mapPairs?.[index]?.reserveLp,
-                totalReserve0: mapPairs?.[index]?.reserve0,
-                totalReserve1: mapPairs?.[index]?.reserve1,
+                return {
+                    value: i?.[1]?.toString(),
+                    valueWithDec: mulNumberWithDecimal(
+                        i?.[1]?.toString(),
+                        lpTokens?.[index]?.decimals,
+                    ),
+                    tokenLp: { ...lpTokens?.[index] },
+                    token0: {
+                        ...mapPairs?.[index]?.token0,
+                        value: valuePercent0,
+                        logoURI: TokenList.find(
+                            (tkl) =>
+                                tkl.address.toLowerCase() ==
+                                mapPairs?.[
+                                    index
+                                ]?.token0?.address?.toLowerCase(),
+                        )?.logoURI,
+                    },
+                    token1: {
+                        ...mapPairs?.[index]?.token1,
+                        value: valuePercent1,
+                        logoURI: TokenList.find(
+                            (tkl) =>
+                                tkl.address.toLowerCase() ==
+                                mapPairs?.[
+                                    index
+                                ]?.token1?.address?.toLowerCase(),
+                        )?.logoURI,
+                    },
+                    percent: percent * 100,
+                    totalLp: mapPairs?.[index]?.reserveLp,
+                    totalReserve0: mapPairs?.[index]?.reserve0,
+                    totalReserve1: mapPairs?.[index]?.reserve1,
+                }
             }
-        }
-    }).filter(i => i)
+        })
+        .filter((i) => i)
     console.log({ lpBalancesUser, balances, allPairs })
 
-    return useMemo(
-        () => {
-            return {
-                tokenList,
-                position: lpBalancesUser
-            }
-        },
-        [allPairs],
-    )
+    return useMemo(() => {
+        return {
+            tokenList,
+            position: lpBalancesUser,
+        }
+    }, [allPairs])
 }

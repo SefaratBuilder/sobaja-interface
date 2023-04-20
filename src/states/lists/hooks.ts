@@ -7,13 +7,16 @@ import { useActiveWeb3React } from 'hooks'
 
 export function useTokenList(): TokenList {
     const { chainId } = useActiveWeb3React()
-    return useSelector((state: AppState) => chainId ? state.lists.currentList[chainId] : [])
+    return useSelector((state: AppState) =>
+        chainId ? state.lists.currentList[chainId] : [],
+    )
 }
 
 export function useUpdateCurrentList() {
     const dispatch = useDispatch()
     const { chainId } = useActiveWeb3React()
-    return (newList: TokenList) => chainId && dispatch(updateCurrentList({ chainId, newList }))
+    return (newList: TokenList) =>
+        chainId && dispatch(updateCurrentList({ chainId, newList }))
 }
 
 export function useAddTokenToCurrentList() {
@@ -22,6 +25,12 @@ export function useAddTokenToCurrentList() {
     const currentList = useTokenList()
 
     return (newToken: Token) => {
-        chainId && dispatch(updateCurrentList({ chainId, newList: [...currentList, newToken] }))
+        chainId &&
+            dispatch(
+                updateCurrentList({
+                    chainId,
+                    newList: [...currentList, newToken],
+                }),
+            )
     }
 }

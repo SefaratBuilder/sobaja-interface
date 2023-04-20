@@ -25,4 +25,6 @@ export const toggleDarkMode = createAction<boolean>(
     'application/toggleDarkMode',
 )
 
-export const updateRefAddress = createAction<string | undefined>("application/updateRefAddress")
+export const updateRefAddress = createAction<string | undefined>(
+    'application/updateRefAddress',
+)

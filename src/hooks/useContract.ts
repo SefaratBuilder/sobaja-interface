@@ -10,7 +10,7 @@ import {
     ROUTER_ABI,
     ROUTERS,
     FAUCET_ABI,
-    Faucet
+    Faucet,
 } from 'constants/addresses'
 import ERC20 from 'constants/jsons/erc20.json'
 import { PAIR_ABI } from 'constants/jsons/pair'
@@ -61,8 +61,8 @@ export function useTokenContract(address: string | undefined): Contract | null {
 }
 
 export function useFaucetContract(): Contract | null {
-    const { chainId } = useActiveWeb3React();
-    if (!chainId) return null;
+    const { chainId } = useActiveWeb3React()
+    if (!chainId) return null
     return useContract(Faucet[chainId], FAUCET_ABI)
 }
 

@@ -24,9 +24,9 @@ export function useETHBalances(
         () =>
             uncheckedAddresses
                 ? uncheckedAddresses
-                    .map(isAddress)
-                    .filter((a): a is string => a !== false)
-                    .sort()
+                      .map(isAddress)
+                      .filter((a): a is string => a !== false)
+                      .sort()
                 : [],
         [uncheckedAddresses],
     )
@@ -43,7 +43,10 @@ export function useETHBalances(
                 (memo, address, i) => {
                     const value = results?.[i]?.result?.[0]
                     if (value && value._hex)
-                        memo[address] = divNumberWithDecimal(Number(value._hex), 18)
+                        memo[address] = divNumberWithDecimal(
+                            Number(value._hex),
+                            18,
+                        )
                     return memo
                 },
                 {},
@@ -89,14 +92,17 @@ export function useTokenBalancesWithLoadingIndicator(
             () =>
                 address && validatedTokens.length > 0
                     ? validatedTokens.reduce<{
-                        [tokenAddress: string]: string | undefined
-                    }>((memo, token, i) => {
-                        const value = balances?.[i]?.result?.[0]
-                        if (value && value._hex) {
-                            memo[token.address] = divNumberWithDecimal(Number(value._hex), token.decimals)
-                        }
-                        return memo
-                    }, {})
+                          [tokenAddress: string]: string | undefined
+                      }>((memo, token, i) => {
+                          const value = balances?.[i]?.result?.[0]
+                          if (value && value._hex) {
+                              memo[token.address] = divNumberWithDecimal(
+                                  Number(value._hex),
+                                  token.decimals,
+                              )
+                          }
+                          return memo
+                      }, {})
                     : {},
             [address, validatedTokens, balances],
         ),

@@ -48,7 +48,9 @@ export function useToken(address: string | undefined): Token | undefined {
     }, [address, chainId, symbolResult, nameResult, decimalsResult])
 }
 
-export function useTokens(addresses: (string | undefined)[]): (Token | undefined)[] {
+export function useTokens(
+    addresses: (string | undefined)[],
+): (Token | undefined)[] {
     const { chainId } = useActiveWeb3React()
     const symbolResult = useMultipleContractSingleData(
         addresses,
@@ -103,12 +105,15 @@ export function useTokenApproval(
     const tokenContract = useTokenContract(token?.address)
     const approve = async (to: string, amount: number | string) => {
         try {
-            console.log("🤦‍♂️ ⟹ tokenContract:", tokenContract)
+            console.log('🤦‍♂️ ⟹ tokenContract:', tokenContract)
             if (!isAddress(to)) return
-            const gasLimit = await tokenContract?.estimateGas.approve(to, amount)
+            const gasLimit = await tokenContract?.estimateGas.approve(
+                to,
+                amount,
+            )
             console.log({ gasLimit: gasLimit && gasLimit.add(1000) })
             return tokenContract?.approve(to, amount, {
-                gasLimit: gasLimit && gasLimit.add(1000)
+                gasLimit: gasLimit && gasLimit.add(1000),
             })
         } catch (err) {
             return

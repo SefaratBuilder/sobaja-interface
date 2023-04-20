@@ -780,7 +780,6 @@ const NetworkButton = styled.div`
     }
 
     p {
-
         font-style: italic;
         font-weight: 500;
         color: #c9c9c9;

@@ -9,7 +9,7 @@ import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { injected } from 'connectors'
 import arrowDown from 'assets/icons/arrow-down.svg'
 
-const Web3StatusMobile = ({toggleWalletModal,setToggleWalletModal}:any) => {
+const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
     const { account, connector, error } = useWeb3React()
 
     function formatConnectorName(account: any) {

@@ -255,7 +255,7 @@ const MyPools = () => {
             initDataTransaction.setIsOpenResultModal(true)
         }
     }, [initDataTransaction])
-    console.log({position})
+    console.log({ position })
     return (
         <>
             <ComponentsTransaction
@@ -701,7 +701,7 @@ const BtnRemove = styled.div`
     text-align: center;
     padding: 5px 0px;
     cursor: pointer;
-    transition: all ease-in-out .3s;
+    transition: all ease-in-out 0.3s;
 
     &:hover {
         background: var(--bg6);

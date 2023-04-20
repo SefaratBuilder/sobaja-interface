@@ -3,8 +3,8 @@ import { InjectedConnector } from '@web3-react/injected-connector'
 import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/index'
 import getLibrary from 'utils/getLibrary'
 import { NetworkConnector } from './NetworkConnector'
-import { WalletLinkConnector } from "@web3-react/walletlink-connector";
-import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
+import { WalletLinkConnector } from '@web3-react/walletlink-connector'
+import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 import { BscConnector } from '@binance-chain/bsc-connector'
 import { ChainId } from 'interfaces'
 
@@ -29,20 +29,19 @@ export const injected = new InjectedConnector({
     supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
 })
 
-
 export const CoinbaseWallet = new WalletLinkConnector({
     url: `https://zksync2-testnet.zksync.dev`,
-    appName: "Coin base",
+    appName: 'Coin base',
     supportedChainIds: [1, 3, 4, 5, 42, 280],
-});
+})
 
 export const walletconnect = new WalletConnectConnector({
     supportedChainIds: [1, 3, 4, 5, 42, 280],
     // rpc: 'https://mainnet.infura.io/v3/',
     // bridge: "https://bridge.walletconnect.org",
     // qrcode: true,
-});
+})
 
 export const binance = new BscConnector({
     supportedChainIds: [1, 56, 137, 280],
-});
+})
