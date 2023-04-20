@@ -69,6 +69,11 @@
                 "internalType": "uint256",
                 "name": "deadline",
                 "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "ref",
+                "type": "address"
             }
         ],
         "name": "addLiquidity",
@@ -123,6 +128,11 @@
                 "internalType": "uint256",
                 "name": "deadline",
                 "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "ref",
+                "type": "address"
             }
         ],
         "name": "addLiquidityETH",
@@ -144,6 +154,25 @@
             }
         ],
         "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "dataRef",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "ref",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -268,6 +297,44 @@
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "getList",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "list",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "getRef",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "ref",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint256",
                 "name": "amountA",
                 "type": "uint256"
@@ -330,6 +397,11 @@
                 "internalType": "uint256",
                 "name": "deadline",
                 "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "ref",
+                "type": "address"
             }
         ],
         "name": "removeLiquidity",
@@ -379,6 +451,11 @@
                 "internalType": "uint256",
                 "name": "deadline",
                 "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "ref",
+                "type": "address"
             }
         ],
         "name": "removeLiquidityETH",
@@ -669,6 +746,11 @@
                 "internalType": "uint256",
                 "name": "deadline",
                 "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "ref",
+                "type": "address"
             }
         ],
         "name": "swapETHForExactTokens",
@@ -703,6 +785,11 @@
                 "internalType": "uint256",
                 "name": "deadline",
                 "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "ref",
+                "type": "address"
             }
         ],
         "name": "swapExactETHForTokens",
@@ -770,6 +857,11 @@
                 "internalType": "uint256",
                 "name": "deadline",
                 "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "ref",
+                "type": "address"
             }
         ],
         "name": "swapExactTokensForETH",
@@ -842,6 +934,11 @@
                 "internalType": "uint256",
                 "name": "deadline",
                 "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "ref",
+                "type": "address"
             }
         ],
         "name": "swapExactTokensForTokens",
@@ -914,6 +1011,11 @@
                 "internalType": "uint256",
                 "name": "deadline",
                 "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "ref",
+                "type": "address"
             }
         ],
         "name": "swapTokensForExactETH",
@@ -953,6 +1055,11 @@
                 "internalType": "uint256",
                 "name": "deadline",
                 "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "ref",
+                "type": "address"
             }
         ],
         "name": "swapTokensForExactTokens",
