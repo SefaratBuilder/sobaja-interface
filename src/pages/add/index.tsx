@@ -40,6 +40,7 @@ import {
 } from 'states/application/hooks'
 import imgCopy from 'assets/icons/copy.svg'
 import imgCheckMark from 'assets/icons/check-mark.svg'
+import { sendEvent } from 'utils/analytics'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -198,6 +199,17 @@ const Swap = () => {
 
                 initDataTransaction.setIsOpenWaitingModal(false)
                 initDataTransaction.setIsOpenResultModal(true)
+
+                sendEvent({
+                    category: 'Defi',
+                    action: 'Add liquidity',
+                    label: [
+                        tokenIn?.symbol,
+                        tokenIn?.address,
+                        tokenOut?.symbol,
+                        tokenOut?.address,
+                    ].join('/'),
+                })
 
                 const txn = await callResult.wait()
                 initDataTransaction.setIsOpenResultModal(false)

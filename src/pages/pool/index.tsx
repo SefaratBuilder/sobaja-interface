@@ -34,8 +34,9 @@ import arrowDown from 'assets/icons/arrowDown.svg'
 import { useNavigate } from 'react-router-dom'
 import MyPools from 'components/MyPools'
 import ToastMessage from 'components/ToastMessage'
+import Pagination from 'components/Pagination'
 
-interface Data {
+export interface PoolData {
     name: string
     volume: string
     tvl: string
@@ -51,7 +52,7 @@ function createData(
     volume: string,
     fee: string,
     apr: string,
-): Data {
+): PoolData {
     return {
         network,
         name,
@@ -99,6 +100,11 @@ const rows = [
         '10%',
     ),
     createData('Ethereum', 'USDC/UNI', '$66.66m', '$100.99k', '$66.66k', '10%'),
+    createData('Ethereum', 'DAI/USDC', '$66.66m', '$100.99k', '$66.66k', '10%'),
+    createData('Ethereum', 'USDT/DAI', '$66.66m', '$100.99k', '$66.66k', '10%'),
+    createData('Ethereum', 'DAI/ETH', '$66.66m', '$100.99k', '$66.66k', '10%'),
+    createData('Ethereum', 'AVA/USDC', '$66.66m', '$100.99k', '$66.66k', '10%'),
+    createData('Ethereum', 'BNB/USDC', '$66.66m', '$100.99k', '$66.66k', '10%'),
 ]
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -141,7 +147,7 @@ function stableSort<T>(
 
 interface HeadCell {
     disablePadding: boolean
-    id: keyof Data
+    id: keyof PoolData
     label: string
     numeric: boolean
 }
@@ -191,7 +197,10 @@ const DEFAULT_ROWS_PER_PAGE = 10
 
 interface EnhancedTableProps {
     numSelected: number
-    onRequestSort: (event: MouseEvent<unknown>, newOrderBy: keyof Data) => void
+    onRequestSort: (
+        event: MouseEvent<unknown>,
+        newOrderBy: keyof PoolData,
+    ) => void
     onSelectAllClick: (event: ChangeEvent<HTMLInputElement>) => void
     order: Order
     orderBy: string
@@ -271,13 +280,17 @@ function EnhancedTableToolbar() {
 
 export default function Pools() {
     const [order, setOrder] = useState<Order>(DEFAULT_ORDER)
-    const [orderBy, setOrderBy] = useState<keyof Data>(DEFAULT_ORDER_BY)
+    const [orderBy, setOrderBy] = useState<keyof PoolData>(DEFAULT_ORDER_BY)
     const [selected, setSelected] = useState<readonly string[]>([])
     const [page, setPage] = useState(0)
     const [dense, setDense] = useState(false)
-    const [visibleRows, setVisibleRows] = useState<Data[] | null>(null)
+    const [visibleRows, setVisibleRows] = useState<PoolData[] | null>(null)
     const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE)
-    const [paddingHeight, setPaddingHeight] = useState(0)
+
+    const [poolsAdminInCurrentPag, setPoolsAdminInCurrentPag] =
+        useState(visibleRows)
+    // const [paddingHeight, setPaddingHeight] = useState(0)
+
     const [searchName, setSearchName] = useState('')
     const [isMyPositionPage, setIsMyPositionPage] = useState(false)
 
@@ -286,10 +299,10 @@ export default function Pools() {
             rows,
             getComparator(DEFAULT_ORDER, DEFAULT_ORDER_BY),
         )
-        rowsOnMount = rowsOnMount.slice(
-            0 * DEFAULT_ROWS_PER_PAGE,
-            0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE,
-        )
+        // rowsOnMount = rowsOnMount.slice(
+        //     0 * DEFAULT_ROWS_PER_PAGE,
+        //     0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE,
+        // )
 
         setVisibleRows(rowsOnMount)
     }, [])
@@ -317,7 +330,7 @@ export default function Pools() {
     }
 
     const handleRequestSort = useCallback(
-        (event: MouseEvent<unknown>, newOrderBy: keyof Data) => {
+        (event: MouseEvent<unknown>, newOrderBy: keyof PoolData) => {
             const isAsc = orderBy === newOrderBy && order === 'asc'
             const toggledOrder = isAsc ? 'desc' : 'asc'
             setOrder(toggledOrder)
@@ -388,8 +401,7 @@ export default function Pools() {
                             </div>
                             <div className="circle">0</div>
                         </HeadLabelLeft>
-                    {
-                        !isMyPositionPage && (
+                        {!isMyPositionPage && (
                             <HeadLabelRight>
                                 <InputSearchModal>
                                     <img src={SearchIcon} alt="" />
@@ -404,8 +416,7 @@ export default function Pools() {
                                     <img src={imgDownArrowWhite} alt="" />
                                 </NetworkButton> */}
                             </HeadLabelRight>
-                        )
-                    }   
+                        )}
                     </HeadLabel>
                     {!isMyPositionPage && (
                         <TableContainer>
@@ -426,97 +437,113 @@ export default function Pools() {
                                 />
                                 {/* <TableRow style={{ height: 5 }}></TableRow> */}
                                 <TableBody>
-                                    {visibleRows
-                                        ? visibleRows.map((row, index) => {
-                                              const isItemSelected = isSelected(
-                                                  row.name,
-                                              )
-                                              const labelId = `enhanced-table-checkbox-${index}`
+                                    {poolsAdminInCurrentPag
+                                        ? poolsAdminInCurrentPag.map(
+                                              (row, index) => {
+                                                  const isItemSelected =
+                                                      isSelected(row.name)
+                                                  const labelId = `enhanced-table-checkbox-${index}`
 
-                                              return (
-                                                  <>
-                                                      <RowTable
-                                                          role="checkbox"
-                                                          aria-checked={
-                                                              isItemSelected
-                                                          }
-                                                          tabIndex={-1}
-                                                          key={index}
-                                                          selected={
-                                                              isItemSelected
-                                                          }
-                                                          sx={{
-                                                              cursor: 'pointer',
-                                                          }}
-                                                      >
-                                                          <CellTable
-                                                              component="th"
-                                                              id={labelId}
-                                                              scope="row"
-                                                              padding="normal"
+                                                  return (
+                                                      <>
+                                                          <RowTable
+                                                              role="checkbox"
+                                                              aria-checked={
+                                                                  isItemSelected
+                                                              }
+                                                              tabIndex={-1}
+                                                              key={index}
+                                                              selected={
+                                                                  isItemSelected
+                                                              }
                                                               sx={{
-                                                                  width: '100px',
+                                                                  cursor: 'pointer',
                                                               }}
-                                                              align="center"
                                                           >
-                                                              <img
-                                                                  className="network"
-                                                                  src={LogoETH}
-                                                                  alt=""
-                                                              />
-                                                          </CellTable>
-                                                          <CellTable align="center">
-                                                              <div className="label">
-                                                                  <PairTokens
-                                                                      tokenA={
-                                                                          Logos?.[
-                                                                              row.name.split(
-                                                                                  '/',
-                                                                              )?.[0]
-                                                                          ]
+                                                              <CellTable
+                                                                  component="th"
+                                                                  id={labelId}
+                                                                  scope="row"
+                                                                  padding="normal"
+                                                                  sx={{
+                                                                      width: '100px',
+                                                                  }}
+                                                                  align="center"
+                                                              >
+                                                                  <img
+                                                                      className="network"
+                                                                      src={
+                                                                          LogoETH
                                                                       }
-                                                                      tokenB={
-                                                                          Logos?.[
-                                                                              row.name.split(
-                                                                                  '/',
-                                                                              )?.[1]
-                                                                          ]
-                                                                      }
+                                                                      alt=""
                                                                   />
-                                                                  <div className="name">
-                                                                      {row.name}
+                                                              </CellTable>
+                                                              <CellTable align="center">
+                                                                  <div className="label">
+                                                                      <PairTokens
+                                                                          tokenA={
+                                                                              Logos?.[
+                                                                                  row.name.split(
+                                                                                      '/',
+                                                                                  )?.[0]
+                                                                              ]
+                                                                          }
+                                                                          tokenB={
+                                                                              Logos?.[
+                                                                                  row.name.split(
+                                                                                      '/',
+                                                                                  )?.[1]
+                                                                              ]
+                                                                          }
+                                                                      />
+                                                                      <div className="name">
+                                                                          {
+                                                                              row.name
+                                                                          }
+                                                                      </div>
+                                                                      <Badge>
+                                                                          0.30%
+                                                                      </Badge>
                                                                   </div>
-                                                                  <Badge>
-                                                                      0.30%
-                                                                  </Badge>
-                                                              </div>
-                                                          </CellTable>
-                                                          <CellTable align="right">
-                                                              {row.tvl}
-                                                          </CellTable>
-                                                          <CellTable align="right">
-                                                              {row.volume}
-                                                          </CellTable>
-                                                          <CellTable align="right">
-                                                              {row.fee}
-                                                          </CellTable>
-                                                          <CellTable align="right">
-                                                              {row.apr}
-                                                          </CellTable>
-                                                      </RowTable>
-                                                      <TableRow
-                                                          style={{ height: 5 }}
-                                                      ></TableRow>
-                                                  </>
-                                              )
-                                          })
+                                                              </CellTable>
+                                                              <CellTable align="right">
+                                                                  {row.tvl}
+                                                              </CellTable>
+                                                              <CellTable align="right">
+                                                                  {row.volume}
+                                                              </CellTable>
+                                                              <CellTable align="right">
+                                                                  {row.fee}
+                                                              </CellTable>
+                                                              <CellTable align="right">
+                                                                  {row.apr}
+                                                              </CellTable>
+                                                          </RowTable>
+                                                          <TableRow
+                                                              style={{
+                                                                  height: 5,
+                                                              }}
+                                                          ></TableRow>
+                                                      </>
+                                                  )
+                                              },
+                                          )
                                         : null}
                                 </TableBody>
                             </Table>
                         </TableContainer>
                     )}
+
                     {isMyPositionPage && <MyPools />}
                 </CustomizeBox>
+                {visibleRows && visibleRows.length > 0 && (
+                    <Pagination
+                        data={visibleRows}
+                        currentPage={1}
+                        setPoolsData={setPoolsAdminInCurrentPag}
+                        limitNumber={10}
+                    />
+                )}
             </Container>
         </>
     )
