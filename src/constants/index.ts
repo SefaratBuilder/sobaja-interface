@@ -71,7 +71,7 @@ export const DEFAULT_TOKEN_LIST: { [chainId in number]: TokenList } = {
     [ChainId.GOERLI]: [NATIVE_COIN, ...tokenList],
     [ChainId.MUMBAI]: [NATIVE_COIN, ...tokenList],
     [ChainId.ZKMAINNET]: [NATIVE_COIN, ...tokenList],
-    [ChainId.ZKTESTNET]: [NATIVE_COIN, ...tokenList]
+    [ChainId.ZKTESTNET]: [NATIVE_COIN, ...tokenList],
 }
 
 export const ALL_SUPPORTED_CHAIN_IDS: ChainId[] = [
@@ -80,4 +80,3 @@ export const ALL_SUPPORTED_CHAIN_IDS: ChainId[] = [
     ChainId.GOERLI,
     ChainId.MUMBAI,
 ]
-

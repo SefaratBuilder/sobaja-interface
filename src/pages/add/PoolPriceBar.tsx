@@ -158,7 +158,7 @@ const WrapExpectedOutput = styled.div<{ dropDown: boolean }>`
 
     &.active {
         height: 116px;
-        @media(max-width: 576px) {
+        @media (max-width: 576px) {
             height: 130px;
         }
     }

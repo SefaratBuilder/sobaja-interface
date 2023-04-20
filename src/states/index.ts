@@ -14,7 +14,7 @@ const store = configureStore({
         lists,
         application,
         multicall,
-        transactions
+        transactions,
     },
     middleware: [save({ states: PERSISTED_KEYS })],
     preloadedState: load({ states: PERSISTED_KEYS }),

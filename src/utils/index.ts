@@ -82,8 +82,9 @@ export function getEtherscanLink(
     data: string,
     type: 'transaction' | 'token' | 'address' | 'block',
 ): string {
-    const prefix = `https://${ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[ChainId.ZKMAINNET]
-        }`
+    const prefix = `https://${
+        ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[ChainId.ZKMAINNET]
+    }`
 
     switch (type) {
         case 'transaction': {
@@ -102,7 +103,6 @@ export function getEtherscanLink(
     }
 }
 
-
 //current time + deadline second
 export function calcTransactionDeadline(deadline: number) {
     return (new Date().getTime() / 1000 + deadline).toFixed()
@@ -110,15 +110,14 @@ export function calcTransactionDeadline(deadline: number) {
 
 export const calcSlippageAmount = (
     amount: string | number,
-    slippage: string | number
+    slippage: string | number,
 ): [string, string] => {
-
     if (Number(slippage) < 0 || Number(slippage) > 100) {
         throw new Error(`Please input properly slippage amount`)
     }
 
-    const amountOut = mul(amount, ((sub(1, div(slippage, 100)))))
-    const amountIn = div(amount, ((sub(1, div(slippage, 100)))))
+    const amountOut = mul(amount, sub(1, div(slippage, 100)))
+    const amountIn = div(amount, sub(1, div(slippage, 100)))
 
     return [amountOut, amountIn]
 }

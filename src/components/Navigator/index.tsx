@@ -11,7 +11,12 @@ interface NavigationProps {
 export const itemNav = [
     { path: '/swap', name: 'Swap', img: '' },
     { path: '/pools', name: 'Pools', img: '' },
-    { path: 'https://portal.zksync.io/bridge', name: 'Bridge', img: '', target: '_blank' },
+    {
+        path: 'https://portal.zksync.io/bridge',
+        name: 'Bridge',
+        img: '',
+        target: '_blank',
+    },
     { path: '/earns', name: 'Earn', img: '' },
     { path: '/nfts', name: 'NFTs', img: '' },
     { path: '/launchpad', name: 'Launchpad', img: '' },
@@ -21,11 +26,13 @@ const Navigator = ({ burgerNav, setBurgerNav }: NavigationProps) => {
     return (
         <>
             <NavigatorWrapper>
-                {
-                    itemNav.map((item, index) => {
-                        return <Link to={item.path} target={item.target} key={index} >{item.name}</Link>
-                    })
-                }
+                {itemNav.map((item, index) => {
+                    return (
+                        <Link to={item.path} target={item.target} key={index}>
+                            {item.name}
+                        </Link>
+                    )
+                })}
             </NavigatorWrapper>
             <BurgerNav burgerNav={burgerNav} setBurgerNav={setBurgerNav} />
         </>

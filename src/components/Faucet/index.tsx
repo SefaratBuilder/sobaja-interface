@@ -28,7 +28,7 @@ const Faucet = () => {
         sendEvent({
             category: 'Defi',
             action: 'Faucet',
-            label: [erc20],
+            label: erc20,
         })
     }
 
