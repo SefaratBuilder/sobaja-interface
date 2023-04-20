@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
 import Bridge from 'components/Bridge'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
@@ -16,13 +16,15 @@ import Setting from 'components/HeaderLiquidity'
 import { useToken, useTokenApproval } from 'hooks/useToken'
 import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
+import { shortenAddress } from 'utils'
+
 import {
     ALL_SUPPORTED_CHAIN_IDS,
     URLSCAN_BY_CHAINID,
     WRAPPED_NATIVE_COIN,
 } from 'constants/index'
 import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
-import { FixedNumber } from 'ethers'
+import { FixedNumber, ZeroAddress } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
 import {
@@ -30,22 +32,37 @@ import {
     usePairContract,
     useRouterContract,
 } from 'hooks/useContract'
-import { calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
-import { useAppState, useTransactionDeadline } from 'states/application/hooks'
+import {
+    calcSlippageAmount,
+    calcTransactionDeadline,
+    computeGasLimit,
+    isNativeCoin,
+} from 'utils'
+import {
+    useAppState,
+    useSlippageTolerance,
+    useTransactionDeadline,
+    useUpdateRefAddress,
+} from 'states/application/hooks'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import ComponentsTransaction, {
     InitCompTransaction,
 } from 'components/TransactionModal'
 import ToastMessage from 'components/ToastMessage'
 import { AddressZero } from '@ethersproject/constants'
+import { getContractAddress } from '@ethersproject/address'
+import imgCopy from 'assets/icons/copy.svg'
+import imgCheckMark from 'assets/icons/check-mark.svg'
 
 const Swap = () => {
     const swapState = useSwapState()
-    const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(false)
+    const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
+    const [isCopied, setIsCopied] = useState(false)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
     const { chainId, library, account } = useActiveWeb3React()
+    const { refAddress } = useAppState()
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
     const pair = usePair(chainId, tokenIn, tokenOut)
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
@@ -59,6 +76,8 @@ const Swap = () => {
         '0x1990D029794ffC74fC20908740A22de982152945',
     )
     const factoryContract = useFactoryContract()
+    const { slippage } = useSlippageTolerance()
+    const loca = useLocation()
     console.log({ pair, tokenIn, tokenOut })
 
     const mintLp = async () => {
@@ -103,6 +122,14 @@ const Swap = () => {
         }
     }
 
+    const updateRef = useUpdateRefAddress()
+
+    useEffect(() => {
+        if (loca.search && loca.search.includes('?')) {
+            updateRef(loca.search.slice(1))
+        }
+    }, [loca])
+
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
             onUserInput(field, value)
@@ -116,6 +143,26 @@ const Swap = () => {
         },
         [onTokenSelection, swapState],
     )
+
+    const handleCopyAddress = () => {
+        console.log({ href: window.location.href })
+        console.log({ hostname: window.location.hostname })
+
+        if (account && navigator.clipboard) {
+            navigator.clipboard
+                .writeText(
+                    // window.location.href
+                    `https://app.sobajaswap.com/#/swap?
+                        ${account}`,
+                )
+                .then(() => {
+                    setIsCopied(true)
+                    setTimeout(() => {
+                        setIsCopied(false)
+                    }, 1000)
+                })
+        }
+    }
 
     const getSwapMethod = () => {
         if (swapType === Field.INPUT) {
@@ -132,28 +179,32 @@ const Swap = () => {
     const getSwapArguments = () => {
         if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
             return
+        const amountIn = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
+        const amountOut = mulNumberWithDecimal(outputAmount, tokenOut.decimals)
+        const amountOutMin = mulNumberWithDecimal(
+            calcSlippageAmount(outputAmount, slippage)[0],
+            tokenOut.decimals,
+        )
+        const amountInMax = mulNumberWithDecimal(
+            calcSlippageAmount(inputAmount, slippage)[1],
+            tokenIn.decimals,
+        )
         if (swapType === Field.INPUT) {
-            console.log({
-                amountOutmin: mulNumberWithDecimal(
-                    outputAmount,
-                    tokenOut.decimals,
-                ),
-            })
             if (isNativeCoin(tokenIn))
                 return {
                     args: [
-                        '0', //amountOutMin
+                        amountOutMin, //amountOutMin
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
                     ],
-                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
+                    value: amountIn, //amountIn
                 }
             else if (isNativeCoin(tokenOut))
                 return {
                     args: [
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        '0x00',
+                        amountIn, //amountIn
+                        amountOutMin, //amountOutMin
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline),
@@ -163,8 +214,8 @@ const Swap = () => {
             else
                 return {
                     args: [
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOutMin
+                        amountIn, //amountIn
+                        amountOutMin, //amountOutMin
                         [tokenIn.address, tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
@@ -175,8 +226,8 @@ const Swap = () => {
             if (isNativeCoin(tokenOut))
                 return {
                     args: [
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
+                        amountOut, //amountOut
+                        amountInMax, //amountInMax
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline),
@@ -186,18 +237,18 @@ const Swap = () => {
             else if (isNativeCoin(tokenIn))
                 return {
                     args: [
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
+                        amountOut, //amountOut
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
                     ],
-                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
+                    value: amountInMax, //amountInMax
                 }
             else
                 return {
                     args: [
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountInMax
+                        amountOut, //amountOut
+                        amountInMax, //amountInMax
                         [tokenIn.address, tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
@@ -273,24 +324,20 @@ const Swap = () => {
                 initDataTransaction.setIsOpenWaitingModal(false)
                 return initDataTransaction.setIsOpenResultModal(true)
             }
-
             const { args, value } = swapArguments
-            // console.log('🤦‍♂️ ⟹ onConfirm ⟹ args:', args)
-            // console.log('🤦‍♂️ ⟹ onConfirm ⟹ method:', method)
-            // console.log('🤦‍♂️ ⟹ onConfirm ⟹ routerContract:', routerContract)
 
-            const addressssss = '0x5f296af3efAf9baA357bC9C9B02a89ECE482A9EC'
-            const aaa = [...args, addressssss]
-            // console.log('🤦‍♂️ ⟹ onConfirm ⟹ aaa:', aaa)
-            // console.log(
-            //     '🤦‍♂️ ⟹ onConfirm ⟹ estimateGas:',
-            //     routerContract?.estimateGas,
-            // )
-            const gasLimit = await routerContract?.estimateGas[method](...aaa, {
-                value,
-            })
+            const referralAddress = refAddress || ZeroAddress
+            const newArgs = [...args, referralAddress]
+            console.log('🤦‍♂️ ⟹ args:', newArgs)
+
+            const gasLimit = await routerContract?.estimateGas[method](
+                ...newArgs,
+                {
+                    value,
+                },
+            )
             console.log('🤦‍♂️ ⟹ onConfirm ⟹ gasLimit:', gasLimit)
-            const callResult = await routerContract?.[method](...aaa, {
+            const callResult = await routerContract?.[method](...newArgs, {
                 value,
                 gasLimit: computeGasLimit(gasLimit),
             })
@@ -503,13 +550,46 @@ const Swap = () => {
                         onUserInput={handleOnUserInput}
                         onUserSelect={handleOnTokenSelection}
                         field={Field.OUTPUT}
+                        hideMaxButton={true}
                     />
                 </Columns>
-                <PoolPriceBar
-                    dropDown={poolPriceBarOpen}
-                    setDropDown={setPoolPriceBarOpen}
-                />
+                {pair && (
+                    <PoolPriceBar
+                        pair={pair}
+                        dropDown={poolPriceBarOpen}
+                        setDropDown={setPoolPriceBarOpen}
+                    />
+                )}
                 <SwapButton />
+                {/* <SwapButton /> */}
+                <Referral>
+                    <span>Referral:</span>
+                    <p>
+                        https://app.sobajaswap.com/#/swap?
+                        {account && shortenAddress(account, 7)}
+                    </p>
+                    {/* <span>
+                        <img src={imgCopy} alt="" />
+                    </span> */}
+                    <span>
+                        {isCopied ? (
+                            <CopyBtn>
+                                <CopyAccountAddress src={imgCheckMark} />
+                                <Tooltip className="tooltip">Copied</Tooltip>
+                            </CopyBtn>
+                        ) : (
+                            <CopyBtn>
+                                <CopyAccountAddress
+                                    onClick={() => handleCopyAddress()}
+                                    src={imgCopy}
+                                />
+                                <Tooltip className="tooltip">
+                                    Click to copy address
+                                </Tooltip>
+                            </CopyBtn>
+                        )}
+                    </span>
+                </Referral>
             </SwapContainer>
         </>
     )
@@ -534,6 +614,51 @@ const SwapContainer = styled(Columns)`
     }
 `
 
+const Referral = styled.div`
+    display: grid;
+    grid-template-columns: 55px 1fr 12px;
+    font-size: 14px;
+    span {
+        color: rgba(0, 255, 163, 1);
+    }
+    p {
+        opacity: 0.5;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        /* text-align: center; */
+    }
+    img {
+        cursor: pointer;
+    }
+`
+
+const CopyBtn = styled.div`
+    position: relative;
+    :hover .tooltip {
+        transition: all 0.1s ease-in-out;
+        opacity: 1;
+        visibility: visible;
+    }
+`
+const Tooltip = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    width: 100px;
+    height: 30px;
+    font-size: 12px;
+    right: -45px;
+    text-align: center;
+    border: 1px solid;
+    border-radius: 6px;
+    background: rgba(157, 195, 230, 0.1);
+    backdrop-filter: blur(3px);
+`
+
 const Nav = styled(Row)`
     a {
         padding: 5px 8px;
@@ -549,6 +674,10 @@ const Nav = styled(Row)`
     }
 `
 
+const CopyAccountAddress = styled.img`
+    height: 12px;
+    cursor: pointer;
+`
 const Icon = styled.div`
     width: 35px;
     height: 35px;

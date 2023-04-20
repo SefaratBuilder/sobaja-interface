@@ -241,9 +241,9 @@ export const useMyPosition = () => {
     // const balances = useTokenBalances('0x998f5d682a11dAEA3Adf8cd4D3cC6EC73405c770', lpTokens)
 
     const lpBalancesUser = Object.entries(balances).map(i => {
-        if (i?.[1]?.value && Number(i?.[1]?.value) > 0) {
+        if (i?.[1] && Number(i?.[1]) > 0) {
             const index = mapPairs.findIndex((lp: any) => lp?.tokenLp?.address === i?.[0])
-            const percent = div(i?.[1]?.value.toString(), mapPairs?.[index]?.reserveLp)
+            const percent = div(i?.[1]?.toString(), mapPairs?.[index]?.reserveLp)
             const valuePercent0 = divNumberWithDecimal(mul(mapPairs?.[index]?.reserve0, percent), mapPairs?.[index]?.token0?.decimals)
             const valuePercent1 = divNumberWithDecimal(mul(mapPairs?.[index]?.reserve1, percent), mapPairs?.[index]?.token1?.decimals)
 
@@ -251,8 +251,8 @@ export const useMyPosition = () => {
             !tokenList.includes(mapPairs?.[index]?.token1?.address) && tokenList.push(mapPairs?.[index]?.token1?.address)
 
             return {
-                value: divNumberWithDecimal(i?.[1]?.value?.toString(), lpTokens?.[index]?.decimals),
-                valueWithDec: i?.[1]?.value?.toString(),
+                value: divNumberWithDecimal(i?.[1]?.toString(), lpTokens?.[index]?.decimals),
+                valueWithDec: i?.[1]?.toString(),
                 tokenLp: { ...lpTokens?.[index] },
                 token0: {
                     ...mapPairs?.[index]?.token0,

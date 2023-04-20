@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
 import Setting from 'components/HeaderLiquidity'
 import Bridge from 'components/Bridge'
@@ -19,24 +19,34 @@ import {
     ZERO_ADDESS,
 } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
-import { ethers } from 'ethers'
+import { ZeroAddress, ethers } from 'ethers'
 import { useFactoryContract, useRouterContract } from 'hooks/useContract'
 import { useActiveWeb3React } from 'hooks'
 import { mulNumberWithDecimal } from 'utils/math'
 import { usePair } from 'hooks/useAllPairs'
 import { FixedNumber } from '@ethersproject/bignumber'
-import { isNativeCoin } from 'utils'
+import { calcSlippageAmount, isNativeCoin, shortenAddress } from 'utils'
 import WalletModal from 'components/WalletModal'
 import { InitCompTransaction } from 'components/TransactionModal'
 import ComponentsTransaction from 'components/TransactionModal'
 import ToastMessage from 'components/ToastMessage'
 import { useTransactionHandler } from 'states/transactions/hooks'
+import PoolPriceBar from './PoolPriceBar'
+import BackArrow from 'assets/icons/arrow-left.svg'
+import {
+    useAppState,
+    useSlippageTolerance,
+    useUpdateRefAddress,
+} from 'states/application/hooks'
+import imgCopy from 'assets/icons/copy.svg'
+import imgCheckMark from 'assets/icons/check-mark.svg'
 
 const Swap = () => {
     const swapState = useSwapState()
     const router = useRouterContract()
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
+    const [isCopied, setIsCopied] = useState(false)
 
     const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
@@ -46,13 +56,13 @@ const Swap = () => {
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenInApproval = useTokenApproval(account, routerAddress, tokenIn)
     const tokenOutApproval = useTokenApproval(account, routerAddress, tokenOut)
-
+    const { slippage } = useSlippageTolerance()
+    const { refAddress } = useAppState()
     const factoryContract = useFactoryContract()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
-
+    const loca = useLocation()
     const pair = usePair(chainId, tokenIn, tokenOut)
-    console.log({ pair })
 
     const isInsufficientAllowanceTokenIn =
         Number(tokenInApproval?.allowance) < Number(inputAmount) &&
@@ -62,6 +72,14 @@ const Swap = () => {
         tokenOut?.address !== ZERO_ADDESS
     const isInsufficientAllowance =
         isInsufficientAllowanceTokenIn || isInsufficientAllowanceTokenOut
+
+    const updateRef = useUpdateRefAddress()
+
+    useEffect(() => {
+        if (loca.search && loca.search.includes('?')) {
+            updateRef(loca.search.slice(1))
+        }
+    }, [loca])
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -76,11 +94,29 @@ const Swap = () => {
         },
         [onTokenSelection, swapState],
     )
+    const handleCopyAddress = () => {
+        console.log({ href: window.location.href })
+        console.log({ hostname: window.location.hostname })
+
+        if (account && navigator.clipboard) {
+            navigator.clipboard
+                .writeText(
+                    // window.location.href
+                    `https://app.sobajaswap.com/#/swap?
+                        ${account}`,
+                )
+                .then(() => {
+                    setIsCopied(true)
+                    setTimeout(() => {
+                        setIsCopied(false)
+                    }, 1000)
+                })
+        }
+    }
 
     const handleOnAdd = async () => {
         try {
             if (inputAmount && outputAmount && tokenIn && tokenOut) {
-                console.log('adding...')
                 initDataTransaction.setError('')
                 initDataTransaction.setPayload({
                     method: 'add liquidity',
@@ -112,27 +148,45 @@ const Swap = () => {
                 let value = isNativeCoin(tokenIn)
                     ? mulNumberWithDecimal(inputAmount, tokenIn.decimals)
                     : mulNumberWithDecimal(outputAmount, tokenOut.decimals)
-                value = isEthTxn ? value : '0x00'
+                value = isEthTxn ? value : '0'
+                let valueMin = isNativeCoin(tokenIn)
+                    ? mulNumberWithDecimal(
+                          calcSlippageAmount(inputAmount, slippage)[0],
+                          tokenIn.decimals,
+                      )
+                    : mulNumberWithDecimal(
+                          calcSlippageAmount(outputAmount, slippage)[0],
+                          tokenOut.decimals,
+                      )
+                valueMin = isEthTxn ? value : '0'
+
                 const args = isEthTxn
                     ? [
                           token.address,
                           mulNumberWithDecimal(amountToken, token.decimals),
                           mulNumberWithDecimal(amountToken, token.decimals), //
-                          value,
+                          valueMin,
                           account,
                           (new Date().getTime() / 1000 + 1000).toFixed(0),
+                          refAddress || ZeroAddress,
                       ]
                     : [
                           tokenIn.address,
                           tokenOut.address,
                           mulNumberWithDecimal(inputAmount, tokenIn.decimals),
                           mulNumberWithDecimal(outputAmount, tokenOut.decimals),
-                          mulNumberWithDecimal(inputAmount, tokenIn.decimals), //
-                          mulNumberWithDecimal(outputAmount, tokenOut.decimals), //
+                          mulNumberWithDecimal(
+                              calcSlippageAmount(inputAmount, slippage)[0],
+                              tokenIn.decimals,
+                          ), //
+                          mulNumberWithDecimal(
+                              calcSlippageAmount(outputAmount, slippage)[0],
+                              tokenOut.decimals,
+                          ), //
                           account,
                           (new Date().getTime() / 1000 + 1000).toFixed(0),
+                          refAddress || ZeroAddress,
                       ]
-                console.log({ ...args, value })
                 const gasLimit = await routerContract?.estimateGas?.[method]?.(
                     ...args,
                     { value },
@@ -152,7 +206,6 @@ const Swap = () => {
                     hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
                         callResult.hash || ''
                     }`,
-                    // hash: tx?.hash || '',
                     msg: 'Add liquidity',
                     status: txn.status === 1 ? true : false,
                 })
@@ -228,22 +281,17 @@ const Swap = () => {
                 ? WRAPPED_NATIVE_COIN[chainId]
                 : tokenOut
 
-            const addRate = pair?.calcAddRate(
+            const addRate = pair.calcAddRate(
                 amountInWithDel,
                 tI,
                 tO,
                 Field.INPUT,
             )
-            console.log('Amount out', addRate)
-            handleOnUserInput(Field.OUTPUT, addRate)
-            // onUserInput(Field.OUTPUT, addRate)
+            onChangeSwapState({
+                ...swapState,
+                outputAmount: addRate,
+            })
         }
-        // if(!pair) {
-        //     onChangeSwapState({
-        //         ...swapState,
-        //         outputAmount: ''
-        //     })
-        // }
     }, [inputAmount, tokenIn, tokenOut])
 
     useEffect(() => {
@@ -261,8 +309,6 @@ const Swap = () => {
                 tokenOut.decimals,
             )
 
-            console.log('🤦‍♂️ ⟹ useEffect ⟹ amountOutWithDel:', amountOutWithDel)
-
             const tI = isNativeCoin(tokenIn)
                 ? WRAPPED_NATIVE_COIN[chainId]
                 : tokenIn
@@ -276,16 +322,15 @@ const Swap = () => {
                 tO,
                 Field.OUTPUT,
             )
-            console.log('Amount In', addRate)
-            handleOnUserInput(Field.INPUT, addRate)
+            console.log({ addRate })
+            onChangeSwapState({
+                ...swapState,
+                inputAmount: addRate,
+            })
         }
-        // if(!pair) {
-        //     onChangeSwapState({
-        //         ...swapState,
-        //         inputAmount: ''
-        //     })
-        // }
     }, [outputAmount, tokenIn, tokenOut])
+
+    console.log({ pair })
 
     const AddButton = () => {
         const balanceIn = useCurrencyBalance(account, tokenIn)
@@ -368,12 +413,6 @@ const Swap = () => {
             <ComponentsTransaction
                 data={initDataTransaction}
                 onConfirm={onConfirm}
-                // onConfirm={approveToken}
-                //     // isInsufficientAllowance &&
-                //     // !isNativeCoin(tokenIn)
-                //     //     ? handleOnApprove
-                //     //     : onConfirm
-                //     // () => handleOnApprove()
             />
             <ToastMessage />
             <SwapContainer>
@@ -381,14 +420,12 @@ const Swap = () => {
                     <WalletModal setToggleWalletModal={openWalletModal} />
                 )}
                 <Row jus="space-between">
-                    <Nav gap="20px">
-                        <Link to="/swap">Swap</Link>
-                        {/* <Link to="/add" className="active-link">Add</Link> */}
-                        <Link to="/limit">Limit</Link>
-                    </Nav>
+                    <BackLink to="/pools">
+                        <img src={BackArrow} alt="back arrow" />
+                    </BackLink>
+                    <Title>Add Liquidity</Title>
                     <Setting />
                 </Row>
-                <Bridge />
                 <Columns>
                     <CurrencyInputPanel
                         token={tokenIn}
@@ -408,7 +445,39 @@ const Swap = () => {
                         field={Field.OUTPUT}
                     />
                 </Columns>
+                <PoolPriceBar
+                    dropDown={poolPriceBarOpen}
+                    setDropDown={setPoolPriceBarOpen}
+                />
                 <AddButton />
+                <Referral>
+                    <span>Referral:</span>
+                    <p>
+                        https://app.sobajaswap.com/#/add?
+                        {account && shortenAddress(account, 7)}
+                    </p>
+                    {/* <span>
+                        <img src={imgCopy} alt="" />
+                    </span> */}
+                    <span>
+                        {isCopied ? (
+                            <CopyBtn>
+                                <CopyAccountAddress src={imgCheckMark} />
+                                <Tooltip className="tooltip">Copied</Tooltip>
+                            </CopyBtn>
+                        ) : (
+                            <CopyBtn>
+                                <CopyAccountAddress
+                                    onClick={() => handleCopyAddress()}
+                                    src={imgCopy}
+                                />
+                                <Tooltip className="tooltip">
+                                    Click to copy address
+                                </Tooltip>
+                            </CopyBtn>
+                        )}
+                    </span>
+                </Referral>
             </SwapContainer>
         </>
     )
@@ -448,6 +517,62 @@ const Nav = styled(Row)`
     }
 `
 
+const Referral = styled.div`
+    display: grid;
+    grid-template-columns: 55px 1fr 12px;
+    font-size: 14px;
+    span {
+        color: rgba(0, 255, 163, 1);
+    }
+    p {
+        opacity: 0.5;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding-left: 4px;
+        /* text-align: center; */
+    }
+    img {
+        cursor: pointer;
+    }
+`
+
+const CopyBtn = styled.div`
+    position: relative;
+    :hover .tooltip {
+        transition: all 0.1s ease-in-out;
+        opacity: 1;
+        visibility: visible;
+    }
+`
+const Tooltip = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    width: 100px;
+    height: 30px;
+    font-size: 12px;
+    right: -45px;
+    text-align: center;
+    border: 1px solid;
+    border-radius: 6px;
+    background: rgba(157, 195, 230, 0.1);
+    backdrop-filter: blur(3px);
+`
+const CopyAccountAddress = styled.img`
+    height: 12px;
+    cursor: pointer;
+`
+
+const Title = styled.div`
+    font-size: 24px;
+    width: 100%;
+    text-align: center;
+`
+
 const Icon = styled.div`
     width: 35px;
     height: 35px;
@@ -470,6 +595,12 @@ const Icon = styled.div`
 const ButtonGroup = styled(Row)`
     width: 100%;
     gap: 5px;
+`
+
+const BackLink = styled(Link)`
+    img {
+        width: 30px;
+    }
 `
 
 export default Swap
