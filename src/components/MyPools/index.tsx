@@ -23,6 +23,8 @@ import { useTokenApproval } from 'hooks/useToken'
 import { ROUTERS } from 'constants/addresses'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import { Row } from 'components/Layouts'
+import { ZeroAddress } from 'ethers'
+import { sendEvent } from 'utils/analytics'
 
 const MyPools = () => {
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
@@ -115,8 +117,6 @@ const MyPools = () => {
                 initDataTransaction.setError('')
                 initDataTransaction.setPayload({
                     method: 'remove',
-                    input: (poolRemove?.token0?.value * percentValue) / 100,
-                    output: (poolRemove?.token1?.value * percentValue) / 100,
                     tokenIn: poolRemove?.token0,
                     tokenOut: poolRemove?.token1,
                 })
@@ -178,6 +178,7 @@ const MyPools = () => {
                           ),
                           account,
                           calcTransactionDeadline(deadline),
+                          ZeroAddress,
                       ]
                     : [
                           poolRemove.token0.address,
@@ -208,6 +209,7 @@ const MyPools = () => {
                           ),
                           account,
                           calcTransactionDeadline(deadline),
+                          ZeroAddress,
                       ]
                 console.log(...args)
                 const gasLimit = await routerContract?.estimateGas?.[method]?.(
@@ -215,6 +217,17 @@ const MyPools = () => {
                 )
                 const callResult = await routerContract?.[method]?.(...args, {
                     gasLimit: gasLimit && gasLimit.add(1000),
+                })
+
+                sendEvent({
+                    category: 'Defi',
+                    action: 'Remove liquidity',
+                    label: [
+                        poolRemove.token0?.symbol,
+                        poolRemove.token0?.address,
+                        poolRemove.token1?.symbol,
+                        poolRemove.token1?.address,
+                    ].join('/'),
                 })
 
                 initDataTransaction.setIsOpenWaitingModal(false)
@@ -242,7 +255,7 @@ const MyPools = () => {
             initDataTransaction.setIsOpenResultModal(true)
         }
     }, [initDataTransaction])
-
+    console.log({position})
     return (
         <>
             <ComponentsTransaction
@@ -352,9 +365,12 @@ const MyPools = () => {
                             )
                         })}
                 </RowMyPools>
-                {
-                    position.length <= 0 && <Row jus="center">You don't have a liquidity position yet. Try to add new position.</Row>
-                }
+                {position.length <= 0 && (
+                    <Row jus="center">
+                        You don't have a liquidity position yet. Try to add new
+                        position.
+                    </Row>
+                )}
                 {modalRemovePool && (
                     <ModalRemovePool>
                         <WrapRemovePool>
@@ -625,7 +641,14 @@ const WrapRemovePool = styled.div`
     backdrop-filter: blur(25px);
     border-radius: 12px;
     padding: 20px;
-    min-width: 500px;
+    max-width: 500px;
+    height: fit-content;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin: auto;
 
     @media screen and (max-width: 550px) {
         min-width: 300px;
@@ -641,11 +664,11 @@ const ModalRemovePool = styled.div`
     left: 0;
     height: fit-content;
     z-index: 1;
-    /* max-width: 500px; */
-    /* width: 100%; */
     margin: auto;
     display: flex;
     justify-content: center;
+    background: #00000055;
+    height: 100%;
 
     @media screen and (max-width: 1100px) {
         /* width: 90%; */
@@ -678,6 +701,11 @@ const BtnRemove = styled.div`
     text-align: center;
     padding: 5px 0px;
     cursor: pointer;
+    transition: all ease-in-out .3s;
+
+    &:hover {
+        background: var(--bg6);
+    }
 `
 const BtnAdd = styled(BtnRemove)``
 const WrapAddAndRemove = styled.div`
@@ -745,6 +773,8 @@ const RowMyPools = styled.div`
         grid-template-columns: minmax(100px, 1fr);
     }
 `
-const WrapMyPools = styled.div``
+const WrapMyPools = styled.div`
+    margin-top: 10px;
+`
 
 export default MyPools

@@ -10,13 +10,14 @@ import { OpacityModal } from 'components/Web3Status'
 import { useActiveWeb3React } from 'hooks'
 import { Error } from 'components/Text'
 import { Row } from 'components/Layouts'
+import { sendEvent } from 'utils/analytics'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
     const { chainId } = useActiveWeb3React()
-    
+
     useOnClickOutside(ref, () => {
         setIsDisplayFaucet(false)
     })
@@ -24,6 +25,11 @@ const Faucet = () => {
     const clickFaucetToken = (erc20: string) => {
         if (faucetContract == null) return
         faucetContract?.requestTokens(erc20)
+        sendEvent({
+            category: 'Defi',
+            action: 'Faucet',
+            label: [erc20],
+        })
     }
 
     const showMintCoins = () => {
@@ -175,7 +181,7 @@ const FaucetModalDiv = styled.div`
     right: 0;
     bottom: 0;
     margin: auto;
-    z-index: 3;
+    z-index: 9999;
     display: flex;
     @media (max-width: 576px) {
         width: 90%;
@@ -191,7 +197,7 @@ const ContainerFaucetModal = styled.div<{ isDislayFaucet: boolean }>`
     width: 100%;
     margin: auto;
     transition: all 0.1s ease-in-out;
-    z-index: ${({ isDislayFaucet }) => (isDislayFaucet ? 3 : -1)};
+    z-index: ${({ isDislayFaucet }) => (isDislayFaucet ? 999 : -1)};
     scale: ${({ isDislayFaucet }) => (isDislayFaucet ? 1 : 0.95)};
     opacity: ${({ isDislayFaucet }) => (isDislayFaucet ? 1 : 0)};
     padding: 10px;
