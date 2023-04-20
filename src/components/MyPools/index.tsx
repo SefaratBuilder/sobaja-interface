@@ -24,6 +24,7 @@ import { ROUTERS } from 'constants/addresses'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import { Row } from 'components/Layouts'
 import { ZeroAddress } from 'ethers'
+import { sendEvent } from 'utils/analytics'
 
 const MyPools = () => {
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
@@ -116,8 +117,6 @@ const MyPools = () => {
                 initDataTransaction.setError('')
                 initDataTransaction.setPayload({
                     method: 'remove',
-                    input: (poolRemove?.token0?.value * percentValue) / 100,
-                    output: (poolRemove?.token1?.value * percentValue) / 100,
                     tokenIn: poolRemove?.token0,
                     tokenOut: poolRemove?.token1,
                 })
@@ -218,6 +217,17 @@ const MyPools = () => {
                 )
                 const callResult = await routerContract?.[method]?.(...args, {
                     gasLimit: gasLimit && gasLimit.add(1000),
+                })
+
+                sendEvent({
+                    category: 'Defi',
+                    action: 'Remove liquidity',
+                    label: [
+                        poolRemove.token0?.symbol,
+                        poolRemove.token0?.address,
+                        poolRemove.token1?.symbol,
+                        poolRemove.token1?.address,
+                    ].join('/'),
                 })
 
                 initDataTransaction.setIsOpenWaitingModal(false)

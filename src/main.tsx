@@ -7,6 +7,9 @@ import getLibrary from 'utils/getLibrary'
 import { createWeb3ReactRoot, Web3ReactProvider } from '@web3-react/core'
 import { Buffer } from 'buffer'
 const Web3ProviderNetwork = createWeb3ReactRoot('NETWORK')
+import ReactGA from 'react-ga4'
+
+ReactGA.initialize('G-DFS071B0YW')
 
 window.Buffer = Buffer
 

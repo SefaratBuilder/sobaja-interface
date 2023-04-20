@@ -53,6 +53,7 @@ import { AddressZero } from '@ethersproject/constants'
 import { getContractAddress } from '@ethersproject/address'
 import imgCopy from 'assets/icons/copy.svg'
 import imgCheckMark from 'assets/icons/check-mark.svg'
+import { sendEvent } from 'utils/analytics'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -299,6 +300,17 @@ const Swap = () => {
             initDataTransaction.setIsOpenResultModal(true)
 
             console.log('🤦‍♂️ ⟹ handleOnSwap ⟹ callResult:', { callResult })
+            sendEvent({
+                category: 'Defi',
+                action: 'Swap',
+                label: [
+                    tokenIn?.symbol,
+                    tokenIn?.address,
+                    tokenOut?.symbol,
+                    tokenOut?.address,
+                ].join('/'),
+            })
+
             const txn = await callResult.wait()
             initDataTransaction.setIsOpenResultModal(false)
 
@@ -524,7 +536,7 @@ const Swap = () => {
                     <span>Referral:</span>
                     <p>
                         https://app.sobajaswap.com/#/swap?
-                        {account && shortenAddress(account, 7)}
+                        {account && shortenAddress(account, 6)}
                     </p>
                     {/* <span>
                         <img src={imgCopy} alt="" />
@@ -574,7 +586,7 @@ const SwapContainer = styled(Columns)`
 
 const Referral = styled.div`
     display: grid;
-    grid-template-columns: 55px 1fr 12px;
+    grid-template-columns: 54px 1fr 12px;
     font-size: 14px;
     span {
         color: rgba(0, 255, 163, 1);
@@ -584,7 +596,7 @@ const Referral = styled.div`
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        /* text-align: center; */
+        text-align: center;
     }
     img {
         cursor: pointer;
