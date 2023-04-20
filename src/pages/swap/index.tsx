@@ -25,7 +25,11 @@ import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
 import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
-import { useFactoryContract, usePairContract, useRouterContract } from 'hooks/useContract'
+import {
+    useFactoryContract,
+    usePairContract,
+    useRouterContract,
+} from 'hooks/useContract'
 import { calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
 import { useAppState, useTransactionDeadline } from 'states/application/hooks'
 import { useTransactionHandler } from 'states/transactions/hooks'
@@ -33,6 +37,7 @@ import ComponentsTransaction, {
     InitCompTransaction,
 } from 'components/TransactionModal'
 import ToastMessage from 'components/ToastMessage'
+import { AddressZero } from '@ethersproject/constants'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -50,13 +55,15 @@ const Swap = () => {
     const { deadline } = useTransactionDeadline()
     const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
-    const pairContract = usePairContract('0x1990D029794ffC74fC20908740A22de982152945')
+    const pairContract = usePairContract(
+        '0x1990D029794ffC74fC20908740A22de982152945',
+    )
     const factoryContract = useFactoryContract()
-    console.log({pair, tokenIn, tokenOut})
+    console.log({ pair, tokenIn, tokenOut })
 
     const mintLp = async () => {
         try {
-            if(account) {
+            if (account) {
                 console.log('111', pairContract)
                 // const token0 = await pairContract?.token0()
                 // const token1 = await pairContract?.token1()
@@ -64,27 +71,35 @@ const Swap = () => {
                 // const gasLimit = await pairContract?.estimateGas.mint(account)
                 // const callResult = await pairContract?.mint(account, { gasLimit })
                 const factory = await routerContract?.factory()
-                console.log({factory})
+                console.log({ factory })
                 // await callResult.wait()
                 // if(callResult?.status === 1) console.log('mint okkkkk', callResult)
             }
-        } catch(err) {
-            console.log('failed mint' ,err)
+        } catch (err) {
+            console.log('failed mint', err)
         }
     }
 
     const create = async () => {
         try {
-            if(account) {
+            if (account) {
                 console.log('111', factoryContract)
                 console.log('addressssss', tokenIn?.address, tokenOut?.address)
-                const gasLimit = await factoryContract?.estimateGas.createPair(tokenIn?.address, tokenOut?.address)
-                const callResult = await factoryContract?.createPair(tokenIn?.address, tokenOut?.address, { gasLimit: computeGasLimit(gasLimit) })
+                const gasLimit = await factoryContract?.estimateGas.createPair(
+                    tokenIn?.address,
+                    tokenOut?.address,
+                )
+                const callResult = await factoryContract?.createPair(
+                    tokenIn?.address,
+                    tokenOut?.address,
+                    { gasLimit: computeGasLimit(gasLimit) },
+                )
                 await callResult.wait()
-                if(callResult?.status === 1) console.log('create okkkkk', callResult)
+                if (callResult?.status === 1)
+                    console.log('create okkkkk', callResult)
             }
-        } catch(err) {
-            console.log('failed mint' ,err)
+        } catch (err) {
+            console.log('failed mint', err)
         }
     }
 
@@ -260,11 +275,22 @@ const Swap = () => {
             }
 
             const { args, value } = swapArguments
-            const gasLimit = await routerContract?.estimateGas[method](
-                ...args,
-                { value },
-            )
-            const callResult = await routerContract?.[method](...args, {
+            // console.log('🤦‍♂️ ⟹ onConfirm ⟹ args:', args)
+            // console.log('🤦‍♂️ ⟹ onConfirm ⟹ method:', method)
+            // console.log('🤦‍♂️ ⟹ onConfirm ⟹ routerContract:', routerContract)
+
+            const addressssss = '0x5f296af3efAf9baA357bC9C9B02a89ECE482A9EC'
+            const aaa = [...args, addressssss]
+            // console.log('🤦‍♂️ ⟹ onConfirm ⟹ aaa:', aaa)
+            // console.log(
+            //     '🤦‍♂️ ⟹ onConfirm ⟹ estimateGas:',
+            //     routerContract?.estimateGas,
+            // )
+            const gasLimit = await routerContract?.estimateGas[method](...aaa, {
+                value,
+            })
+            console.log('🤦‍♂️ ⟹ onConfirm ⟹ gasLimit:', gasLimit)
+            const callResult = await routerContract?.[method](...aaa, {
                 value,
                 gasLimit: computeGasLimit(gasLimit),
             })
@@ -285,6 +311,7 @@ const Swap = () => {
                 status: txn.status === 1 ? true : false,
             })
         } catch (error) {
+            console.log('🤦‍♂️ ⟹ onConfirm ⟹ error:', error)
             // initDataTransaction.setIsOpenWaitingModal(false)
             initDataTransaction.setError('Failed')
             initDataTransaction.setIsOpenResultModal(true)
