@@ -44,22 +44,20 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
         }
     }
     const validateInputDealine = (e: string) => {
-        const value = e
+        e = e
             .replace(/[^0-9.,]/g, '')
             .replace(' ', '')
             .replace(',', '.')
             .replace(/(\..*?)\..*/g, '$1')
-            console.log('asdasdasd')
-        if (Number(value) < 1) {
-            const value2 = e
-            setDeadline(Number(value2) * 60)
+            console.log('eeeeeeee', e)
+            if (Number(e) < 1) {
+            setDeadline(Number(e) * 60)
             setTextError('Your transaction may be failed')
-        } else if (Number(value) > 60) {
+        } else if (Number(e) > 60) {
             setTextError('Your transaction can take a long time')
         } else {
-            const value2 = e
             setTextError('')
-            setDeadline(Number(value2) * 60)
+            setDeadline(Number(e) * 60)
         }
     }
 
@@ -148,7 +146,7 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
                             <InputTime
                                 placeholder={(deadline/60).toString()}
                                 type={'text'}
-                                // value={Number(deadline)/60}
+                                value={Number(deadline)/60}
                                 onChange={(e) =>
                                     validateInputDealine(e.target.value)
                                 }
