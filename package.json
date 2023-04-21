@@ -13,6 +13,7 @@
         "prettier:check": "prettier --list-different src/**/*.{tsx,ts}"
     },
     "dependencies": {
+        "@apollo/client": "^3.7.12",
         "@binance-chain/bsc-connector": "^1.0.0",
         "@emotion/react": "^11.10.6",
         "@emotion/styled": "^11.10.6",

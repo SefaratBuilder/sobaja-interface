@@ -11,10 +11,10 @@ import Era from 'assets/brand/era.svg'
 import Orbiter from 'assets/brand/orbiter.svg'
 import Celer from 'assets/brand/celer.svg'
 import Multichain from 'assets/brand/multichain.svg'
-import EraBg from 'assets/brand/era-bg.svg'
-import OrbiterBg from 'assets/brand/orbiter-bg.svg'
-import CelerBg from 'assets/brand/celer-bg.svg'
-import MultichainBg from 'assets/brand/multichain-bg.svg'
+import EraBg from 'assets/brand/era-bg.png'
+import OrbiterBg from 'assets/brand/orbiter-bg.png'
+import CelerBg from 'assets/brand/celer-bg.png'
+import MultichainBg from 'assets/brand/multichain-bg.png'
 import ArrowLink from 'assets/icons/arrow-link.svg'
 
 const BridgeUrls = [
@@ -101,9 +101,9 @@ const Bridge = () => {
                         </SelectButton>
                     </Row>
                     <Row gap="10px" jus="space-between">
-                        {BridgeUrls.map((item) => {
+                        {BridgeUrls.map((item, index) => {
                             return (
-                                <BridgeItem bg={item.bg}>
+                                <BridgeItem bg={item.bg} key={index}>
                                     <img
                                         className="logo"
                                         src={item.logo}

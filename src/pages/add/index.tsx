@@ -41,6 +41,7 @@ import {
 import imgCopy from 'assets/icons/copy.svg'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import { sendEvent } from 'utils/analytics'
+import { Pair } from 'utils/pair'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -100,7 +101,7 @@ const Swap = () => {
         console.log({ hostname: window.location.hostname })
 
         if (account) {
-            window.navigator.clipboard
+            navigator.clipboard
                 .writeText(
                     // window.location.href
                     `https://app.sobajaswap.com/#/swap?
@@ -145,11 +146,20 @@ const Swap = () => {
                 const amountToken = isNativeCoin(tokenOut)
                     ? inputAmount
                     : outputAmount
-
+                const amountTokenMin = isNativeCoin(tokenIn)
+                    ? mulNumberWithDecimal(
+                        calcSlippageAmount(outputAmount, slippage)[0],
+                        tokenOut.decimals,
+                    )
+                    : mulNumberWithDecimal(
+                        calcSlippageAmount(inputAmount, slippage)[0],
+                        tokenIn.decimals,
+                    )
                 let value = isNativeCoin(tokenIn)
                     ? mulNumberWithDecimal(inputAmount, tokenIn.decimals)
                     : mulNumberWithDecimal(outputAmount, tokenOut.decimals)
                 value = isEthTxn ? value : '0'
+
                 let valueMin = isNativeCoin(tokenIn)
                     ? mulNumberWithDecimal(
                           calcSlippageAmount(inputAmount, slippage)[0],
@@ -159,13 +169,12 @@ const Swap = () => {
                           calcSlippageAmount(outputAmount, slippage)[0],
                           tokenOut.decimals,
                       )
-                valueMin = isEthTxn ? value : '0'
 
                 const args = isEthTxn
                     ? [
                           token.address,
                           mulNumberWithDecimal(amountToken, token.decimals),
-                          mulNumberWithDecimal(amountToken, token.decimals), //
+                          amountTokenMin, //
                           valueMin,
                           account,
                           (new Date().getTime() / 1000 + 1000).toFixed(0),
@@ -188,6 +197,7 @@ const Swap = () => {
                           (new Date().getTime() / 1000 + 1000).toFixed(0),
                           refAddress || ZeroAddress,
                       ]
+
                 const gasLimit = await routerContract?.estimateGas?.[method]?.(
                     ...args,
                     { value },
@@ -342,8 +352,6 @@ const Swap = () => {
         }
     }, [outputAmount, tokenIn, tokenOut])
 
-    console.log({ pair })
-
     const AddButton = () => {
         const balanceIn = useCurrencyBalance(account, tokenIn)
         const balanceOut = useCurrencyBalance(account, tokenOut)
@@ -359,10 +367,6 @@ const Swap = () => {
             (Number(balanceIn) < Number(inputAmount) ||
                 Number(balanceOut) < Number(outputAmount))
 
-        console.log({
-            allowIn: tokenInApproval?.allowance,
-            allowOut: tokenOutApproval?.allowance,
-        })
         return (
             <Row>
                 {isNotConnected ? (
@@ -457,10 +461,13 @@ const Swap = () => {
                         field={Field.OUTPUT}
                     />
                 </Columns>
-                <PoolPriceBar
-                    dropDown={poolPriceBarOpen}
-                    setDropDown={setPoolPriceBarOpen}
-                />
+                {
+                    pair && <PoolPriceBar
+                                dropDown={poolPriceBarOpen}
+                                setDropDown={setPoolPriceBarOpen}
+                                pair={pair}
+                            />
+                }
                 <AddButton />
                 <Referral>
                     <span>Referral:</span>

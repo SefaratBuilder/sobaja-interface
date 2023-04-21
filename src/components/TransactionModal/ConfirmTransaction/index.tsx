@@ -96,11 +96,7 @@ const Container = styled.div`
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
-    background: linear-gradient(
-        to top right,
-        rgba(0, 28, 44, 0.3),
-        rgba(0, 28, 44, 0.3)
-    );
+    background-color: #00000073;
     box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
     max-width: 500px;
     width: 100%;
@@ -108,6 +104,7 @@ const Container = styled.div`
     backdrop-filter: blur(40px);
     @media screen and (max-width: 576px) {
         max-width: 400px;
+        width: 90%;
         padding: 20px 20px;
     }
     @media screen and (max-width: 390px) {
