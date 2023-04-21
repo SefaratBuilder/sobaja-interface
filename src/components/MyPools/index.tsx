@@ -40,11 +40,7 @@ const MyPools = () => {
     const routerContract = useRouterContract()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
-    const { deadline } = useAppState()
-    const ref = useRef()
-
-    useOnClickOutside(ref, () => setModalRemovePool(false))
-    
+    const { deadline } = useAppState()    
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(
         account,
@@ -376,7 +372,7 @@ const MyPools = () => {
                 )}
                 {modalRemovePool && (
                     <ModalRemovePool>
-                        <WrapRemovePool ref={ref}>
+                        <WrapRemovePool>
                             <WrapTitle>
                                 <Title>Remove</Title>
                                 <BtnClose
