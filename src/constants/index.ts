@@ -34,7 +34,7 @@ export const WRAPPED_NATIVE_COIN: { [chainId in number]: Token } = {
     [ChainId.GOERLI]: {
         address: WRAPPED_NATIVE_ADDRESSES[ChainId.GOERLI],
         symbol: 'ETH',
-        chainId: 324,
+        chainId: ChainId.GOERLI,
         name: 'Ethereum',
         logoURI: ETH_LOGO,
         decimals: 18,
@@ -42,7 +42,7 @@ export const WRAPPED_NATIVE_COIN: { [chainId in number]: Token } = {
     [ChainId.MUMBAI]: {
         address: WRAPPED_NATIVE_ADDRESSES[ChainId.MUMBAI],
         symbol: 'MATIC',
-        chainId: 324,
+        chainId: ChainId.MUMBAI,
         name: 'Polygon',
         logoURI: MATIC_LOGO,
         decimals: 18,
@@ -50,7 +50,7 @@ export const WRAPPED_NATIVE_COIN: { [chainId in number]: Token } = {
     [ChainId.ZKMAINNET]: {
         address: WRAPPED_NATIVE_ADDRESSES[ChainId.ZKMAINNET],
         symbol: 'ETH',
-        chainId: 324,
+        chainId: ChainId.ZKMAINNET,
         name: 'Ethereum',
         logoURI: ETH_LOGO,
         decimals: 18,
@@ -58,7 +58,7 @@ export const WRAPPED_NATIVE_COIN: { [chainId in number]: Token } = {
     [ChainId.ZKTESTNET]: {
         address: WRAPPED_NATIVE_ADDRESSES[ChainId.ZKTESTNET],
         symbol: 'ETH',
-        chainId: 324,
+        chainId: ChainId.ZKTESTNET,
         name: 'Ethereum',
         logoURI: ETH_LOGO,
         decimals: 18,

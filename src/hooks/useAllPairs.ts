@@ -174,7 +174,6 @@ export function usePair(
         'totalSupply',
         [],
     )
-
     const reservesResult = useMultipleContractSingleData(
         [lpAddress],
         PAIR_INTERFACE,

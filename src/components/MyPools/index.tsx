@@ -1,4 +1,4 @@
-import React, { useState, Fragment, useMemo, useCallback } from 'react'
+import React, { useState, Fragment, useMemo, useCallback, useRef } from 'react'
 import styled from 'styled-components'
 import { useMyPosition, useTokensUrl } from 'hooks/useAllPairs'
 import UnknowToken from 'assets/icons/question-mark-button-dark.svg'
@@ -25,6 +25,7 @@ import { useTransactionHandler } from 'states/transactions/hooks'
 import { Row } from 'components/Layouts'
 import { ZeroAddress } from 'ethers'
 import { sendEvent } from 'utils/analytics'
+import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 
 const MyPools = () => {
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
@@ -40,14 +41,16 @@ const MyPools = () => {
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
     const { deadline } = useAppState()
+    const ref = useRef()
 
+    useOnClickOutside(ref, () => setModalRemovePool(false))
+    
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(
         account,
         routerAddress,
         poolRemove?.tokenLp,
     )
-
     const isInsufficientAllowance = useMemo(
         () =>
             Number(tokenApproval?.allowance) <
@@ -255,7 +258,7 @@ const MyPools = () => {
             initDataTransaction.setIsOpenResultModal(true)
         }
     }, [initDataTransaction])
-    console.log({ position })
+
     return (
         <>
             <ComponentsTransaction
@@ -373,7 +376,7 @@ const MyPools = () => {
                 )}
                 {modalRemovePool && (
                     <ModalRemovePool>
-                        <WrapRemovePool>
+                        <WrapRemovePool ref={ref}>
                             <WrapTitle>
                                 <Title>Remove</Title>
                                 <BtnClose

@@ -5,6 +5,12 @@ import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { ChainId, Token } from 'interfaces'
 import { add, div, divNumberWithDecimal, mul, sub } from './math'
+import { WRAPPED_NATIVE_COIN } from 'constants/index'
+
+export function convertNativeToWrappedToken(token: Token, chainId: number): Token {
+    if (isNativeCoin(token)) return WRAPPED_NATIVE_COIN[chainId]
+    return token
+}
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {
@@ -82,9 +88,8 @@ export function getEtherscanLink(
     data: string,
     type: 'transaction' | 'token' | 'address' | 'block',
 ): string {
-    const prefix = `https://${
-        ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[ChainId.ZKMAINNET]
-    }`
+    const prefix = `https://${ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[ChainId.ZKMAINNET]
+        }`
 
     switch (type) {
         case 'transaction': {
