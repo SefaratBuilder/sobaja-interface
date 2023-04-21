@@ -571,11 +571,7 @@ const SwapContainer = styled(Columns)`
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
-    background: linear-gradient(
-        to top right,
-        rgba(0, 28, 44, 0.3),
-        rgba(0, 28, 44, 0.3)
-    );
+    background-color: #00000073;
     gap: 15px;
     @media (max-width: 500px) {
         width: 90%;

@@ -4,6 +4,7 @@ import ConfirmTransactionModal from './ConfirmTransaction'
 import WaitingTransactionModal from './WaitingTransaction'
 import ResultTransactionModal from './ResultTransaction'
 import { useTransactionHandler } from 'states/transactions/hooks'
+import styled from 'styled-components'
 
 export interface CompTransaction {
     payload: any
@@ -85,7 +86,7 @@ const ComponentsTransaction = ({ data, onConfirm }: Data) => {
     // // }, [data])
 
     return (
-        <>
+        <Container>
             {data.isOpenConfirmModal && (
                 <ConfirmTransactionModal
                     setConfirmTransaction={data.setIsOpenConfirmModal}
@@ -115,8 +116,9 @@ const ComponentsTransaction = ({ data, onConfirm }: Data) => {
                 // txnHash={data.TransactionHash}
                 />
             )}
-        </>
+        </Container>
     )
 }
 
+const Container = styled.div``
 export default ComponentsTransaction
