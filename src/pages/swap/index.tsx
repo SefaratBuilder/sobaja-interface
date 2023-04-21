@@ -66,8 +66,6 @@ const Swap = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
     }
 
-    const [setting, setSetting] = useState(false)
-
     const SwapButton = () => {
         const isNotConnected = !account
         const unSupportedNetwork =
@@ -174,7 +172,7 @@ const SwapContainer = styled(Columns)`
         rgba(0, 28, 44, 0.3)
     );
     gap: 15px;
-    @media screen and (max-width: 767px) {
+    @media screen and (max-width: 520px) {
         margin: 0 20px;
     }
 `

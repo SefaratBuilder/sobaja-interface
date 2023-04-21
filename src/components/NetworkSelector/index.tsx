@@ -18,9 +18,9 @@ const NetworkSelector = () => {
     const ref = useRef<any>()
     // const { address, network, wallet } = useActiveWeb3React()
     const listNetwork = [
-        { name: 'Ethereum', logo: LogoETH, className: 'button-eth', url: '' },
-        { name: 'BNB Chain', logo: LogoBNB, className: 'button-bnb', url: '' },
-        { name: 'Mainet', logo: LogoERA, className: 'button-era', url: '' },
+        { name: 'Ethereum', logo: LogoETH, className: 'button-eth'},
+        { name: 'BNB Chain', logo: LogoBNB, className: 'button-bnb'},
+        { name: 'Mainet', logo: LogoERA, className: 'button-era',},
         { name: 'Testnet', logo: LogoERA, className: 'button-era', url: '' },
     ]
 
@@ -52,7 +52,7 @@ const NetworkSelector = () => {
     })
 
     const handleSetNetwork = (idx: number) => {
-        setActiveDot(0)
+        setActiveDot(1)
     }
 
     return (

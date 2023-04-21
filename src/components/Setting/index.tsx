@@ -229,7 +229,20 @@ const Container = styled.div`
         z-index: 3;
     }
     @media screen and (max-width: 375px) {
-        width: 310px;
+        width: 335px;
+        left: -67px;
+    }
+    @media screen and (min-width: 376px) and (max-width: 399px) {
+        width: 335px;
+        left: -80px;
+    }
+    @media screen and (min-width: 400px) and (max-width: 439px) {
+        width: 335px;
+        left: -90px;
+    }
+    @media screen and (min-width: 440px) and (max-width: 480px) {
+        width: 335px;
+        left: -110px;
     }
 `
 

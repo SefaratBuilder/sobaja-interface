@@ -27,7 +27,7 @@ const Header = () => {
                 <NetworkSelector />
                 <Web3Status />
                 <WrapperNavigator onClick={() => setBurgerNav((i) => !i)}>
-                    {!burgerNav ? 'O' : 'X'}
+                    {!burgerNav ? <img src="images/icon-menu.svg" alt="" /> : 'X'}
                 </WrapperNavigator>
             </Connector>
         </HeaderWrapper>
