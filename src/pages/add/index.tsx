@@ -100,7 +100,7 @@ const Swap = () => {
         console.log({ hostname: window.location.hostname })
 
         if (account) {
-            window.navigator.clipboard
+            navigator.clipboard
                 .writeText(
                     // window.location.href
                     `https://app.sobajaswap.com/#/swap?

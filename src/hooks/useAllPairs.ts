@@ -248,8 +248,6 @@ export const useMyPosition = () => {
     const lpTokens = mapPairs?.map((i: any) => i?.tokenLp)
     const tokenList: Array<string> = []
     const balances = useTokenBalances(account, lpTokens)
-    // const balances = useTokenBalances('0x998f5d682a11dAEA3Adf8cd4D3cC6EC73405c770', lpTokens)
-    console.log({ balances, mapPairs })
     const lpBalancesUser = Object.entries(balances)
         .map((i) => {
             if (i?.[1] && Number(i?.[1]) > 0) {
@@ -314,7 +312,7 @@ export const useMyPosition = () => {
             }
         })
         .filter((i) => i)
-    console.log({ lpBalancesUser, balances, allPairs })
+    // console.log({ lpBalancesUser, balances, allPairs })
 
     return useMemo(() => {
         return {
