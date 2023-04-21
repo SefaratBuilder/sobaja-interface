@@ -11,6 +11,7 @@ import imgDownArrow from 'assets/icons/arrow-down.svg'
 import imgPlusWallet from 'assets/icons/plus-wallet.svg'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
+import iconSetting from 'assets/icons/setting.svg'
 
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -20,28 +21,27 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account, library, chainId } = useActiveWeb3React()
-    const ref = useRef<any>(false)
+    const { account, deactivate } = useActiveWeb3React()
+
     const [isCopied, setIsCopied] = useState<boolean>(false)
+
     const balance = account && useETHBalances([account])?.[account]
 
-    useOnClickOutside(ref, () => {
-        setToggleWalletModal(false)
-    })
-
     const handleCopyAddress = () => {
-        if (account && navigator.clipboard) {
-            navigator.clipboard.writeText(account.toString()).then(() => {
-                setIsCopied(true)
-                setTimeout(() => {
-                    setIsCopied(false)
-                }, 1000)
-            })
+        if (account) {
+            window.navigator.clipboard
+                .writeText(account.toString())
+                .then(() => {
+                    setIsCopied(true)
+                    setTimeout(() => {
+                        setIsCopied(false)
+                    }, 1000)
+                })
         }
     }
 
     return (
-        <WrapConnectModal isConnected={true} ref={ref}>
+        <WrapConnectModal isConnected={true}>
             <Header>
                 <WrapAccountInfo>
                     <ImgAccount src="https://picsum.photos/50/50" />
@@ -64,9 +64,14 @@ const AccountDetails = ({
                             </Tooltip>
                         </CopyBtn>
                     )}
+
+                    <button onClick={() => openOptions()}>
+                        <img src={iconSetting} alt="#" />
+                    </button>
                     <button
                         onClick={() => {
-                            openOptions()
+                            deactivate()
+                            setToggleWalletModal(false)
                         }}
                     >
                         <img src={imgPower} alt="#" />
@@ -257,7 +262,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     transform: translateY(-50%);
     margin: auto;
     transition: all 0.1s ease-in-out;
-    z-index: ${({ isConnected }) => (isConnected ? 3 : -1)};
+    z-index: 999999;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
     color: ${({ theme }) => theme.text1};
@@ -272,7 +277,6 @@ const Container = styled.div<{ isConnected: boolean }>`
 const WrapBlur = styled.div`
     div {
         opacity: 0;
-        z-index: -1;
     }
     &.active {
         div {
@@ -296,14 +300,14 @@ const Header = styled.div`
         cursor: pointer;
         color: ${({ theme }) => theme.text1};
     }
-    ::before {
+    /* ::before {
         content: '';
         position: absolute;
         right: -10px;
         width: 50%;
         height: 35px;
         top: -62px;
-    }
+    } */
     @media screen and (max-width: 390px) {
         padding: 0.5rem 1rem;
     }
@@ -394,27 +398,7 @@ const Item = styled.div<{ isChecked: boolean }>`
         width: 45%;
     }
 `
-const ItemContent = styled.button`
-    font-family: 'Montserrat', sans-serif !important;
-    background: none;
-    border: none;
-    color: ${({ theme }) => theme.text1};
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
 
-    img {
-        height: 50px;
-        width: 50px;
-        object-fit: contain;
-    }
-    span {
-        font-size: 11.5px;
-        color: white;
-    }
-`
 const Footer = styled.div`
     display: flex;
     flex-direction: column;
@@ -512,20 +496,21 @@ const RowTransaction = styled.div`
 const WrapConnectModal = styled(Container)`
     max-width: 350px;
     left: unset;
-    right: 10px;
-    top: 67px;
+    right: 20px;
+    top: 90px;
     transform: unset;
     margin: unset;
     overflow: unset;
-    @media screen and (max-width: 1200px) {
-        right: 70px;
-    }
-    @media screen and (max-width: 576px) {
-        left: 50%;
-        right: unset;
+    @media screen and (max-width: 1100px) {
+        right: 10px;
         top: unset;
-        bottom: unset;
-        transform: translateX(-50%);
+        bottom: 60px;
+    }
+    @media screen and (max-width: 391px) {
+        width: 90%;
+        margin: auto;
+        right: 10px;
+        max-width: 300px;
     }
 `
 

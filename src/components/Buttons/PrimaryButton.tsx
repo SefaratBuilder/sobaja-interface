@@ -35,7 +35,7 @@ const PrimaryButton = ({
 
 export default PrimaryButton
 
-export const Button = styled.button<{ height: any; color: any }>`
+export const Button = styled.button<{ height?: any; color?: any }>`
     display: flex;
     align-items: center;
     justify-content: center;
@@ -50,6 +50,7 @@ export const Button = styled.button<{ height: any; color: any }>`
             : 'linear-gradient(87.2deg, #00B2FF 2.69%, #003655 98.02%);'};
     font-size: 1rem;
     font-style: italic;
+    font-family: 'Roboto', sans-serif;
     font-weight: 300;
     letter-spacing: 0.3;
     cursor: ${({ disabled }) => (disabled ? 'no-drop' : 'pointer')};
@@ -58,5 +59,9 @@ export const Button = styled.button<{ height: any; color: any }>`
 
     :hover {
         opacity: 0.8;
+    }
+
+    @media screen and (max-width: 576px) {
+        font-size: 0.8rem;
     }
 `

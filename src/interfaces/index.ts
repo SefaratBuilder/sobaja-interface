@@ -13,3 +13,10 @@ export interface Token {
 }
 
 export type TokenList = Token[]
+
+export enum ChainId {
+    ZKMAINNET = 324,
+    ZKTESTNET = 280,
+    GOERLI = 5,
+    MUMBAI = 80001,
+}

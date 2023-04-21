@@ -3,7 +3,8 @@ import { getAddress } from '@ethersproject/address'
 import { AddressZero } from '@ethersproject/constants'
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
 import { BigNumber } from '@ethersproject/bignumber'
-import { ChainId } from 'constants/index'
+import { ChainId, Token } from 'interfaces'
+import { add, div, divNumberWithDecimal, mul, sub } from './math'
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {
@@ -12,6 +13,18 @@ export function isAddress(value: any): string | false {
     } catch {
         return false
     }
+}
+
+//gas limit + 1000
+export function computeGasLimit(gas: BigNumber | undefined) {
+    if (!gas) return
+    return gas.add(1000)
+}
+
+//is native coin
+export function isNativeCoin(token: Token | undefined) {
+    if (!token) return
+    return token.address === AddressZero
 }
 
 // shorten the checksummed version of the input address to have 0x + 4 characters at start and end
@@ -88,4 +101,23 @@ export function getEtherscanLink(
             return `${prefix}/address/${data}`
         }
     }
+}
+
+//current time + deadline second
+export function calcTransactionDeadline(deadline: number) {
+    return (new Date().getTime() / 1000 + deadline).toFixed()
+}
+
+export const calcSlippageAmount = (
+    amount: string | number,
+    slippage: string | number,
+): [string, string] => {
+    if (Number(slippage) < 0 || Number(slippage) > 100) {
+        throw new Error(`Please input properly slippage amount`)
+    }
+
+    const amountOut = mul(amount, sub(1, div(slippage, 100)))
+    const amountIn = div(amount, sub(1, div(slippage, 100)))
+
+    return [amountOut, amountIn]
 }

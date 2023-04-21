@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
-import Transaction from 'components/Setting'
 import Bridge from 'components/Bridge'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
 import { Field, Token } from 'interfaces'
@@ -13,28 +12,77 @@ import LabelButton from 'components/Buttons/LabelButton'
 import SwapIcon from 'assets/icons/swap-icon.svg'
 import { useActiveWeb3React } from 'hooks'
 import { usePair, usePairAddressesByIds } from 'hooks/useAllPairs'
-import HeaderLiquidity from 'components/HeaderLiquidity'
+import Setting from 'components/HeaderLiquidity'
 import { useToken, useTokenApproval } from 'hooks/useToken'
 import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
-import { ALL_SUPPORTED_CHAIN_IDS } from 'constants/index'
-import { ROUTERS } from 'constants/addresses'
-import { FixedNumber } from 'ethers'
+import { shortenAddress } from 'utils'
+
+import {
+    ALL_SUPPORTED_CHAIN_IDS,
+    URLSCAN_BY_CHAINID,
+    WRAPPED_NATIVE_COIN,
+} from 'constants/index'
+import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
+import { FixedNumber, ZeroAddress } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
+import {
+    useFactoryContract,
+    usePairContract,
+    useRouterContract,
+} from 'hooks/useContract'
+import {
+    calcSlippageAmount,
+    calcTransactionDeadline,
+    computeGasLimit,
+    isNativeCoin,
+} from 'utils'
+import {
+    useAppState,
+    useSlippageTolerance,
+    useTransactionDeadline,
+    useUpdateRefAddress,
+} from 'states/application/hooks'
+import { useTransactionHandler } from 'states/transactions/hooks'
+import ComponentsTransaction, {
+    InitCompTransaction,
+} from 'components/TransactionModal'
+import ToastMessage from 'components/ToastMessage'
+import { AddressZero } from '@ethersproject/constants'
+import { getContractAddress } from '@ethersproject/address'
+import imgCopy from 'assets/icons/copy.svg'
+import imgCheckMark from 'assets/icons/check-mark.svg'
+import { sendEvent } from 'utils/analytics'
 
 const Swap = () => {
     const swapState = useSwapState()
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
+    const [isCopied, setIsCopied] = useState(false)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
     const { chainId, library, account } = useActiveWeb3React()
+    const { refAddress } = useAppState()
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
     const pair = usePair(chainId, tokenIn, tokenOut)
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
     const balanceIn = useCurrencyBalance(account, tokenIn)
+    const routerContract = useRouterContract()
+    const { deadline } = useTransactionDeadline()
+    const { addTxn } = useTransactionHandler()
+    const initDataTransaction = InitCompTransaction()
+    const loca = useLocation()
+    const { slippage } = useSlippageTolerance()
+
+    const updateRef = useUpdateRefAddress()
+
+    useEffect(() => {
+        if (loca.search && loca.search.includes('?')) {
+            updateRef(loca.search.slice(1))
+        }
+    }, [loca])
 
     const handleOnUserInput = useCallback(
         (field: Field, value: string) => {
@@ -50,33 +98,336 @@ const Swap = () => {
         [onTokenSelection, swapState],
     )
 
-    const handleOnSwap = () => {}
+    const handleCopyAddress = () => {
+        console.log({ href: window.location.href })
+        console.log({ hostname: window.location.hostname })
+
+        if (account) {
+            window.navigator.clipboard
+                .writeText(
+                    // window.location.href
+                    `https://app.sobajaswap.com/#/swap?
+                        ${account}`,
+                )
+                .then(() => {
+                    setIsCopied(true)
+                    setTimeout(() => {
+                        setIsCopied(false)
+                    }, 1000)
+                })
+        }
+    }
+
+    const getSwapMethod = () => {
+        if (swapType === Field.INPUT) {
+            if (isNativeCoin(tokenIn)) return 'swapExactETHForTokens'
+            else if (isNativeCoin(tokenOut)) return 'swapExactTokensForETH'
+            else return 'swapExactTokensForTokens'
+        } else {
+            if (isNativeCoin(tokenOut)) return 'swapTokensForExactETH'
+            else if (isNativeCoin(tokenIn)) return 'swapETHForExactTokens'
+            else return 'swapTokensForExactTokens'
+        }
+    }
+
+    const getSwapArguments = () => {
+        if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
+            return
+        const amountIn = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
+        const amountOut = mulNumberWithDecimal(outputAmount, tokenOut.decimals)
+        const amountOutMin = mulNumberWithDecimal(
+            calcSlippageAmount(outputAmount, slippage)[0],
+            tokenOut.decimals,
+        )
+        const amountInMax = mulNumberWithDecimal(
+            calcSlippageAmount(inputAmount, slippage)[1],
+            tokenIn.decimals,
+        )
+        if (swapType === Field.INPUT) {
+            if (isNativeCoin(tokenIn))
+                return {
+                    args: [
+                        amountOutMin, //amountOutMin
+                        [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
+                        account,
+                        calcTransactionDeadline(deadline),
+                    ],
+                    value: amountIn, //amountIn
+                }
+            else if (isNativeCoin(tokenOut))
+                return {
+                    args: [
+                        amountIn, //amountIn
+                        amountOutMin, //amountOutMin
+                        [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
+                        account,
+                        calcTransactionDeadline(deadline),
+                    ],
+                    value: '0x00',
+                }
+            else
+                return {
+                    args: [
+                        amountIn, //amountIn
+                        amountOutMin, //amountOutMin
+                        [tokenIn.address, tokenOut.address],
+                        account,
+                        calcTransactionDeadline(deadline),
+                    ],
+                    value: '0x00',
+                }
+        } else {
+            if (isNativeCoin(tokenOut))
+                return {
+                    args: [
+                        amountOut, //amountOut
+                        amountInMax, //amountInMax
+                        [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
+                        account,
+                        calcTransactionDeadline(deadline),
+                    ],
+                    value: '0x00',
+                }
+            else if (isNativeCoin(tokenIn))
+                return {
+                    args: [
+                        amountOut, //amountOut
+                        [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
+                        account,
+                        calcTransactionDeadline(deadline),
+                    ],
+                    value: amountInMax, //amountInMax
+                }
+            else
+                return {
+                    args: [
+                        amountOut, //amountOut
+                        amountInMax, //amountInMax
+                        [tokenIn.address, tokenOut.address],
+                        account,
+                        calcTransactionDeadline(deadline),
+                    ],
+                    value: '0x00',
+                }
+        }
+    }
+
+    const handleOnSwap = async () => {
+        try {
+            if (inputAmount && outputAmount && tokenIn && tokenOut) {
+                console.log('swaping...')
+                initDataTransaction.setError('')
+                initDataTransaction.setPayload({
+                    method: 'swap',
+                    input: inputAmount,
+                    output: outputAmount,
+                    tokenIn,
+                    tokenOut,
+                })
+                initDataTransaction.setIsOpenConfirmModal(true)
+            }
+        } catch (error) {
+            console.log('failed to swap', error)
+        }
+    }
 
     const handleOnApprove = async () => {
         try {
+            initDataTransaction.setError('')
+
             if (tokenIn && inputAmount && routerAddress) {
-                await tokenApproval?.approve(routerAddress, 1)
+                console.log('approving....')
+                initDataTransaction.setIsOpenWaitingModal(true)
+                const callResult: any = await tokenApproval?.approve(
+                    routerAddress,
+                    mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                )
+
+                initDataTransaction.setIsOpenWaitingModal(false)
+                initDataTransaction.setIsOpenResultModal(true)
+
+                const txn = await callResult.wait()
+                initDataTransaction.setIsOpenResultModal(false)
+
+                addTxn({
+                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                        callResult.hash || ''
+                    }`,
+                    // hash: tx?.hash || '',
+                    msg: 'Approve',
+                    status: txn.status === 1 ? true : false,
+                })
             }
         } catch (err) {
             console.log('Failed to approve token: ', err)
+            initDataTransaction.setError('Failed')
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
         }
     }
+
+    const onConfirm = useCallback(async () => {
+        try {
+            initDataTransaction.setIsOpenConfirmModal(false)
+            initDataTransaction.setIsOpenWaitingModal(true)
+
+            const method = getSwapMethod()
+            const swapArguments = getSwapArguments()
+            if (!swapArguments) {
+                initDataTransaction.setError('Failed')
+                initDataTransaction.setIsOpenWaitingModal(false)
+                return initDataTransaction.setIsOpenResultModal(true)
+            }
+            const { args, value } = swapArguments
+
+            const referralAddress = refAddress || ZeroAddress
+            const newArgs = [...args, referralAddress]
+            console.log('🤦‍♂️ ⟹ args:', newArgs)
+
+            const gasLimit = await routerContract?.estimateGas[method](
+                ...newArgs,
+                {
+                    value,
+                },
+            )
+            console.log('🤦‍♂️ ⟹ onConfirm ⟹ gasLimit:', gasLimit)
+            const callResult = await routerContract?.[method](...newArgs, {
+                value,
+                gasLimit: computeGasLimit(gasLimit),
+            })
+
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
+
+            console.log('🤦‍♂️ ⟹ handleOnSwap ⟹ callResult:', { callResult })
+            sendEvent({
+                category: 'Defi',
+                action: 'Swap',
+                label: [
+                    tokenIn?.symbol,
+                    tokenIn?.address,
+                    tokenOut?.symbol,
+                    tokenOut?.address,
+                ].join('/'),
+            })
+
+            const txn = await callResult.wait()
+            initDataTransaction.setIsOpenResultModal(false)
+
+            addTxn({
+                hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                    callResult.hash || ''
+                }`,
+                // hash: tx?.hash || '',
+                msg: 'Swap',
+                status: txn.status === 1 ? true : false,
+            })
+        } catch (error) {
+            console.log('🤦‍♂️ ⟹ onConfirm ⟹ error:', error)
+            // initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setError('Failed')
+            initDataTransaction.setIsOpenResultModal(true)
+        }
+    }, [initDataTransaction])
 
     const openWalletModal = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
     }
 
+    useEffect(() => {
+        if (
+            inputAmount &&
+            pair &&
+            tokenIn &&
+            tokenOut &&
+            swapType === Field.INPUT &&
+            chainId
+        ) {
+            const amountInWithDel = mulNumberWithDecimal(
+                inputAmount,
+                tokenIn.decimals,
+            )
+            const tI = isNativeCoin(tokenIn)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenIn
+            const tO = isNativeCoin(tokenOut)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenOut
+            const swapRate = pair?.calcSwapRate(
+                amountInWithDel,
+                tI,
+                tO,
+                Field.INPUT,
+            )
+            if (isNaN(Number(swapRate))) {
+                onChangeSwapState({
+                    ...swapState,
+                    outputAmount: '',
+                })
+            } else {
+                onChangeSwapState({
+                    ...swapState,
+                    outputAmount: swapRate,
+                })
+            }
+            return
+        }
+        return () => {}
+    }, [inputAmount, chainId])
+
+    useEffect(() => {
+        if (
+            outputAmount &&
+            pair &&
+            tokenIn &&
+            tokenOut &&
+            swapType === Field.OUTPUT &&
+            chainId
+        ) {
+            const amountOutWithDel = mulNumberWithDecimal(
+                outputAmount,
+                tokenOut.decimals,
+            )
+            const tI = isNativeCoin(tokenIn)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenIn
+            const tO = isNativeCoin(tokenOut)
+                ? WRAPPED_NATIVE_COIN[chainId]
+                : tokenOut
+            const swapRate = pair?.calcSwapRate(
+                amountOutWithDel,
+                tI,
+                tO,
+                Field.OUTPUT,
+            )
+            console.log({ swapRate })
+            if (isNaN(Number(swapRate))) {
+                onChangeSwapState({
+                    ...swapState,
+                    inputAmount: '',
+                })
+            } else {
+                onChangeSwapState({
+                    ...swapState,
+                    inputAmount: swapRate,
+                })
+            }
+        }
+        return () => {}
+    }, [outputAmount, chainId])
+
     const SwapButton = () => {
         const isNotConnected = !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
-        const isUndefinedAmount = !inputAmount || !outputAmount
-        const isInffuficientLiquidity = !pair
+        const isUndefinedAmount = !inputAmount && !outputAmount
+        const isInffuficientLiquidity = !pair || Number(inputAmount) < 0
         const isUndefinedCurrencies = !tokenIn || !tokenOut
         const isInsufficientBalance =
             inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
         const isInsufficientAllowance =
-            Number(tokenApproval?.allowance) < Number(inputAmount)
+            Number(tokenApproval?.allowance) < Number(inputAmount) &&
+            !isNativeCoin(tokenIn)
 
         return (
             <Row>
@@ -93,76 +444,130 @@ const Swap = () => {
                     <LabelButton name="Enter an amount" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
+                ) : isInffuficientLiquidity ? (
+                    <LabelButton name="Insufficient Liquidity" />
                 ) : isInsufficientAllowance ? (
                     <PrimaryButton
                         name={`Approve ${tokenIn?.symbol}`}
                         onClick={handleOnApprove}
                     />
-                ) : isInffuficientLiquidity ? (
-                    <LabelButton name="Insufficient Liquidity" />
                 ) : (
                     <PrimaryButton
                         onClick={() => handleOnSwap()}
                         name={'Swap'}
                     />
                 )}
+                {/* <PrimaryButton
+                        onClick={() => mintLp()}
+                        name={'Mint lp'}
+                /> */}
+                {/* <PrimaryButton
+                        onClick={() => create()}
+                        name={'Create pair'}
+                /> */}
             </Row>
         )
     }
 
     return (
-        <SwapContainer>
-            {!account && isOpenWalletModal && (
-                <WalletModal setToggleWalletModal={openWalletModal} />
-            )}
-            <Row jus="space-between">
-                <Row gap="20px">
-                    <Link to="/swap">Swap</Link>
-                    <Link to="/add">Add</Link>
-                    <Link to="/pools">Pool</Link>
-                </Row>
-                {/* <Transaction /> */}
-                <HeaderLiquidity name="Swap" />
-            </Row>
-            {/* <Bridge /> */}
-            <Columns>
-                <CurrencyInputPanel
-                    token={tokenIn}
-                    value={inputAmount}
-                    onUserInput={handleOnUserInput}
-                    onUserSelect={handleOnTokenSelection}
-                    field={Field.INPUT}
-                />
-                <Icon>
-                    <img src={SwapIcon} alt="icon" onClick={onSwitchTokens} />
-                </Icon>
-                <CurrencyInputPanel
-                    token={tokenOut}
-                    value={outputAmount}
-                    onUserInput={handleOnUserInput}
-                    onUserSelect={handleOnTokenSelection}
-                    field={Field.OUTPUT}
-                />
-            </Columns>
-            <PoolPriceBar
-                dropDown={poolPriceBarOpen}
-                setDropDown={setPoolPriceBarOpen}
+        <>
+            <ComponentsTransaction
+                data={initDataTransaction}
+                onConfirm={
+                    Number(tokenApproval?.allowance) < Number(inputAmount) &&
+                    !isNativeCoin(tokenIn)
+                        ? handleOnApprove
+                        : onConfirm
+                }
             />
-            <SwapButton />
-        </SwapContainer>
+            <ToastMessage />
+            <SwapContainer>
+                {!account && isOpenWalletModal && (
+                    <WalletModal setToggleWalletModal={openWalletModal} />
+                )}
+                <Row jus="space-between">
+                    <Nav gap="20px">
+                        <Link to="/swap" className="active-link">
+                            Swap
+                        </Link>
+                        {/* <Link to="/add">Add</Link> */}
+                        {/* <Link to="/pools">Pool</Link> */}
+                        <Link to="/limit">Limit</Link>
+                    </Nav>
+                    <Setting />
+                </Row>
+                <Bridge />
+                <Columns>
+                    <CurrencyInputPanel
+                        token={tokenIn}
+                        value={inputAmount}
+                        onUserInput={handleOnUserInput}
+                        onUserSelect={handleOnTokenSelection}
+                        field={Field.INPUT}
+                    />
+                    <Icon>
+                        <img
+                            src={SwapIcon}
+                            alt="icon"
+                            onClick={onSwitchTokens}
+                        />
+                    </Icon>
+                    <CurrencyInputPanel
+                        token={tokenOut}
+                        value={outputAmount}
+                        onUserInput={handleOnUserInput}
+                        onUserSelect={handleOnTokenSelection}
+                        field={Field.OUTPUT}
+                        hideMaxButton={true}
+                    />
+                </Columns>
+                {pair && (
+                    <PoolPriceBar
+                        pair={pair}
+                        dropDown={poolPriceBarOpen}
+                        setDropDown={setPoolPriceBarOpen}
+                    />
+                )}
+                <SwapButton />
+                {/* <SwapButton /> */}
+                <Referral>
+                    <span>Referral:</span>
+                    <p>
+                        https://app.sobajaswap.com/#/swap?
+                        {account && shortenAddress(account, 6)}
+                    </p>
+                    {/* <span>
+                        <img src={imgCopy} alt="" />
+                    </span> */}
+                    <span>
+                        {isCopied ? (
+                            <CopyBtn>
+                                <CopyAccountAddress src={imgCheckMark} />
+                                <Tooltip className="tooltip">Copied</Tooltip>
+                            </CopyBtn>
+                        ) : (
+                            <CopyBtn>
+                                <CopyAccountAddress
+                                    onClick={() => handleCopyAddress()}
+                                    src={imgCopy}
+                                />
+                                <Tooltip className="tooltip">
+                                    Click to copy address
+                                </Tooltip>
+                            </CopyBtn>
+                        )}
+                    </span>
+                </Referral>
+            </SwapContainer>
+        </>
     )
 }
 
 const SwapContainer = styled(Columns)`
-    position: absolute;
-    top: 100px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: 0 auto;
+    margin: 0 auto 40px;
     height: fit-content;
-    max-width: 480px;
-    background: #130f0f;
+    max-width: 520px;
+    background: var(--bg5) !important;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
@@ -172,11 +577,75 @@ const SwapContainer = styled(Columns)`
         rgba(0, 28, 44, 0.3)
     );
     gap: 15px;
-    @media screen and (max-width: 520px) {
-        margin: 0 20px;
+    @media (max-width: 500px) {
+        width: 90%;
     }
 `
 
+const Referral = styled.div`
+    display: grid;
+    grid-template-columns: 54px 1fr 12px;
+    font-size: 14px;
+    span {
+        color: rgba(0, 255, 163, 1);
+    }
+    p {
+        opacity: 0.5;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: center;
+    }
+    img {
+        cursor: pointer;
+    }
+`
+
+const CopyBtn = styled.div`
+    position: relative;
+    :hover .tooltip {
+        transition: all 0.1s ease-in-out;
+        opacity: 1;
+        visibility: visible;
+    }
+`
+const Tooltip = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    width: 100px;
+    height: 30px;
+    font-size: 12px;
+    right: -45px;
+    text-align: center;
+    border: 1px solid;
+    border-radius: 6px;
+    background: rgba(157, 195, 230, 0.1);
+    backdrop-filter: blur(3px);
+`
+
+const Nav = styled(Row)`
+    a {
+        padding: 5px 8px;
+        border-radius: 4px;
+        text-decoration: none !important;
+        :hover {
+            text-decoration: none !important;
+        }
+    }
+
+    .active-link {
+        background: var(--bg6);
+    }
+`
+
+const CopyAccountAddress = styled.img`
+    height: 12px;
+    cursor: pointer;
+`
 const Icon = styled.div`
     width: 35px;
     height: 35px;

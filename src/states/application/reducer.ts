@@ -6,6 +6,7 @@ import {
     updateTransactionDeadline,
     updateApplicationState,
     toggleDarkMode,
+    updateRefAddress,
 } from './actions'
 
 export interface ApplicationState {
@@ -28,7 +29,7 @@ const initialState: ApplicationState = {
     },
     isAgreePolicy: false,
     slippage: '0.3', //%
-    deadline: 0.5, //ms,
+    deadline: 1200, //default 20m,
     isUpdateApplication: false,
     userDarkMode: false,
     refAddress: undefined,
@@ -61,5 +62,8 @@ export default createReducer(initialState, (builder) => {
         })
         .addCase(toggleDarkMode, (state, action) => {
             state.userDarkMode = action.payload
+        })
+        .addCase(updateRefAddress, (state, action) => {
+            state.refAddress = action.payload
         })
 })

@@ -2,18 +2,35 @@ import { Token, TokenList } from '../../interfaces'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppState } from '../index'
 import { ListState } from './reducer'
-import { updateCurrentList, addTokenToCurrentList } from './actions'
+import { updateCurrentList } from './actions'
+import { useActiveWeb3React } from 'hooks'
 
-export function useTokenList(): ListState {
-    return useSelector((state: AppState) => state.lists)
+export function useTokenList(): TokenList {
+    const { chainId } = useActiveWeb3React()
+    return useSelector((state: AppState) =>
+        chainId ? state.lists.currentList[chainId] : [],
+    )
 }
 
 export function useUpdateCurrentList() {
     const dispatch = useDispatch()
-    return (tokenList: TokenList) => dispatch(updateCurrentList(tokenList))
+    const { chainId } = useActiveWeb3React()
+    return (newList: TokenList) =>
+        chainId && dispatch(updateCurrentList({ chainId, newList }))
 }
 
 export function useAddTokenToCurrentList() {
     const dispatch = useDispatch()
-    return (token: Token) => dispatch(addTokenToCurrentList(token))
+    const { chainId } = useActiveWeb3React()
+    const currentList = useTokenList()
+
+    return (newToken: Token) => {
+        chainId &&
+            dispatch(
+                updateCurrentList({
+                    chainId,
+                    newList: [...currentList, newToken],
+                }),
+            )
+    }
 }

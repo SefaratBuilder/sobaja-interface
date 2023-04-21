@@ -4,6 +4,7 @@ const { calculator } = JSBI
 
 export const fixNum = (number: number | string): string => {
     const checkStr: any = number.toString()
+
     if (checkStr.includes('-') && !checkStr.includes('e')) {
         const a = checkStr
             .toLocaleString('fullwide', { useGrouping: false })
@@ -44,6 +45,7 @@ export const mul = (numberA: any, numberB: any) => {
 }
 
 export const div = (numberA: any, numberB: any) => {
+    if (numberB == 0 || !numberB) return 0
     const data = fixNum(numberA) + '/' + fixNum(numberB)
     return calculator(data)
 }
@@ -61,25 +63,26 @@ export const sub = (numberA: any, numberB: any) => {
 export const divNumberWithDecimal = (
     n: number | string,
     decimals: number,
-): number => {
-    return Number(div(n, 10 ** decimals))
+): string => {
+    return fixNum(div(n, 10 ** decimals))
 }
 
 export const mulNumberWithDecimal = (
     n: number | string,
     decimals: number,
-): number => {
+): string => {
+    if (!n) return '0'
     if (n?.toString().includes('.')) {
         if (n.toString().split('.')[1].length >= decimals) {
             const a = n.toString().split('.')
-            return Number(a[0] + a[1].slice(0, decimals))
+            return fixNum(a[0] + a[1].slice(0, decimals))
         } else {
             const diff = decimals - n.toString().split('.')[1].length
             let zero = ''
             for (let i = 0; i < diff; i++) zero += '0'
-            return Number(n.toString().replaceAll('.', '') + zero)
+            return fixNum(n.toString().replaceAll('.', '') + zero)
         }
     } else {
-        return Number(n) * Number(`1e${decimals}`)
+        return fixNum(mul(n, 10 ** decimals))
     }
 }

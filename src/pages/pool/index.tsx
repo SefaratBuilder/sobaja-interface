@@ -31,8 +31,12 @@ import SearchIcon from 'assets/icons/search.svg'
 import PairTokens from 'components/LogoToken/PairTokens'
 import imgDownArrowWhite from 'assets/icons/chevron-white.svg'
 import arrowDown from 'assets/icons/arrowDown.svg'
+import { useNavigate } from 'react-router-dom'
+import MyPools from 'components/MyPools'
+import ToastMessage from 'components/ToastMessage'
+import Pagination from 'components/Pagination'
 
-interface Data {
+export interface PoolData {
     name: string
     volume: string
     tvl: string
@@ -48,7 +52,7 @@ function createData(
     volume: string,
     fee: string,
     apr: string,
-): Data {
+): PoolData {
     return {
         network,
         name,
@@ -96,6 +100,11 @@ const rows = [
         '10%',
     ),
     createData('Ethereum', 'USDC/UNI', '$66.66m', '$100.99k', '$66.66k', '10%'),
+    createData('Ethereum', 'DAI/USDC', '$66.66m', '$100.99k', '$66.66k', '10%'),
+    createData('Ethereum', 'USDT/DAI', '$66.66m', '$100.99k', '$66.66k', '10%'),
+    createData('Ethereum', 'DAI/ETH', '$66.66m', '$100.99k', '$66.66k', '10%'),
+    createData('Ethereum', 'AVA/USDC', '$66.66m', '$100.99k', '$66.66k', '10%'),
+    createData('Ethereum', 'BNB/USDC', '$66.66m', '$100.99k', '$66.66k', '10%'),
 ]
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -138,7 +147,7 @@ function stableSort<T>(
 
 interface HeadCell {
     disablePadding: boolean
-    id: keyof Data
+    id: keyof PoolData
     label: string
     numeric: boolean
 }
@@ -188,7 +197,10 @@ const DEFAULT_ROWS_PER_PAGE = 10
 
 interface EnhancedTableProps {
     numSelected: number
-    onRequestSort: (event: MouseEvent<unknown>, newOrderBy: keyof Data) => void
+    onRequestSort: (
+        event: MouseEvent<unknown>,
+        newOrderBy: keyof PoolData,
+    ) => void
     onSelectAllClick: (event: ChangeEvent<HTMLInputElement>) => void
     order: Order
     orderBy: string
@@ -198,7 +210,11 @@ interface EnhancedTableProps {
 function EnhancedTableHead(props: EnhancedTableProps) {
     const { order, orderBy } = props
     return (
-        <TableHead>
+        <TableHead
+        // className="black-bg"
+        >
+            <TableRow style={{ height: 5 }}></TableRow>
+
             <TableRow>
                 {headCells.map((headCell, index) => (
                     <HeadTable
@@ -215,9 +231,10 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                         sx={{
                             color: 'white',
                             borderBottom: 'none',
-                            borderTop: 1,
+                            // borderTop: 1,
                             borderColor: '#ffffff4c',
                         }}
+                        className="black-bg"
                     >
                         {headCell.label}{' '}
                         {index === 2 && (
@@ -226,17 +243,20 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                     </HeadTable>
                 ))}
             </TableRow>
+            <TableRow style={{ height: 5 }}></TableRow>
         </TableHead>
     )
 }
 
 function EnhancedTableToolbar() {
+    const navigate = useNavigate()
     return (
         <Typography
             sx={{ flex: '1 1 100%' }}
             variant="h6"
             id="tableTitle"
             component="div"
+            className="black-bg"
         >
             <HeadTitle>
                 <div>
@@ -246,7 +266,12 @@ function EnhancedTableToolbar() {
                     </div>
                 </div>
                 <div className="new-position">
-                    <PrimaryButton name="+ New Position" />
+                    <PrimaryButton
+                        name="+ New Position"
+                        onClick={() => {
+                            navigate('/add')
+                        }}
+                    />
                 </div>
             </HeadTitle>
         </Typography>
@@ -255,24 +280,29 @@ function EnhancedTableToolbar() {
 
 export default function Pools() {
     const [order, setOrder] = useState<Order>(DEFAULT_ORDER)
-    const [orderBy, setOrderBy] = useState<keyof Data>(DEFAULT_ORDER_BY)
+    const [orderBy, setOrderBy] = useState<keyof PoolData>(DEFAULT_ORDER_BY)
     const [selected, setSelected] = useState<readonly string[]>([])
     const [page, setPage] = useState(0)
     const [dense, setDense] = useState(false)
-    const [visibleRows, setVisibleRows] = useState<Data[] | null>(null)
+    const [visibleRows, setVisibleRows] = useState<PoolData[] | null>(null)
     const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE)
-    const [paddingHeight, setPaddingHeight] = useState(0)
+
+    const [poolsAdminInCurrentPag, setPoolsAdminInCurrentPag] =
+        useState(visibleRows)
+    // const [paddingHeight, setPaddingHeight] = useState(0)
+
     const [searchName, setSearchName] = useState('')
+    const [isMyPositionPage, setIsMyPositionPage] = useState(false)
 
     useEffect(() => {
         let rowsOnMount = stableSort(
             rows,
             getComparator(DEFAULT_ORDER, DEFAULT_ORDER_BY),
         )
-        rowsOnMount = rowsOnMount.slice(
-            0 * DEFAULT_ROWS_PER_PAGE,
-            0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE,
-        )
+        // rowsOnMount = rowsOnMount.slice(
+        //     0 * DEFAULT_ROWS_PER_PAGE,
+        //     0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE,
+        // )
 
         setVisibleRows(rowsOnMount)
     }, [])
@@ -300,7 +330,7 @@ export default function Pools() {
     }
 
     const handleRequestSort = useCallback(
-        (event: MouseEvent<unknown>, newOrderBy: keyof Data) => {
+        (event: MouseEvent<unknown>, newOrderBy: keyof PoolData) => {
             const isAsc = orderBy === newOrderBy && order === 'asc'
             const toggledOrder = isAsc ? 'desc' : 'asc'
             setOrder(toggledOrder)
@@ -331,138 +361,184 @@ export default function Pools() {
     const isSelected = (name: string) => selected.indexOf(name) !== -1
 
     return (
-        <Container>
-            <Box
-                sx={{
-                    backgroundColor: 'transparent',
-                    color: 'white',
-                    paddingTop: '80px',
-                }}
-            >
-                <EnhancedTableToolbar />
+        <>
+            <ToastMessage />
+            <Container>
+                <CustomizeBox
+                    sx={{
+                        backgroundColor: 'transparent',
+                        color: 'white',
+                        paddingTop: '15px',
+                    }}
+                >
+                    <EnhancedTableToolbar />
 
-                <HeadLabel>
-                    <HeadLabelLeft>
-                        <div className="title-pool">
-                            <PrimaryButton
-                                name="Pools"
-                                height="35px"
-                                color="rgba(0, 178, 255, 1)"
-                            />
-                        </div>
-                        <div>My Positions</div>
-                        <div className="circle">0</div>
-                    </HeadLabelLeft>
-                    <HeadLabelRight>
-                        <InputSearchModal>
-                            <img src={SearchIcon} alt="" />
-                            <input
-                                type="text"
-                                placeholder="Search"
-                                onChange={(e) => handleOnSearch(e)}
-                            />
-                        </InputSearchModal>
-                        <NetworkButton>
-                            <p>Networks</p>
-                            <img src={imgDownArrowWhite} alt="" />
-                        </NetworkButton>
-                    </HeadLabelRight>
-                </HeadLabel>
+                    <HeadLabel className="black-bg">
+                        <HeadLabelLeft>
+                            <div className="title-pool">
+                                <PrimaryButton
+                                    name="Pools"
+                                    height="35px"
+                                    color={
+                                        !isMyPositionPage
+                                            ? 'rgba(0, 178, 255, 1)'
+                                            : 'none'
+                                    }
+                                    onClick={() => setIsMyPositionPage(false)}
+                                />
+                            </div>
+                            <div>
+                                <PrimaryButton
+                                    name="My positions"
+                                    height="35px"
+                                    color={
+                                        isMyPositionPage
+                                            ? 'rgba(0, 178, 255, 1)'
+                                            : 'none'
+                                    }
+                                    onClick={() => setIsMyPositionPage(true)}
+                                />
+                            </div>
+                            <div className="circle">0</div>
+                        </HeadLabelLeft>
+                        {!isMyPositionPage && (
+                            <HeadLabelRight>
+                                <InputSearchModal>
+                                    <img src={SearchIcon} alt="" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search"
+                                        onChange={(e) => handleOnSearch(e)}
+                                    />
+                                </InputSearchModal>
+                            </HeadLabelRight>
+                        )}
+                    </HeadLabel>
+                    {!isMyPositionPage && (
+                        <TableContainer>
+                            <Table
+                                sx={{ minWidth: 650 }}
+                                aria-labelledby="tableTitle"
+                                size={dense ? 'small' : 'medium'}
+                            >
+                                <EnhancedTableHead
+                                    numSelected={selected.length}
+                                    order={order}
+                                    orderBy={orderBy}
+                                    onSelectAllClick={handleSelectAllClick}
+                                    onRequestSort={handleRequestSort}
+                                    rowCount={rows.length}
+                                />
+                                <TableBody>
+                                    {poolsAdminInCurrentPag
+                                        ? poolsAdminInCurrentPag.map(
+                                              (row, index) => {
+                                                  const isItemSelected =
+                                                      isSelected(row.name)
+                                                  const labelId = `enhanced-table-checkbox-${index}`
 
-                <TableContainer>
-                    <Table
-                        sx={{ minWidth: 650 }}
-                        aria-labelledby="tableTitle"
-                        size={dense ? 'small' : 'medium'}
-                    >
-                        <EnhancedTableHead
-                            numSelected={selected.length}
-                            order={order}
-                            orderBy={orderBy}
-                            onSelectAllClick={handleSelectAllClick}
-                            onRequestSort={handleRequestSort}
-                            rowCount={rows.length}
-                        />
-                        <TableBody>
-                            {visibleRows
-                                ? visibleRows.map((row, index) => {
-                                      const isItemSelected = isSelected(
-                                          row.name,
-                                      )
-                                      const labelId = `enhanced-table-checkbox-${index}`
+                                                  return (
+                                                      <>
+                                                          <RowTable
+                                                              role="checkbox"
+                                                              aria-checked={
+                                                                  isItemSelected
+                                                              }
+                                                              tabIndex={-1}
+                                                              key={index}
+                                                              selected={
+                                                                  isItemSelected
+                                                              }
+                                                              sx={{
+                                                                  cursor: 'pointer',
+                                                              }}
+                                                          >
+                                                              <CellTable
+                                                                  component="th"
+                                                                  id={labelId}
+                                                                  scope="row"
+                                                                  padding="normal"
+                                                                  sx={{
+                                                                      width: '100px',
+                                                                  }}
+                                                                  align="center"
+                                                              >
+                                                                  <img
+                                                                      className="network"
+                                                                      src={
+                                                                          LogoETH
+                                                                      }
+                                                                      alt=""
+                                                                  />
+                                                              </CellTable>
+                                                              <CellTable align="center">
+                                                                  <div className="label">
+                                                                      <PairTokens
+                                                                          tokenA={
+                                                                              Logos?.[
+                                                                                  row.name.split(
+                                                                                      '/',
+                                                                                  )?.[0]
+                                                                              ]
+                                                                          }
+                                                                          tokenB={
+                                                                              Logos?.[
+                                                                                  row.name.split(
+                                                                                      '/',
+                                                                                  )?.[1]
+                                                                              ]
+                                                                          }
+                                                                      />
+                                                                      <div className="name">
+                                                                          {
+                                                                              row.name
+                                                                          }
+                                                                      </div>
+                                                                      <Badge>
+                                                                          0.30%
+                                                                      </Badge>
+                                                                  </div>
+                                                              </CellTable>
+                                                              <CellTable align="right">
+                                                                  {row.tvl}
+                                                              </CellTable>
+                                                              <CellTable align="right">
+                                                                  {row.volume}
+                                                              </CellTable>
+                                                              <CellTable align="right">
+                                                                  {row.fee}
+                                                              </CellTable>
+                                                              <CellTable align="right">
+                                                                  {row.apr}
+                                                              </CellTable>
+                                                          </RowTable>
+                                                          <TableRow
+                                                              style={{
+                                                                  height: 5,
+                                                              }}
+                                                          ></TableRow>
+                                                      </>
+                                                  )
+                                              },
+                                          )
+                                        : null}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
 
-                                      return (
-                                          <RowTable
-                                              role="checkbox"
-                                              aria-checked={isItemSelected}
-                                              tabIndex={-1}
-                                              key={index}
-                                              selected={isItemSelected}
-                                              sx={{
-                                                  cursor: 'pointer',
-                                              }}
-                                          >
-                                              <CellTable
-                                                  component="th"
-                                                  id={labelId}
-                                                  scope="row"
-                                                  padding="none"
-                                                  sx={{
-                                                      width: '100px',
-                                                  }}
-                                                  align="center"
-                                              >
-                                                  <img
-                                                      className="network"
-                                                      src={LogoETH}
-                                                      alt=""
-                                                  />
-                                              </CellTable>
-                                              <CellTable align="center">
-                                                  <div className="label">
-                                                      <PairTokens
-                                                          tokenA={
-                                                              Logos?.[
-                                                                  row.name.split(
-                                                                      '/',
-                                                                  )?.[0]
-                                                              ]
-                                                          }
-                                                          tokenB={
-                                                              Logos?.[
-                                                                  row.name.split(
-                                                                      '/',
-                                                                  )?.[1]
-                                                              ]
-                                                          }
-                                                      />
-                                                      <div className="name">
-                                                          {row.name}
-                                                      </div>
-                                                      <Badge>30%</Badge>
-                                                  </div>
-                                              </CellTable>
-                                              <CellTable align="right">
-                                                  {row.tvl}
-                                              </CellTable>
-                                              <CellTable align="right">
-                                                  {row.volume}
-                                              </CellTable>
-                                              <CellTable align="right">
-                                                  {row.fee}
-                                              </CellTable>
-                                              <CellTable align="right">
-                                                  {row.apr}
-                                              </CellTable>
-                                          </RowTable>
-                                      )
-                                  })
-                                : null}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Box>
-        </Container>
+                    {isMyPositionPage && <MyPools />}
+                </CustomizeBox>
+                {visibleRows && visibleRows.length > 0 && (
+                    <Pagination
+                        data={visibleRows}
+                        currentPage={1}
+                        setPoolsData={setPoolsAdminInCurrentPag}
+                        limitNumber={10}
+                    />
+                )}
+            </Container>
+        </>
     )
 }
 
@@ -477,16 +553,27 @@ const Container = styled.div`
     height: fit-content;
     font-size: 16px !important;
     color: white;
-    font-family: 'Montserrat', sans-serif !important;
     font-style: italic;
     font-weight: 300;
     overflow: hidden;
+    margin-bottom: 50px;
+
+    .black-bg {
+        background: rgba(0, 0, 0, 0.3) !important;
+    }
+`
+
+const CustomizeBox = styled(Box)`
+    @media screen and (max-width: 576px) {
+        padding: 0 !important;
+    }
 `
 
 const HeadTitle = styled.div`
     display: flex;
     justify-content: space-between;
     gap: 20px;
+    padding: 20px;
 
     @media screen and (max-width: 576px) {
         flex-direction: column;
@@ -494,19 +581,24 @@ const HeadTitle = styled.div`
     }
 
     .title {
-        font-family: 'Montserrat';
         font-style: italic;
         font-weight: 600;
         font-size: 50px;
         line-height: 61px;
+        @media screen and (max-width: 576px) {
+            font-size: 30px;
+        }
     }
 
     .details {
-        font-family: 'Montserrat';
         font-style: italic;
         font-weight: 500;
         font-size: 20px;
         line-height: 24px;
+
+        @media screen and (max-width: 576px) {
+            font-size: 16px;
+        }
     }
 
     .new-position {
@@ -518,8 +610,9 @@ const HeadTitle = styled.div`
 const HeadLabel = styled.div`
     display: flex;
     justify-content: space-between;
-    padding: 35px 0 21px 0;
+    padding: 35px 20px 21px;
     gap: 25px;
+    /* padding: 20px; */
 
     @media screen and (max-width: 992px) {
         flex-direction: column;
@@ -531,6 +624,8 @@ const HeadLabel = styled.div`
 `
 
 const RowTable = styled(TableRow)`
+    /* background: rgba(0, 0, 0, 0.3) !important; */
+
     :hover {
         background: rgb(255 255 255 / 39%);
     }
@@ -576,7 +671,7 @@ const HeadLabelRight = styled.div`
 const HeadTable = styled(TableCell)`
     font-size: 16px !important;
     padding-left: 15px !important;
-    font-family: 'Montserrat', sans-serif !important;
+    /* font-family: 'Roboto', sans-serif !important; */
     display: flex;
 
     justify-content: center;
@@ -584,6 +679,10 @@ const HeadTable = styled(TableCell)`
 
     img {
         width: 12px;
+    }
+
+    @media screen and (max-width: 576px) {
+        font-size: 12px !important;
     }
 `
 
@@ -593,8 +692,13 @@ const CellTable = styled(TableCell)`
     border: none !important;
     font-size: 16px !important;
     color: white;
-    padding: 10px 15px 0 0 !important;
-    font-family: 'Montserrat', sans-serif !important;
+    /* padding: 15px 15px 0 0 !important; */
+    font-family: 'Roboto', sans-serif !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+
+    @media screen and (max-width: 576px) {
+        font-size: 12px !important;
+    }
 
     .label {
         display: flex;
@@ -629,12 +733,10 @@ const InputSearchModal = styled.div`
     input {
         max-width: 100% !important;
         width: 100%;
-        font-size: 18px !important;
         background: rgba(0, 0, 0, 0);
         border: none;
         outline: none;
         color: #c9c9c9;
-        font-family: 'Montserrat';
         font-style: italic;
         font-weight: 500;
         font-size: 18px;
@@ -645,6 +747,14 @@ const InputSearchModal = styled.div`
         width: 14px;
         height: 14px;
         opacity: 0.4;
+    }
+
+    @media screen and (max-width: 576px) {
+        /* padding: 2px 10px; */
+
+        input {
+            font-size: 12px;
+        }
     }
 `
 
@@ -670,17 +780,21 @@ const NetworkButton = styled.div`
     }
 
     p {
-        font-size: 18px !important;
-        font-family: 'Montserrat';
         font-style: italic;
         font-weight: 500;
         color: #c9c9c9;
     }
+
+    @media screen and (max-width: 576px) {
+        font-size: 12px;
+        padding: 0 15px;
+    }
 `
 
 const Badge = styled.div`
-    background: rgba(217, 217, 217, 0.3);
+    background: #e2ebf0;
     border-radius: 5px;
     padding: 3px 5px;
     font-size: 12px;
+    color: rgba(136, 136, 136, 1);
 `

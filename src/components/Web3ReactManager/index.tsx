@@ -29,6 +29,7 @@ export default function Web3ReactManager({
         error: networkError,
         activate: activateNetwork,
     } = useWeb3React('NETWORK')
+
     // try to eagerly connect to an injected provider, if it exists and has granted access already
     const triedEager = useEagerConnect()
 
@@ -77,7 +78,7 @@ export default function Web3ReactManager({
     if (!active && !networkActive) {
         return showLoader ? (
             <MessageWrapper>
-                <span>Loading ........</span>
+                <span>Loading...</span>
             </MessageWrapper>
         ) : null
     }

@@ -43,7 +43,6 @@ const SelectTokenButton = ({
 export default SelectTokenButton
 
 const Button = styled.button`
-    font-family: 'Montserrat', sans-serif;
     font-style: italic;
     display: flex;
     align-items: center;

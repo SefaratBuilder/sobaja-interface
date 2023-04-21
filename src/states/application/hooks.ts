@@ -7,9 +7,11 @@ import {
     updateTransactionDeadline,
     updateApplicationState,
     toggleDarkMode,
+    updateRefAddress,
 } from './actions'
+import { ApplicationState } from './reducer'
 
-export function useAppState() {
+export function useAppState(): ApplicationState {
     return useSelector((state: AppState) => state.application)
 }
 
@@ -55,4 +57,10 @@ export function useBlockNumber(): number | undefined {
     return useSelector(
         (state: AppState) => state.application.blockNumber[chainId ?? -1],
     )
+}
+
+export const useUpdateRefAddress = () => {
+    const dispatch = useDispatch()
+    // const { refAddress } = useAppState();
+    return (ref: string | undefined) => dispatch(updateRefAddress(ref))
 }
