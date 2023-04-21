@@ -1,12 +1,12 @@
 // import { IPool, Pool } from 'constants/interface'
-import { PoolData } from 'pages/pool'
+import { PoolData, PoolDataMobile } from 'pages/pool'
 import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import ArrowLeft from 'assets/icons/pagination-arrow-left.svg'
 import ArrowRight from 'assets/icons/pagination-arrow-right.svg'
 
 export interface Paginations {
-    data: PoolData[]
+    data: PoolData[] | PoolDataMobile[]
     currentPage: number
     // setPoolsData: React.Dispatch<React.SetStateAction<PoolData[]>>
     setPoolsData: any

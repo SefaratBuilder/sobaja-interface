@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import PrimaryButton, { Button } from 'components/Buttons/PrimaryButton'
 import styled from 'styled-components'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
@@ -17,14 +17,20 @@ const Faucet = () => {
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
     const { chainId } = useActiveWeb3React()
+    const isDisable = useMemo(
+        () => (chainId && chainId != 280) || false,
+        [chainId],
+    )
 
     useOnClickOutside(ref, () => {
         setIsDisplayFaucet(false)
     })
 
-    const clickFaucetToken = (erc20: string) => {
+    const clickFaucetToken = async (erc20: string) => {
         if (faucetContract == null) return
-        faucetContract?.requestTokens(erc20)
+        const fc = await faucetContract?.requestTokens(erc20)
+        console.log('🤦‍♂️ ⟹ clickFaucetToken ⟹ fc:', fc)
+
         sendEvent({
             category: 'Defi',
             action: 'Faucet',
@@ -33,13 +39,18 @@ const Faucet = () => {
     }
 
     const showMintCoins = () => {
+        console.log({ isDisable })
+
         if (tokenList && tokenList.length > 0) {
             return tokenList.map((item) => {
                 if (item.type == 'faucet' && item.chainId == 280) {
                     return (
                         <MintCoinButton
                             key={item.address}
-                            onClick={() => clickFaucetToken(item.address)}
+                            onClick={() => {
+                                chainId == 280 && clickFaucetToken(item.address)
+                            }}
+                            isDisable={isDisable}
                         >
                             <Icon
                                 src={
@@ -109,7 +120,7 @@ const Icon = styled.img`
     border-radius: 50%;
 `
 
-const MintCoinButton = styled.button`
+const MintCoinButton = styled.button<{ isDisable: boolean }>`
     gap: 5px;
     align-items: center;
     display: flex;
@@ -125,7 +136,7 @@ const MintCoinButton = styled.button`
     color: ${({ theme }) => theme.text1};
     border: none;
     border-radius: 12px;
-    cursor: pointer;
+    cursor: ${({ isDisable }) => (isDisable ? 'not-allowed' : 'pointer')};
     :hover {
         opacity: 0.7;
     }
