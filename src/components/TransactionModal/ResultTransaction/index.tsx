@@ -84,6 +84,7 @@ const Container = styled.div`
     width: 100%;
     padding: 20px 30px;
     backdrop-filter: blur(40px);
+    z-index: 999;
 
     @media screen and (max-width: 576px) {
         width: 90%;
