@@ -3,10 +3,8 @@ import styled from 'styled-components'
 import { Link, useLocation } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
 import Setting from 'components/HeaderLiquidity'
-import Bridge from 'components/Bridge'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
 import { Field, Token } from 'interfaces'
-import { useSwapActionHandlers, useSwapState } from 'states/swap/hooks'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import LabelButton from 'components/Buttons/LabelButton'
 import PlusIcon from 'assets/icons/plus.svg'
@@ -19,12 +17,11 @@ import {
     ZERO_ADDESS,
 } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
-import { ZeroAddress, ethers } from 'ethers'
+import { ZeroAddress } from 'ethers'
 import { useFactoryContract, useRouterContract } from 'hooks/useContract'
 import { useActiveWeb3React } from 'hooks'
 import { mulNumberWithDecimal } from 'utils/math'
 import { usePair } from 'hooks/useAllPairs'
-import { FixedNumber } from '@ethersproject/bignumber'
 import { calcSlippageAmount, isNativeCoin, shortenAddress } from 'utils'
 import WalletModal from 'components/WalletModal'
 import { InitCompTransaction } from 'components/TransactionModal'
@@ -41,18 +38,18 @@ import {
 import imgCopy from 'assets/icons/copy.svg'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import { sendEvent } from 'utils/analytics'
-import { Pair } from 'utils/pair'
+import { useMintActionHandlers, useMintState } from 'states/mint/hooks'
 
-const Swap = () => {
-    const swapState = useSwapState()
+const Add = () => {
+    const mintState = useMintState()
     const router = useRouterContract()
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
     const [isCopied, setIsCopied] = useState(false)
 
-    const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } = swapState
-    const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
-        useSwapActionHandlers()
+    const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } = mintState
+    const { onUserInput, onTokenSelection, onChangeMintState } =
+        useMintActionHandlers()
     const { account, chainId } = useActiveWeb3React()
     const routerContract = useRouterContract()
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
@@ -87,14 +84,14 @@ const Swap = () => {
         (field: Field, value: string) => {
             onUserInput(field, value)
         },
-        [onUserInput, swapState],
+        [onUserInput, mintState],
     )
 
     const handleOnTokenSelection = useCallback(
         (field: Field, token: Token) => {
             onTokenSelection(field, token)
         },
-        [onTokenSelection, swapState],
+        [onTokenSelection, mintState],
     )
     const handleCopyAddress = () => {
         console.log({ href: window.location.href })
@@ -309,8 +306,8 @@ const Swap = () => {
                 tO,
                 Field.INPUT,
             )
-            onChangeSwapState({
-                ...swapState,
+            onChangeMintState({
+                ...mintState,
                 outputAmount: addRate,
             })
         }
@@ -345,8 +342,8 @@ const Swap = () => {
                 Field.OUTPUT,
             )
             console.log({ addRate })
-            onChangeSwapState({
-                ...swapState,
+            onChangeMintState({
+                ...mintState,
                 inputAmount: addRate,
             })
         }
@@ -622,4 +619,4 @@ const BackLink = styled(Link)`
     }
 `
 
-export default Swap
+export default Add
