@@ -7,7 +7,7 @@ import multicall from './multicall/reducer'
 import transactions from './transactions/reducer'
 import mint from './mint/reducer'
 
-const PERSISTED_KEYS: string[] = ['application', 'multicall', 'transactions']
+const PERSISTED_KEYS: string[] = ['application', 'multicall', 'transactions', 'lists']
 
 const store = configureStore({
     reducer: {

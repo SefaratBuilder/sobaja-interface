@@ -177,7 +177,6 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
 					</InterfaceSetting> */}
                 </Wrap>
             </Container>
-            <Blur />
         </>
     )
 }
@@ -225,6 +224,7 @@ const Container = styled.div`
     transform: translateX(-50%);
     opacity: 0;
     transition: all 0.2s linear;
+    z-index: 9999;
     /* z-index: -1; */
     &.active {
         opacity: 1;
