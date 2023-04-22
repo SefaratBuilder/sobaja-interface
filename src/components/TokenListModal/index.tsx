@@ -61,7 +61,6 @@ const TokenListModal = ({
     }
 
     const handleAddToken = (token: Token) => {
-        console.log('aaaa')
         addTokenToCurrentList(token)
         setSearchQuery('')
     }

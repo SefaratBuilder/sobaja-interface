@@ -100,7 +100,7 @@ const Bridge = () => {
                             />
                         </SelectButton>
                     </Row>
-                    <Row gap="10px" jus="space-between">
+                    <Row gap="10px" wrap="wrap">
                         {BridgeUrls.map((item, index) => {
                             return (
                                 <BridgeItem bg={item.bg} key={index}>
@@ -129,10 +129,11 @@ const Bridge = () => {
 }
 
 const BridgeItem = styled.div<{ bg: string }>`
-    max-width: 110px;
+    // max-width: 110px;
     max-height: 110px;
+    max-width: 23%;
     width: 100%;
-    border-radius: 10px;
+    border-radius: 6px;
     padding: 5px;
     background: url(${({ bg }) => bg});
     display: grid;
@@ -179,6 +180,10 @@ const BridgeItem = styled.div<{ bg: string }>`
             width: 6px;
             margin-left: 2px;
         }
+    }
+    @media (max-width: 767px) {
+        max-width: 47%;
+        border-radius: 4px;
     }
 `
 

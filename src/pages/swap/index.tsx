@@ -400,7 +400,7 @@ const Swap = () => {
                 tO,
                 Field.OUTPUT,
             )
-            console.log({ swapRate })
+
             if (isNaN(Number(swapRate))) {
                 onChangeSwapState({
                     ...swapState,
