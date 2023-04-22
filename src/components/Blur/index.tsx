@@ -1,9 +1,10 @@
-import styled from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
 
 const Blur = () => {
     return (
         <>
             <Container />
+            <GlobalStyle />
         </>
     )
 }
@@ -17,7 +18,13 @@ const Container = styled.div`
     left: 0;
     right: 0;
     background-color: rgba(0, 0, 0, 0.424);
-    z-index: 1;
+    z-index: 998;
     transition: all 0.2s linear;
     display: block;
+`
+
+const GlobalStyle = createGlobalStyle`
+    body {
+        overflow: hidden;
+    }
 `

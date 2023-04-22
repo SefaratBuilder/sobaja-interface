@@ -11,6 +11,7 @@ import { useActiveWeb3React } from 'hooks'
 import { Error } from 'components/Text'
 import { Row } from 'components/Layouts'
 import { sendEvent } from 'utils/analytics'
+import Blur from 'components/Blur'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
@@ -109,7 +110,7 @@ const Faucet = () => {
             ) : (
                 ''
             )}
-            {isDislayFaucet ? <OpacityModal></OpacityModal> : ''}
+            {isDislayFaucet ? <Blur /> : ''}
         </>
     )
 }
