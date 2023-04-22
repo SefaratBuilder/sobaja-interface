@@ -54,6 +54,7 @@ import { getContractAddress } from '@ethersproject/address'
 import imgCopy from 'assets/icons/copy.svg'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import { sendEvent } from 'utils/analytics'
+import Blur from 'components/Blur'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -483,7 +484,10 @@ const Swap = () => {
             <ToastMessage />
             <SwapContainer>
                 {!account && isOpenWalletModal && (
-                    <WalletModal setToggleWalletModal={openWalletModal} />
+                    <>
+                        <WalletModal setToggleWalletModal={openWalletModal} />
+                        <Blur />
+                    </>
                 )}
                 <Row jus="space-between">
                     <Nav gap="20px">

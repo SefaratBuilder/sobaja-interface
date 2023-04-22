@@ -462,6 +462,7 @@ const WrapAccountInfo = styled.div`
 const ImgAccount = styled.img`
     height: 20px;
     border-radius: 50%;
+    width: 20px;
 `
 const IdAccount = styled.div``
 const CopyAccountAddress = styled.img`

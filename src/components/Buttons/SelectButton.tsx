@@ -58,6 +58,7 @@ const Button = styled.button`
     background: none;
     font-size: 14px;
     width: 100%;
+    font-family: Roboto;
     cursor: pointer;
     div {
         display: flex;

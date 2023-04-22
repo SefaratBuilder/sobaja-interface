@@ -23,6 +23,7 @@ const Button = styled.button<{ height?: any }>`
     color: white;
     font-size: 1rem;
     font-style: italic;
+    font-family: Roboto;
     font-weight: 300;
 
     &.loading:after {

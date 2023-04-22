@@ -39,6 +39,7 @@ import imgCopy from 'assets/icons/copy.svg'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import { sendEvent } from 'utils/analytics'
 import { useMintActionHandlers, useMintState } from 'states/mint/hooks'
+import Blur from 'components/Blur'
 
 const Add = () => {
     const mintState = useMintState()
@@ -247,7 +248,7 @@ const Add = () => {
                 initDataTransaction.setIsOpenWaitingModal(true)
                 const callResult: any = await approve(
                     routerAddress,
-                    mulNumberWithDecimal(amount, decimals),
+                    mulNumberWithDecimal(amount, decimals), //amount * 10 ** decimals
                 )
                 console.log('🤦‍♂️ ⟹ Add ⟹ callResult:', callResult)
 
@@ -430,7 +431,10 @@ const Add = () => {
             <ToastMessage />
             <SwapContainer>
                 {!account && isOpenWalletModal && (
-                    <WalletModal setToggleWalletModal={openWalletModal} />
+                    <>
+                        <WalletModal setToggleWalletModal={openWalletModal} />
+                        <Blur />
+                    </>
                 )}
                 <Row jus="space-between">
                     <BackLink to="/pools">
