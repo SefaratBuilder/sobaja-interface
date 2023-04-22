@@ -1,7 +1,4 @@
 import Blur from 'components/Blur'
-// import HiddenGlobalScroll from "components/HiddenGlobalScroll"
-// import { Loader } from "components/Loader"
-// import { payloadTxnModal } from "constants/index"
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
