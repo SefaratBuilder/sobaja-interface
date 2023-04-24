@@ -8,7 +8,8 @@ import {
     useTransactionDeadline,
 } from 'states/application/hooks'
 import SwitchButton from 'components/Buttons/SwitchButton'
-
+import { Switch } from '@mui/material'
+import { styled as styledUI } from '@mui/material/styles'
 interface TransactionProps {
     setSetting: React.Dispatch<React.SetStateAction<boolean>>
     setting: boolean
@@ -205,6 +206,7 @@ const Container = styled.div<{ref: any}>`
     transition: all 0.2s linear;
     z-index: 9999;
     /* z-index: -1; */
+
     &.active {
         opacity: 1;
         z-index: 3;
@@ -232,7 +234,10 @@ const Wrap = styled.div`
     padding: 15px;
     // width: 360px;
     // height: 360px;
-    background: var(--bg2);
+    /* background: var(--bg5); */
+
+    background: linear-gradient(180deg, #002033 0%, rgba(0, 38, 60, 0.8) 100%);
+    backdrop-filter: blur(10px);
     border: 1px solid #003b5c;
 
     @media screen and (max-width: 390px) {
@@ -251,7 +256,7 @@ const Title = styled.div`
 const SubTitle = styled.div`
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 10px;
 `
 const GroupButton = styled.div`
     display: flex;

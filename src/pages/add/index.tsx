@@ -146,13 +146,13 @@ const Add = () => {
                     : outputAmount
                 const amountTokenMin = isNativeCoin(tokenIn)
                     ? mulNumberWithDecimal(
-                        calcSlippageAmount(outputAmount, slippage)[0],
-                        tokenOut.decimals,
-                    )
+                          calcSlippageAmount(outputAmount, slippage)[0],
+                          tokenOut.decimals,
+                      )
                     : mulNumberWithDecimal(
-                        calcSlippageAmount(inputAmount, slippage)[0],
-                        tokenIn.decimals,
-                    )
+                          calcSlippageAmount(inputAmount, slippage)[0],
+                          tokenIn.decimals,
+                      )
                 let value = isNativeCoin(tokenIn)
                     ? mulNumberWithDecimal(inputAmount, tokenIn.decimals)
                     : mulNumberWithDecimal(outputAmount, tokenOut.decimals)
@@ -424,10 +424,15 @@ const Add = () => {
 
     return (
         <>
-            <ComponentsTransaction
-                data={initDataTransaction}
-                onConfirm={onConfirm}
-            />
+            <>
+                <ComponentsTransaction
+                    data={initDataTransaction}
+                    onConfirm={onConfirm}
+                />
+                {(initDataTransaction.isOpenConfirmModal ||
+                    initDataTransaction.isOpenResultModal ||
+                    initDataTransaction.isOpenWaitingModal) && <Blur />}
+            </>
             <ToastMessage />
             <SwapContainer>
                 {!account && isOpenWalletModal && (
@@ -462,13 +467,13 @@ const Add = () => {
                         field={Field.OUTPUT}
                     />
                 </Columns>
-                {
-                    pair && <PoolPriceBar
-                                dropDown={poolPriceBarOpen}
-                                setDropDown={setPoolPriceBarOpen}
-                                pair={pair}
-                            />
-                }
+                {pair && (
+                    <PoolPriceBar
+                        dropDown={poolPriceBarOpen}
+                        setDropDown={setPoolPriceBarOpen}
+                        pair={pair}
+                    />
+                )}
                 <AddButton />
                 <Referral>
                     <span>Referral:</span>

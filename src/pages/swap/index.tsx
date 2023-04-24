@@ -456,21 +456,26 @@ const Swap = () => {
 
     return (
         <>
-            <ComponentsTransaction
-                data={initDataTransaction}
-                onConfirm={
-                    Number(tokenApproval?.allowance) < Number(inputAmount) &&
-                    !isNativeCoin(tokenIn)
-                        ? handleOnApprove
-                        : onConfirm
-                }
-            />
+            <>
+                <ComponentsTransaction
+                    data={initDataTransaction}
+                    onConfirm={
+                        Number(tokenApproval?.allowance) <
+                            Number(inputAmount) && !isNativeCoin(tokenIn)
+                            ? handleOnApprove
+                            : onConfirm
+                    }
+                />
+                {(initDataTransaction.isOpenConfirmModal ||
+                    initDataTransaction.isOpenResultModal ||
+                    initDataTransaction.isOpenWaitingModal) && <Blur />}
+            </>
             <ToastMessage />
             <SwapContainer>
                 {!account && isOpenWalletModal && (
                     <>
                         <WalletModal setToggleWalletModal={openWalletModal} />
-                        <Blur />
+                        {/* <Blur /> */}
                     </>
                 )}
                 <Row jus="space-between">
@@ -517,16 +522,22 @@ const Swap = () => {
                     />
                 )}
                 <SwapButton />
-                {/* <SwapButton /> */}
+
+                {/* Test */}
+                {/* <div>
+                    <PrimaryButton
+                        name="TEST"
+                        onClick={() =>
+                            initDataTransaction.setIsOpenWaitingModal(true)
+                        }
+                    />
+                </div> */}
                 <Referral>
                     <span>Referral:</span>
                     <p>
                         https://app.sobajaswap.com/#/swap?
                         {account && shortenAddress(account, 6)}
                     </p>
-                    {/* <span>
-                        <img src={imgCopy} alt="" />
-                    </span> */}
                     <span>
                         {isCopied ? (
                             <CopyBtn>
