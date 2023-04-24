@@ -278,6 +278,14 @@ const MyPools = () => {
         )
         setPositionInCurrentPage(filterData)
     }, [page])
+
+    /*
+     * Update position when account change
+     */
+    useEffect(() => {
+        setPositionInCurrentPage(position?.slice(0, 6))
+    }, [account])
+
     return (
         <>
             <ComponentsTransaction
