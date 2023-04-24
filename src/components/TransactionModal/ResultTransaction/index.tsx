@@ -40,7 +40,7 @@ const ResultTransactionModal = ({
             </Header> */}
             <WrapContent>
                 <WrapInfoLoad>
-                    <div>
+                    <div className={isSuccess ? '' : 'error'}>
                         {isSuccess
                             ? 'Transaction Submitted'
                             : error?.data
@@ -53,7 +53,7 @@ const ResultTransactionModal = ({
                 </WrapImgResult>
             </WrapContent>
             <PrimaryButton
-                type="light-blue"
+                type="modal"
                 name="Close"
                 onClick={() => setOpenModal(false)}
             />
@@ -68,7 +68,6 @@ const Container = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 999;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
@@ -77,7 +76,7 @@ const Container = styled.div`
         rgba(0, 28, 44, 0.3),
         rgba(0, 28, 44, 0.3)
     );
-    background-color: #002033;
+    background-color: #00000073;
 
     box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
     max-width: 500px;
@@ -95,7 +94,7 @@ const Header = styled.div`
     justify-content: flex-end;
 `
 const WrapContent = styled.div`
-    margin-bottom: 30px;
+    /* margin-bottom: 30px; */
 `
 const WrapImgResult = styled.div`
     display: flex;
@@ -113,13 +112,19 @@ const WrapInfoLoad = styled.div`
     justify-content: center;
     align-items: center;
     gap: 10px;
-    div:first-child {
+    font-style: normal;
+    /* div:first-child {
+        font-size: 20px;
+    } */
+    div {
+        color: #34dc81;
         font-size: 20px;
     }
-    div:last-child {
-        color: #ffffffba;
-        font-size: 14px;
+
+    .error {
+        color: #cd3535;
     }
+
     a {
         text-decoration: none;
         color: rgb(1, 104, 255);

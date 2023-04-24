@@ -65,4 +65,13 @@ export const Button = styled.button<{ height?: any; color?: any }>`
     @media screen and (max-width: 576px) {
         font-size: 0.8rem;
     }
+
+    &.modal {
+        background: #00b2ff;
+        width: 85%;
+        margin: auto;
+        span {
+            font-style: normal;
+        }
+    }
 `

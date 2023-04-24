@@ -1,4 +1,11 @@
-import React, { useState, Fragment, useMemo, useCallback, useRef } from 'react'
+import React, {
+    useState,
+    Fragment,
+    useMemo,
+    useCallback,
+    useRef,
+    useEffect,
+} from 'react'
 import styled from 'styled-components'
 import { useMyPosition, useTokensUrl } from 'hooks/useAllPairs'
 import UnknowToken from 'assets/icons/question-mark-button-dark.svg'
@@ -26,11 +33,21 @@ import { Row } from 'components/Layouts'
 import { ZeroAddress } from 'ethers'
 import { sendEvent } from 'utils/analytics'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
+import Pagination from 'components/Pagination'
 
 const MyPools = () => {
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
     const [percentValue, setPercentValue] = useState(0)
     const { position, tokenList } = useMyPosition()
+    const totalPage = position?.length > 0 ? Math.ceil(position?.length / 6) : 1
+    const [page, setPage] = useState(1)
+
+    const [positionInCurrentPage, setPositionInCurrentPage] = useState<
+        typeof position
+    >(position?.slice(0, 6))
+
+    console.log('🤦‍♂️ ⟹ MyPools ⟹ positionInCurrentPage:', positionInCurrentPage)
+
     const [poolRemove, setPoolRemove] = useState<(typeof position)[0]>()
     const navigate = useNavigate()
     const urlTokens = useTokensUrl(tokenList)
@@ -40,7 +57,7 @@ const MyPools = () => {
     const routerContract = useRouterContract()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
-    const { deadline } = useAppState()    
+    const { deadline } = useAppState()
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(
         account,
@@ -255,6 +272,12 @@ const MyPools = () => {
         }
     }, [initDataTransaction])
 
+    useEffect(() => {
+        const filterData = position.filter(
+            (d, index) => index >= (page - 1) * 6 && index < page * 6,
+        )
+        setPositionInCurrentPage(filterData)
+    }, [page])
     return (
         <>
             <ComponentsTransaction
@@ -264,9 +287,9 @@ const MyPools = () => {
             {/* <ToastMessage /> */}
             <WrapMyPools>
                 <RowMyPools>
-                    {position &&
-                        position?.length > 0 &&
-                        position.map((item, index) => {
+                    {positionInCurrentPage &&
+                        positionInCurrentPage?.length > 0 &&
+                        positionInCurrentPage.map((item, index) => {
                             return (
                                 <ColMyPools key={index}>
                                     <WrapContent>
@@ -364,11 +387,18 @@ const MyPools = () => {
                             )
                         })}
                 </RowMyPools>
-                {position.length <= 0 && (
+                {positionInCurrentPage.length <= 0 ? (
                     <Row jus="center">
                         You don't have a liquidity position yet. Try to add new
                         position.
                     </Row>
+                ) : (
+                    <Pagination
+                        page={page}
+                        setPage={setPage}
+                        isSorted={false}
+                        totalPage={totalPage}
+                    />
                 )}
                 {modalRemovePool && (
                     <ModalRemovePool>
@@ -408,9 +438,9 @@ const MyPools = () => {
                                         disabled={false}
                                     />
                                     <DotPercent>
-                                        {arrPrecent.map((item) => {
+                                        {arrPrecent.map((item, index) => {
                                             return (
-                                                <div key={item}>
+                                                <div key={index}>
                                                     <span>
                                                         {item == 100
                                                             ? 'Max'

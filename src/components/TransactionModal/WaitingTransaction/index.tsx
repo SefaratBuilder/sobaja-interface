@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import imgClose from 'assets/icons/x.svg'
 import Loader from 'components/Loader'
+import CustomLoader from 'components/CustomLoader'
 
 interface WaitingTransactionModalProps {
     setModalRemove?: any
@@ -91,7 +92,8 @@ const WaitingTransactionModal = ({
                     <WrapInfoLoad>
                         <div>Waiting For Confirmation</div>
                         <WrapLoader>
-                            <Loader size="42px" />
+                            {/* <Loader size="42px" /> */}
+                            <CustomLoader size="4em" />
                         </WrapLoader>
                         <div>{message}</div>
                         <div>Confirm this transaction in your wallet</div>
@@ -109,7 +111,6 @@ const Container = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 3;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
