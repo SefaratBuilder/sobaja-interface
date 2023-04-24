@@ -577,6 +577,9 @@ const SwapContainer = styled(Columns)`
     padding: 20px 25px;
     background-color: #00000073;
     gap: 15px;
+    position: relative;
+    z-index: 0;
+
     @media (max-width: 500px) {
         width: 90%;
     }

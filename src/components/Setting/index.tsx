@@ -62,12 +62,11 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
     }
 
     const ref = useRef<any>()
-    useOnClickOutside(ref, () => setSetting(false))
 
     return (
         <>
             <Container className={setting ? 'active' : ''}>
-                <Wrap className={setting ? 'active' : ''} ref={ref}>
+                <Wrap>
                     <TransactionSetting>
                         <Title>Settings</Title>
                         <SubTitle>
@@ -154,28 +153,8 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
                             <p> minutes</p>
                         </SubTitle>
                     </TransactionSetting>
-                    {/* <InterfaceSetting>
-						<Title>Interface Settings</Title>
-						<Toggle>
-							<SubTitle>
-								<span>Auto Rounter API</span>
-								<IconQuestion>
-									?<SlippageText>Allow high price impact trades and skip the confirm screen. Use at your own risk.</SlippageText>
-								</IconQuestion>
-							</SubTitle>
-							<SwitchButton active={activeExpertMode} />
-						</Toggle>
-						<Multihop>
-							<SubTitle>
-								<span>Expert Mode</span>
-								<IconQuestion>
-									?<SlippageText>Restricts swaps to direct pairs only.</SlippageText>
-								</IconQuestion>
-							</SubTitle>
-							<SwitchButton active={multihop} />
-						</Multihop>
-					</InterfaceSetting> */}
                 </Wrap>
+                <Blur />
             </Container>
         </>
     )
@@ -214,7 +193,7 @@ const TransactionSetting = styled.div`
     justify-content: center;
     align-items: flex-start;
 `
-const InterfaceSetting = styled(TransactionSetting)``
+
 const Container = styled.div`
     position: absolute;
     /* width: 360px; */
@@ -253,7 +232,7 @@ const Wrap = styled.div`
     padding: 15px;
     // width: 360px;
     // height: 360px;
-    background: var(--bg5);
+    background: var(--bg2);
     border: 1px solid #003b5c;
 
     @media screen and (max-width: 390px) {
