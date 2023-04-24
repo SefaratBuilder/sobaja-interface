@@ -7,62 +7,16 @@ import ArrowRight from 'assets/icons/pagination-arrow-right.svg'
 import { Data } from 'hooks/useQueryPool'
 
 export interface Paginations {
-    data: Data[] | PoolDataMobile[]
-    currentPage: number
-    // setPoolsData: React.Dispatch<React.SetStateAction<PoolData[]>>
-    setPoolsData: any
-    limitNumber: number
+    page: number
+    setPage: any
     isSorted: boolean
-    isMobile: boolean
+    totalPage: number
 }
 
-const Pagination = ({
-    data,
-    currentPage,
-    setPoolsData,
-    limitNumber,
-    isSorted,
-    isMobile,
-}: Paginations) => {
-    const [page, setPage] = useState<number>(currentPage)
-
-    const totalPage = data.length > 0 ? Math.ceil(data.length / limitNumber) : 1
-
-    const handleDataInCurrentPage = () => {
-        if (isMobile) {
-            let filterData = data.filter(
-                (d, index) =>
-                    index >= (page - 1) * limitNumber &&
-                    index < page * limitNumber,
-            )
-
-            filterData = filterData.map((i) => {
-                return {
-                    name: i.name,
-                    volume: i.volume,
-                    apr: i.apr,
-                    tvlValue: i.tvlValue,
-                }
-            })
-            setPoolsData(filterData)
-            return
-        }
-
-        const filterData = data.filter(
-            (d, index) =>
-                index >= (page - 1) * limitNumber && index < page * limitNumber,
-        )
-        setPoolsData(filterData)
-    }
-
+const Pagination = ({ page, setPage, isSorted, totalPage }: Paginations) => {
     useEffect(() => {
         setPage(1)
     }, [isSorted])
-
-    useEffect(() => {
-        handleDataInCurrentPage()
-        // }, [])
-    }, [data, page])
 
     return (
         <Container>
