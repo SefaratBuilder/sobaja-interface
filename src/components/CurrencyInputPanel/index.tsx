@@ -6,6 +6,7 @@ import TokenListModal from 'components/TokenListModal'
 import { Columns } from 'components/Layouts'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { useActiveWeb3React } from 'hooks'
+import { fixNum } from 'utils/math'
 
 interface CurrencyInputPanelProps {
     token: Token | undefined

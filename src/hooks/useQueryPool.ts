@@ -15,7 +15,7 @@ export interface Data {
 
 export const useQueryPool = () => {
     const [poolData, setPoolData] = useState<Data[]>()
-    const APIURL = 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2'
+    const APIURL = 'https://thegraph.com/hosted-service/subgraph/anvospace/s-subajaswap'
 
     // Initialize the Apollo Client
     const client = new ApolloClient({

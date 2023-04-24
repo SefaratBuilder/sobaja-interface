@@ -827,7 +827,6 @@ const HeadLabelRight = styled.div`
 const HeadTable = styled(TableCell)`
     font-size: 16px !important;
     padding-left: 15px !important;
-    /* font-family: 'Roboto', sans-serif !important; */
     display: flex;
 
     justify-content: center;
@@ -852,7 +851,7 @@ const CellTable = styled(TableCell)`
     font-size: 16px !important;
     color: white;
     /* padding: 15px 15px 0 0 !important; */
-    font-family: 'Roboto', sans-serif !important;
+    font-family: Verdana, sans-serif;
     background: rgba(0, 0, 0, 0.3) !important;
     /* display: none; */
 

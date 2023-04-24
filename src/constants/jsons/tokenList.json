@@ -51,7 +51,7 @@
         "address": "0xD22aabc72743F22D52e00A2f7554D9112eBa9F1d",
         "symbol": "SBJ",
         "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "logoURI": "/images/sbj.svg",
         "name": "Sobaja test token",
         "chainId": 80001
     },
@@ -59,7 +59,7 @@
         "address": "0x1cebe52e6d399d7188986a3d6cfc881d50391932",
         "symbol": "SBJ2",
         "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "logoURI": "/images/sbj.svg",
         "name": "Sobaja test token 2",
         "chainId": 80001
     },

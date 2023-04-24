@@ -11,7 +11,7 @@ import { Token } from 'interfaces'
 import ERC20_INTERFACE from 'constants/jsons/erc20'
 import { NATIVE_COIN } from 'constants/index'
 import { useTokenList } from 'states/lists/hooks'
-import { divNumberWithDecimal } from 'utils/math'
+import { divNumberWithDecimal, fixNum } from 'utils/math'
 
 /**
  * Returns a map of the given addresses to their eventually consistent ETH balances.
@@ -24,9 +24,9 @@ export function useETHBalances(
         () =>
             uncheckedAddresses
                 ? uncheckedAddresses
-                      .map(isAddress)
-                      .filter((a): a is string => a !== false)
-                      .sort()
+                    .map(isAddress)
+                    .filter((a): a is string => a !== false)
+                    .sort()
                 : [],
         [uncheckedAddresses],
     )
@@ -92,17 +92,19 @@ export function useTokenBalancesWithLoadingIndicator(
             () =>
                 address && validatedTokens.length > 0
                     ? validatedTokens.reduce<{
-                          [tokenAddress: string]: string | undefined
-                      }>((memo, token, i) => {
-                          const value = balances?.[i]?.result?.[0]
-                          if (value && value._hex) {
-                              memo[token.address] = divNumberWithDecimal(
-                                  Number(value._hex),
-                                  token.decimals,
-                              )
-                          }
-                          return memo
-                      }, {})
+                        [tokenAddress: string]: string | undefined
+                    }>((memo, token, i) => {
+                        const value = balances?.[i]?.result?.[0]
+
+                        if (value && value._hex) {
+
+                            memo[token.address] = divNumberWithDecimal(
+                                fixNum(value),
+                                token.decimals,
+                            )
+                        }
+                        return memo
+                    }, {})
                     : {},
             [address, validatedTokens, balances],
         ),
