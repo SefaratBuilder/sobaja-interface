@@ -41,6 +41,7 @@ import { useWindowDimensions } from 'hooks/useWindowSize'
 import { useMyPosition } from 'hooks/useAllPairs'
 import { Data, useQueryPool } from 'hooks/useQueryPool'
 import Loader from 'components/Loader'
+import CustomLoader from 'components/CustomLoader'
 
 export interface PoolData {
     name: string
@@ -89,37 +90,6 @@ const Logos: any = {
     AVA,
     UNKNOWN,
 }
-
-// const rows = [
-//     createData('Ethereum', 'USDC/ETH', '$66.66m', '$100.99k', '$66.66k', '10%'),
-//     createData('Ethereum', 'ETH/USDT', '$66.66m', '$100.99k', '$66.66k', '10%'),
-//     createData('Ethereum', 'BTC/ETH', '$66.66m', '$100.99k', '$66.66k', '10%'),
-//     createData(
-//         'Ethereum',
-//         'SUSHI/ETH',
-//         '$66.66m',
-//         '$100.99k',
-//         '$66.66k',
-//         '10%',
-//     ),
-//     createData('Ethereum', 'BNB/ETH', '$66.66m', '$100.99k', '$66.66k', '10%'),
-//     createData('Ethereum', 'AVA/USDT', '$66.66m', '$100.99k', '$66.66k', '10%'),
-//     createData('Ethereum', 'DAI/UNI', '$66.66m', '$100.99k', '$66.66k', '10%'),
-//     createData(
-//         'Ethereum',
-//         'USDT/SUSHI',
-//         '$66.66m',
-//         '$100.99k',
-//         '$66.66k',
-//         '10%',
-//     ),
-//     createData('Ethereum', 'USDC/UNI', '$66.66m', '$100.99k', '$66.66k', '10%'),
-//     createData('Ethereum', 'DAI/USDC', '$66.66m', '$100.99k', '$66.66k', '10%'),
-//     createData('Ethereum', 'USDT/DAI', '$66.66m', '$100.99k', '$66.66k', '10%'),
-//     createData('Ethereum', 'DAI/ETH', '$66.66m', '$100.99k', '$66.66k', '10%'),
-//     createData('Ethereum', 'AVA/USDC', '$66.66m', '$100.99k', '$66.66k', '10%'),
-//     createData('Ethereum', 'BNB/USDC', '$66.66m', '$100.99k', '$66.66k', '10%'),
-// ]
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     if (b[orderBy] < a[orderBy]) {
@@ -252,11 +222,54 @@ export default function Pools() {
     const [selected, setSelected] = useState<readonly string[]>([])
     const [dense, setDense] = useState(false)
     const [isAsc, setIsAsc] = useState(false)
-    const rows = useQueryPool()
+    const [page, setPage] = useState<number>(1)
+    const [totalPage, setTotalPage] = useState<number>(1)
 
+    const rows = useQueryPool()
+    console.log('🤦‍♂️ ⟹ Pools ⟹ rows:', rows)
+
+    const [totalPool, setTotalPool] = useState<Data[] | PoolDataMobile[]>()
     const [poolsAdminInCurrentPag, setPoolsAdminInCurrentPag] = useState<
         Data[] | PoolDataMobile[]
-    >(rows)
+    >()
+
+    const handleDataInCurrentPage = () => {
+        if (!totalPool) return
+
+        if (width <= 576) {
+            const filterData = totalPool.filter(
+                (d, index) => index >= (page - 1) * 10 && index < page * 10,
+            )
+
+            const newFilterData = filterData.map((i) => {
+                return {
+                    name: i.name,
+                    volume: i.volume,
+                    apr: i.apr,
+                    tvlValue: i.tvlValue,
+                }
+            })
+            setPoolsAdminInCurrentPag(newFilterData)
+            return
+        }
+        setTotalPage(
+            totalPool?.length > 0 ? Math.ceil(totalPool.length / 10) : 1,
+        )
+
+        const filterData = totalPool.filter(
+            (d, index) => index >= (page - 1) * 10 && index < page * 10,
+        )
+        setPoolsAdminInCurrentPag(filterData)
+    }
+
+    useEffect(() => {
+        if (rows.length > 0) {
+            setTotalPool(rows)
+        }
+    }, [rows])
+    useEffect(() => {
+        if (totalPool) handleDataInCurrentPage()
+    }, [totalPool, page])
 
     const [listHeader, setListHeader] = useState(headCells)
     const [searchName, setSearchName] = useState('')
@@ -275,15 +288,13 @@ export default function Pools() {
     function EnhancedTableHead(props: EnhancedTableProps) {
         const { order, orderBy } = props
         return (
-            <TableHead
-            // className="black-bg"
-            >
+            <TableHead>
                 <TableRow style={{ height: 5 }}></TableRow>
 
                 <TableRow>
                     {listHeader.map((headCell, index) => (
                         <HeadTable
-                            key={headCell.id}
+                            key={index}
                             align={
                                 width > 576
                                     ? index === 1
@@ -304,10 +315,7 @@ export default function Pools() {
                             sx={{
                                 color: 'white',
                                 borderBottom: 'none',
-                                // borderTop: 1,
                                 borderColor: '#ffffff4c',
-                                // width:
-                                // index === 1 ? '500px !important' : 'unset',
                             }}
                             className="black-bg"
                         >
@@ -364,18 +372,29 @@ export default function Pools() {
     const handleOnSearch = (e: any) => {
         if (e.target.value) {
             let newRows = rows.filter((i) =>
-                i.name.includes(e?.target?.value?.toUpperCase()),
+                i.name
+                    ?.toLowerCase()
+                    ?.includes(e?.target?.value?.toLowerCase()),
             )
             setSearchName(e.target.value)
-            setPoolsAdminInCurrentPag(newRows)
+            setTotalPool(newRows)
+            setTotalPage(
+                newRows?.length > 0 ? Math.ceil(newRows.length / 10) : 1,
+            )
         } else {
             setSearchName('')
-            let rowsOnMount = stableSort(
-                rows,
-                getComparator(DEFAULT_ORDER, DEFAULT_ORDER_BY),
-            )
+            setTotalPool(rows)
 
+            let rowsOnMount = stableSort<any>(
+                rows,
+                getComparator<any>(DEFAULT_ORDER, DEFAULT_ORDER_BY),
+            )
+            rowsOnMount = rowsOnMount.slice(
+                0 * DEFAULT_ROWS_PER_PAGE,
+                0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE,
+            )
             setPoolsAdminInCurrentPag(rowsOnMount)
+            setTotalPage(rows?.length > 0 ? Math.ceil(rows.length / 10) : 1)
         }
     }
 
@@ -660,24 +679,26 @@ export default function Pools() {
                                                 )}
                                             </TableBody>
                                         </>
+                                    ) : !searchName ? (
+                                        <LoaderLabel>
+                                            {/* <Loader size="30px" /> */}
+                                            <CustomLoader />
+                                            <div>Loading</div>
+                                        </LoaderLabel>
                                     ) : (
-                                        <CustomLoader>
-                                            <Loader size="30px" />
-                                            <div>Loading pool</div>
-                                        </CustomLoader>
+                                        <LabelNotFound>Not Found</LabelNotFound>
                                     )}
                                 </Table>
                             </TableContainer>
-                            {rows && rows.length > 0 && (
-                                <Pagination
-                                    data={rows}
-                                    currentPage={1}
-                                    setPoolsData={setPoolsAdminInCurrentPag}
-                                    limitNumber={10}
-                                    isSorted={isAsc}
-                                    isMobile={width <= 576}
-                                />
-                            )}
+                            {poolsAdminInCurrentPag &&
+                                poolsAdminInCurrentPag.length > 0 && (
+                                    <Pagination
+                                        page={page}
+                                        setPage={setPage}
+                                        isSorted={isAsc}
+                                        totalPage={totalPage}
+                                    />
+                                )}
                         </>
                     )}
 
@@ -699,7 +720,7 @@ const Container = styled.div`
     height: fit-content;
     font-size: 16px !important;
     color: white;
-    font-style: italic;
+    
     font-weight: 300;
     overflow: hidden;
     margin-bottom: 50px;
@@ -731,7 +752,7 @@ const HeadTitle = styled.div`
     }
 
     .title {
-        font-style: italic;
+        
         font-weight: 600;
         font-size: 50px;
         line-height: 61px;
@@ -741,7 +762,7 @@ const HeadTitle = styled.div`
     }
 
     .details {
-        font-style: italic;
+        
         font-weight: 500;
         font-size: 20px;
         line-height: 24px;
@@ -827,7 +848,6 @@ const HeadLabelRight = styled.div`
 const HeadTable = styled(TableCell)`
     font-size: 16px !important;
     padding-left: 15px !important;
-    /* font-family: 'Roboto', sans-serif !important; */
     display: flex;
 
     justify-content: center;
@@ -852,7 +872,7 @@ const CellTable = styled(TableCell)`
     font-size: 16px !important;
     color: white;
     /* padding: 15px 15px 0 0 !important; */
-    font-family: 'Roboto', sans-serif !important;
+    font-family: Verdana, sans-serif;
     background: rgba(0, 0, 0, 0.3) !important;
     /* display: none; */
 
@@ -919,7 +939,7 @@ const InputSearchModal = styled.div`
         border: none;
         outline: none;
         color: #c9c9c9;
-        font-style: italic;
+        
         font-weight: 500;
         font-size: 18px;
         line-height: 100%;
@@ -940,7 +960,7 @@ const InputSearchModal = styled.div`
     }
 `
 
-const CustomLoader = styled.div`
+const LoaderLabel = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -975,7 +995,7 @@ const NetworkButton = styled.div`
     }
 
     p {
-        font-style: italic;
+        
         font-weight: 500;
         color: #c9c9c9;
     }
@@ -1002,4 +1022,9 @@ const BtnSort = styled.div`
             transform: rotate(180deg);
         }
     }
+`
+
+const LabelNotFound = styled.div`
+    text-align: center;
+    padding: 20px 0;
 `

@@ -126,7 +126,7 @@ const MintCoinButton = styled.button<{ isDisable: boolean }>`
     align-items: center;
     display: flex;
     font-size: 1rem;
-    font-style: italic;
+    
     font-weight: 300;
     color: var(--text1);
     width: 100%;

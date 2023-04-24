@@ -180,7 +180,6 @@ export function usePair(
         'getReserves',
         [],
     )
-    console.log({ reservesResult })
 
     return useMemo(() => {
         const balance = balanceResult?.[0]?.result?.[0]

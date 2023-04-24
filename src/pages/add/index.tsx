@@ -146,13 +146,13 @@ const Add = () => {
                     : outputAmount
                 const amountTokenMin = isNativeCoin(tokenIn)
                     ? mulNumberWithDecimal(
-                        calcSlippageAmount(outputAmount, slippage)[0],
-                        tokenOut.decimals,
-                    )
+                          calcSlippageAmount(outputAmount, slippage)[0],
+                          tokenOut.decimals,
+                      )
                     : mulNumberWithDecimal(
-                        calcSlippageAmount(inputAmount, slippage)[0],
-                        tokenIn.decimals,
-                    )
+                          calcSlippageAmount(inputAmount, slippage)[0],
+                          tokenIn.decimals,
+                      )
                 let value = isNativeCoin(tokenIn)
                     ? mulNumberWithDecimal(inputAmount, tokenIn.decimals)
                     : mulNumberWithDecimal(outputAmount, tokenOut.decimals)
@@ -312,7 +312,7 @@ const Add = () => {
                 outputAmount: addRate,
             })
         }
-    }, [inputAmount, tokenIn, tokenOut])
+    }, [inputAmount, chainId, pair?.reserve0, pair?.reserve1, pair?.reserveLp, pair?.tokenLp.address])
 
     useEffect(() => {
         // when output amount change
@@ -348,7 +348,7 @@ const Add = () => {
                 inputAmount: addRate,
             })
         }
-    }, [outputAmount, tokenIn, tokenOut])
+    }, [outputAmount, chainId, pair?.reserve0, pair?.reserve1, pair?.reserveLp, pair?.tokenLp.address])
 
     const AddButton = () => {
         const balanceIn = useCurrencyBalance(account, tokenIn)
@@ -424,10 +424,15 @@ const Add = () => {
 
     return (
         <>
-            <ComponentsTransaction
-                data={initDataTransaction}
-                onConfirm={onConfirm}
-            />
+            <>
+                <ComponentsTransaction
+                    data={initDataTransaction}
+                    onConfirm={onConfirm}
+                />
+                {(initDataTransaction.isOpenConfirmModal ||
+                    initDataTransaction.isOpenResultModal ||
+                    initDataTransaction.isOpenWaitingModal) && <Blur />}
+            </>
             <ToastMessage />
             <SwapContainer>
                 {!account && isOpenWalletModal && (
@@ -462,13 +467,13 @@ const Add = () => {
                         field={Field.OUTPUT}
                     />
                 </Columns>
-                {
-                    pair && <PoolPriceBar
-                                dropDown={poolPriceBarOpen}
-                                setDropDown={setPoolPriceBarOpen}
-                                pair={pair}
-                            />
-                }
+                {pair && (
+                    <PoolPriceBar
+                        dropDown={poolPriceBarOpen}
+                        setDropDown={setPoolPriceBarOpen}
+                        pair={pair}
+                    />
+                )}
                 <AddButton />
                 <Referral>
                     <span>Referral:</span>
@@ -517,6 +522,9 @@ const SwapContainer = styled(Columns)`
         rgba(0, 28, 44, 0.3)
     );
     gap: 15px;
+    position: relative;
+    z-index: 0;
+
     @media (max-width: 500px) {
         width: 90%;
     }

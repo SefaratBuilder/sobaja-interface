@@ -91,7 +91,6 @@ const Container = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 3;
     background: var(--bg5) !important;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
@@ -155,11 +154,11 @@ const EstimatedNotice = styled.div`
     }
     span {
         font-size: 12px;
-        font-style: italic;
+        
     }
     .details {
         font-size: 16px;
-        font-style: italic;
+        
         padding-bottom: 5px;
     }
 `

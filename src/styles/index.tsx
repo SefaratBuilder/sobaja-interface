@@ -66,6 +66,6 @@ export const GlobalStyle = createGlobalStyle`
     }
 
     .i {
-        font-style: italic;
+        
     }
 `
