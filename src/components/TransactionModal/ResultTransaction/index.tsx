@@ -31,17 +31,14 @@ const ResultTransactionModal = ({
         <Container
         // ref={ref}
         >
-            <Header>
+            {/* <Header>
                 <ImgClose
                     src={imgClose}
                     alt=""
                     onClick={() => setOpenModal(false)}
                 />
-            </Header>
+            </Header> */}
             <WrapContent>
-                <WrapImgResult>
-                    <img src={`${isSuccess ? imgSuccess : imgError}`} alt="" />
-                </WrapImgResult>
                 <WrapInfoLoad>
                     <div>
                         {isSuccess
@@ -51,6 +48,9 @@ const ResultTransactionModal = ({
                             : error}
                     </div>
                 </WrapInfoLoad>
+                <WrapImgResult>
+                    <img src={`${isSuccess ? imgSuccess : imgError}`} alt="" />
+                </WrapImgResult>
             </WrapContent>
             <PrimaryButton
                 type="light-blue"
@@ -68,7 +68,7 @@ const Container = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 3;
+    z-index: 999;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
@@ -77,7 +77,7 @@ const Container = styled.div`
         rgba(0, 28, 44, 0.3),
         rgba(0, 28, 44, 0.3)
     );
-    background-color: #00000073;
+    background-color: #002033;
 
     box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
     max-width: 500px;

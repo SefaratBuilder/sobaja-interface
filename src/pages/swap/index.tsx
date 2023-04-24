@@ -533,6 +533,14 @@ const Swap = () => {
                     />
                 )}
                 <SwapButton />
+                {/* <div>
+                    <PrimaryButton
+                        onClick={() => {
+                            initDataTransaction.setIsOpenResultModal(true)
+                        }}
+                        name={'TEST'}
+                    />
+                </div> */}
                 {/* <SwapButton /> */}
                 <Referral>
                     <span>Referral:</span>
