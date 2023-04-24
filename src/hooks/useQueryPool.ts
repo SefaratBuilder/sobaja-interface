@@ -15,7 +15,7 @@ export interface Data {
 
 export const useQueryPool = () => {
     const [poolData, setPoolData] = useState<Data[]>()
-    const APIURL = 'https://thegraph.com/hosted-service/subgraph/anvospace/s-subajaswap'
+    const APIURL = 'https://api.thegraph.com/subgraphs/name/anvospace/s-subajaswap'
 
     // Initialize the Apollo Client
     const client = new ApolloClient({
@@ -113,7 +113,7 @@ export const useQueryPool = () => {
         // Calculate APR based on the formula: (Annual Reward / Total Value Locked) * 100
         const apr = (annualReward / tvl) * 100;
 
-        return apr;
+        return isNaN(apr) ? 0 : apr;
     }
 
     function createData(

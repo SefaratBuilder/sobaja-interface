@@ -720,13 +720,15 @@ const Container = styled.div`
     height: fit-content;
     font-size: 16px !important;
     color: white;
-    
+    font-family: Verdana !important;
+
     font-weight: 300;
     overflow: hidden;
     margin-bottom: 50px;
 
     .black-bg {
         background: rgba(0, 0, 0, 0.3) !important;
+        min-width: 84px;
     }
 
     @media screen and (max-width: 772px) {
@@ -745,6 +747,7 @@ const HeadTitle = styled.div`
     justify-content: space-between;
     gap: 20px;
     padding: 20px;
+    font-family: Verdana;
 
     @media screen and (max-width: 576px) {
         flex-direction: column;
@@ -752,7 +755,6 @@ const HeadTitle = styled.div`
     }
 
     .title {
-        
         font-weight: 600;
         font-size: 50px;
         line-height: 61px;
@@ -762,7 +764,6 @@ const HeadTitle = styled.div`
     }
 
     .details {
-        
         font-weight: 500;
         font-size: 20px;
         line-height: 24px;
@@ -849,11 +850,12 @@ const HeadTable = styled(TableCell)`
     font-size: 16px !important;
     padding-left: 15px !important;
     display: flex;
+    font-family: Verdana !important;
 
     justify-content: center;
     align-items: center;
     div {
-        display: inline-block;
+        display: inline;
     }
 
     img {
@@ -872,9 +874,9 @@ const CellTable = styled(TableCell)`
     font-size: 16px !important;
     color: white;
     /* padding: 15px 15px 0 0 !important; */
-    font-family: Verdana, sans-serif;
     background: rgba(0, 0, 0, 0.3) !important;
     /* display: none; */
+    font-family: Verdana !important;
 
     @media screen and (max-width: 576px) {
         /* font-size: 14px !important; */
@@ -884,7 +886,6 @@ const CellTable = styled(TableCell)`
         display: flex;
         gap: 10px;
         justify-content: center;
-        /* padding-left: 200px; */
         align-items: center;
 
         /* @media screen and (max-width: 1920px) {
@@ -939,7 +940,7 @@ const InputSearchModal = styled.div`
         border: none;
         outline: none;
         color: #c9c9c9;
-        
+
         font-weight: 500;
         font-size: 18px;
         line-height: 100%;
@@ -995,7 +996,6 @@ const NetworkButton = styled.div`
     }
 
     p {
-        
         font-weight: 500;
         color: #c9c9c9;
     }
