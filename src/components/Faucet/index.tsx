@@ -87,7 +87,7 @@ const Faucet = () => {
                         <BodyModalFaucet>
                             <ContentFaucet>
                                 <TextCoin>
-                                    Get BTC, USDT, USDC, DAI for testing ZkSync
+                                    Get BTC, USDT, USDC, DAI for testing zkSync
                                     Testnet on Sobajaswap, test token can
                                     nullify the reality of Mainnet.
                                 </TextCoin>
@@ -98,7 +98,7 @@ const Faucet = () => {
                                     <Row>
                                         <Error fontSize="14px">
                                             Wrong network! Please switch to
-                                            ZkSync Goerli network to faucet
+                                            zkSync Goerli network to faucet
                                             tokens.
                                         </Error>
                                     </Row>
@@ -126,7 +126,7 @@ const MintCoinButton = styled.button<{ isDisable: boolean }>`
     align-items: center;
     display: flex;
     font-size: 1rem;
-    
+    font-family: Verdana;
     font-weight: 300;
     color: var(--text1);
     width: 100%;
