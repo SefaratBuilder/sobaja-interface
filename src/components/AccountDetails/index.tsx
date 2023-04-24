@@ -327,7 +327,7 @@ const Title = styled.div`
     color: ${({ theme }) => theme.text1};
 
     div:first-child {
-        font-style: italic;
+        
         letter-spacing: 0.5px;
         display: flex;
         flex-wrap: wrap;

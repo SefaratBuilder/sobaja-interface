@@ -30,6 +30,7 @@ const TokenListModal = ({
     const [renderedTokenList, setRenderTokenList] = useState<Token[] | []>([])
     const allTokenBalances = useAllTokenBalances()
     const tokens = useTokenList()
+    console.log({tokens})
     const queriedToken = useToken(searchQuery)
 
     const handleSearchToken = async (

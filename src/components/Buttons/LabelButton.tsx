@@ -22,8 +22,8 @@ const Button = styled.button<{ height?: any }>`
     border: var(--border2);
     color: white;
     font-size: 1rem;
-    font-style: italic;
-    font-family: Roboto;
+    
+    font-family: Verdana, sans-serif;
     font-weight: 300;
 
     &.loading:after {

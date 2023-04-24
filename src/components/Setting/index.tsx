@@ -67,8 +67,8 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
 
     return (
         <>
-            <Container className={setting ? 'active' : ''}>
-                <Wrap className={setting ? 'active' : ''} ref={ref}>
+            <Container ref={ref} className={setting ? 'active' : ''}>
+                <Wrap>
                     <TransactionSetting>
                         <Title>Settings</Title>
                         <SubTitle>
@@ -155,36 +155,6 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
                             <p> minutes</p>
                         </SubTitle>
                     </TransactionSetting>
-                    {/* <InterfaceSetting>
-                        <span>Interface Settings</span>
-                        <Toggle>
-                            <SubTitle>
-                                <span>Auto Rounter API</span>
-                                <IconQuestion>
-                                    ?
-                                    <SlippageText>
-                                        Allow high price impact trades and skip
-                                        the confirm screen. Use at your own
-                                        risk.
-                                    </SlippageText>
-                                </IconQuestion>
-                            </SubTitle>
-                            <SwitchButton active={activeExpertMode} />
-                        </Toggle>
-
-                        <Multihop>
-                            <SubTitle>
-                                <span>Expert Mode</span>
-                                <IconQuestion>
-                                    ?
-                                    <SlippageText>
-                                        Restricts swaps to direct pairs only.
-                                    </SlippageText>
-                                </IconQuestion>
-                            </SubTitle>
-                            <SwitchButton active={multihop} />
-                        </Multihop>
-                    </InterfaceSetting> */}
                 </Wrap>
             </Container>
         </>
@@ -212,7 +182,7 @@ const InputTime = styled.input`
     border-radius: 6px;
     text-align: right;
     ::placeholder {
-        font-style: italic;
+        
         color: #c9c9c9;
     }
 `
@@ -224,8 +194,8 @@ const TransactionSetting = styled.div`
     justify-content: center;
     align-items: flex-start;
 `
-const InterfaceSetting = styled(TransactionSetting)``
-const Container = styled.div`
+
+const Container = styled.div<{ref: any}>`
     position: absolute;
     /* width: 360px; */
     height: fit-content;
@@ -386,7 +356,7 @@ const SlippageText = styled.div`
     padding: 0.6rem 1rem;
     font-weight: 400;
     word-break: break-word;
-    font-style: italic;
+    
     background: rgba(157, 195, 230, 0.8);
     box-shadow: ${({ theme }) => theme.boxShadow};
     border: 1px solid ${({ theme }) => theme.bd1};
