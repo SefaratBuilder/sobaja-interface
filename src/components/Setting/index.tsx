@@ -62,10 +62,11 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
     }
 
     const ref = useRef<any>()
+    useOnClickOutside(ref, () => setSetting(false))
 
     return (
         <>
-            <Container className={setting ? 'active' : ''}>
+            <Container ref={ref} className={setting ? 'active' : ''}>
                 <Wrap>
                     <TransactionSetting>
                         <Title>Settings</Title>
@@ -154,7 +155,6 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
                         </SubTitle>
                     </TransactionSetting>
                 </Wrap>
-                <Blur />
             </Container>
         </>
     )
@@ -181,7 +181,7 @@ const InputTime = styled.input`
     border-radius: 6px;
     text-align: right;
     ::placeholder {
-        font-style: italic;
+        
         color: #c9c9c9;
     }
 `
@@ -194,7 +194,7 @@ const TransactionSetting = styled.div`
     align-items: flex-start;
 `
 
-const Container = styled.div`
+const Container = styled.div<{ref: any}>`
     position: absolute;
     /* width: 360px; */
     height: fit-content;
@@ -351,7 +351,7 @@ const SlippageText = styled.div`
     padding: 0.6rem 1rem;
     font-weight: 400;
     word-break: break-word;
-    font-style: italic;
+    
     background: rgba(157, 195, 230, 0.8);
     box-shadow: ${({ theme }) => theme.boxShadow};
     border: 1px solid ${({ theme }) => theme.bd1};

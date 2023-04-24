@@ -11,10 +11,10 @@ import PrimaryButton from 'components/Buttons/PrimaryButton'
 import LabelButton from 'components/Buttons/LabelButton'
 import SwapIcon from 'assets/icons/swap-icon.svg'
 import { useActiveWeb3React } from 'hooks'
-import { usePair, usePairAddressesByIds } from 'hooks/useAllPairs'
+import { usePair } from 'hooks/useAllPairs'
 import Setting from 'components/HeaderLiquidity'
-import { useToken, useTokenApproval } from 'hooks/useToken'
-import { useCurrencyBalance, useTokenBalance } from 'hooks/useCurrencyBalance'
+import { useTokenApproval } from 'hooks/useToken'
+import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
 import { shortenAddress } from 'utils'
 
@@ -24,12 +24,9 @@ import {
     WRAPPED_NATIVE_COIN,
 } from 'constants/index'
 import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
-import { FixedNumber, ZeroAddress } from 'ethers'
+import { ZeroAddress } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
-import { MaxUint256 } from 'ethers'
 import {
-    useFactoryContract,
-    usePairContract,
     useRouterContract,
 } from 'hooks/useContract'
 import {
@@ -49,8 +46,6 @@ import ComponentsTransaction, {
     InitCompTransaction,
 } from 'components/TransactionModal'
 import ToastMessage from 'components/ToastMessage'
-import { AddressZero } from '@ethersproject/constants'
-import { getContractAddress } from '@ethersproject/address'
 import imgCopy from 'assets/icons/copy.svg'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import { sendEvent } from 'utils/analytics'
@@ -76,7 +71,6 @@ const Swap = () => {
     const initDataTransaction = InitCompTransaction()
     const loca = useLocation()
     const { slippage } = useSlippageTolerance()
-
     const updateRef = useUpdateRefAddress()
 
     useEffect(() => {
@@ -324,8 +318,6 @@ const Swap = () => {
                 status: txn.status === 1 ? true : false,
             })
         } catch (error) {
-            console.log('🤦‍♂️ ⟹ onConfirm ⟹ error:', error)
-            // initDataTransaction.setIsOpenWaitingModal(false)
             initDataTransaction.setError('Failed')
             initDataTransaction.setIsOpenResultModal(true)
         }
@@ -374,7 +366,7 @@ const Swap = () => {
             return
         }
         return () => {}
-    }, [inputAmount, chainId])
+    }, [inputAmount, chainId, pair?.reserve0, pair?.reserve1, pair?.reserveLp, pair?.tokenLp.address])
 
     useEffect(() => {
         if (
@@ -415,7 +407,7 @@ const Swap = () => {
             }
         }
         return () => {}
-    }, [outputAmount, chainId])
+    }, [outputAmount, chainId, pair?.reserve0, pair?.reserve1, pair?.reserveLp, pair?.tokenLp.address])
 
     const SwapButton = () => {
         const isNotConnected = !account
@@ -458,14 +450,6 @@ const Swap = () => {
                         name={'Swap'}
                     />
                 )}
-                {/* <PrimaryButton
-                        onClick={() => mintLp()}
-                        name={'Mint lp'}
-                /> */}
-                {/* <PrimaryButton
-                        onClick={() => create()}
-                        name={'Create pair'}
-                /> */}
             </Row>
         )
     }

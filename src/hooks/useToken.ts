@@ -106,17 +106,18 @@ export function useTokenApproval(
     const approve = async (to: string, amount: number | string) => {
         try {
             console.log('🤦‍♂️ ⟹ tokenContract:', tokenContract)
+            console.log({ to, amount, tokenContract: tokenContract?.address })
             if (!isAddress(to)) return
             const gasLimit = await tokenContract?.estimateGas.approve(
                 to,
-                amount,
+                '1',
             )
             console.log({ gasLimit: gasLimit && gasLimit.add(1000) })
             return tokenContract?.approve(to, amount, {
                 gasLimit: gasLimit && gasLimit.add(1000),
             })
         } catch (err) {
-            return
+            console.log({ err })
         }
     }
 

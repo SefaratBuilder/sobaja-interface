@@ -155,11 +155,11 @@ const EstimatedNotice = styled.div`
     }
     span {
         font-size: 12px;
-        font-style: italic;
+        
     }
     .details {
         font-size: 16px;
-        font-style: italic;
+        
         padding-bottom: 5px;
     }
 `

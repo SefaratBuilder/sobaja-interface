@@ -16,7 +16,7 @@ const SwitchButton = ({ active }: SwitchButtonProps) => {
 
 export default SwitchButton
 const Container = styled.div`
-    font-style: italic;
+    
     display: flex;
     align-items: center;
     position: relative;

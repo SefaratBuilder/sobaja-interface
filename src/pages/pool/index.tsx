@@ -699,7 +699,7 @@ const Container = styled.div`
     height: fit-content;
     font-size: 16px !important;
     color: white;
-    font-style: italic;
+    
     font-weight: 300;
     overflow: hidden;
     margin-bottom: 50px;
@@ -731,7 +731,7 @@ const HeadTitle = styled.div`
     }
 
     .title {
-        font-style: italic;
+        
         font-weight: 600;
         font-size: 50px;
         line-height: 61px;
@@ -741,7 +741,7 @@ const HeadTitle = styled.div`
     }
 
     .details {
-        font-style: italic;
+        
         font-weight: 500;
         font-size: 20px;
         line-height: 24px;
@@ -918,7 +918,7 @@ const InputSearchModal = styled.div`
         border: none;
         outline: none;
         color: #c9c9c9;
-        font-style: italic;
+        
         font-weight: 500;
         font-size: 18px;
         line-height: 100%;
@@ -974,7 +974,7 @@ const NetworkButton = styled.div`
     }
 
     p {
-        font-style: italic;
+        
         font-weight: 500;
         color: #c9c9c9;
     }

@@ -312,7 +312,7 @@ const Add = () => {
                 outputAmount: addRate,
             })
         }
-    }, [inputAmount, tokenIn, tokenOut])
+    }, [inputAmount, chainId, pair?.reserve0, pair?.reserve1, pair?.reserveLp, pair?.tokenLp.address])
 
     useEffect(() => {
         // when output amount change
@@ -348,7 +348,7 @@ const Add = () => {
                 inputAmount: addRate,
             })
         }
-    }, [outputAmount, tokenIn, tokenOut])
+    }, [outputAmount, chainId, pair?.reserve0, pair?.reserve1, pair?.reserveLp, pair?.tokenLp.address])
 
     const AddButton = () => {
         const balanceIn = useCurrencyBalance(account, tokenIn)
