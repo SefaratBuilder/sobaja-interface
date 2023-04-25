@@ -39,15 +39,12 @@ const MyPools = () => {
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
     const [percentValue, setPercentValue] = useState(0)
     const { position, tokenList } = useMyPosition()
-    console.log('🤦‍♂️ ⟹ MyPools ⟹ position:', position)
     const totalPage = position?.length > 0 ? Math.ceil(position?.length / 6) : 1
     const [page, setPage] = useState(1)
 
     const [positionInCurrentPage, setPositionInCurrentPage] = useState<
         typeof position
     >(position?.slice(0, 6))
-
-    console.log('🤦‍♂️ ⟹ MyPools ⟹ positionInCurrentPage:', positionInCurrentPage)
 
     const [poolRemove, setPoolRemove] = useState<(typeof position)[0]>()
     const navigate = useNavigate()
@@ -509,7 +506,11 @@ const MyPools = () => {
                             <TextPrice></TextPrice>
                             <ValuePrice>1 USDT = 0.00050 </ValuePrice>
                         </WrapPrice> */}
-                            {isInsufficientAllowance ? (
+                            {Number(percentValue) === 0 ? (
+                                <BtnConfirm isDisabled={true}>
+                                    Select your percent
+                                </BtnConfirm>
+                            ) : isInsufficientAllowance ? (
                                 <BtnConfirm onClick={() => handleOnApprove()}>
                                     Approve
                                 </BtnConfirm>
@@ -653,7 +654,7 @@ const WrapTip = styled.div`
     }
 `
 
-const BtnConfirm = styled.div`
+const BtnConfirm = styled.div<{ isDisabled?: boolean }>`
     margin-top: 20px;
     background: #00b2ff;
     border-radius: 12px;
@@ -663,7 +664,7 @@ const BtnConfirm = styled.div`
     font-size: 20px;
     font-weight: 400;
     color: #ffffff;
-    cursor: pointer;
+    cursor: ${({ isDisabled }) => (isDisabled ? 'not-allowed' : 'pointer')};
 `
 const Title = styled.div`
     font-weight: 700;
