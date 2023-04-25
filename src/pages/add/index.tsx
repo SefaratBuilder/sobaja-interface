@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Link, useLocation } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
@@ -40,6 +40,8 @@ import imgCheckMark from 'assets/icons/check-mark.svg'
 import { sendEvent } from 'utils/analytics'
 import { useMintActionHandlers, useMintState } from 'states/mint/hooks'
 import Blur from 'components/Blur'
+import { useOnClickOutside } from 'hooks/useOnClickOutSide'
+import { OpacityModal } from 'components/Web3Status'
 
 const Add = () => {
     const mintState = useMintState()
@@ -63,6 +65,12 @@ const Add = () => {
     const { addTxn } = useTransactionHandler()
     const loca = useLocation()
     const pair = usePair(chainId, tokenIn, tokenOut)
+
+    const ref = useRef<any>()
+
+    useOnClickOutside(ref, () => {
+        setIsOpenWalletModal(false)
+    })
 
     const isInsufficientAllowanceTokenIn =
         Number(tokenInApproval?.allowance) < Number(inputAmount) &&
@@ -312,7 +320,14 @@ const Add = () => {
                 outputAmount: addRate,
             })
         }
-    }, [inputAmount, chainId, pair?.reserve0, pair?.reserve1, pair?.reserveLp, pair?.tokenLp.address])
+    }, [
+        inputAmount,
+        chainId,
+        pair?.reserve0,
+        pair?.reserve1,
+        pair?.reserveLp,
+        pair?.tokenLp.address,
+    ])
 
     useEffect(() => {
         // when output amount change
@@ -348,7 +363,14 @@ const Add = () => {
                 inputAmount: addRate,
             })
         }
-    }, [outputAmount, chainId, pair?.reserve0, pair?.reserve1, pair?.reserveLp, pair?.tokenLp.address])
+    }, [
+        outputAmount,
+        chainId,
+        pair?.reserve0,
+        pair?.reserve1,
+        pair?.reserveLp,
+        pair?.tokenLp.address,
+    ])
 
     const AddButton = () => {
         const balanceIn = useCurrencyBalance(account, tokenIn)
@@ -424,21 +446,23 @@ const Add = () => {
 
     return (
         <>
-            <>
-                <ComponentsTransaction
-                    data={initDataTransaction}
-                    onConfirm={onConfirm}
-                />
-                {(initDataTransaction.isOpenConfirmModal ||
-                    initDataTransaction.isOpenResultModal ||
-                    initDataTransaction.isOpenWaitingModal) && <Blur />}
-            </>
+            <ComponentsTransaction
+                data={initDataTransaction}
+                onConfirm={onConfirm}
+            />
+            {(initDataTransaction.isOpenConfirmModal ||
+                initDataTransaction.isOpenResultModal ||
+                initDataTransaction.isOpenWaitingModal) && <Blur />}
             <ToastMessage />
-            <SwapContainer>
+            <SwapContainer ref={ref}>
                 {!account && isOpenWalletModal && (
                     <>
-                        <WalletModal setToggleWalletModal={openWalletModal} />
-                        <Blur />
+                        <WalletModal
+                            setToggleWalletModal={setIsOpenWalletModal}
+                        />
+                        <OpacityModal
+                            onClick={() => setIsOpenWalletModal(false)}
+                        />
                     </>
                 )}
                 <Row jus="space-between">

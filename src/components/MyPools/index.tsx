@@ -39,6 +39,7 @@ const MyPools = () => {
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
     const [percentValue, setPercentValue] = useState(0)
     const { position, tokenList } = useMyPosition()
+    console.log('🤦‍♂️ ⟹ MyPools ⟹ position:', position)
     const totalPage = position?.length > 0 ? Math.ceil(position?.length / 6) : 1
     const [page, setPage] = useState(1)
 
