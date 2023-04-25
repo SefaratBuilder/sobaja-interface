@@ -2,10 +2,10 @@ import styled, { createGlobalStyle } from 'styled-components'
 
 const Blur = () => {
     return (
-        <>
+        <div>
             <Container />
             <GlobalStyle />
-        </>
+        </div>
     )
 }
 

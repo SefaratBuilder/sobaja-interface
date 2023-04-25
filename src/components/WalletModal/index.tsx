@@ -31,9 +31,6 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
     const [pendingNameWallet, setPendingNameWallet] = useState<
         string | undefined
     >()
-    const modalRef = useRef()
-
-    useOnClickOutside(modalRef, () => setToggleWalletModal(false))
 
     const toggleAgreement = () => {
         setIsAgreePolicy(!isAgreePolicy)
@@ -158,7 +155,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             )
         }
         return (
-            <Container isConnected={true} ref={modalRef}>
+            <Container isConnected={true}>
                 <Header>
                     <span>Connect a wallet</span>
                     <div>
@@ -309,7 +306,7 @@ const ContainerPending = styled.div`
     align-items: center;
 `
 
-const Container = styled.div<{ isConnected: boolean, ref: any }>`
+const Container = styled.div<{ isConnected: boolean }>`
     position: fixed;
     transition: all 10s ease-in-out 10s;
     background: var(--bg5);
@@ -381,7 +378,6 @@ const Title = styled.div`
     color: ${({ theme }) => theme.text1};
 
     div:first-child {
-        
         letter-spacing: 0.5px;
         display: flex;
         flex-wrap: wrap;
