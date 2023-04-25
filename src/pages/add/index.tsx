@@ -662,6 +662,7 @@ const BackLink = styled(Link)`
 `
 const LabelMsg = styled.div`
     margin: auto;
+    opacity: 0.5;
 `
 
 export default Add
