@@ -556,31 +556,37 @@ const Swap = () => {
                         }
                     />
                 </div> */}
-                <Referral>
-                    <span>Referral:</span>
-                    <p>
-                        https://app.sobajaswap.com/#/swap?
-                        {account && shortenAddress(account, 6)}
-                    </p>
-                    <span>
-                        {isCopied ? (
-                            <CopyBtn>
-                                <CopyAccountAddress src={imgCheckMark} />
-                                <Tooltip className="tooltip">Copied</Tooltip>
-                            </CopyBtn>
-                        ) : (
-                            <CopyBtn>
-                                <CopyAccountAddress
-                                    onClick={() => handleCopyAddress()}
-                                    src={imgCopy}
-                                />
-                                <Tooltip className="tooltip">
-                                    Click to copy address
-                                </Tooltip>
-                            </CopyBtn>
-                        )}
-                    </span>
-                </Referral>
+                {account ? (
+                    <Referral>
+                        <span>Referral:</span>
+                        <p>
+                            https://app.sobajaswap.com/#/swap?
+                            {account && shortenAddress(account, 5)}
+                        </p>
+                        <span>
+                            {isCopied ? (
+                                <CopyBtn>
+                                    <CopyAccountAddress src={imgCheckMark} />
+                                    <Tooltip className="tooltip">
+                                        Copied
+                                    </Tooltip>
+                                </CopyBtn>
+                            ) : (
+                                <CopyBtn>
+                                    <CopyAccountAddress
+                                        onClick={() => handleCopyAddress()}
+                                        src={imgCopy}
+                                    />
+                                    <Tooltip className="tooltip">
+                                        Click to copy address
+                                    </Tooltip>
+                                </CopyBtn>
+                            )}
+                        </span>
+                    </Referral>
+                ) : (
+                    <LabelMsg>Login to get your referral link</LabelMsg>
+                )}
             </SwapContainer>
         </>
     )
@@ -606,7 +612,7 @@ const SwapContainer = styled(Columns)`
 
 const Referral = styled.div`
     display: grid;
-    grid-template-columns: 54px 1fr 12px;
+    grid-template-columns: 55px 1fr 12px;
     font-size: 14px;
     span {
         color: rgba(0, 255, 163, 1);
@@ -688,6 +694,9 @@ const Icon = styled.div`
     img {
         width: 20px;
     }
+`
+const LabelMsg = styled.div`
+    margin: auto;
 `
 
 export default Swap
