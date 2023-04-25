@@ -226,7 +226,6 @@ export default function Pools() {
     const [totalPage, setTotalPage] = useState<number>(1)
 
     const rows = useQueryPool()
-    console.log('🤦‍♂️ ⟹ Pools ⟹ rows:', rows)
 
     const [totalPool, setTotalPool] = useState<Data[] | PoolDataMobile[]>()
     const [poolsAdminInCurrentPag, setPoolsAdminInCurrentPag] = useState<

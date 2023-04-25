@@ -327,7 +327,6 @@ const Title = styled.div`
     color: ${({ theme }) => theme.text1};
 
     div:first-child {
-        
         letter-spacing: 0.5px;
         display: flex;
         flex-wrap: wrap;
@@ -500,6 +499,7 @@ const WrapConnectModal = styled(Container)`
     transform: unset;
     margin: unset;
     overflow: unset;
+
     @media screen and (max-width: 1100px) {
         right: 10px;
         top: unset;
