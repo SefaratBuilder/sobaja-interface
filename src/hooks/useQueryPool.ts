@@ -10,7 +10,9 @@ export interface Data {
     volumeValue: number,
     apr: string,
     aprValue: number,
-    fee: string
+    fee: string,
+    addresses: string[],
+    symbols: string[]
 }
 
 export const useQueryPool = () => {
@@ -31,9 +33,11 @@ export const useQueryPool = () => {
             reserveUSD
             token0 {
                 symbol
+                id
             }
             token1 {
                 symbol
+                id
             }
         }
     }
@@ -125,7 +129,9 @@ export const useQueryPool = () => {
         volumeValue: number,
         apr: string,
         aprValue: number,
-        fee: string
+        fee: string,
+        addresses: string[],
+        symbols: string[]
     ): Data {
         return {
             network,
@@ -136,14 +142,16 @@ export const useQueryPool = () => {
             volumeValue,
             apr,
             aprValue,
-            fee
+            fee,
+            addresses,
+            symbols
         }
     }
     async function fetchData() {
         let tempRowsData: any[] = [];
         let dailyTVL = await fetchTVL('desc');
 
-        const promises = dailyTVL.pairs.map(async (pair: { id: string; token0: { symbol: any }; token1: { symbol: any }; reserveUSD: string }) => {
+        const promises = dailyTVL.pairs.map(async (pair: { id: string; token0: { symbol: string, id: string }; token1: { symbol: string, id: string }; reserveUSD: string }) => {
             const pairId = pair.id;
             const protocol = 'Ethereum';
             const pairSymbol = `${pair.token0.symbol}/${pair.token1.symbol}`;
@@ -161,8 +169,9 @@ export const useQueryPool = () => {
             // APR = (Annual Reward / Total Value Locked) * 100
             const aprValue = calculateRandomAPR(reserveUSDValue); // Replace with actual data
             const apr = `${aprValue.toFixed(2)}%`; // Replace with actual data
-
-            let data = createData(protocol, pairSymbol, reserveUSD, reserveUSDValue, volume, volumeValue, apr, aprValue, fee);
+            const addresses = [pair.id, pair.token0.id, pair.token1.id]
+            const symbols = ['SBJ-LP', pair.token0.symbol, pair.token1.symbol]
+            let data = createData(protocol, pairSymbol, reserveUSD, reserveUSDValue, volume, volumeValue, apr, aprValue, fee, addresses, symbols);
             tempRowsData.push(data);
         });
 
