@@ -253,6 +253,8 @@ export default function Pools() {
                     volume: i.volume,
                     apr: i.apr,
                     tvlValue: i.tvlValue,
+                    addresses: i.addresses,
+                    symbols: i.symbols
                 }
             })
             setPoolsAdminInCurrentPag(newFilterData)
