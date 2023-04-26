@@ -56,6 +56,8 @@ export interface PoolDataMobile {
     volume: string
     apr: string
     tvlValue: string | number
+    addresses: string[]
+    symbols: string[]
 }
 
 function createData(
@@ -224,6 +226,11 @@ export default function Pools() {
     const [isAsc, setIsAsc] = useState(false)
     const [page, setPage] = useState<number>(1)
     const [totalPage, setTotalPage] = useState<number>(1)
+    const [listHeader, setListHeader] = useState(headCells)
+    const [searchName, setSearchName] = useState('')
+    const [isMyPositionPage, setIsMyPositionPage] = useState(false)
+    const { width } = useWindowDimensions()
+    const { position } = useMyPosition()
 
     const rows = useQueryPool()
     console.log('🤦‍♂️ ⟹ Pools ⟹ rows:', rows)
@@ -267,15 +274,10 @@ export default function Pools() {
             setTotalPool(rows)
         }
     }, [rows])
+    
     useEffect(() => {
         if (totalPool) handleDataInCurrentPage()
     }, [totalPool, page])
-
-    const [listHeader, setListHeader] = useState(headCells)
-    const [searchName, setSearchName] = useState('')
-    const [isMyPositionPage, setIsMyPositionPage] = useState(false)
-    const { width } = useWindowDimensions()
-    const { position } = useMyPosition()
 
     useEffect(() => {
         isAsc ? setOrder('asc') : setOrder('desc')
@@ -317,7 +319,7 @@ export default function Pools() {
                                 borderBottom: 'none',
                                 borderColor: '#ffffff4c',
                             }}
-                            className="black-bg"
+                            className="black-bg2"
                         >
                             {headCell.label}{' '}
                             {width > 576 && index === 2 && (
@@ -344,6 +346,8 @@ export default function Pools() {
                         volume: i.volume,
                         apr: i.apr,
                         tvlValue: i.tvlValue,
+                        addresses: i.addresses,
+                        symbols: i.symbols
                     }
                 }),
                 getComparator(order, 'tvlValue'),
@@ -397,7 +401,7 @@ export default function Pools() {
             setTotalPage(rows?.length > 0 ? Math.ceil(rows.length / 10) : 1)
         }
     }
-
+    console.log({poolsAdminInCurrentPag})
     const isSelected = (name: string) => selected.indexOf(name) !== -1
 
     return (
@@ -537,20 +541,10 @@ export default function Pools() {
                                                                                 <div className="label">
                                                                                     <PairTokens
                                                                                         tokenA={
-                                                                                            Logos?.[
-                                                                                                row.name.split(
-                                                                                                    '/',
-                                                                                                )?.[0]
-                                                                                            ] ||
-                                                                                            Logos?.UNKNOWN
+                                                                                            row.symbols[1]
                                                                                         }
                                                                                         tokenB={
-                                                                                            Logos?.[
-                                                                                                row.name.split(
-                                                                                                    '/',
-                                                                                                )?.[1]
-                                                                                            ] ||
-                                                                                            Logos?.UNKNOWN
+                                                                                            row.symbols[2]
                                                                                         }
                                                                                     />
                                                                                     <div className="name">
@@ -623,22 +617,8 @@ export default function Pools() {
                                                                                     }
                                                                                 >
                                                                                     <PairTokens
-                                                                                        tokenA={
-                                                                                            Logos?.[
-                                                                                                row.name.split(
-                                                                                                    '/',
-                                                                                                )?.[0]
-                                                                                            ] ??
-                                                                                            Logos?.UNKNOWN
-                                                                                        }
-                                                                                        tokenB={
-                                                                                            Logos?.[
-                                                                                                row.name.split(
-                                                                                                    '/',
-                                                                                                )?.[1]
-                                                                                            ] ??
-                                                                                            Logos?.UNKNOWN
-                                                                                        }
+                                                                                        tokenA={row.symbols[1]}
+                                                                                        tokenB={row.symbols[2]}
                                                                                     />
                                                                                     <div className="name">
                                                                                         {
@@ -728,6 +708,11 @@ const Container = styled.div`
 
     .black-bg {
         background: rgba(0, 0, 0, 0.3) !important;
+        min-width: 84px;
+    }
+
+    .black-bg2 {
+        background: rgba(255,255,255,0.3) !important;
         min-width: 84px;
     }
 
@@ -874,7 +859,7 @@ const CellTable = styled(TableCell)`
     font-size: 16px !important;
     color: white;
     /* padding: 15px 15px 0 0 !important; */
-    background: rgba(0, 0, 0, 0.3) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
     /* display: none; */
     font-family: Verdana !important;
 
