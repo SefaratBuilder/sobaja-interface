@@ -237,6 +237,11 @@ const Add = () => {
                     msg: 'Add liquidity',
                     status: txn.status === 1 ? true : false,
                 })
+                /**
+                 * @dev reset input && output state when transaction success
+                 */
+                onUserInput(Field.INPUT, '')
+                onUserInput(Field.OUTPUT, '')
             }
         } catch (error) {
             // initDataTransaction.setIsOpenWaitingModal(false)
