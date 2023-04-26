@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Link, useLocation } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
@@ -26,9 +26,7 @@ import {
 import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
 import { ZeroAddress } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
-import {
-    useRouterContract,
-} from 'hooks/useContract'
+import { useRouterContract } from 'hooks/useContract'
 import {
     calcSlippageAmount,
     calcTransactionDeadline,
@@ -50,6 +48,8 @@ import imgCopy from 'assets/icons/copy.svg'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import { sendEvent } from 'utils/analytics'
 import Blur from 'components/Blur'
+import { useOnClickOutside } from 'hooks/useOnClickOutSide'
+import { OpacityModal } from 'components/Web3Status'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -72,6 +72,11 @@ const Swap = () => {
     const loca = useLocation()
     const { slippage } = useSlippageTolerance()
     const updateRef = useUpdateRefAddress()
+    const ref = useRef<any>()
+
+    useOnClickOutside(ref, () => {
+        setIsOpenWalletModal(false)
+    })
 
     useEffect(() => {
         if (loca.search && loca.search.includes('?')) {
@@ -366,7 +371,14 @@ const Swap = () => {
             return
         }
         return () => {}
-    }, [inputAmount, chainId, pair?.reserve0, pair?.reserve1, pair?.reserveLp, pair?.tokenLp.address])
+    }, [
+        inputAmount,
+        chainId,
+        pair?.reserve0,
+        pair?.reserve1,
+        pair?.reserveLp,
+        pair?.tokenLp.address,
+    ])
 
     useEffect(() => {
         if (
@@ -407,7 +419,14 @@ const Swap = () => {
             }
         }
         return () => {}
-    }, [outputAmount, chainId, pair?.reserve0, pair?.reserve1, pair?.reserveLp, pair?.tokenLp.address])
+    }, [
+        outputAmount,
+        chainId,
+        pair?.reserve0,
+        pair?.reserve1,
+        pair?.reserveLp,
+        pair?.tokenLp.address,
+    ])
 
     const SwapButton = () => {
         const isNotConnected = !account
@@ -471,10 +490,15 @@ const Swap = () => {
                     initDataTransaction.isOpenWaitingModal) && <Blur />}
             </>
             <ToastMessage />
-            <SwapContainer>
+            <SwapContainer ref={ref}>
                 {!account && isOpenWalletModal && (
                     <>
-                        <WalletModal setToggleWalletModal={openWalletModal} />
+                        <WalletModal
+                            setToggleWalletModal={setIsOpenWalletModal}
+                        />
+                        <OpacityModal
+                            onClick={() => setIsOpenWalletModal(false)}
+                        />
                         {/* <Blur /> */}
                     </>
                 )}
@@ -532,31 +556,37 @@ const Swap = () => {
                         }
                     />
                 </div> */}
-                <Referral>
-                    <span>Referral:</span>
-                    <p>
-                        https://app.sobajaswap.com/#/swap?
-                        {account && shortenAddress(account, 6)}
-                    </p>
-                    <span>
-                        {isCopied ? (
-                            <CopyBtn>
-                                <CopyAccountAddress src={imgCheckMark} />
-                                <Tooltip className="tooltip">Copied</Tooltip>
-                            </CopyBtn>
-                        ) : (
-                            <CopyBtn>
-                                <CopyAccountAddress
-                                    onClick={() => handleCopyAddress()}
-                                    src={imgCopy}
-                                />
-                                <Tooltip className="tooltip">
-                                    Click to copy address
-                                </Tooltip>
-                            </CopyBtn>
-                        )}
-                    </span>
-                </Referral>
+                {account ? (
+                    <Referral>
+                        <span>Referral:</span>
+                        <p>
+                            https://app.sobajaswap.com/#/swap?
+                            {account && shortenAddress(account, 5)}
+                        </p>
+                        <span>
+                            {isCopied ? (
+                                <CopyBtn>
+                                    <CopyAccountAddress src={imgCheckMark} />
+                                    <Tooltip className="tooltip">
+                                        Copied
+                                    </Tooltip>
+                                </CopyBtn>
+                            ) : (
+                                <CopyBtn>
+                                    <CopyAccountAddress
+                                        onClick={() => handleCopyAddress()}
+                                        src={imgCopy}
+                                    />
+                                    <Tooltip className="tooltip">
+                                        Click to copy address
+                                    </Tooltip>
+                                </CopyBtn>
+                            )}
+                        </span>
+                    </Referral>
+                ) : (
+                    <LabelMsg>Login to get your referral link</LabelMsg>
+                )}
             </SwapContainer>
         </>
     )
@@ -582,7 +612,7 @@ const SwapContainer = styled(Columns)`
 
 const Referral = styled.div`
     display: grid;
-    grid-template-columns: 54px 1fr 12px;
+    grid-template-columns: 55px 1fr 12px;
     font-size: 14px;
     span {
         color: rgba(0, 255, 163, 1);
@@ -664,6 +694,10 @@ const Icon = styled.div`
     img {
         width: 20px;
     }
+`
+const LabelMsg = styled.div`
+    margin: auto;
+    opacity: 0.5;
 `
 
 export default Swap

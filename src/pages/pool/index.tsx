@@ -233,7 +233,6 @@ export default function Pools() {
     const { position } = useMyPosition()
 
     const rows = useQueryPool()
-    console.log('🤦‍♂️ ⟹ Pools ⟹ rows:', rows)
 
     const [totalPool, setTotalPool] = useState<Data[] | PoolDataMobile[]>()
     const [poolsAdminInCurrentPag, setPoolsAdminInCurrentPag] = useState<
