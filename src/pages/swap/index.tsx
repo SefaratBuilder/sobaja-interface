@@ -322,6 +322,11 @@ const Swap = () => {
                 msg: 'Swap',
                 status: txn.status === 1 ? true : false,
             })
+            /**
+             * @dev reset input && output state when transaction success
+             */
+            onUserInput(Field.INPUT, '')
+            onUserInput(Field.OUTPUT, '')
         } catch (error) {
             initDataTransaction.setError('Failed')
             initDataTransaction.setIsOpenResultModal(true)
