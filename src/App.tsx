@@ -21,6 +21,7 @@ import Pools from 'pages/pool'
 import ToastMessage from 'components/ToastMessage'
 import TestTransaction from 'components/TestTransaction'
 import ReactGA from 'react-ga4'
+import StakeDetails from 'pages/staking'
 
 const App = () => {
     const Updater = () => {
@@ -53,6 +54,7 @@ const App = () => {
                         <Route path="/swap" element={<Swap />} />
                         <Route path="/pools" element={<Pools />} />
                         <Route path="/add" element={<AddLiquidity />} />
+                        {/* <Route path="/staking" element={<StakeDetails />} /> */}
                         <Route path="*" element={<Navigate to="/swap" />} />
                     </Routes>
                     <Polling />
