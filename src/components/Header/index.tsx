@@ -13,7 +13,6 @@ import ConnectorMobile from 'components/ConnectorMobile'
 const Header = () => {
     const [burgerNav, setBurgerNav] = useState(false)
     const navigate = useNavigate()
-    const { account, chainId, deactivate } = useActiveWeb3React()
 
     return (
         <HeaderWrapper>
