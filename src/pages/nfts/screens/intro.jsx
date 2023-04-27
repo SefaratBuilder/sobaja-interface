@@ -1,5 +1,5 @@
 import styled from "styled-components";
-
+import BackgroundIntro from 'assets/nfts/bg-intro-nfts.png'
 const Intro = () => {
     return (
         <Screen>
@@ -14,7 +14,7 @@ const Intro = () => {
     );
 };
 const Screen = styled.div`
-    background: url(/src/assets/nfts/bg-intro-nfts.png);
+    background: url(${BackgroundIntro});
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;

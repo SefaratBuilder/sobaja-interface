@@ -4,15 +4,23 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { Autoplay, Pagination, Navigation } from "swiper";
 import styled from "styled-components";
+import Img1 from 'assets/nfts/nft1.png'
+import Img2 from 'assets/nfts/nft2.png'
+import Img3 from 'assets/nfts/nft3.png'
+import Img4 from 'assets/nfts/nft4.png'
+import Img5 from 'assets/nfts/nft5.png'
+import CircleIcon from 'assets/nfts/end.svg'
+import ArrowPrev from 'assets/nfts/arrow-prev.png'
+import ArrowNext from 'assets/nfts/arrow-next.png'
 
 export default function Carousel() {
     const ItemSlider = [
         {
-            img: "/src/assets/nfts/nft1.png",
+            img: Img1,
             title: "Soba man",
             button: 
-                {   img: "/src/assets/nfts/end.svg",
-                    title: "Ends in",
+                {   img: CircleIcon,
+                    text: "Ends in",
                     time: "06:05:59"
                 },
             description1: "Soba",
@@ -20,12 +28,12 @@ export default function Carousel() {
             
         },
         {
-            img: "/src/assets/nfts/nft2.png",
+            img: Img2,
             title: "Black Valley",
             button: 
                 {
-                    img: "/src/assets/nfts/end.svg",
-                    title: "Ends in",
+                    img: CircleIcon,
+                    text: "Ends in",
                     time: "20:35:59"
                 },
             description1: "WGRT_",
@@ -33,12 +41,12 @@ export default function Carousel() {
             
         },
         {
-            img: "/src/assets/nfts/nft3.png",
+            img: Img3,
             title: "ANDREA CRESPI for The NFT Magazine #03 ISSUE 2K23 | CRYPTOART MONOGRAPH",
             button: 
                 {
-                    img: "/src/assets/nfts/end.svg",
-                    title: "Ends in",
+                    img: CircleIcon,
+                    text: "Ends in",
                     time: "25:35:59"
                 },
                 description1: "Andrea Crespi, The NFT Magazine",
@@ -46,12 +54,12 @@ export default function Carousel() {
             
         },
         {
-            img: "/src/assets/nfts/nft4.png",
+            img: Img4,
             title: "ANA•MOR•PHIC",
             button: 
                 {
-                    img: "/src/assets/nfts/end.svg",
-                    title: "Ends in",
+                    img: CircleIcon,
+                    text: "Ends in",
                     time: "25:35:59"
                 },
                 description1: "steve tanchel",
@@ -59,12 +67,12 @@ export default function Carousel() {
             
         },
         {
-            img: "/src/assets/nfts/nft5.png",
+            img: Img5,
             title: "YUGEN 2",
             button: 
                 {
-                    img: "/src/assets/nfts/end.svg",
-                    title: "Ends in",
+                    img: CircleIcon,
+                    text: "Ends in",
                     time: "20:35:59"
                 },
                 description1: "Martha Fiennes",
@@ -72,11 +80,11 @@ export default function Carousel() {
             
         },
         {
-            img: "/src/assets/nfts/nft1.png",
+            img: Img1,
             title: "Soba man",
             button: 
-                {   img: "/src/assets/nfts/end.svg",
-                    title: "Ends in",
+                {   img: CircleIcon,
+                    text: "Ends in",
                     time: "06:05:59"
                 },
             description1: "Soba",
@@ -84,12 +92,12 @@ export default function Carousel() {
             
         },
         {
-            img: "/src/assets/nfts/nft2.png",
+            img: Img2,
             title: "Black Valley",
             button: 
                 {
-                    img: "/src/assets/nfts/end.svg",
-                    title: "Ends in",
+                    img: CircleIcon,
+                    text: "Ends in",
                     time: "20:35:59"
                 },
             description1: "WGRT_",
@@ -97,12 +105,12 @@ export default function Carousel() {
             
         },
         {
-            img: "/src/assets/nfts/nft3.png",
+            img: Img3,
             title: "ANDREA CRESPI for The NFT Magazine #03 ISSUE 2K23 | CRYPTOART MONOGRAPH",
             button: 
                 {
-                    img: "/src/assets/nfts/end.svg",
-                    title: "Ends in",
+                    img: CircleIcon,
+                    text: "Ends in",
                     time: "25:35:59"
                 },
                 description1: "Andrea Crespi, The NFT Magazine",
@@ -110,12 +118,12 @@ export default function Carousel() {
             
         },
         {
-            img: "/src/assets/nfts/nft4.png",
+            img: Img4,
             title: "ANA•MOR•PHIC",
             button: 
                 {
-                    img: "/src/assets/nfts/end.svg",
-                    title: "Ends in",
+                    img: CircleIcon,
+                    text: "Ends in",
                     time: "25:35:59"
                 },
                 description1: "steve tanchel",
@@ -123,12 +131,12 @@ export default function Carousel() {
             
         },
         {
-            img: "/src/assets/nfts/nft5.png",
+            img: Img5,
             title: "YUGEN 2",
             button: 
                 {
-                    img: "/src/assets/nfts/end.svg",
-                    title: "Ends in",
+                    img: CircleIcon,
+                    text: "Ends in",
                     time: "20:35:59"
                 },
                 description1: "Martha Fiennes",
@@ -172,7 +180,7 @@ export default function Carousel() {
                          <Button>
                             <Icon>
                             <img src={item.button.img} alt="" className="icon"/></Icon>
-                            <Text>{item.button.title}</Text>
+                            <Text>{item.button.text}</Text>
                             <Time>{item.button.time}</Time>
                          </Button>
                          <Title>
@@ -195,14 +203,13 @@ const WrapCarousel = styled.div`
     position:relative;
     margin-bottom:1rem;
      .swiper-button-prev{
-        background-image: url("/src/assets/nfts/arrow-prev.png");
+        background-image: url(${ArrowPrev});
         position:absolute;
         background-repeat: no-repeat;
         background-size:contain;
         right:0;
         height: 35px;
         width: 35px;
-        border-radius: 50%;
         top: 40%;
         z-index: 2;
         transform:translateY(-50%);
@@ -211,14 +218,13 @@ const WrapCarousel = styled.div`
 
     }
     .swiper-button-next{
-        background-image: url("/src/assets/nfts/arrow-next.png");
+        background-image: url(${ArrowNext});
         position:absolute;
         background-repeat: no-repeat;
         background-size:contain;
         right:0;
         height: 35px;
         width: 35px;
-        border-radius: 50%;
         top: 40%;
         z-index: 2;
         transform:translateY(-50%);
@@ -242,7 +248,7 @@ const WrapCarousel = styled.div`
             padding: 15px;
         }
     }
-`
+`;
 const Button = styled.div`
     display: flex;
     gap: 5px;
@@ -281,10 +287,12 @@ const Time = styled.div`
     @media screen and (max-width: 767px){
         font-size: 8px;
         line-height: 12px;
+        margin-top: 4px;
     }
     @media screen and (min-width: 768px) and (max-width: 991px){
         font-size: 9px;
         line-height: 14px;
+        margin-top: 3px;
     }
 `;
 const Title = styled.div`

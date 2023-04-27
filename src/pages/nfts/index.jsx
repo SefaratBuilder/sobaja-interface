@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import Intro from "../nfts/screens/intro";
+import Intro from "./screens/intro";
 import Carousel from "./screens/carousel";
 const NFTs = () => {
 	return (
