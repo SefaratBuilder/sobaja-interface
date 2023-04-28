@@ -61,6 +61,7 @@ export function useETHBalances(
 export function useTokenBalancesWithLoadingIndicator(
     address?: string | null,
     tokens?: (Token | undefined)[],
+    isUpdateApplication?: boolean
 ): [{ [tokenAddress: string]: string | undefined }, boolean] {
     const validatedTokens: Token[] = useMemo(
         () =>
@@ -106,7 +107,7 @@ export function useTokenBalancesWithLoadingIndicator(
                         return memo
                     }, {})
                     : {},
-            [address, validatedTokens, balances],
+            [address, validatedTokens, balances, isUpdateApplication],
         ),
         anyLoading,
     ]
@@ -115,8 +116,9 @@ export function useTokenBalancesWithLoadingIndicator(
 export function useTokenBalances(
     address?: string | null,
     tokens?: (Token | undefined)[],
+    isUpdateApplication?: boolean
 ): { [tokenAddress: string]: string | undefined } {
-    return useTokenBalancesWithLoadingIndicator(address, tokens)[0]
+    return useTokenBalancesWithLoadingIndicator(address, tokens, isUpdateApplication)[0]
 }
 
 // get the balance for a single token/account combo

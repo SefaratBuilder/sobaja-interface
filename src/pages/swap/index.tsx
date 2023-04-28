@@ -319,7 +319,7 @@ const Swap = () => {
                     callResult.hash || ''
                 }`,
                 // hash: tx?.hash || '',
-                msg: 'Swap',
+                msg: `Swap ${tokenIn?.symbol} to ${tokenOut?.symbol}`,
                 status: txn.status === 1 ? true : false,
             })
             /**

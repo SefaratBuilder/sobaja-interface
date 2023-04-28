@@ -10,12 +10,12 @@ import styled from 'styled-components'
 import SuccessIcon from 'assets/icons/success.svg'
 import ErrorIcon from 'assets/icons/close.png'
 import { InitCompTransaction } from 'components/TransactionModal'
+import { useUpdateApplicationState } from 'states/application/hooks'
 
 const Toast = ({ txn }: { txn: Txn }) => {
     const { removeTxn } = useTransactionHandler()
 
     useEffect(() => {
-        // console.log('asdasdadsadsads')
         let timeX = setTimeout(() => {
             removeTxn(txn)
         }, 5000)
@@ -55,9 +55,6 @@ interface ToastMsg {
 
 const ToastMessage = ({ payload, setToastMessageModal }: ToastMsg) => {
     const { txnList } = useTransactionsState()
-    // console.log('🤦‍♂️ ⟹ ToastMessage ⟹ txnList:', { txnList })
-    // const [hash, setHash] = useState<number>(0)
-    // const { addTxn, removeTxn } = useTransactionHandler()
 
     return (
         <ToastMessageWrapper>

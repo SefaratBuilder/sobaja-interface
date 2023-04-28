@@ -25,8 +25,8 @@ const ConfirmTransactionModal = ({
         setConfirmTransaction(false)
     })
 
-    const Swap = () => {
-        const detail = payload?.method === 'swap' ? 'for' : 'x'
+    const Details = () => {
+        const detail = payload?.method === 'swap' ? 'to' : 'x'
         return (
             <ContainerItem>
                 <Header>
@@ -73,7 +73,7 @@ const ConfirmTransactionModal = ({
     return (
         <>
             <Container ref={ref}>
-                {<Swap />}
+                {<Details />}
                 {/* <h1>Hello</h1> */}
                 {/* {payload && payload?.method === 'Add' && <AddLiquidity />}
                 {payload?.method === 'Remove' && <Remove />}
