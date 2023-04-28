@@ -13,6 +13,7 @@ import styled from 'styled-components'
 import Header from 'components/Header'
 import Web3ReactManager from 'components/Web3ReactManager'
 import SwapUpdater from 'states/swap/updater'
+import MintUpdater from 'states/mint/updater'
 import AppUpdater from 'states/application/updater'
 import MulticallUpdater from 'states/multicall/updater'
 import ListUpdater from 'states/lists/updater'
@@ -22,6 +23,7 @@ import NFTs from 'pages/nfts'
 import ToastMessage from 'components/ToastMessage'
 import TestTransaction from 'components/TestTransaction'
 import ReactGA from 'react-ga4'
+import StakeDetails from 'pages/staking'
 
 const App = () => {
     const Updater = () => {
@@ -33,6 +35,7 @@ const App = () => {
         return (
             <>
                 <SwapUpdater />
+                <MintUpdater />
                 <AppUpdater />
                 <MulticallUpdater />
                 <ListUpdater />
@@ -54,6 +57,7 @@ const App = () => {
                         <Route path="/swap" element={<Swap />} />
                         <Route path="/pools" element={<Pools />} />
                         <Route path="/add" element={<AddLiquidity />} />
+                        {/* <Route path="/staking" element={<StakeDetails />} /> */}
                         <Route path="/nfts" element={<NFTs />} />
                         <Route path="*" element={<Navigate to="/swap" />} />
                     </Routes>

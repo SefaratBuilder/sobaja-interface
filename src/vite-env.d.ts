@@ -8,6 +8,8 @@ interface Window {
     web3?: any
     ethereum?: any
     BinanceChain?: any
+    bitkeep?: any
+    okexchain?: any
 }
 
 declare module 'jsbi-calculator'

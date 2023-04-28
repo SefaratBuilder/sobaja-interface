@@ -11,6 +11,7 @@ import {
     ROUTERS,
     FAUCET_ABI,
     Faucet,
+    STAKING_ABI
 } from 'constants/addresses'
 import ERC20 from 'constants/jsons/erc20.json'
 import { PAIR_ABI } from 'constants/jsons/pair'
@@ -54,6 +55,12 @@ export function useRouterContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
     if (!chainId) return null
     return useContract(ROUTERS[chainId], ROUTER_ABI)
+}
+
+export function useStakingContract(): Contract | null {
+    const { chainId } = useActiveWeb3React()
+    if (!chainId) return null
+    return useContract('0x6E7E86F3CE091C4a842b0D27d1c8c4059090eC65', STAKING_ABI)
 }
 
 export function useTokenContract(address: string | undefined): Contract | null {

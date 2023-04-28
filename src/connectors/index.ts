@@ -7,6 +7,7 @@ import { WalletLinkConnector } from '@web3-react/walletlink-connector'
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 import { BscConnector } from '@binance-chain/bsc-connector'
 import { ChainId } from 'interfaces'
+import { BitKeepConnector } from "bitkeep-connector";
 
 const NETWORK_URLS: { [key in ChainId]: string } = {
     [ChainId.ZKMAINNET]: `https://mainnet.era.zksync.io`,
@@ -25,6 +26,13 @@ export function getNetworkLibrary(): Web3Provider {
     return (networkLibrary = networkLibrary ?? getLibrary(network.provider))
 }
 
+export const okex = new InjectedConnector({
+    supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
+});
+
+export const bitkeep = new BitKeepConnector({
+    supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
+});
 export const injected = new InjectedConnector({
     supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
 })
@@ -32,16 +40,17 @@ export const injected = new InjectedConnector({
 export const CoinbaseWallet = new WalletLinkConnector({
     url: `https://zksync2-testnet.zksync.dev`,
     appName: 'Coin base',
-    supportedChainIds: [1, 3, 4, 5, 42, 280],
+    supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
 })
 
 export const walletconnect = new WalletConnectConnector({
-    supportedChainIds: [1, 3, 4, 5, 42, 280],
+    supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
     // rpc: 'https://mainnet.infura.io/v3/',
     // bridge: "https://bridge.walletconnect.org",
     // qrcode: true,
 })
 
 export const binance = new BscConnector({
-    supportedChainIds: [1, 56, 137, 280],
+    supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
 })
+
