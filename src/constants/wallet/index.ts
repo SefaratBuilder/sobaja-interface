@@ -7,7 +7,7 @@ import BITKEEP_ICON from 'assets/icons/BitKeep.jpeg';
 import OKEX_ICON from 'assets/token-logos/okex.png'
 import { InjectedConnector } from '@web3-react/injected-connector';
 
-import { injected, CoinbaseWallet, walletconnect, binance, bitkeep, okex } from 'connectors'
+import { injected, CoinbaseWallet, walletconnect, bitkeep, okex } from 'connectors'
 interface WalletInfo {
     connector?: AbstractConnector
     name: string
@@ -44,15 +44,6 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
         description: 'Connect to Trust Wallet, Rainbow Wallet and more...',
         href: null,
         color: '#4196FC',
-        mobile: true,
-    },
-    Binance: {
-        connector: binance,
-        name: 'Binance Chain Wallet',
-        iconURL: BINANCECONNECT_ICON_URL,
-        description: 'Login using Binance hosted wallet',
-        href: 'https://www.bnbchain.world/en',
-        color: '#4A6C9B',
         mobile: true,
     },
     BitKeep: {
