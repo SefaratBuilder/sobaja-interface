@@ -79,12 +79,14 @@ const AccountDetails = ({
             </Header>
             <WrapContent>
                 <NameBalance>
-                    {NATIVE_COIN?.[chainId].symbol || 'ETH'} Balance
+                    {(chainId && NATIVE_COIN[chainId].symbol) || 'ETH'} Balance
                 </NameBalance>
                 <Balance className={'to'}>
                     {balance ? balance.toString() : 0}
                 </Balance>
-                <Balance>{NATIVE_COIN?.[chainId].symbol || 'ETH'}</Balance>
+                <Balance>
+                    {(chainId && NATIVE_COIN[chainId].symbol) || 'ETH'}
+                </Balance>
                 <WrapButton>
                     <NavLink to="">
                         <PrimaryButton
