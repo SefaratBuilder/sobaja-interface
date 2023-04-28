@@ -15,7 +15,6 @@ const NetworkSelector = () => {
     const { chainId } = useActiveWeb3React()
     const [activeDot, setActiveDot] = useState(0)
     const ref = useRef<any>()
-    // const { address, network, wallet } = useActiveWeb3React()
 
     const networkRef = useRef<any>()
     useOnClickOutside(networkRef, () => {

@@ -3,9 +3,11 @@ import METAMASK_ICON_URL from 'assets/icons/metamask.svg'
 import COINBASE_ICON_URL from 'assets/icons/coinbase.svg'
 import BINANCECONNECT_ICON_URL from 'assets/icons/binance.svg'
 import WALLETCONNECT_ICON_URL from 'assets/icons/wallet-connect.svg'
-import BITKEEP_ICON from 'assets/icons/BitKeep.jpeg'
-import { InjectedConnector } from '@web3-react/injected-connector'
-import { injected, CoinbaseWallet, walletconnect, binance, bitkeep } from 'connectors'
+import BITKEEP_ICON from 'assets/icons/BitKeep.jpeg';
+import OKEX_ICON from 'assets/token-logos/okex.png'
+import { InjectedConnector } from '@web3-react/injected-connector';
+
+import { injected, CoinbaseWallet, walletconnect, binance, bitkeep, okex } from 'connectors'
 interface WalletInfo {
     connector?: AbstractConnector
     name: string
@@ -53,13 +55,22 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
         color: '#4A6C9B',
         mobile: true,
     },
-    // BitKeep: {
-    // connector: bitkeep,
-    // name: 'BitKeep Wallet',
-    // iconURL: BITKEEP_ICON,
-    // description: 'Login using BitKeep hosted wallet',
-    // href: 'https://bitkeep.com/',
-    // color: '#4A6C9B',
-    // mobile: true,
-    // },
+    BitKeep: {
+        connector: bitkeep,
+        name: 'BitKeep Wallet',
+        iconURL: BITKEEP_ICON,
+        description: 'Login using BitKeep hosted wallet',
+        href: 'https://bitkeep.com/',
+        color: '#4A6C9B',
+        mobile: true,
+    },
+    OkexChain: {
+        connector: okex,
+        name: 'OKX Wallet',
+        iconURL: OKEX_ICON,
+        description: 'Login using OKX hosted wallet',
+        href: 'https://www.okx.com/vi/download',
+        color: '#4A6C9B',
+        mobile: true,
+    },
 }
