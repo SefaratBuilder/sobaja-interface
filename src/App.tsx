@@ -13,6 +13,7 @@ import styled from 'styled-components'
 import Header from 'components/Header'
 import Web3ReactManager from 'components/Web3ReactManager'
 import SwapUpdater from 'states/swap/updater'
+import MintUpdater from 'states/mint/updater'
 import AppUpdater from 'states/application/updater'
 import MulticallUpdater from 'states/multicall/updater'
 import ListUpdater from 'states/lists/updater'
@@ -34,6 +35,7 @@ const App = () => {
         return (
             <>
                 <SwapUpdater />
+                <MintUpdater />
                 <AppUpdater />
                 <MulticallUpdater />
                 <ListUpdater />
