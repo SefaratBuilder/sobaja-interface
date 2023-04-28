@@ -16,7 +16,10 @@ import {
     isNativeCoin,
 } from 'utils'
 import { div, mul, mulNumberWithDecimal } from 'utils/math'
-import { useAppState } from 'states/application/hooks'
+import {
+    useAppState,
+    useUpdateApplicationState,
+} from 'states/application/hooks'
 import { useActiveWeb3React } from 'hooks'
 import { useRouterContract } from 'hooks/useContract'
 import { useNavigate } from 'react-router-dom'
@@ -34,11 +37,30 @@ import { ZeroAddress } from 'ethers'
 import { sendEvent } from 'utils/analytics'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import Pagination from 'components/Pagination'
+import { useMintActionHandlers } from 'states/mint/hooks'
 
-const MyPools = () => {
+interface Positions {
+    position: (
+        | {
+              value: string
+              valueWithDec: string
+              tokenLp: any
+              token0: any
+              token1: any
+              percent: number
+              totalLp: any
+              totalReserve0: any
+              totalReserve1: any
+          }
+        | undefined
+    )[]
+    tokenList: string[]
+}
+
+const MyPools = ({ position, tokenList }: Positions) => {
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
     const [percentValue, setPercentValue] = useState(0)
-    const { position, tokenList } = useMyPosition()
+    // const { position, tokenList } = useMyPosition()
     const totalPage = position?.length > 0 ? Math.ceil(position?.length / 6) : 1
     const [page, setPage] = useState(1)
 
@@ -49,7 +71,8 @@ const MyPools = () => {
     const [poolRemove, setPoolRemove] = useState<(typeof position)[0]>()
     const navigate = useNavigate()
     const urlTokens = useTokensUrl(tokenList)
-    const { onTokenSelection } = useSwapActionHandlers()
+    const { onTokenSelection } = useMintActionHandlers()
+    const updateAppication = useUpdateApplicationState()
     const { slippage } = useAppState()
     const { account, chainId } = useActiveWeb3React()
     const routerContract = useRouterContract()
@@ -62,6 +85,11 @@ const MyPools = () => {
         routerAddress,
         poolRemove?.tokenLp,
     )
+
+    useEffect(() => {
+        setPositionInCurrentPage(position?.slice(0, 6) || [])
+    }, [position])
+
     const isInsufficientAllowance = useMemo(
         () =>
             Number(tokenApproval?.allowance) <
@@ -117,6 +145,8 @@ const MyPools = () => {
     }
 
     const handleOnAdd = (item: (typeof position)[0]) => {
+        console.log({ item })
+
         onTokenSelection(Field.INPUT, item?.token0)
         onTokenSelection(Field.OUTPUT, item?.token1)
 
@@ -133,7 +163,16 @@ const MyPools = () => {
                     method: 'remove',
                     tokenIn: poolRemove?.token0,
                     tokenOut: poolRemove?.token1,
+                    input: (
+                        (poolRemove?.token0?.value * percentValue) /
+                        100
+                    ).toFixed(4),
+                    output: (
+                        (poolRemove?.token1?.value * percentValue) /
+                        100
+                    ).toFixed(4),
                 })
+
                 initDataTransaction.setIsOpenConfirmModal(true)
             }
         } catch (error) {
@@ -259,9 +298,12 @@ const MyPools = () => {
                             'transaction',
                         ) || '',
                     // hash: tx?.hash || '',
-                    msg: 'Remove',
+                    msg: `Remove ${poolRemove.token0?.symbol} and ${poolRemove.token1?.symbol}`,
                     status: txn.status === 1 ? true : false,
                 })
+
+                updateAppication()
+                // navigate('/pools')
             }
         } catch (error) {
             console.log(error)

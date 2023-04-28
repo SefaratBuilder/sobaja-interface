@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import imgClose from 'assets/icons/icon-close.svg'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
-import { injected, binance } from 'connectors/index'
+import { injected, binance, bitkeep, okex } from 'connectors/index'
 import AccountDetails from 'components/AccountDetails'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import Loader from 'components/Loader'
@@ -23,7 +23,19 @@ const WALLET_VIEWS = {
 const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
     const [isAgreePolicy, setIsAgreePolicy] = useState<boolean>(false)
     const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT)
-    const { activate, deactivate, connector, error, account } = useWeb3React()
+    const {
+        activate,
+        deactivate,
+        connector,
+        error,
+        account,
+        chainId,
+        library,
+    } = useWeb3React()
+    console.log('account11', account)
+    console.log('chainId11', chainId)
+    console.log('library11', library)
+
     const [pendingError, setPendingError] = useState<boolean>(false)
     const [pendingWallet, setPendingWallet] = useState<
         AbstractConnector | undefined
@@ -97,7 +109,9 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                 }
             }
             if (option.connector == binance) {
+                console.log('binance ko ?')
                 //don't show injected if there's no injected provider
+                console.log(window.BinanceChain)
                 if (!window.BinanceChain) {
                     if (option.name === 'Binance Chain Wallet') {
                         return (
@@ -114,6 +128,58 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                                 >
                                     <img src={option.iconURL}></img>
                                     <span>Install Binance</span>
+                                </ItemContent>
+                            </Item>
+                        )
+                    } else {
+                        return null //dont want to return install twice
+                    }
+                }
+            }
+            if (option.connector == bitkeep) {
+                //don't show injected if there's no injected provider
+                if (!window.bitkeep) {
+                    if (option.name === 'BitKeep Wallet') {
+                        return (
+                            <Item
+                                isChecked={isAgreePolicy}
+                                key={key + option.name}
+                            >
+                                <ItemContent
+                                    onClick={() =>
+                                        option.href &&
+                                        option.href !== null &&
+                                        window.open(option.href)
+                                    }
+                                >
+                                    <img src={option.iconURL}></img>
+                                    <span>Install BitKeep</span>
+                                </ItemContent>
+                            </Item>
+                        )
+                    } else {
+                        return null //dont want to return install twice
+                    }
+                }
+            }
+            if (option.connector == okex) {
+                //don't show injected if there's no injected provider
+                if (!window.okexchain) {
+                    if (option.name === 'OKX Wallet') {
+                        return (
+                            <Item
+                                isChecked={isAgreePolicy}
+                                key={key + option.name}
+                            >
+                                <ItemContent
+                                    onClick={() =>
+                                        option.href &&
+                                        option.href !== null &&
+                                        window.open(option.href)
+                                    }
+                                >
+                                    <img src={option.iconURL}></img>
+                                    <span>Install OKX</span>
                                 </ItemContent>
                             </Item>
                         )
@@ -211,7 +277,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                 {walletView == WALLET_VIEWS.PENDING ? (
                     <ContainerPending>
                         <WrapContentPending>
-                            <Header>
+                            <HeaderPending>
                                 <span>Connect a {pendingNameWallet}</span>
                                 <div>
                                     {' '}
@@ -228,7 +294,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                                         alt=""
                                     />
                                 </div>
-                            </Header>
+                            </HeaderPending>
                             <WrapContent>
                                 <WrapItemPending
                                     className={`${
@@ -278,10 +344,10 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
 }
 
 const LoadingWrapper = styled.div<{ borderError: boolean }>`
-    gap: 2px;
+    gap: 13px;
     align-items: center;
     justify-content: center;
-    width: 90%;
+    /* width: 90%; */
     display: flex;
     flex-direction: column;
     /* border: ${({ borderError }) =>
@@ -350,6 +416,22 @@ const BtnClose = styled.img`
     }
 `
 
+const HeaderPending = styled.div`
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 1.5rem 0;
+    align-items: center;
+    span {
+        cursor: pointer;
+        color: ${({ theme }) => theme.text1};
+        font-family: 'Verdana';
+        font-style: normal;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 39px;
+    }
+`
+
 const Header = styled.div`
     display: flex;
     justify-content: space-between;
@@ -377,6 +459,7 @@ const Header = styled.div`
         padding: 0.5rem 1rem;
     }
 `
+
 const WrapContent = styled.div`
     padding: 0.5rem 1.5rem 1.2rem;
 

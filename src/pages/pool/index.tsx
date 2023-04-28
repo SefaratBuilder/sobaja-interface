@@ -230,7 +230,7 @@ export default function Pools() {
     const [searchName, setSearchName] = useState('')
     const [isMyPositionPage, setIsMyPositionPage] = useState(false)
     const { width } = useWindowDimensions()
-    const { position } = useMyPosition()
+    const { position, tokenList } = useMyPosition()
 
     const rows = useQueryPool()
 
@@ -254,7 +254,7 @@ export default function Pools() {
                     apr: i.apr,
                     tvlValue: i.tvlValue,
                     addresses: i.addresses,
-                    symbols: i.symbols
+                    symbols: i.symbols,
                 }
             })
             setPoolsAdminInCurrentPag(newFilterData)
@@ -275,7 +275,7 @@ export default function Pools() {
             setTotalPool(rows)
         }
     }, [rows])
-    
+
     useEffect(() => {
         if (totalPool) handleDataInCurrentPage()
     }, [totalPool, page])
@@ -348,7 +348,7 @@ export default function Pools() {
                         apr: i.apr,
                         tvlValue: i.tvlValue,
                         addresses: i.addresses,
-                        symbols: i.symbols
+                        symbols: i.symbols,
                     }
                 }),
                 getComparator(order, 'tvlValue'),
@@ -402,7 +402,7 @@ export default function Pools() {
             setTotalPage(rows?.length > 0 ? Math.ceil(rows.length / 10) : 1)
         }
     }
-    console.log({poolsAdminInCurrentPag})
+    console.log({ poolsAdminInCurrentPag })
     const isSelected = (name: string) => selected.indexOf(name) !== -1
 
     return (
@@ -542,10 +542,12 @@ export default function Pools() {
                                                                                 <div className="label">
                                                                                     <PairTokens
                                                                                         tokenA={
-                                                                                            row.symbols[1]
+                                                                                            row
+                                                                                                .symbols[1]
                                                                                         }
                                                                                         tokenB={
-                                                                                            row.symbols[2]
+                                                                                            row
+                                                                                                .symbols[2]
                                                                                         }
                                                                                     />
                                                                                     <div className="name">
@@ -618,8 +620,14 @@ export default function Pools() {
                                                                                     }
                                                                                 >
                                                                                     <PairTokens
-                                                                                        tokenA={row.symbols[1]}
-                                                                                        tokenB={row.symbols[2]}
+                                                                                        tokenA={
+                                                                                            row
+                                                                                                .symbols[1]
+                                                                                        }
+                                                                                        tokenB={
+                                                                                            row
+                                                                                                .symbols[2]
+                                                                                        }
                                                                                     />
                                                                                     <div className="name">
                                                                                         {
@@ -683,7 +691,9 @@ export default function Pools() {
                         </>
                     )}
 
-                    {isMyPositionPage && <MyPools />}
+                    {isMyPositionPage && (
+                        <MyPools position={position} tokenList={tokenList} />
+                    )}
                 </CustomizeBox>
             </Container>
         </>
@@ -713,7 +723,7 @@ const Container = styled.div`
     }
 
     .black-bg2 {
-        background: rgba(255,255,255,0.3) !important;
+        background: rgba(255, 255, 255, 0.3) !important;
         min-width: 84px;
     }
 

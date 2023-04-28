@@ -9,6 +9,7 @@ interface Window {
     ethereum?: any
     BinanceChain?: any
     bitkeep?: any
+    okexchain?: any
 }
 
 declare module 'jsbi-calculator'

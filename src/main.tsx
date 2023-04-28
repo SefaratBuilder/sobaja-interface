@@ -9,7 +9,7 @@ import { Buffer } from 'buffer'
 const Web3ProviderNetwork = createWeb3ReactRoot('NETWORK')
 import ReactGA from 'react-ga4'
 
-ReactGA.initialize('G-DFS071B0YW')
+ReactGA.initialize('G-K8KM7MVBW1')
 
 window.Buffer = Buffer
 

@@ -13,7 +13,7 @@ const Updater = () => {
             const newList = currentList.filter(
                 (item) =>
                     item.chainId === chainId ||
-                    item.address === NATIVE_COIN.address,
+                    item.address === NATIVE_COIN[chainId].address,
             )
             updateCurrentList(newList)
         }
