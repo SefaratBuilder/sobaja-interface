@@ -18,6 +18,7 @@ import MulticallUpdater from 'states/multicall/updater'
 import ListUpdater from 'states/lists/updater'
 import Polling from 'components/Polling'
 import Pools from 'pages/pool'
+import NFTs from 'pages/nfts'
 import ToastMessage from 'components/ToastMessage'
 import TestTransaction from 'components/TestTransaction'
 import ReactGA from 'react-ga4'
@@ -53,6 +54,7 @@ const App = () => {
                         <Route path="/swap" element={<Swap />} />
                         <Route path="/pools" element={<Pools />} />
                         <Route path="/add" element={<AddLiquidity />} />
+                        <Route path="/nfts" element={<NFTs />} />
                         <Route path="*" element={<Navigate to="/swap" />} />
                     </Routes>
                     <Polling />
