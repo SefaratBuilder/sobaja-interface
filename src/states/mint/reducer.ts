@@ -14,7 +14,7 @@ export interface MintState {
 const initialState: MintState = {
     inputAmount: '',
     outputAmount: '',
-    tokenIn: NATIVE_COIN,
+    tokenIn: NATIVE_COIN[324],
     tokenOut: undefined,
     swapType: Field.INPUT,
 }

@@ -140,8 +140,8 @@ export function useCurrencyBalances(
     return useMemo(
         () =>
             currencies?.map((currency) => {
-                if (!account || !currency) return undefined
-                if (currency.address === NATIVE_COIN.address) {
+                if (!account || !currency || !chainId) return undefined
+                if (currency.address === NATIVE_COIN[chainId].address) {
                     return ethBalance[account]
                 }
                 if (currency) return tokenBalances[currency.address]
@@ -162,18 +162,18 @@ export function useCurrencyBalance(
 export function useAllTokenBalances(): {
     [tokenAddress: string]: string | undefined
 } {
-    const { account } = useActiveWeb3React()
+    const { account, chainId } = useActiveWeb3React()
     const currentList = useTokenList()
     const balances = useTokenBalances(account ?? undefined, currentList)
     let ethBalanceWithAccountKey = useETHBalances([account])
     let ethBalanceWithTokenKey = {}
-
-    Object.keys(ethBalanceWithAccountKey).map((k) => {
-        ethBalanceWithTokenKey = {
-            [NATIVE_COIN.address]: ethBalanceWithAccountKey[k],
-            ...ethBalanceWithTokenKey,
-        }
-    })
+    chainId &&
+        Object.keys(ethBalanceWithAccountKey).map((k) => {
+            ethBalanceWithTokenKey = {
+                [NATIVE_COIN[chainId].address]: ethBalanceWithAccountKey[k],
+                ...ethBalanceWithTokenKey,
+            }
+        })
 
     return { ...ethBalanceWithTokenKey, ...balances } ?? {}
 }
