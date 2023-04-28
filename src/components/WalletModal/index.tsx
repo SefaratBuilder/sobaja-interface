@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import imgClose from 'assets/icons/icon-close.svg'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
-import { injected, binance, bitkeep, okex } from 'connectors/index'
+import { injected, bitkeep, okex } from 'connectors/index'
 import AccountDetails from 'components/AccountDetails'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import Loader from 'components/Loader'
@@ -89,6 +89,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             >
                                 <ItemContent
                                     onClick={() =>
+                                        isAgreePolicy &&
                                         option.href &&
                                         option.href !== null &&
                                         window.open(option.href)
@@ -108,34 +109,6 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     return null
                 }
             }
-            if (option.connector == binance) {
-                console.log('binance ko ?')
-                //don't show injected if there's no injected provider
-                console.log(window.BinanceChain)
-                if (!window.BinanceChain) {
-                    if (option.name === 'Binance Chain Wallet') {
-                        return (
-                            <Item
-                                isChecked={isAgreePolicy}
-                                key={key + option.name}
-                            >
-                                <ItemContent
-                                    onClick={() =>
-                                        option.href &&
-                                        option.href !== null &&
-                                        window.open(option.href)
-                                    }
-                                >
-                                    <img src={option.iconURL}></img>
-                                    <span>Install Binance</span>
-                                </ItemContent>
-                            </Item>
-                        )
-                    } else {
-                        return null //dont want to return install twice
-                    }
-                }
-            }
             if (option.connector == bitkeep) {
                 //don't show injected if there's no injected provider
                 if (!window.bitkeep) {
@@ -147,6 +120,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             >
                                 <ItemContent
                                     onClick={() =>
+                                        isAgreePolicy &&
                                         option.href &&
                                         option.href !== null &&
                                         window.open(option.href)
@@ -173,6 +147,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             >
                                 <ItemContent
                                     onClick={() =>
+                                        isAgreePolicy &&
                                         option.href &&
                                         option.href !== null &&
                                         window.open(option.href)
@@ -236,16 +211,12 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     </div>
                 </Header>
                 <WrapContent>
-                    <Title>
+                    {/* <Title>
                         <div>
                             Connect wallet in one click to start using
                             Sobajaswap
                         </div>
-                    </Title>
-
-                    <WrapItem className={`${isAgreePolicy ? 'active' : ''}`}>
-                        {getOptions()}
-                    </WrapItem>
+                    </Title> */}
                     <Title>
                         <div>
                             By connecting a wallet, you agree to&nbsp;
@@ -269,6 +240,9 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             </span>
                         </div>
                     </Title>
+                    <WrapItem className={`${isAgreePolicy ? 'active' : ''}`}>
+                        {getOptions()}
+                    </WrapItem>
                 </WrapContent>
                 {/* <Footer>
                     <a href="#">Learn more about wallets</a>
@@ -475,6 +449,7 @@ const Title = styled.div`
 
     div {
         font-size: 14px;
+        margin-bottom: 15px;
     }
 
     div:first-child {
@@ -523,6 +498,7 @@ const WrapItemPending = styled.div`
     }
     @media screen and (max-width: 576px) {
         padding: 1rem;
+
         div:nth-child(4) {
             order: 1;
         }
@@ -545,6 +521,13 @@ const WrapItem = styled.div`
     }
     @media screen and (max-width: 576px) {
         padding: 1rem;
+        grid-template-columns: 1fr;
+        max-height: 300px;
+        overflow: auto;
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
         div:nth-child(4) {
             order: 1;
         }
@@ -568,7 +551,7 @@ const Item = styled.div<{ isChecked: boolean }>`
         background: rgba(146, 129, 129, 0.13);
     }
     @media screen and (max-width: 576px) {
-        width: 45%;
+        /* width: 45%; */
     }
 `
 const ItemContent = styled.button`

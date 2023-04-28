@@ -52,7 +52,7 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
             .replace(/(\..*?)\..*/g, '$1')
         console.log('eeeeeeee', e)
         if (Number(e) < 1) {
-            setDeadline(Number(e) * 60)
+            setDeadline(Number(1) * 60)
             setTextError('Your transaction may be failed')
         } else if (Number(e) > 60) {
             setTextError('Your transaction can take a long time')
@@ -182,7 +182,6 @@ const InputTime = styled.input`
     border-radius: 6px;
     text-align: right;
     ::placeholder {
-        
         color: #c9c9c9;
     }
 `
@@ -195,7 +194,7 @@ const TransactionSetting = styled.div`
     align-items: flex-start;
 `
 
-const Container = styled.div<{ref: any}>`
+const Container = styled.div<{ ref: any }>`
     position: absolute;
     /* width: 360px; */
     height: fit-content;
@@ -356,7 +355,7 @@ const SlippageText = styled.div`
     padding: 0.6rem 1rem;
     font-weight: 400;
     word-break: break-word;
-    
+
     background: rgba(157, 195, 230, 0.8);
     box-shadow: ${({ theme }) => theme.boxShadow};
     border: 1px solid ${({ theme }) => theme.bd1};

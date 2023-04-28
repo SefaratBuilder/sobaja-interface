@@ -50,7 +50,4 @@ export const walletconnect = new WalletConnectConnector({
     // qrcode: true,
 })
 
-export const binance = new BscConnector({
-    supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
-})
 
