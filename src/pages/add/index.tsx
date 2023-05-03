@@ -14,7 +14,7 @@ import {
     ALL_SUPPORTED_CHAIN_IDS,
     URLSCAN_BY_CHAINID,
     WRAPPED_NATIVE_COIN,
-    ZERO_ADDESS,
+    ZERO_ADDRESS,
 } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { ZeroAddress } from 'ethers'
@@ -74,10 +74,10 @@ const Add = () => {
 
     const isInsufficientAllowanceTokenIn =
         Number(tokenInApproval?.allowance) < Number(inputAmount) &&
-        tokenIn?.address !== ZERO_ADDESS
+        tokenIn?.address !== ZERO_ADDRESS
     const isInsufficientAllowanceTokenOut =
         Number(tokenOutApproval?.allowance) < Number(outputAmount) &&
-        tokenOut?.address !== ZERO_ADDESS
+        tokenOut?.address !== ZERO_ADDRESS
     const isInsufficientAllowance =
         isInsufficientAllowanceTokenIn || isInsufficientAllowanceTokenOut
 

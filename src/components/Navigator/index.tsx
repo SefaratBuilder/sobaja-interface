@@ -11,12 +11,6 @@ interface NavigationProps {
 export const itemNav = [
     { path: '/swap', name: 'Swap', img: '' },
     { path: '/pools', name: 'Pools', img: '' },
-    {
-        path: 'https://portal.zksync.io/bridge',
-        name: 'Bridge',
-        img: '',
-        target: '_blank',
-    },
     { path: '/earns', name: 'Earn', img: '' },
     { path: '/nfts', name: 'NFTs', img: '' },
     { path: '/launchpad', name: 'Launchpad', img: '' },

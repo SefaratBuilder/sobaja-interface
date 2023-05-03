@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import {
     Routes,
     Route,
@@ -7,8 +7,6 @@ import {
     useLocation,
 } from 'react-router-dom'
 import { GlobalStyle } from './styles'
-import Swap from 'pages/swap'
-import AddLiquidity from 'pages/add'
 import styled from 'styled-components'
 import Header from 'components/Header'
 import Web3ReactManager from 'components/Web3ReactManager'
@@ -17,10 +15,12 @@ import AppUpdater from 'states/application/updater'
 import MulticallUpdater from 'states/multicall/updater'
 import ListUpdater from 'states/lists/updater'
 import Polling from 'components/Polling'
+import Swap from 'pages/swap'
+import AddLiquidity from 'pages/add'
 import Pools from 'pages/pool'
-import ToastMessage from 'components/ToastMessage'
-import TestTransaction from 'components/TestTransaction'
 import ReactGA from 'react-ga4'
+const Launchpad = React.lazy(() => import('./pages/launchpad'));  
+
 
 const App = () => {
     const Updater = () => {
@@ -53,6 +53,11 @@ const App = () => {
                         <Route path="/swap" element={<Swap />} />
                         <Route path="/pools" element={<Pools />} />
                         <Route path="/add" element={<AddLiquidity />} />
+                        <Route path="/test-launchpad" element={
+                            <Suspense fallback="">
+                                <Launchpad />
+                            </Suspense>
+                        } />
                         <Route path="*" element={<Navigate to="/swap" />} />
                     </Routes>
                     <Polling />
