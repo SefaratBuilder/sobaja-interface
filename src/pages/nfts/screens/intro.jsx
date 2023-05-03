@@ -19,7 +19,7 @@ const Screen = styled.div`
     background-repeat: no-repeat;
     background-position: center;
 `;
-const Content= styled.div`
+const Content = styled.div`
     padding: 4rem 20px;
 `;
 const Title = styled.div`

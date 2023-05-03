@@ -4,7 +4,9 @@ import MATIC_LOGO from 'assets/token-logos/matic.png'
 import tokenList from './jsons/tokenList.json'
 import { WRAPPED_NATIVE_ADDRESSES } from './addresses'
 
-export const ZERO_ADDESS = '0x0000000000000000000000000000000000000000'
+export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+export const ETHER_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 
 export const NATIVE_COIN: { [chainId in number]: Token } = {
     [ChainId.GOERLI]: {
@@ -122,3 +124,10 @@ export const ALL_SUPPORTED_CHAIN_IDS: ChainId[] = [
     ChainId.GOERLI,
     ChainId.MUMBAI,
 ]
+
+export const LAUNCHPAD_SUBGRAPH_URL: { [chainId in number]: string } = {
+    [ChainId.GOERLI]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad',
+    [ChainId.MUMBAI]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad',
+    [ChainId.ZKMAINNET]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad',
+    [ChainId.ZKMAINNET]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad'
+}
