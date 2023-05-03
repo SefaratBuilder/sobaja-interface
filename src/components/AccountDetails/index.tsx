@@ -12,6 +12,7 @@ import imgPlusWallet from 'assets/icons/plus-wallet.svg'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
 import iconSetting from 'assets/icons/setting.svg'
+import { NATIVE_COIN } from 'constants/index'
 
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -21,7 +22,7 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account, deactivate } = useActiveWeb3React()
+    const { account, deactivate, chainId } = useActiveWeb3React()
 
     const [isCopied, setIsCopied] = useState<boolean>(false)
 
@@ -77,11 +78,15 @@ const AccountDetails = ({
                 </WrapBtnHeader>
             </Header>
             <WrapContent>
-                <NameBalance>ETH Balance</NameBalance>
+                <NameBalance>
+                    {(chainId && NATIVE_COIN[chainId].symbol) || 'ETH'} Balance
+                </NameBalance>
                 <Balance className={'to'}>
                     {balance ? balance.toString() : 0}
                 </Balance>
-                <Balance>ETH</Balance>
+                <Balance>
+                    {(chainId && NATIVE_COIN[chainId].symbol) || 'ETH'}
+                </Balance>
                 <WrapButton>
                     <NavLink to="">
                         <PrimaryButton

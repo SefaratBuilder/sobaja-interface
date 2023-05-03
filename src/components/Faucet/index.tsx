@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import PrimaryButton, { Button } from 'components/Buttons/PrimaryButton'
 import styled from 'styled-components'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
@@ -12,12 +12,20 @@ import { Error } from 'components/Text'
 import { Row } from 'components/Layouts'
 import { sendEvent } from 'utils/analytics'
 import Blur from 'components/Blur'
+import ComponentsTransaction, {
+    InitCompTransaction,
+} from 'components/TransactionModal'
+import { URLSCAN_BY_CHAINID } from 'constants/index'
+import { useTransactionHandler } from 'states/transactions/hooks'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
     const { chainId } = useActiveWeb3React()
+    const initDataTransaction = InitCompTransaction()
+    const { addTxn } = useTransactionHandler()
+
     const isDisable = useMemo(
         () => (chainId && chainId != 280) || false,
         [chainId],
@@ -27,16 +35,44 @@ const Faucet = () => {
         setIsDisplayFaucet(false)
     })
 
-    const clickFaucetToken = async (erc20: string) => {
-        if (faucetContract == null) return
-        const fc = await faucetContract?.requestTokens(erc20)
-        console.log('🤦‍♂️ ⟹ clickFaucetToken ⟹ fc:', fc)
+    useEffect(() => {
+        initDataTransaction.setError('')
+        initDataTransaction.setIsOpenResultModal(false)
+    }, [isDislayFaucet])
 
-        sendEvent({
-            category: 'Defi',
-            action: 'Faucet',
-            label: erc20,
-        })
+    const clickFaucetToken = async (erc20: string) => {
+        try {
+            if (faucetContract == null) return
+            setIsDisplayFaucet(false)
+            initDataTransaction.setIsOpenWaitingModal(true)
+
+            const tx = await faucetContract?.requestTokens(erc20)
+
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
+            const result = await tx.wait()
+
+            initDataTransaction.setIsOpenResultModal(false)
+
+            addTxn({
+                hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                    result.hash || ''
+                }`,
+                msg: 'Faucet',
+                status: result.status === 1 ? true : false,
+            })
+            sendEvent({
+                category: 'Defi',
+                action: 'Faucet',
+                label: erc20,
+            })
+            setIsDisplayFaucet(false)
+        } catch (err) {
+            console.log('Failed to approve token: ', err)
+            initDataTransaction.setError('Failed')
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
+        }
     }
 
     const showMintCoins = () => {
@@ -71,6 +107,10 @@ const Faucet = () => {
             <BtnFaucet onClick={() => setIsDisplayFaucet(!isDislayFaucet)}>
                 Faucet
             </BtnFaucet>
+            <ComponentsTransaction
+                data={initDataTransaction}
+                onConfirm={() => {}}
+            />
             {isDislayFaucet ? (
                 <FaucetModalDiv>
                     <ContainerFaucetModal

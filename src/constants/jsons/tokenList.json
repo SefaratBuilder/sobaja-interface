@@ -32,11 +32,11 @@
         "chainId": 324
     },
     {
-        "address": "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa",
-        "symbol": "WETH",
+        "address": "0x9c3c9283d3e44854697cd22d3faa240cfb032889",
+        "symbol": "WMATIC",
         "decimals": 18,
-        "logoURI": "https://raw.githubusercontent.com/forbitspace/icons/main/token/eth.jpg",
-        "name": "Wrapped Ethereum",
+        "logoURI": "https://seeklogo.com/images/P/polygon-matic-logo-1DFDA3A3A8-seeklogo.com.png",
+        "name": "Wrapped Matic",
         "chainId": 80001
     },
     {

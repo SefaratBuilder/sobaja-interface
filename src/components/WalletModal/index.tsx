@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import imgClose from 'assets/icons/icon-close.svg'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
-import { injected, binance } from 'connectors/index'
+import { injected, bitkeep, okex } from 'connectors/index'
 import AccountDetails from 'components/AccountDetails'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import Loader from 'components/Loader'
@@ -23,7 +23,19 @@ const WALLET_VIEWS = {
 const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
     const [isAgreePolicy, setIsAgreePolicy] = useState<boolean>(false)
     const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT)
-    const { activate, deactivate, connector, error, account } = useWeb3React()
+    const {
+        activate,
+        deactivate,
+        connector,
+        error,
+        account,
+        chainId,
+        library,
+    } = useWeb3React()
+    console.log('account11', account)
+    console.log('chainId11', chainId)
+    console.log('library11', library)
+
     const [pendingError, setPendingError] = useState<boolean>(false)
     const [pendingWallet, setPendingWallet] = useState<
         AbstractConnector | undefined
@@ -77,13 +89,14 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             >
                                 <ItemContent
                                     onClick={() =>
+                                        isAgreePolicy &&
                                         option.href &&
                                         option.href !== null &&
                                         window.open(option.href)
                                     }
                                 >
                                     <img src={option.iconURL}></img>
-                                    <span>Install Metamask</span>
+                                    <span>Install MetaMask</span>
                                 </ItemContent>
                             </Item>
                         )
@@ -96,10 +109,10 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     return null
                 }
             }
-            if (option.connector == binance) {
+            if (option.connector == bitkeep) {
                 //don't show injected if there's no injected provider
-                if (!window.BinanceChain) {
-                    if (option.name === 'Binance Chain Wallet') {
+                if (!window.bitkeep) {
+                    if (option.name === 'BitKeep Wallet') {
                         return (
                             <Item
                                 isChecked={isAgreePolicy}
@@ -107,13 +120,41 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             >
                                 <ItemContent
                                     onClick={() =>
+                                        isAgreePolicy &&
                                         option.href &&
                                         option.href !== null &&
                                         window.open(option.href)
                                     }
                                 >
                                     <img src={option.iconURL}></img>
-                                    <span>Install Binance</span>
+                                    <span>Install BitKeep</span>
+                                </ItemContent>
+                            </Item>
+                        )
+                    } else {
+                        return null //dont want to return install twice
+                    }
+                }
+            }
+            if (option.connector == okex) {
+                //don't show injected if there's no injected provider
+                if (!window.okexchain) {
+                    if (option.name === 'OKX Wallet') {
+                        return (
+                            <Item
+                                isChecked={isAgreePolicy}
+                                key={key + option.name}
+                            >
+                                <ItemContent
+                                    onClick={() =>
+                                        isAgreePolicy &&
+                                        option.href &&
+                                        option.href !== null &&
+                                        window.open(option.href)
+                                    }
+                                >
+                                    <img src={option.iconURL}></img>
+                                    <span>Install OKX</span>
                                 </ItemContent>
                             </Item>
                         )
@@ -157,7 +198,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
         return (
             <Container isConnected={true}>
                 <Header>
-                    <span>Connect a wallet</span>
+                    <span>Connect</span>
                     <div>
                         {' '}
                         <BtnClose
@@ -170,14 +211,20 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     </div>
                 </Header>
                 <WrapContent>
+                    {/* <Title>
+                        <div>
+                            Connect wallet in one click to start using
+                            Sobajaswap
+                        </div>
+                    </Title> */}
                     <Title>
                         <div>
                             By connecting a wallet, you agree to&nbsp;
                             <b>Sobajaswap</b>&nbsp;
                             <a href="#" target="_blank" rel="noreferrer">
-                                Terms of Service
+                                Terms of Service and
                             </a>
-                            &nbsp;and&nbsp;
+                            &nbsp;
                             <a href="#" target="_blank" rel="noreferrer">
                                 Privacy Policy.
                             </a>
@@ -197,14 +244,14 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                         {getOptions()}
                     </WrapItem>
                 </WrapContent>
-                <Footer>
+                {/* <Footer>
                     <a href="#">Learn more about wallets</a>
-                </Footer>
+                </Footer> */}
 
                 {walletView == WALLET_VIEWS.PENDING ? (
                     <ContainerPending>
                         <WrapContentPending>
-                            <Header>
+                            <HeaderPending>
                                 <span>Connect a {pendingNameWallet}</span>
                                 <div>
                                     {' '}
@@ -221,9 +268,9 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                                         alt=""
                                     />
                                 </div>
-                            </Header>
+                            </HeaderPending>
                             <WrapContent>
-                                <WrapItem
+                                <WrapItemPending
                                     className={`${
                                         isAgreePolicy ? 'active' : ''
                                     }`}
@@ -256,7 +303,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                                             <p>Initializing...</p>
                                         </LoadingWrapper>
                                     )}
-                                </WrapItem>
+                                </WrapItemPending>
                             </WrapContent>
                         </WrapContentPending>
                     </ContainerPending>
@@ -271,18 +318,19 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
 }
 
 const LoadingWrapper = styled.div<{ borderError: boolean }>`
-    gap: 2px;
+    gap: 13px;
     align-items: center;
     justify-content: center;
-    width: 90%;
+    /* width: 90%; */
     display: flex;
+    flex-direction: column;
     /* border: ${({ borderError }) =>
         borderError ? '1px solid red' : '1px solid #ffffff'}; */
 
     border-radius: 8px;
     padding: 4px 0px;
     .configbtn {
-        padding: 0px 5px;
+        padding: 15px;
     }
 `
 const StyledLoader = styled(Loader)`
@@ -309,7 +357,7 @@ const ContainerPending = styled.div`
 const Container = styled.div<{ isConnected: boolean }>`
     position: fixed;
     transition: all 10s ease-in-out 10s;
-    background: var(--bg5);
+    background: #001c2c;
     opacity: 0.6;
     border-radius: 12px;
     border: 1px solid #003b5c;
@@ -321,7 +369,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     right: 0px;
     bottom: 0px;
     top: 0px;
-    height: 480px;
+    height: fit-content;
     margin: auto;
     transition: all 0.1s ease-in-out;
     z-index: 999999;
@@ -342,15 +390,36 @@ const BtnClose = styled.img`
     }
 `
 
+const HeaderPending = styled.div`
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 1.5rem 0;
+    align-items: center;
+    span {
+        cursor: pointer;
+        color: ${({ theme }) => theme.text1};
+        font-family: 'Verdana';
+        font-style: normal;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 39px;
+    }
+`
+
 const Header = styled.div`
     display: flex;
     justify-content: space-between;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid rgba(157, 195, 230, 0.5);
+    padding: 1rem 1.5rem 0;
+    /* border-bottom: 1px solid rgba(157, 195, 230, 0.5); */
 
     span {
         cursor: pointer;
         color: ${({ theme }) => theme.text1};
+        font-family: 'Verdana';
+        font-style: normal;
+        font-weight: 700;
+        font-size: 28px;
+        line-height: 39px;
     }
     ::before {
         content: '';
@@ -364,8 +433,9 @@ const Header = styled.div`
         padding: 0.5rem 1rem;
     }
 `
+
 const WrapContent = styled.div`
-    padding: 0.5rem 1.5rem 1rem;
+    padding: 0.5rem 1.5rem 1.2rem;
 
     @media screen and (max-width: 390px) {
         padding: 0.5rem 1rem;
@@ -376,6 +446,11 @@ const Title = styled.div`
     flex-direction: column;
     gap: 3px;
     color: ${({ theme }) => theme.text1};
+
+    div {
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
 
     div:first-child {
         letter-spacing: 0.5px;
@@ -388,7 +463,7 @@ const Title = styled.div`
     }
 
     a {
-        color: #fff;
+        color: rgba(0, 178, 255, 1);
         text-decoration: none;
         font-weight: 600;
     }
@@ -408,12 +483,13 @@ const Title = styled.div`
         }
     }
 `
-const WrapItem = styled.div`
-    display: flex;
+const WrapItemPending = styled.div`
+    /* display: grid;
+    grid-template-columns: 1fr 1fr; */
     align-items: center;
     justify-content: space-evenly;
     flex-wrap: wrap;
-    padding: 2rem 0;
+    padding: 1.2rem 0;
     cursor: pointer;
     opacity: 0.3;
     gap: 20px;
@@ -422,6 +498,36 @@ const WrapItem = styled.div`
     }
     @media screen and (max-width: 576px) {
         padding: 1rem;
+
+        div:nth-child(4) {
+            order: 1;
+        }
+    }
+    @media screen and (max-width: 375px) {
+    }
+`
+const WrapItem = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* align-items: center; */
+    /* justify-content: space-evenly; */
+    /* flex-wrap: wrap; */
+    padding: 1.2rem 0;
+    cursor: pointer;
+    opacity: 0.3;
+    gap: 20px;
+    &.active {
+        opacity: 1;
+    }
+    @media screen and (max-width: 576px) {
+        padding: 1rem;
+        grid-template-columns: 1fr;
+        max-height: 300px;
+        overflow: auto;
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
         div:nth-child(4) {
             order: 1;
         }
@@ -430,20 +536,22 @@ const WrapItem = styled.div`
     }
 `
 const Item = styled.div<{ isChecked: boolean }>`
-    width: 30%;
+    /* width: 30%; */
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     border-radius: 8px;
-    width: 100px;
-    height: 100px;
+    width: 100%;
+    /* height: 100px; */
     transition: all ease-in-out 0.1s;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
 
     :hover {
         background: rgba(146, 129, 129, 0.13);
     }
     @media screen and (max-width: 576px) {
-        width: 45%;
+        /* width: 45%; */
     }
 `
 const ItemContent = styled.button`
@@ -451,18 +559,20 @@ const ItemContent = styled.button`
     border: none;
     color: ${({ theme }) => theme.text1};
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     gap: 10px;
     cursor: pointer;
+    font-family: Verdana;
 
     img {
         height: 50px;
         width: 50px;
         object-fit: contain;
+        border-radius: 50%;
     }
     span {
-        font-size: 11.5px;
+        font-size: 14px;
         color: white;
     }
 `

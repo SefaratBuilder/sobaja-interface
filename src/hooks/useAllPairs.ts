@@ -22,6 +22,7 @@ import {
     mulNumberWithDecimal,
 } from 'utils/math'
 import TokenList from 'constants/jsons/tokenList.json'
+import { useAppState } from 'states/application/hooks'
 
 /**
  * Returns pairs length.
@@ -210,6 +211,8 @@ export function useAllPairs(): {
 } {
     const factory = useFactoryContract()
     const pairsLength = usePairsLength()
+    const { isUpdateApplication } = useAppState()
+
     let ids: number[] = []
     if (pairsLength?._value) {
         for (let i = 0; i < Number(pairsLength._value); i++) ids.push(i)
@@ -225,7 +228,7 @@ export function useAllPairs(): {
     const pairs = usePairByAddresses(addresses)
     // console.log({ pairs })
 
-    return useMemo(() => pairs, [pairs])
+    return useMemo(() => pairs, [pairs, isUpdateApplication])
 }
 
 export const useTokensUrl = (tokens: Array<string>) => {
@@ -243,10 +246,13 @@ export const useTokensUrl = (tokens: Array<string>) => {
 export const useMyPosition = () => {
     const { account } = useActiveWeb3React()
     const allPairs = useAllPairs()
+    console.log("🤦‍♂️ ⟹ useMyPosition ⟹ allPairs:", allPairs)
+    const { isUpdateApplication } = useAppState()
     const mapPairs: any = Object.values(allPairs)
     const lpTokens = mapPairs?.map((i: any) => i?.tokenLp)
     const tokenList: Array<string> = []
-    const balances = useTokenBalances(account, lpTokens)
+    const balances = useTokenBalances(account, lpTokens, isUpdateApplication)
+    console.log("🤦‍♂️ ⟹ useMyPosition ⟹ balances:", balances)
     const lpBalancesUser = Object.entries(balances)
         .map((i) => {
             if (i?.[1] && Number(i?.[1]) > 0) {
@@ -314,9 +320,10 @@ export const useMyPosition = () => {
     // console.log({ lpBalancesUser, balances, allPairs })
 
     return useMemo(() => {
+
         return {
             tokenList,
             position: lpBalancesUser,
         }
-    }, [allPairs])
+    }, [allPairs, account, isUpdateApplication])
 }

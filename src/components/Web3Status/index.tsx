@@ -1,33 +1,21 @@
-import React, { useEffect, useRef, useState, Fragment } from 'react'
+import React, { useState, Fragment } from 'react'
 import styled from 'styled-components'
 import PrimaryButton, { Button } from 'components/Buttons/PrimaryButton'
 import WalletModal from 'components/WalletModal'
 import { Activity } from 'react-feather'
 import { shortenAddress } from 'utils'
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
-import { SUPPORTED_WALLETS } from 'constants/wallet'
-import { injected } from 'connectors'
 import arrowDown from 'assets/icons/arrow-down.svg'
 
 const Web3Status = () => {
-    const { account, connector, error } = useWeb3React()
+    const { account, connector, error, library } = useWeb3React()
     const [toggleWalletModal, setToggleWalletModal] = useState<boolean>(false)
 
     function formatConnectorName(account: any) {
-        const { ethereum } = window
-        const isMetaMask = !!(ethereum && ethereum.isMetaMask)
-        const logo = Object.keys(SUPPORTED_WALLETS)
-            .filter(
-                (k) =>
-                    SUPPORTED_WALLETS[k].connector === connector &&
-                    (connector !== injected ||
-                        isMetaMask === (k === 'METAMASK')),
-            )
-            .map((k) => SUPPORTED_WALLETS[k].iconURL)[0]
         return (
             <Fragment>
                 <WalletName>
-                    <Icon src={logo}></Icon>
+                    <Icon src="https://picsum.photos/50/50"></Icon>
                     <span>{account && shortenAddress(account)}</span>
                 </WalletName>
                 <IconArrow src={arrowDown}></IconArrow>
@@ -129,6 +117,7 @@ const WalletName = styled.div`
 const Icon = styled.img`
     height: 20px;
     width: 20px;
+    border-radius: 50%;
 `
 
 const Web3StatusConnect = styled(Button)`

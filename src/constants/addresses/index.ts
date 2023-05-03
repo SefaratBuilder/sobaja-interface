@@ -2,6 +2,7 @@ import MULTICALL_ABI from '../jsons/multicall.json'
 import FACTORY_ABI from '../jsons/factory.json'
 import ROUTER_ABI from '../jsons/router.json'
 import FAUCET_ABI from '../jsons/faucet.json'
+import STAKING_ABI from '../jsons/staking.json'
 import { ChainId } from 'interfaces'
 
 const MULTICALL_NETWORKS: { [chainId: number]: string } = {
@@ -77,5 +78,6 @@ export {
     Faucet,
     INIT_CODE_HASHES,
     LAUNCHPADS,
-    LAUNCHPAD_ACCESS_MANAGERS
+    LAUNCHPAD_ACCESS_MANAGERS,
+    STAKING_ABI
 }

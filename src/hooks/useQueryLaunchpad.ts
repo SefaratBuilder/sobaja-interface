@@ -4,8 +4,8 @@ import { LAUNCHPAD_SUBGRAPH_URL } from 'constants/index';
 const GetTopLaunchpad = gql`
     query GetTopLaunchpad {
         launchpadCreateds {
+            address
             id
-            addr
             launchpadTemplate
             owner
         }

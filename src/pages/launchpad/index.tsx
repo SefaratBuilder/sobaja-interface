@@ -43,8 +43,8 @@ const Launchpad = () => {
                 launchpadState.token,
                 account,
                 launchpadState.paymentCurrency,
-                add(launchpadState.startTime, 300), // start after 5min
-                add(launchpadState.endTime, 310), // end after 1h
+                add(launchpadState.startTime, 300), // start after 5m
+                add(launchpadState.endTime, 310), // end after 5m + 10s
                 mulNumberWithDecimal(launchpadState.softCap, 18),
                 mulNumberWithDecimal(launchpadState.hardCap, 18),
                 mulNumberWithDecimal(launchpadState.price, 18),
@@ -123,9 +123,9 @@ const Launchpad = () => {
                 <Admin />
                 <Columns gap="10px" al="flex-end">
                     <LaunchpadList gap="10px" jus="flex-end">
-                        {data?.launchpadCreateds?.map((item: { addr: string, owner: string }) => {
+                        {data?.launchpadCreateds?.map((item: { address: string, owner: string }) => {
                             return (
-                                <LaunchpadItem key={item.addr} {...item} />
+                                <LaunchpadItem key={item.address} {...item} />
                             )
                         })}
                     </LaunchpadList>

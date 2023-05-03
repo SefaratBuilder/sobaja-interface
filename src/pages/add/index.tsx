@@ -234,9 +234,14 @@ const Add = () => {
                     hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
                         callResult.hash || ''
                     }`,
-                    msg: 'Add liquidity',
+                    msg: `Add liquidity ${tokenIn?.symbol} and ${tokenOut?.symbol}`,
                     status: txn.status === 1 ? true : false,
                 })
+                /**
+                 * @dev reset input && output state when transaction success
+                 */
+                onUserInput(Field.INPUT, '')
+                onUserInput(Field.OUTPUT, '')
             }
         } catch (error) {
             // initDataTransaction.setIsOpenWaitingModal(false)

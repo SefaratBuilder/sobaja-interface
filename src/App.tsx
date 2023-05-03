@@ -11,6 +11,7 @@ import styled from 'styled-components'
 import Header from 'components/Header'
 import Web3ReactManager from 'components/Web3ReactManager'
 import SwapUpdater from 'states/swap/updater'
+import MintUpdater from 'states/mint/updater'
 import AppUpdater from 'states/application/updater'
 import MulticallUpdater from 'states/multicall/updater'
 import ListUpdater from 'states/lists/updater'
@@ -18,9 +19,10 @@ import Polling from 'components/Polling'
 import Swap from 'pages/swap'
 import AddLiquidity from 'pages/add'
 import Pools from 'pages/pool'
+import NFTs from 'pages/nfts'
 import ReactGA from 'react-ga4'
-const Launchpad = React.lazy(() => import('./pages/launchpad'));  
 
+const Launchpad = React.lazy(() => import('./pages/launchpad'));  
 
 const App = () => {
     const Updater = () => {
@@ -32,6 +34,7 @@ const App = () => {
         return (
             <>
                 <SwapUpdater />
+                <MintUpdater />
                 <AppUpdater />
                 <MulticallUpdater />
                 <ListUpdater />
@@ -58,6 +61,8 @@ const App = () => {
                                 <Launchpad />
                             </Suspense>
                         } />
+                        {/* <Route path="/staking" element={<StakeDetails />} /> */}
+                        <Route path="/nfts" element={<NFTs />} />
                         <Route path="*" element={<Navigate to="/swap" />} />
                     </Routes>
                     <Polling />
