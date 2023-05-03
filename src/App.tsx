@@ -20,6 +20,7 @@ import Swap from 'pages/swap'
 import AddLiquidity from 'pages/add'
 import Pools from 'pages/pool'
 import NFTs from 'pages/nfts'
+import Bridge from 'pages/bridge'
 import ReactGA from 'react-ga4'
 
 const Launchpad = React.lazy(() => import('./pages/launchpad'));  
@@ -62,6 +63,7 @@ const App = () => {
                             </Suspense>
                         } />
                         {/* <Route path="/staking" element={<StakeDetails />} /> */}
+                        <Route path="/bridge" element={<Bridge />} />
                         <Route path="/nfts" element={<NFTs />} />
                         <Route path="*" element={<Navigate to="/swap" />} />
                     </Routes>
