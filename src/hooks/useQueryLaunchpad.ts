@@ -3,11 +3,19 @@ import { LAUNCHPAD_SUBGRAPH_URL } from 'constants/index';
 
 const GetTopLaunchpad = gql`
     query GetTopLaunchpad {
-        launchpadCreateds {
-            address
+        launchpads(orderBy: startTime) {
             id
-            launchpadTemplate
-            owner
+            launchpadOwner
+            individualCap
+            overflow
+            price
+            result
+            startTime
+            softcap
+            totalCommitment
+            totalTokenSale
+            hardcap
+            finalized
         }
     }
 `;

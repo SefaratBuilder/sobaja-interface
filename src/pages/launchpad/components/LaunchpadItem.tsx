@@ -6,11 +6,10 @@ import { useFairLaunchContract } from 'hooks/useContract'
 import { mulNumberWithDecimal } from 'utils/math'
 import { useLaunchpadInfo } from 'hooks/useLaunchpads'
 
-const LaunchpadItem = ({ address, owner } : { address: string, owner: string }) => {
+const LaunchpadItem = ({ id, launchpadOwner } : { id: string, launchpadOwner: string }) => {
     const [commit, setCommit] = useState('')
-    const fairlaunchContract = useFairLaunchContract(address)
-    const launchpadInfo = useLaunchpadInfo(address)
-    console.log({launchpadInfo})
+    const fairlaunchContract = useFairLaunchContract(id)
+    const launchpadInfo = useLaunchpadInfo(id)
 
     const onCommit = async () => {
         try {
@@ -69,8 +68,8 @@ const LaunchpadItem = ({ address, owner } : { address: string, owner: string }) 
         <Wrapper gap="5px">
             <Row gap="10px">
                 <div>
-                    <div>Address: {shortenAddress(address)}</div>
-                    <div>Owner: {shortenAddress(owner)}</div>
+                    <div>Address: {shortenAddress(id)}</div>
+                    <div>launchpadOnwer: {shortenAddress(launchpadOwner)}</div>
                     <div>Start time: {launchpadInfo?.startTime}</div>
                     <div>End time: {launchpadInfo?.endTime}</div>
                     <div>Hard cap: {launchpadInfo?.hardcap}</div>

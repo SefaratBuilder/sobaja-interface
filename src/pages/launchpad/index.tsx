@@ -123,9 +123,9 @@ const Launchpad = () => {
                 <Admin />
                 <Columns gap="10px" al="flex-end">
                     <LaunchpadList gap="10px" jus="flex-end">
-                        {data?.launchpadCreateds?.map((item: { address: string, owner: string }) => {
+                        {data?.launchpads?.map((item: { id: string, launchpadOwner: string }) => {
                             return (
-                                <LaunchpadItem key={item.address} {...item} />
+                                <LaunchpadItem key={item.id} {...item} />
                             )
                         })}
                     </LaunchpadList>
