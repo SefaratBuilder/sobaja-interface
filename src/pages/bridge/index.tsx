@@ -1,8 +1,5 @@
 import styled from "styled-components";
-import { Columns, Row } from 'components/Layouts'
 import BridgeIcon from 'assets/icons/bridge.svg'
-import { Switch } from '@mui/material'
-import { styled as styledUI } from '@mui/material/styles'
 import Chevron from 'assets/icons/chevron-white.svg'
 import ETH from 'assets/token-logos/eth.svg'
 import Swap from 'assets/icons/swap-icon-2.svg'
@@ -23,9 +20,9 @@ const Bridge = () => {
             
         },
         {
-            to: '',
+            to: 'https://usdcdemo.layerzero.network/bridge',
             logo: LayerZero,
-            name: 'LayerZer Bridge',
+            name: 'LayerZero Bridge',
             
         },
         {
@@ -47,7 +44,7 @@ const Bridge = () => {
            
         },
         {
-            to: '',
+            to: 'https://app.symbiosis.finance/bridge',
             logo: Symbiosis,
             name: 'Symbiosis',
            
@@ -87,14 +84,14 @@ const Bridge = () => {
                                         alt=""
                                     />
                                     <span>{item.name}</span>
-                                    <Link href={item.to} target="_blank">
+                                    <LinkItem href={item.to} target="_blank">
                                         Bridge
                                         <img
                                             className="arrow"
                                             src={ArrowLink}
                                             alt="arrow-link"
                                         />
-                                    </Link>
+                                    </LinkItem>
                                 </BridgeItem>
                             )
                         })}
@@ -115,12 +112,18 @@ const ContentTopHolder= styled.div`
     @media screen and (max-width: 767px){
         margin-top: 0;
     }
+    @media screen and (max-width: 560px){
+        margin: 0 20px 0 20px;
+    }
 `;
 const ContentTop= styled.div`
     margin: 10px;
     padding: 20px;
     background: var(--bg1);
     border-radius: 10px;
+    @media screen and (max-width: 710px){
+        padding: 10px;
+    }
 `;
 const Title = styled.div`
     display: flex;
@@ -134,6 +137,9 @@ const ItemHolder = styled.div`
     justify-content: center;
     gap: 20px;
     margin-top: 20px;
+    @media screen and (max-width: 710px){
+        gap: 10px;
+    }
     // @media screen and (max-width: 520px){
     //     flex-direction: column;
     //     align-items: center;
@@ -153,14 +159,20 @@ const Item = styled.div`
     }
     @media screen and (max-width: 399px){
         gap: 5px;
+        padding: 5px 4px;
+        border-radius: 6px;
         span{
             margin-right: 0px;
             font-size: 10px;
             margin-top: 3px;
         }
+        img{
+            max-width: 35px;
+        }
     }
     @media screen and (min-width: 400px) and (max-width: 449px){
         gap: 5px;
+        padding: 8px 8px;
         span{
             margin-right: 15px;
             font-size: 10px;
@@ -192,26 +204,39 @@ background-size: cover;
 border-radius: 12px;
 margin-top: 10px;
 padding: 20px 10px;
+@media screen and (max-width: 710px){
+    margin: 10px 20px 0 20px;
+}
 }
 `;
 const BridgeItem = styled.a`
-// max-width: 110px;
+position: relative;
 max-height: 110px;
 max-width: 30%;
 width: 100%;
 border-radius: 6px;
 padding: 5px;
-background: var(--bg1);
 display: flex;
 flex-direction: column;
 align-items: center;
 font-size: 14px;
 text-align: center;
 margin: 10px;
-
+z-index: 10;
+&::before{
+    position: absolute;
+    content: '';
+    background: linear-gradient(87.2deg, #00B2FF 1.86%, #003655 98.02%);
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    margin-top: -7px;
+    opacity: 0.8;
+    z-index: -1;
+  }
 .logo {
     max-width: 80px;
-    max-height: 30px;
+    max-height: 20px;
     margin: 0 auto;
 }
 .arrow {
@@ -221,7 +246,14 @@ margin: 10px;
 span{
     margin: 5px 0px;
 }
-@media screen and (max-width: 479px){
+&:hover{
+    text-decoration: none;
+}
+@media screen and (max-width: 359px){
+    max-width: 41%;
+    font-size: 10px;
+}
+@media screen and (min-width: 360px) and (max-width: 479px){
     max-width: 43%;
     font-size: 10px;
 }
@@ -230,7 +262,7 @@ span{
     font-size: 12px;
 }
 `;
-const Link = styled.a`
+const LinkItem = styled.a`
 background: rgba(217, 217, 217, 0.1);
 border: 0.5px solid #F9F9F9;
 border-radius: 5px;
