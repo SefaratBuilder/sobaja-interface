@@ -264,7 +264,7 @@ const Icon = styled.div`
     max-width: 20px;
 `;
 const Text = styled.div`
-    font-family: 'Verdana';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 700;
     font-size: 12px;
@@ -280,7 +280,7 @@ const Text = styled.div`
     }
 `;
 const Time = styled.div`
-    font-family: 'Verdana';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 400;
     font-size: 10px;
@@ -298,7 +298,7 @@ const Time = styled.div`
     }
 `;
 const Title = styled.div`
-    font-family: 'Verdana';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 700;
     font-size: 16px;
@@ -317,7 +317,7 @@ const Title = styled.div`
 `;
 const Description = styled.div`
 
-    font-family: 'Verdana';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 400;
     font-size: 14px;

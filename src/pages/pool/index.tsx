@@ -711,7 +711,7 @@ const Container = styled.div`
     height: fit-content;
     font-size: 16px !important;
     color: white;
-    font-family: Verdana !important;
+    font-family: Inter !important;
 
     font-weight: 300;
     overflow: hidden;
@@ -743,7 +743,7 @@ const HeadTitle = styled.div`
     justify-content: space-between;
     gap: 20px;
     padding: 20px;
-    font-family: Verdana;
+    font-family: Inter;
 
     @media screen and (max-width: 576px) {
         flex-direction: column;
@@ -846,7 +846,7 @@ const HeadTable = styled(TableCell)`
     font-size: 16px !important;
     padding-left: 15px !important;
     display: flex;
-    font-family: Verdana !important;
+    font-family: Inter !important;
 
     justify-content: center;
     align-items: center;
@@ -872,7 +872,7 @@ const CellTable = styled(TableCell)`
     /* padding: 15px 15px 0 0 !important; */
     background: rgba(255, 255, 255, 0.1) !important;
     /* display: none; */
-    font-family: Verdana !important;
+    font-family: Inter !important;
 
     @media screen and (max-width: 576px) {
         /* font-size: 14px !important; */

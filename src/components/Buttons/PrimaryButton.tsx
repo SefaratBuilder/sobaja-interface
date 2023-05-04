@@ -56,7 +56,7 @@ export const Button = styled.button<{ height?: any; color?: any }>`
     cursor: ${({ disabled }) => (disabled ? 'no-drop' : 'pointer')};
     opacity: ${({ disabled }) => (disabled ? 0.7 : 1)};
     color: var(--text1);
-    font-family: Verdana, sans-serif;
+    font-family: Inter, sans-serif;
 
     :hover {
         opacity: 0.8;

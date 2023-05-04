@@ -57,7 +57,7 @@ const Bridge = () => {
                         src={BridgeIcon}
                         alt="bridge"
                     />
-                    <div className="b">Bridge</div>
+                    <div className="b">Cross Chain</div>
                 </Row>
                 <Row al="center">
                 <Link to={'/bridge'}>
