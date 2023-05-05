@@ -398,7 +398,7 @@ const HeaderPending = styled.div`
     span {
         cursor: pointer;
         color: ${({ theme }) => theme.text1};
-        font-family: 'Verdana';
+        font-family: 'Inter';
         font-style: normal;
         font-weight: 700;
         font-size: 16px;
@@ -415,7 +415,7 @@ const Header = styled.div`
     span {
         cursor: pointer;
         color: ${({ theme }) => theme.text1};
-        font-family: 'Verdana';
+        font-family: 'Inter';
         font-style: normal;
         font-weight: 700;
         font-size: 28px;
@@ -563,7 +563,7 @@ const ItemContent = styled.button`
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    font-family: Verdana;
+    font-family: Inter;
 
     img {
         height: 50px;
