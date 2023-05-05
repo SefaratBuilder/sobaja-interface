@@ -16,6 +16,7 @@ import OrbiterBg from 'assets/brand/orbiter-bg.png'
 import CelerBg from 'assets/brand/celer-bg.png'
 import MultichainBg from 'assets/brand/multichain-bg.png'
 import ArrowLink from 'assets/icons/arrow-link.svg'
+import { Link } from 'react-router-dom'
 
 const BridgeUrls = [
     {
@@ -56,16 +57,19 @@ const Bridge = () => {
                         src={BridgeIcon}
                         alt="bridge"
                     />
-                    <div className="b">Bridge</div>
+                    <div className="b">Cross Chain</div>
                 </Row>
                 <Row al="center">
+                <Link to={'/bridge'}>
                     <AntSwitch
-                        onClick={() => setIsOpen(!isOpen)}
-                        checked={isOpen}
+                        // onClick={() => setIsOpen(!isOpen)}
+                        // checked={isOpen}
                     />
+                </Link>
                 </Row>
             </Row>
-            {isOpen && (
+            {/* {isOpen && (
+                 
                 <BridgeContent gap="10px">
                     <Row jus="space-between" al="center" gap="10px">
                         <SelectButton>
@@ -110,20 +114,20 @@ const Bridge = () => {
                                         alt=""
                                     />
                                     <span>{item.name}</span>
-                                    <Link href={item.to} target="_blank">
+                                    <LinkItem href={item.to} target="_blank">
                                         Bridge
                                         <img
                                             className="arrow"
                                             src={ArrowLink}
                                             alt="arrow-link"
                                         />
-                                    </Link>
+                                    </LinkItem>
                                 </BridgeItem>
                             )
                         })}
                     </Row>
                 </BridgeContent>
-            )}
+            )} */}
         </BridgeWrapper>
     )
 }
@@ -231,7 +235,7 @@ const SelectButton = styled(Row)`
     }
 `
 
-const Link = styled.a`
+const LinkItem = styled.a`
     width: 100%;
     text-align: center;
     border-radius: 6px;

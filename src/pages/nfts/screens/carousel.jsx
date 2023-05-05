@@ -18,130 +18,132 @@ export default function Carousel() {
         {
             img: Img1,
             title: "Soba man",
-            button: 
-                {   img: CircleIcon,
-                    text: "Ends in",
-                    time: "06:05:59"
-                },
+            button:
+            {
+                img: CircleIcon,
+                text: "Ends in",
+                time: "06:05:59"
+            },
             description1: "Soba",
             description2: "Sobaja Curated",
-            
+
         },
         {
             img: Img2,
             title: "Black Valley",
-            button: 
-                {
-                    img: CircleIcon,
-                    text: "Ends in",
-                    time: "20:35:59"
-                },
+            button:
+            {
+                img: CircleIcon,
+                text: "Ends in",
+                time: "20:35:59"
+            },
             description1: "WGRT_",
             description2: "Dark Stories",
-            
+
         },
         {
             img: Img3,
             title: "ANDREA CRESPI for The NFT Magazine #03 ISSUE 2K23 | CRYPTOART MONOGRAPH",
-            button: 
-                {
-                    img: CircleIcon,
-                    text: "Ends in",
-                    time: "25:35:59"
-                },
-                description1: "Andrea Crespi, The NFT Magazine",
-                description2: "The NFT Magazine",
-            
+            button:
+            {
+                img: CircleIcon,
+                text: "Ends in",
+                time: "25:35:59"
+            },
+            description1: "Andrea Crespi, The NFT Magazine",
+            description2: "The NFT Magazine",
+
         },
         {
             img: Img4,
             title: "ANA•MOR•PHIC",
-            button: 
-                {
-                    img: CircleIcon,
-                    text: "Ends in",
-                    time: "25:35:59"
-                },
-                description1: "steve tanchel",
+            button:
+            {
+                img: CircleIcon,
+                text: "Ends in",
+                time: "25:35:59"
+            },
+            description1: "steve tanchel",
             description2: "USURPA",
-            
+
         },
         {
             img: Img5,
             title: "YUGEN 2",
-            button: 
-                {
-                    img: CircleIcon,
-                    text: "Ends in",
-                    time: "20:35:59"
-                },
-                description1: "Martha Fiennes",
+            button:
+            {
+                img: CircleIcon,
+                text: "Ends in",
+                time: "20:35:59"
+            },
+            description1: "Martha Fiennes",
             description2: "MORROW collective",
-            
+
         },
         {
             img: Img1,
             title: "Soba man",
-            button: 
-                {   img: CircleIcon,
-                    text: "Ends in",
-                    time: "06:05:59"
-                },
+            button:
+            {
+                img: CircleIcon,
+                text: "Ends in",
+                time: "06:05:59"
+            },
             description1: "Soba",
             description2: "Sobaja Curated",
-            
+
         },
         {
             img: Img2,
             title: "Black Valley",
-            button: 
-                {
-                    img: CircleIcon,
-                    text: "Ends in",
-                    time: "20:35:59"
-                },
+            button:
+            {
+                img: CircleIcon,
+                text: "Ends in",
+                time: "20:35:59"
+            },
             description1: "WGRT_",
             description2: "Dark Stories",
-            
+
         },
         {
             img: Img3,
             title: "ANDREA CRESPI for The NFT Magazine #03 ISSUE 2K23 | CRYPTOART MONOGRAPH",
-            button: 
-                {
-                    img: CircleIcon,
-                    text: "Ends in",
-                    time: "25:35:59"
-                },
-                description1: "Andrea Crespi, The NFT Magazine",
-                description2: "The NFT Magazine",
-            
+            button:
+            {
+                img: CircleIcon,
+                text: "Ends in",
+                time: "25:35:59"
+            },
+            description1: "Andrea Crespi, The NFT Magazine",
+            description2: "The NFT Magazine",
+
         },
         {
             img: Img4,
             title: "ANA•MOR•PHIC",
-            button: 
-                {
-                    img: CircleIcon,
-                    text: "Ends in",
-                    time: "25:35:59"
-                },
-                description1: "steve tanchel",
+            button:
+            {
+                img: CircleIcon,
+                text: "Ends in",
+                time: "25:35:59"
+            },
+            description1: "steve tanchel",
             description2: "USURPA",
-            
+
         },
         {
             img: Img5,
             title: "YUGEN 2",
-            button: 
-                {
-                    img: CircleIcon,
-                    text: "Ends in",
-                    time: "20:35:59"
-                },
-                description1: "Martha Fiennes",
+            button:
+            {
+                img: CircleIcon,
+                text: "Ends in",
+                time: "20:35:59"
+            },
+            description1: "Martha Fiennes",
             description2: "MORROW collective",
-            
+
         },
     ]
     return (
@@ -176,21 +178,21 @@ export default function Carousel() {
             >
                 {
                     ItemSlider.map((item, index) => {
-                        return <SwiperSlide key={index}><img src={item.img} alt="" className="image"/>
-                         <Button>
-                            <Icon>
-                            <img src={item.button.img} alt="" className="icon"/></Icon>
-                            <Text>{item.button.text}</Text>
-                            <Time>{item.button.time}</Time>
-                         </Button>
-                         <Title>
-                            {item.title}
-                         </Title>
-                         <Description>
-                            {item.description1}
-                            <br/>
-                            {item.description2}
-                         </Description>
+                        return <SwiperSlide key={index}><img src={item.img} alt="" className="image" />
+                            <Button>
+                                <Icon>
+                                    <img src={item.button.img} alt="" className="icon" /></Icon>
+                                <Text>{item.button.text}</Text>
+                                <Time>{item.button.time}</Time>
+                            </Button>
+                            <Title>
+                                {item.title}
+                            </Title>
+                            <Description>
+                                {item.description1}
+                                <br />
+                                {item.description2}
+                            </Description>
                         </SwiperSlide>
                     })
                 }
@@ -262,7 +264,7 @@ const Icon = styled.div`
     max-width: 20px;
 `;
 const Text = styled.div`
-    font-family: 'Verdana';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 700;
     font-size: 12px;
@@ -278,7 +280,7 @@ const Text = styled.div`
     }
 `;
 const Time = styled.div`
-    font-family: 'Verdana';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 400;
     font-size: 10px;
@@ -296,7 +298,7 @@ const Time = styled.div`
     }
 `;
 const Title = styled.div`
-    font-family: 'Verdana';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 700;
     font-size: 16px;
@@ -315,7 +317,7 @@ const Title = styled.div`
 `;
 const Description = styled.div`
 
-    font-family: 'Verdana';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 400;
     font-size: 14px;

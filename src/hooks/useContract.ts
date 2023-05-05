@@ -11,10 +11,15 @@ import {
     ROUTERS,
     FAUCET_ABI,
     Faucet,
+    LAUNCHPADS,
     STAKING_ABI
 } from 'constants/addresses'
 import ERC20 from 'constants/jsons/erc20.json'
 import { PAIR_ABI } from 'constants/jsons/pair'
+import LAUNCHPAD_ABI from 'constants/jsons/launchpad.json'
+import { FAIRLAUNCH_ABI } from 'constants/jsons/fairlaunch'
+import ACCESS_MANAGER_ABI from 'constants/jsons/accessManager.json'
+import { LAUNCHPAD_ACCESS_MANAGERS } from 'constants/addresses'
 
 // returns null on errors
 export const useContract = (
@@ -75,4 +80,20 @@ export function useFaucetContract(): Contract | null {
 
 export function usePairContract(address: string | undefined): Contract | null {
     return useContract(address, PAIR_ABI)
+}
+
+export function useLaunchpadContract(): Contract | null {
+    const { chainId } = useActiveWeb3React()
+    if (!chainId) return null
+    return useContract(LAUNCHPADS[chainId], LAUNCHPAD_ABI)
+}
+
+export function useFairLaunchContract(address: string | undefined): Contract | null {
+    return useContract(address, FAIRLAUNCH_ABI)
+}
+
+export function useAccessManagerContract(): Contract | null {
+    const { chainId } = useActiveWeb3React()
+    if (!chainId) return null
+    return useContract(LAUNCHPAD_ACCESS_MANAGERS[chainId], ACCESS_MANAGER_ABI)
 }

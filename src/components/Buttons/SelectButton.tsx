@@ -58,7 +58,7 @@ const Button = styled.button`
     background: none;
     font-size: 14px;
     width: 100%;
-    font-family: Verdana, sans-serif;
+    font-family: Inter, sans-serif;
     cursor: pointer;
     div {
         display: flex;

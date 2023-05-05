@@ -1,7 +1,7 @@
 import { useActiveWeb3React } from 'hooks'
 import { useEffect } from 'react'
 import { useTokenList, useUpdateCurrentList } from './hooks'
-import { NATIVE_COIN, ZERO_ADDESS } from 'constants/index'
+import { NATIVE_COIN, ZERO_ADDRESS } from 'constants/index'
 
 const Updater = () => {
     const updateCurrentList = useUpdateCurrentList()
