@@ -194,6 +194,7 @@ const SwapIcon = styled.img`
 `;
 
 const ContentBotHolder = styled.div`
+position: relative;
 max-width: 680px;
 margin: auto;
 display: flex;
@@ -204,6 +205,7 @@ background-size: cover;
 border-radius: 12px;
 margin-top: 10px;
 padding: 20px 10px;
+z-index: -1;
 @media screen and (max-width: 710px){
     margin: 10px 20px 0 20px;
 }

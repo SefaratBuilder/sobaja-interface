@@ -359,7 +359,6 @@ const ContainerPending = styled.div`
 
 const Container = styled.div<{ isConnected: boolean }>`
     position: fixed;
-    // transition: all 10s ease-in-out 10s;
     background: url(${BgWallet});
     background-size: cover;
     background-repeat: no-repeat;
@@ -372,13 +371,11 @@ const Container = styled.div<{ isConnected: boolean }>`
     width: 100%;
     // left: 0px;
     right: 0px;
-    margin-right: ${({ isConnected }) => (isConnected ? '0px' : '-420px')} !important;
     bottom: 0px;
     top: 0px;
     height: 100vh;
     margin: auto;
-    // transition: all 10s ease-in-out;
-    transition: margin-right 2050ms ease 0s;
+    animation: ${({ isConnected }) => (isConnected ? 'fadeIn 0.3s linear;' : 'fadeOut 0.5s linear')};
     z-index: 999999;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
@@ -386,6 +383,26 @@ const Container = styled.div<{ isConnected: boolean }>`
     @media screen and (max-width: 1100px) {
         width: 90%;
     }
+    @keyframes fadeIn {
+		from {
+			transform: translateX(400px);
+			opacity: 1;
+		}
+		to {
+			transform: translateX(0px);
+			opacity: 1;
+		}
+	}
+    @keyframes fadeOut {
+		from {
+			transform: translateX(0px);
+			opacity: 1;
+		}
+		to {
+			transform: translateX(400px);
+			opacity: 1;
+		}
+	}
 `
 
 const BtnClose = styled.img`
