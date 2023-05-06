@@ -20,3 +20,25 @@ export enum ChainId {
     GOERLI = 5,
     MUMBAI = 80001,
 }
+
+export enum LaunchpadResult {
+    Cancel = "Cancel",
+    Fairlure = "Fairlure",
+    Success = "Success",
+    Overflow = "Overflow"
+}
+
+export interface LaunchpadInfo {
+    id: string,
+    startTime: number,
+    endTime: number,
+    hardcap: number,
+    softcap: number,
+    overflow: number,
+    individualCap: number,
+    totalTokenSale: number,
+    totalCommitment: number,
+    finalized: boolean,
+    result: string,
+    launchpadOwner: string
+}
