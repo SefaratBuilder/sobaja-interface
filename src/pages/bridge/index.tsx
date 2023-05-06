@@ -162,6 +162,9 @@ const Item = styled.div`
         margin-right: 40px;
         margin-top: 1px;
     }
+    img{
+        max-width: 50px;
+    }
     @media screen and (max-width: 399px){
         gap: 5px;
         padding: 5px 4px;
@@ -243,7 +246,7 @@ z-index: 0;
   }
 .logo {
     max-width: 80px;
-    max-height: 20px;
+    height: 25px;
     margin: 0 auto;
 }
 .arrow {

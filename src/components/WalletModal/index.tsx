@@ -375,7 +375,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     top: 0px;
     height: 100vh;
     margin: auto;
-    animation: ${({ isConnected }) => (isConnected ? 'fadeIn 0.3s linear;' : 'fadeOut 0.5s linear')};
+    animation: fadeIn 0.3s linear;
     z-index: 999999;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
@@ -389,7 +389,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     }
     @keyframes fadeIn {
 		from {
-			transform: translateX(400px);
+			transform: translateX(-100%);
 			opacity: 1;
 		}
 		to {
