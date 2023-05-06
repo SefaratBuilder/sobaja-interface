@@ -12,6 +12,7 @@ export const itemNav = [
     { path: '/swap', name: 'Swap', img: '' },
     { path: '/pools', name: 'Pools', img: '' },
     { path: '/earns', name: 'Earn', img: '' },
+    { path: '/bridge', name: 'Bridge', img: '' },
     { path: '/nfts', name: 'NFTs', img: '' },
     { path: '/launchpad', name: 'Launchpad', img: '' },
 ]
@@ -22,7 +23,7 @@ const Navigator = ({ burgerNav, setBurgerNav }: NavigationProps) => {
             <NavigatorWrapper>
                 {itemNav.map((item, index) => {
                     return (
-                        <Link to={item.path} target={item.target} key={index}>
+                        <Link to={item.path} key={index}>
                             {item.name}
                         </Link>
                     )

@@ -26,8 +26,6 @@ const Title = styled.div`
     display: flex;
     justify-content: center;
     text-align: center;
-    font-family: 'Verdana';
-    font-style: normal;
     font-weight: 700;
     font-size: 68px;
     line-height: 78px;
@@ -49,8 +47,6 @@ const Description = styled.div`
     margin: auto;
     justify-content: center;
     text-align: center;
-    font-family: 'Verdana';
-    font-style: normal;
     font-weight: 400;
     font-size: 25px;
     line-height: 30px;
@@ -83,9 +79,7 @@ const Button = styled.div`
     }
 `;
 const TextButton = styled.div`
-    font-family: 'Verdana';
-    font-style: normal;
-    font-weight: 700;
+    font-weight: 400;
     padding: 10px 40px;
     font-size: 16px;
     line-height: 24px;

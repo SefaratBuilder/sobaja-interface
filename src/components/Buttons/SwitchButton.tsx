@@ -16,7 +16,6 @@ const SwitchButton = ({ active }: SwitchButtonProps) => {
 
 export default SwitchButton
 const Container = styled.div`
-    
     display: flex;
     align-items: center;
     position: relative;
@@ -24,7 +23,7 @@ const Container = styled.div`
     padding: 4px;
     font-size: 14px;
     background: rgba(157, 195, 230, 0.8);
-    font-family: Verdana, sans-serif;
+    font-family: Inter, sans-serif;
     border-radius: 10px;
     border: none;
     width: fit-content;

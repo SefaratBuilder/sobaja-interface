@@ -22,8 +22,7 @@ const Button = styled.button<{ height?: any }>`
     border: var(--border2);
     color: white;
     font-size: 1rem;
-    
-    font-family: Verdana, sans-serif;
+    font-family: Inter, sans-serif;
     font-weight: 300;
 
     &.loading:after {
