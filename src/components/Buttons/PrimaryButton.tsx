@@ -49,7 +49,7 @@ export const Button = styled.button<{ height?: any; color?: any }>`
             ? color
             : 'linear-gradient(87.2deg, #00B2FF 2.69%, #003655 98.02%);'};
     font-size: 1rem;
-    
+
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
     letter-spacing: 0.3;

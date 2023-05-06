@@ -596,7 +596,7 @@ const ItemContent = styled.button`
         border-radius: 50%;
     }
     span {
-        font-size: 14px;
+        font-size: 18px;
         color: white;
     }
 `
