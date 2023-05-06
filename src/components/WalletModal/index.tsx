@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import imgClose from 'assets/icons/icon-close.svg'
+import BgWallet from 'assets/brand/bg-connect-wallet.png'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
 import { injected, bitkeep, okex } from 'connectors/index'
@@ -21,7 +22,7 @@ const WALLET_VIEWS = {
 }
 
 const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
-    const [isAgreePolicy, setIsAgreePolicy] = useState<boolean>(false)
+    const [isAgreePolicy, setIsAgreePolicy] = useState<boolean>(true)
     const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT)
     const {
         activate,
@@ -198,7 +199,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
         return (
             <Container isConnected={true}>
                 <Header>
-                    <span>Connect</span>
+                    <span>Connect a wallet</span>
                     <div>
                         {' '}
                         <BtnClose
@@ -217,19 +218,24 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             Sobajaswap
                         </div>
                     </Title> */}
+                    
+                    <WrapItem>
+                        {getOptions()}
+                    </WrapItem>
                     <Title>
                         <div>
-                            By connecting a wallet, you agree to&nbsp;
-                            <b>Sobajaswap</b>&nbsp;
+                            By connecting a wallet, you agree to
+                            Sobajaswap <br></br>
                             <a href="#" target="_blank" rel="noreferrer">
-                                Terms of Service and
+                                Terms of Service &nbsp;
                             </a>
-                            &nbsp;
+                           
+                             and 
                             <a href="#" target="_blank" rel="noreferrer">
-                                Privacy Policy.
+                            &nbsp; Privacy Policy.
                             </a>
                         </div>
-                        <div>
+                        {/* <div>
                             <input
                                 type="checkbox"
                                 onChange={toggleAgreement}
@@ -238,11 +244,8 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             <span>
                                 I agree to Terms of Service and Privacy Policy.
                             </span>
-                        </div>
+                        </div> */}
                     </Title>
-                    <WrapItem className={`${isAgreePolicy ? 'active' : ''}`}>
-                        {getOptions()}
-                    </WrapItem>
                 </WrapContent>
                 {/* <Footer>
                     <a href="#">Learn more about wallets</a>
@@ -356,22 +359,23 @@ const ContainerPending = styled.div`
 
 const Container = styled.div<{ isConnected: boolean }>`
     position: fixed;
-    transition: all 10s ease-in-out 10s;
-    background: #001c2c;
-    opacity: 0.6;
-    border-radius: 12px;
+    background: url(${BgWallet});
+    background-size: cover;
+    background-repeat: no-repeat;
+    opacity: 1;
+    // border-radius: 12px;
     border: 1px solid #003b5c;
     box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
     overflow: hidden;
-    max-width: 500px;
+    max-width: 420px;
     width: 100%;
-    left: 0px;
+    // left: 0px;
     right: 0px;
     bottom: 0px;
     top: 0px;
-    height: fit-content;
+    height: 100vh;
     margin: auto;
-    transition: all 0.1s ease-in-out;
+    animation: ${({ isConnected }) => (isConnected ? 'fadeIn 0.3s linear;' : 'fadeOut 0.5s linear')};
     z-index: 999999;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
@@ -379,6 +383,26 @@ const Container = styled.div<{ isConnected: boolean }>`
     @media screen and (max-width: 1100px) {
         width: 90%;
     }
+    @keyframes fadeIn {
+		from {
+			transform: translateX(400px);
+			opacity: 1;
+		}
+		to {
+			transform: translateX(0px);
+			opacity: 1;
+		}
+	}
+    @keyframes fadeOut {
+		from {
+			transform: translateX(0px);
+			opacity: 1;
+		}
+		to {
+			transform: translateX(400px);
+			opacity: 1;
+		}
+	}
 `
 
 const BtnClose = styled.img`
@@ -417,8 +441,8 @@ const Header = styled.div`
         color: ${({ theme }) => theme.text1};
         font-family: 'Inter';
         font-style: normal;
-        font-weight: 700;
-        font-size: 28px;
+        font-weight: 400;
+        font-size: 20px;
         line-height: 39px;
     }
     ::before {
@@ -454,16 +478,16 @@ const Title = styled.div`
 
     div:first-child {
         letter-spacing: 0.5px;
-        display: flex;
+        // display: flex;
         flex-wrap: wrap;
     }
     div:last-child {
-        display: flex;
+        // display: flex;
         gap: 10px;
     }
 
     a {
-        color: rgba(0, 178, 255, 1);
+        // color: rgba(0, 178, 255, 1);
         text-decoration: none;
         font-weight: 600;
     }
@@ -479,7 +503,7 @@ const Title = styled.div`
     @media screen and (max-width: 390px) {
         padding: 0.5rem 0.2rem 0.5rem 0;
         div:first-child {
-            display: inline-flex;
+            // display: inline-flex;
         }
     }
 `
@@ -491,7 +515,7 @@ const WrapItemPending = styled.div`
     flex-wrap: wrap;
     padding: 1.2rem 0;
     cursor: pointer;
-    opacity: 0.3;
+    opacity: 1;
     gap: 20px;
     &.active {
         opacity: 1;
@@ -508,13 +532,13 @@ const WrapItemPending = styled.div`
 `
 const WrapItem = styled.div`
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    // grid-template-columns: 1fr 1fr;
     /* align-items: center; */
     /* justify-content: space-evenly; */
     /* flex-wrap: wrap; */
     padding: 1.2rem 0;
     cursor: pointer;
-    opacity: 0.3;
+    opacity: 1;
     gap: 20px;
     &.active {
         opacity: 1;
@@ -522,8 +546,8 @@ const WrapItem = styled.div`
     @media screen and (max-width: 576px) {
         padding: 1rem;
         grid-template-columns: 1fr;
-        max-height: 300px;
-        overflow: auto;
+        // max-height: 300px;
+        // overflow: auto;
 
         ::-webkit-scrollbar {
             display: none;
