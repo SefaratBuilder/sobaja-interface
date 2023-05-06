@@ -22,8 +22,9 @@ import Pools from 'pages/pool'
 import NFTs from 'pages/nfts'
 import Bridge from 'pages/bridge'
 import ReactGA from 'react-ga4'
+import StakeDetails from 'pages/staking'
 
-const Launchpad = React.lazy(() => import('./pages/launchpad'));  
+const Launchpad = React.lazy(() => import('./pages/launchpad'))
 
 const App = () => {
     const Updater = () => {
@@ -57,12 +58,15 @@ const App = () => {
                         <Route path="/swap" element={<Swap />} />
                         <Route path="/pools" element={<Pools />} />
                         <Route path="/add" element={<AddLiquidity />} />
-                        <Route path="/test-launchpad" element={
-                            <Suspense fallback="">
-                                <Launchpad />
-                            </Suspense>
-                        } />
-                        {/* <Route path="/staking" element={<StakeDetails />} /> */}
+                        <Route
+                            path="/test-launchpad"
+                            element={
+                                <Suspense fallback="">
+                                    <Launchpad />
+                                </Suspense>
+                            }
+                        />
+                        <Route path="/staking" element={<StakeDetails />} />
                         <Route path="/bridge" element={<Bridge />} />
                         <Route path="/nfts" element={<NFTs />} />
                         <Route path="*" element={<Navigate to="/swap" />} />
