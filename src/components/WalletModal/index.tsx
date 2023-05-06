@@ -200,7 +200,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             <Container isConnected={true}>
                 <Header>
                     <span>Connect a wallet</span>
-                    <div>
+                    {/* <div>
                         {' '}
                         <BtnClose
                             onClick={() => {
@@ -209,7 +209,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             src={imgClose}
                             alt=""
                         />
-                    </div>
+                    </div> */}
                 </Header>
                 <WrapContent>
                     {/* <Title>
@@ -389,7 +389,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     }
     @keyframes fadeIn {
 		from {
-			transform: translateX(-100%);
+			transform: translateX(100%);
 			opacity: 1;
 		}
 		to {
