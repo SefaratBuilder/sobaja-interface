@@ -18,5 +18,4 @@ export default defineConfig({
       "@apollo/client": "@apollo/client/apollo-client.min.cjs",
     },
   },
-
 })
