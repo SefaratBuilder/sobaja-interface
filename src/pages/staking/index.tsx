@@ -431,7 +431,8 @@ const Stake = () => {
                                         <CustomInput
                                             value={inputUnstakeValue}
                                             placeholder={
-                                                inputUnstakeValue || '0'
+                                                inputUnstakeValue?.toString() ||
+                                                '0'
                                             }
                                             onChange={(e) =>
                                                 setInputUnstakeValue(
