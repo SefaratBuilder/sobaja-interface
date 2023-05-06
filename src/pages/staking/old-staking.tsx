@@ -1365,3 +1365,5 @@
 //         text-align: center;
 //     }
 // `
+
+export {}

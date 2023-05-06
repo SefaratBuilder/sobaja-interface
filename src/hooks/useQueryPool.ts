@@ -1,6 +1,6 @@
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 import { useEffect, useMemo, useState } from 'react';
-
+// import { InMemoryCache } from '@apollo/client/cache/index'
 export interface Data {
     network: string,
     name: string,

@@ -12,16 +12,17 @@ const GetTopLaunchpad = gql`
     }
 `;
 
-const client = new ApolloClient({
-    uri: LAUNCHPAD_SUBGRAPH_URL[80001],
-    cache: new InMemoryCache(),
-})
+// const client = new ApolloClient({
+//     uri: LAUNCHPAD_SUBGRAPH_URL[80001],
+//     cache: new InMemoryCache(),
+// })
 
 export const useQueryLaunchpad = () => {
-    const launchpadData = useQuery(GetTopLaunchpad, {
-        client
-    })
+    // const launchpadData = useQuery(GetTopLaunchpad, {
+    //     client
+    // })
 
-    return launchpadData
+    // return launchpadData
+    return
 }
 
