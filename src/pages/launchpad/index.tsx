@@ -105,14 +105,13 @@ const Launchpad = () => {
             ]
             const result = await entryContract?.handleOps(...args, { gasLimit: '1000000'})
             await result.wait()
-            console.log("okkkkkkkk", result)
         }
         catch(err) {
             console.log('failed :', err)
         }
     }
-
-    return(
+    console.log({data})
+    return( 
         <Container>
             <Row gap="5px" jus="space-between">
                 <form onSubmit={handleOnCreateLaunchpad}>
