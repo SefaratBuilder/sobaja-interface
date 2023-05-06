@@ -131,6 +131,10 @@ const Title = styled.div`
     img{
         max-width: 30px;
     }
+    span{
+        font-weight: 700;
+        font-size: 20px;
+    }
 `;
 const ItemHolder = styled.div`
     display: flex; 
@@ -205,7 +209,7 @@ background-size: cover;
 border-radius: 12px;
 margin-top: 10px;
 padding: 20px 10px;
-z-index: -1;
+// z-index: -1;
 @media screen and (max-width: 710px){
     margin: 10px 20px 0 20px;
 }
@@ -224,7 +228,7 @@ align-items: center;
 font-size: 14px;
 text-align: center;
 margin: 10px;
-z-index: 10;
+z-index: 1;
 &::before{
     position: absolute;
     content: '';
@@ -247,6 +251,7 @@ z-index: 10;
 }
 span{
     margin: 5px 0px;
+    font-size: 16px;
 }
 &:hover{
     text-decoration: none;
