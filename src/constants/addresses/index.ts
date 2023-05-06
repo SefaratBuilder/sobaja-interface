@@ -67,6 +67,13 @@ const Faucet: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
 }
 
+const AAEntryPoints: { [chainId: number]: string } = {
+    [ChainId.ZKTESTNET]: '0x512f8823C8541e371c6eAB6eee22d5CaB9945a7E',
+    [ChainId.GOERLI]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+    [ChainId.MUMBAI]: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+    [ChainId.ZKMAINNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+}
+
 export {
     MULTICALL_ABI,
     MULTICALL_NETWORKS,
@@ -79,5 +86,6 @@ export {
     INIT_CODE_HASHES,
     LAUNCHPADS,
     LAUNCHPAD_ACCESS_MANAGERS,
-    STAKING_ABI
+    STAKING_ABI,
+    AAEntryPoints
 }

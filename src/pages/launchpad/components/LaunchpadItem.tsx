@@ -4,12 +4,12 @@ import { shortenAddress } from 'utils'
 import { useState } from 'react'
 import { useFairLaunchContract } from 'hooks/useContract'
 import { mulNumberWithDecimal } from 'utils/math'
-import { useLaunchpadInfo } from 'hooks/useLaunchpads'
+import { LaunchpadInfo } from 'interfaces'
+import { formatEther } from 'ethers'
 
-const LaunchpadItem = ({ id, launchpadOwner } : { id: string, launchpadOwner: string }) => {
+const LaunchpadItem = (launchpadInfo: LaunchpadInfo) => {
     const [commit, setCommit] = useState('')
-    const fairlaunchContract = useFairLaunchContract(id)
-    const launchpadInfo = useLaunchpadInfo(id)
+    const fairlaunchContract = useFairLaunchContract(launchpadInfo.id)
 
     const onCommit = async () => {
         try {
@@ -68,19 +68,19 @@ const LaunchpadItem = ({ id, launchpadOwner } : { id: string, launchpadOwner: st
         <Wrapper gap="5px">
             <Row gap="10px">
                 <div>
-                    <div>Address: {shortenAddress(id)}</div>
-                    <div>launchpadOnwer: {shortenAddress(launchpadOwner)}</div>
+                    <div>Address: {shortenAddress(launchpadInfo.id)}</div>
+                    <div>launchpadOnwer: {shortenAddress(launchpadInfo.launchpadOwner)}</div>
                     <div>Start time: {launchpadInfo?.startTime}</div>
                     <div>End time: {launchpadInfo?.endTime}</div>
-                    <div>Hard cap: {launchpadInfo?.hardcap}</div>
-                    <div>Soft cap: {launchpadInfo?.softcap}</div>
+                    <div>Hard cap: {formatEther(launchpadInfo?.hardcap)}</div>
+                    <div>Soft cap: {formatEther(launchpadInfo?.softcap)}</div>
                 </div>
                 <div>
-                    <div>Total token sale: {launchpadInfo?.totalTokenSale}</div>
-                    <div>Total commitment: {launchpadInfo?.totalCommitment}</div>
-                    <div>Result: {launchpadInfo?.launchpadResult}</div>
+                    <div>Total token sale: {formatEther(launchpadInfo?.totalTokenSale)}</div>
+                    <div>Total commitment: {formatEther(launchpadInfo?.totalCommitment)}</div>
+                    <div>Individual cap: {formatEther(launchpadInfo?.individualCap)}</div>
+                    <div>Result: {launchpadInfo.result}</div>
                     <div>Finalized: {launchpadInfo?.finalized ? 'true' : 'false'}</div>
-                    <div>Individual cap: {launchpadInfo?.individualCap}</div>
                 </div>
             </Row>
             <Row gap="10px">

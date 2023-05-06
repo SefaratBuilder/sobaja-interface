@@ -6,12 +6,13 @@ import { useTokenApproval, useToken } from 'hooks/useToken'
 import { useState } from 'react'
 import styled from 'styled-components'
 import { add, div, mulNumberWithDecimal } from 'utils/math'
-import { useLaunchpadContract } from 'hooks/useContract'
+import { useAAEntryPointContract, useLaunchpadContract } from 'hooks/useContract'
 import FAIRLAUNCH_INTERFACE from 'constants/jsons/fairlaunch'
 import { useQueryLaunchpad } from 'hooks/useQueryLaunchpad'
 import { shortenAddress } from 'utils'
 import LaunchpadItem from './components/LaunchpadItem'
 import Admin from './components/Admin'
+import { LaunchpadInfo } from 'interfaces'
 
 const Launchpad = () => {
     const [launchpadState, setLaunchpadState] = useState({
@@ -27,13 +28,13 @@ const Launchpad = () => {
         totalToken: '40'
     })
     const { error, loading, data, refetch } = useQueryLaunchpad()
-    const { account, chainId } = useActiveWeb3React()
+    const { account, chainId, library } = useActiveWeb3React()
     const token = useToken(launchpadState.token ? launchpadState.token : undefined)
     const paymentToken = useToken(launchpadState.paymentCurrency ? launchpadState.paymentCurrency : undefined)
     const tokenApproval = useTokenApproval(account, chainId ? LAUNCHPADS[chainId] : null, token)
     const launchpadContract = useLaunchpadContract()
-    console.log({data, loading, error})
-    
+    const entryContract = useAAEntryPointContract()
+
     const handleOnCreateLaunchpad = async (e: any) => {
         try {
             e.preventDefault()
@@ -83,6 +84,34 @@ const Launchpad = () => {
         tokenApproval.approve(LAUNCHPADS[chainId], '11')
     }
 
+    const handleOnSendTransaction = async () => {
+        try {
+            if(!library || !account) return
+            const args = [
+                [{
+                    sender: account,
+                    nonce: await library.getTransactionCount(account),
+                    initCode: '0x9406cc6185a346906296840746125a0e449764545fbfb9cf000000000000000000000000116a9704b565bbe2ec70d95075404da3950871760000000000000000000000000000000000000000000000000000000000000000',
+                    callData: '0xb61d27f60000000000000000000000004cfb958a43323bc0068472fb1ebb4799124bc8450000000000000000000000000000000000000000000000000011c37937e0800000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000',
+                    callGasLimit: '33100',
+                    verificationGasLimit: '361460',
+                    preVerificationGas: '44992',
+                    maxFeePerGas: '1695000032',
+                    maxPriorityFeePerGas: '1695000000',
+                    paymasterAndData: '0x',
+                    signature: '0x706a1ea7f721803e915300063cbfe291912ddeeb39a383033b54844ace43c90c2db8356bf7f69276ddaf8a9236bd6de0ed11230ff3a3243fc73908a000151a181c'
+                }],
+                account
+            ]
+            const result = await entryContract?.handleOps(...args, { gasLimit: '1000000'})
+            await result.wait()
+            console.log("okkkkkkkk", result)
+        }
+        catch(err) {
+            console.log('failed :', err)
+        }
+    }
+
     return(
         <Container>
             <Row gap="5px" jus="space-between">
@@ -123,7 +152,7 @@ const Launchpad = () => {
                 <Admin />
                 <Columns gap="10px" al="flex-end">
                     <LaunchpadList gap="10px" jus="flex-end">
-                        {data?.launchpads?.map((item: { id: string, launchpadOwner: string }) => {
+                        {data?.launchpads?.map((item: LaunchpadInfo) => {
                             return (
                                 <LaunchpadItem key={item.id} {...item} />
                             )
@@ -131,6 +160,10 @@ const Launchpad = () => {
                     </LaunchpadList>
                     <button style={{width: 100}} onClick={() => refetch()}>Refetch</button>
                 </Columns>
+            </Row>
+            <Row>
+                Account abstraction testing
+                <button onClick={handleOnSendTransaction}>Send transaction</button>
             </Row>
         </Container>
     )
