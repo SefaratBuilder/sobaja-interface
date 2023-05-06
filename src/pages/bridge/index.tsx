@@ -160,6 +160,10 @@ const Item = styled.div`
     border-radius: 10px;
     span{
         margin-right: 40px;
+        margin-top: 1px;
+    }
+    img{
+        max-width: 50px;
     }
     @media screen and (max-width: 399px){
         gap: 5px;
@@ -168,7 +172,7 @@ const Item = styled.div`
         span{
             margin-right: 0px;
             font-size: 10px;
-            margin-top: 3px;
+            margin-top: 4px;
         }
         img{
             max-width: 35px;
@@ -180,7 +184,7 @@ const Item = styled.div`
         span{
             margin-right: 15px;
             font-size: 10px;
-            margin-top: 3px;
+            margin-top: 4px;
         }
     }
     @media screen and (min-width: 450px) and (max-width: 520px){
@@ -228,7 +232,7 @@ align-items: center;
 font-size: 14px;
 text-align: center;
 margin: 10px;
-z-index: 1;
+z-index: 0;
 &::before{
     position: absolute;
     content: '';
@@ -242,7 +246,7 @@ z-index: 1;
   }
 .logo {
     max-width: 80px;
-    max-height: 20px;
+    height: 25px;
     margin: 0 auto;
 }
 .arrow {
