@@ -27,17 +27,18 @@ import { mulNumberWithDecimal } from 'utils/math'
 import { MaxUint256 } from 'ethers'
 import { useFactoryContract, usePairContract, useRouterContract } from 'hooks/useContract'
 import { calcTransactionDeadline, computeGasLimit, isNativeCoin } from 'utils'
+import { calcSlippageAmount } from 'utils'
 import { useAppState, useSlippageTolerance, useTransactionDeadline } from 'states/application/hooks'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import ComponentsTransaction, {
     InitCompTransaction,
 } from 'components/TransactionModal'
 import ToastMessage from 'components/ToastMessage'
-import { calcSlippageAmount } from 'utils'
+import { getContractAddress } from '@ethersproject/address'
 
 const Swap = () => {
     const swapState = useSwapState()
-    const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(false)
+    const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
@@ -50,12 +51,13 @@ const Swap = () => {
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
     
-    const { slippage, setSlippage } = useSlippageTolerance()
     const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
     const pairContract = usePairContract('0x1990D029794ffC74fC20908740A22de982152945')
     const factoryContract = useFactoryContract()
+    const { slippage } = useSlippageTolerance()
     console.log({pair, tokenIn, tokenOut})
+
     const mintLp = async () => {
         try {
             if(account) {
@@ -63,11 +65,12 @@ const Swap = () => {
                 // const token0 = await pairContract?.token0()
                 // const token1 = await pairContract?.token1()
                 // console.log('>>>>>>>>>>>>>>>', token0, token1)
-                const gasLimit = await pairContract?.estimateGas.mint(account)
-                const callResult = await pairContract?.mint(account, { gasLimit })
-
-                await callResult.wait()
-                if(callResult?.status === 1) console.log('mint okkkkk', callResult)
+                // const gasLimit = await pairContract?.estimateGas.mint(account)
+                // const callResult = await pairContract?.mint(account, { gasLimit })
+                const factory = await routerContract?.factory()
+                console.log({factory})
+                // await callResult.wait()
+                // if(callResult?.status === 1) console.log('mint okkkkk', callResult)
             }
         } catch(err) {
             console.log('failed mint' ,err)
@@ -117,30 +120,30 @@ const Swap = () => {
     console.log(pair);
 
     const getSwapArguments = () => {
-        if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
-            return
+        if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId) return
+        const amountIn = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
+        const amountOut = mulNumberWithDecimal(outputAmount, tokenOut.decimals)
+        const amountOutMin = mulNumberWithDecimal(calcSlippageAmount(outputAmount, slippage)[0], tokenOut.decimals)
+        const amountInMax = mulNumberWithDecimal(calcSlippageAmount(inputAmount, slippage)[1], tokenIn.decimals)
         if (swapType === Field.INPUT) {
-            console.log({
-                amountOutmin: mulNumberWithDecimal(
-                    outputAmount,
-                    tokenOut.decimals,
-                ),
-            })
             if (isNativeCoin(tokenIn))
                 return {
                     args: [
                         mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), // amountOutMin
+                        amountOutMin, //amountOutMin
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
                     ],
-                    value: mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
+                    value: amountIn, //amountIn
                 }
             else if (isNativeCoin(tokenOut))
                 return {
                     args: [
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
                         mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), //amountOutMin
+                        amountIn, //amountIn
+                        amountOutMin, //amountOutMin
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline),
@@ -152,6 +155,8 @@ const Swap = () => {
                     args: [
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
                         mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), //amountOutMin
+                        amountIn, //amountIn
+                        amountOutMin, //amountOutMin
                         [tokenIn.address, tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
@@ -164,6 +169,8 @@ const Swap = () => {
                     args: [
                         mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
                         mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals), //amountInMax
+                        amountOut, //amountOut
+                        amountInMax, //amountInMax
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline),
@@ -173,18 +180,21 @@ const Swap = () => {
             else if (isNativeCoin(tokenIn))
                 return {
                     args: [
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
+                        amountOut, //amountOut
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
                     ],
                     value: mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals) //amountInMax
+                    // value: amountInMax, //amountInMax
                 }
             else
                 return {
                     args: [
                         mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
                         mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals), //amountInMax
+                        amountOut, //amountOut
+                        amountInMax, //amountInMax
                         [tokenIn.address, tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
@@ -420,8 +430,8 @@ const Swap = () => {
                 {/* <PrimaryButton
                         onClick={() => mintLp()}
                         name={'Mint lp'}
-                />
-                <PrimaryButton
+                /> */}
+                {/* <PrimaryButton
                         onClick={() => create()}
                         name={'Create pair'}
                 /> */}
@@ -478,12 +488,17 @@ const Swap = () => {
                         onUserInput={handleOnUserInput}
                         onUserSelect={handleOnTokenSelection}
                         field={Field.OUTPUT}
+                        hideMaxButton={true}
                     />
                 </Columns>
-                <PoolPriceBar
-                    dropDown={poolPriceBarOpen}
-                    setDropDown={setPoolPriceBarOpen}
-                />
+                {
+                    pair && 
+                    <PoolPriceBar
+                        pair={pair}
+                        dropDown={poolPriceBarOpen}
+                        setDropDown={setPoolPriceBarOpen}
+                    />
+                }
                 <SwapButton />
             </SwapContainer>
         </>

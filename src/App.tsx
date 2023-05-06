@@ -9,6 +9,7 @@ import Web3ReactManager from 'components/Web3ReactManager'
 import SwapUpdater from 'states/swap/updater'
 import AppUpdater from 'states/application/updater'
 import MulticallUpdater from 'states/multicall/updater'
+import ListUpdater from 'states/lists/updater'
 import Polling from 'components/Polling'
 import Pools from 'pages/pool'
 import ToastMessage from 'components/ToastMessage'
@@ -21,6 +22,7 @@ const App = () => {
                 <SwapUpdater />
                 <AppUpdater />
                 <MulticallUpdater />
+                <ListUpdater />
             </>
         )
     }

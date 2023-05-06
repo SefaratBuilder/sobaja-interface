@@ -112,8 +112,8 @@ export function usePairByAddresses(addresses: (string | undefined)[]): {
                     const balance = balanceResults?.[i]?.result?.[0]
                     const reserves = reservesResults?.[i]?.result
                     const tokenA = tokens?.[i]
-                    const tokenB = tokens?.[i + 3]
-                    const tokenLp = tokens?.[i + 6]
+                    const tokenB = tokens?.[i + addresses.length]
+                    const tokenLp = tokens?.[i + addresses.length * 2]
                     const pair =
                         tokenA &&
                         tokenB &&
@@ -212,7 +212,7 @@ export function useAllPairs(): {
     )
     const addresses: (string | undefined)[] = allPairsResult && allPairsResult.map(i => i.result?.[0])
     const pairs = usePairByAddresses(addresses)
-    console.log({ pairs })
+    // console.log({ pairs })
 
     return useMemo(
         () => pairs,
@@ -239,39 +239,41 @@ export const useMyPosition = () => {
     const tokenList: Array<string> = []
     const balances = useTokenBalances(account, lpTokens)
     // const balances = useTokenBalances('0x998f5d682a11dAEA3Adf8cd4D3cC6EC73405c770', lpTokens)
+
     const lpBalancesUser = Object.entries(balances).map(i => {
-        if (i?.[1]?.value && Number(i?.[1]?.value) > 0) {
+        if (i?.[1] && Number(i?.[1]) > 0) {
             const index = mapPairs.findIndex((lp: any) => lp?.tokenLp?.address === i?.[0])
-            const percent = mul(div(i?.[1]?.value.toString(), mapPairs?.[index]?.reserveLp), 100)
-            const percent0 = divNumberWithDecimal(mul(mapPairs?.[index]?.reserve0, percent), mapPairs?.[index]?.token0?.decimals)
-            const percent1 = divNumberWithDecimal(mul(mapPairs?.[index]?.reserve1, percent), mapPairs?.[index]?.token1?.decimals)
+            const percent = div(i?.[1]?.toString(), mapPairs?.[index]?.reserveLp)
+            const valuePercent0 = divNumberWithDecimal(mul(mapPairs?.[index]?.reserve0, percent), mapPairs?.[index]?.token0?.decimals)
+            const valuePercent1 = divNumberWithDecimal(mul(mapPairs?.[index]?.reserve1, percent), mapPairs?.[index]?.token1?.decimals)
 
             !tokenList.includes(mapPairs?.[index]?.token0?.address) && tokenList.push(mapPairs?.[index]?.token0?.address)
             !tokenList.includes(mapPairs?.[index]?.token1?.address) && tokenList.push(mapPairs?.[index]?.token1?.address)
 
             return {
-                value: divNumberWithDecimal(i?.[1]?.value?.toString(), lpTokens?.[index]?.decimals),
-                valueWithDec: i?.[1]?.value?.toString(),
+                value: divNumberWithDecimal(i?.[1]?.toString(), lpTokens?.[index]?.decimals),
+                valueWithDec: i?.[1]?.toString(),
                 tokenLp: { ...lpTokens?.[index] },
                 token0: {
                     ...mapPairs?.[index]?.token0,
-                    value: percent0,
+                    value: valuePercent0,
                     logoURI: TokenList.find(tkl =>
                         tkl.address.toLowerCase() == mapPairs?.[index]?.token0?.address?.toLowerCase())?.logoURI
                 },
                 token1: {
                     ...mapPairs?.[index]?.token1,
-                    value: percent1,
+                    value: valuePercent1,
                     logoURI: TokenList.find(tkl =>
                         tkl.address.toLowerCase() == mapPairs?.[index]?.token1?.address?.toLowerCase())?.logoURI
                 },
-                percent,
+                percent: percent * 100,
                 totalLp: mapPairs?.[index]?.reserveLp,
                 totalReserve0: mapPairs?.[index]?.reserve0,
                 totalReserve1: mapPairs?.[index]?.reserve1,
             }
         }
     }).filter(i => i)
+    console.log({ lpBalancesUser, balances, allPairs })
 
     return useMemo(
         () => {

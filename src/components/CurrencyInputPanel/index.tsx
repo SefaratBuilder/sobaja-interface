@@ -22,9 +22,14 @@ const CurrencyInputPanel = ({
     field,
     onUserInput,
     onUserSelect,
+    hideMaxButton
 }: CurrencyInputPanelProps) => {
     const { account } = useActiveWeb3React()
-    const balance = account && useCurrencyBalance(account, token)
+    const balance = useCurrencyBalance(account, token)
+    const handleOnMax = () => {
+        if(balance)
+            onUserInput(field, balance)
+    }
 
     return (
         <Wrapper>
@@ -38,8 +43,9 @@ const CurrencyInputPanel = ({
             </Row>
             <Row>
                 <div className="t2">$</div>
-                <div className="t2 to">
-                    Balance: {balance ? balance?.toString() : 0}
+                <div className="t2 balance">
+                    <span className="to">Balance: {balance ? balance?.toString() : 0}</span>
+                    {!hideMaxButton && <span className="max-btn" onClick={handleOnMax}>Max</span>}
                 </div>
             </Row>
         </Wrapper>
@@ -59,6 +65,28 @@ const Row = styled.div`
 
     .t2 {
         font-size: 14px;
+    }
+    .balance {
+        display: flex;
+        align-items: center;
+        gap: 5px;   
+        justify-content: space-between;
+    }
+
+    .to {
+        padding: 0 2px;
+    }
+    .max-btn {
+        background: var(--bg6);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 5px;
+        font-size: 10px;
+        cursor: pointer;
+        transition: all ease-in-out .1s;
+        :hover {
+            opacity: 0.7;
+        }
     }
 `
 

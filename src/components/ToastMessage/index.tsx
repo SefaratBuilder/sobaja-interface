@@ -55,6 +55,7 @@ interface ToastMsg {
 
 const ToastMessage = ({ payload, setToastMessageModal }: ToastMsg) => {
     const { txnList } = useTransactionsState()
+    // console.log('🤦‍♂️ ⟹ ToastMessage ⟹ txnList:', { txnList })
     // const [hash, setHash] = useState<number>(0)
     // const { addTxn, removeTxn } = useTransactionHandler()
 

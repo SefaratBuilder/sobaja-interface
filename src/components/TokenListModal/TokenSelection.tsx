@@ -3,10 +3,11 @@ import { Token } from 'interfaces'
 import styled from 'styled-components'
 import { Row } from 'components/Layouts'
 import LogoToken from 'components/LogoToken'
+import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
+import { useActiveWeb3React } from 'hooks'
 
 interface TokenSelectionProps {
     token: Token
-    balance: number | string
     onUserSelect: (token: Token) => void
     hideAddButton?: boolean
     onAdd?: () => void
@@ -14,14 +15,16 @@ interface TokenSelectionProps {
 
 const TokenSelection = ({
     token,
-    balance,
     onUserSelect,
     hideAddButton = true,
     onAdd,
 }: TokenSelectionProps) => {
+    const { account } = useActiveWeb3React()
+    const balance = useCurrencyBalance(account, token)
+    
     return (
         <WrapperSelection
-            onClick={() => (onAdd ? onAdd() : onUserSelect(token))}
+            onClick={() => onUserSelect(token)}
         >
             <div className={'element-selection'}>
                 <LogoToken token={token} size={'28px'} />
@@ -33,9 +36,9 @@ const TokenSelection = ({
                 </div>
             </div>
             <div className={'element-selection'}>
-                <div>{balance ? balance : 0}</div>
-                {!hideAddButton && onAdd && (
-                    <div className={'add-btn'}>Add to coin list</div>
+                <div>{balance ? Number(balance).toFixed(4) : 0}</div>
+                {!hideAddButton && (
+                    <div className={'add-btn'} onClick={onAdd}>Add to coin list</div>
                 )}
             </div>
         </WrapperSelection>
@@ -52,6 +55,8 @@ const WrapperSelection = styled(Row)`
 
     .add-btn {
         color: #0089ff;
+        position: relative;
+        z-index: 1;
     }
 
     &:hover {
