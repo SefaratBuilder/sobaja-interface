@@ -164,7 +164,6 @@ const NetworkButton = styled.div`
     align-items: center;
     gap: 10px;
     background: var(--bg2);
-    z-index: 1;
     padding: 0 10px;
     border: 1px solid #003b5c;
     background: linear-gradient(90deg, #002033 0%, rgba(0, 38, 60, 0.39) 100%);
