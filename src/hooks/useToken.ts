@@ -6,6 +6,9 @@ import { useActiveWeb3React } from 'hooks'
 import { isAddress } from 'utils'
 import { useTokenContract } from './useContract'
 import { Contract, FixedNumber } from 'ethers'
+import { ETHER_ADDRESS } from 'constants/index'
+import { ZERO_ADDRESS } from 'constants/index'
+import { NATIVE_COIN } from 'constants/index'
 
 export function useToken(address: string | undefined): Token | undefined {
     const { chainId } = useActiveWeb3React()
@@ -35,8 +38,9 @@ export function useToken(address: string | undefined): Token | undefined {
         const symbol = symbolResult?.[0]?.result?.[0]
         const name = nameResult?.[0]?.result?.[0]
         const decimals = decimalsResult?.[0]?.result?.[0]
-
-        if (!symbol || !name || !decimals || !chainId || !address) return
+        if (!chainId) return
+        if (address == ETHER_ADDRESS || address == ZERO_ADDRESS) return NATIVE_COIN[chainId]
+        if (!symbol || !name || !decimals || !address) return
         return {
             address,
             name,
@@ -48,7 +52,9 @@ export function useToken(address: string | undefined): Token | undefined {
     }, [address, chainId, symbolResult, nameResult, decimalsResult])
 }
 
-export function useTokens(addresses: (string | undefined)[]): (Token | undefined)[] {
+export function useTokens(
+    addresses: (string | undefined)[],
+): (Token | undefined)[] {
     const { chainId } = useActiveWeb3React()
     const symbolResult = useMultipleContractSingleData(
         addresses,
@@ -103,15 +109,19 @@ export function useTokenApproval(
     const tokenContract = useTokenContract(token?.address)
     const approve = async (to: string, amount: number | string) => {
         try {
-            console.log("🤦‍♂️ ⟹ tokenContract:", tokenContract)
+            console.log('🤦‍♂️ ⟹ tokenContract:', tokenContract)
+            console.log({ to, amount, tokenContract: tokenContract?.address })
             if (!isAddress(to)) return
-            const gasLimit = await tokenContract?.estimateGas.approve(to, amount)
+            const gasLimit = await tokenContract?.estimateGas.approve(
+                to,
+                '1',
+            )
             console.log({ gasLimit: gasLimit && gasLimit.add(1000) })
             return tokenContract?.approve(to, amount, {
-                gasLimit: gasLimit && gasLimit.add(1000)
+                gasLimit: gasLimit && gasLimit.add(1000),
             })
         } catch (err) {
-            return
+            console.log({ err })
         }
     }
 

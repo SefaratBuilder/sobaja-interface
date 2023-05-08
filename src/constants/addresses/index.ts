@@ -2,6 +2,7 @@ import MULTICALL_ABI from '../jsons/multicall.json'
 import FACTORY_ABI from '../jsons/factory.json'
 import ROUTER_ABI from '../jsons/router.json'
 import FAUCET_ABI from '../jsons/faucet.json'
+import STAKING_ABI from '../jsons/staking.json'
 import { ChainId } from 'interfaces'
 
 const MULTICALL_NETWORKS: { [chainId: number]: string } = {
@@ -20,9 +21,11 @@ const FACTORIES: { [chainId: number]: string } = {
 
 const ROUTERS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0x2da10A1e27bF85cEdD8FFb1AbBe97e53391C0295',
-    [ChainId.ZKTESTNET]: '0x765B2f78AC65ca5C45e0108A45c771528910B848',
+    // [ChainId.ZKTESTNET]: '0x765B2f78AC65ca5C45e0108A45c771528910B848', old
+    [ChainId.ZKTESTNET]: '0xDCeA30E35Eb995Bc43DF40B9e43262afBc60795f', // ref
     [ChainId.GOERLI]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
-    [ChainId.MUMBAI]: '0x7bA65FB5B3491c767D0345891D13480E07d41fEE',
+    // [ChainId.MUMBAI]: '0x7bA65FB5B3491c767D0345891D13480E07d41fEE', // old
+    [ChainId.MUMBAI]: '0xd6E887A268b0422851c10e88D7e1CaA5F03Ee2E2', // ref
 }
 
 const INIT_CODE_HASHES: { [chainId: number]: string } = {
@@ -36,6 +39,24 @@ const INIT_CODE_HASHES: { [chainId: number]: string } = {
         '0x0c18c0437decb2e9aeb8498fc7fd556cac1a8baef62ab1920708dc852189c9d7',
 }
 
+const LAUNCHPADS: { [chainId: number]: string } = {
+    [ChainId.ZKMAINNET]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
+    [ChainId.ZKTESTNET]: '0x01C2d40418858562f8E5852895a48E2a8B3D01b5',
+    [ChainId.GOERLI]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
+    [ChainId.MUMBAI]: '0x408D898895e761A9a16816d41f9064eEB71213D5',
+}
+
+const STAKING: { [chainId: number]: string } = {
+    [ChainId.MUMBAI]: '0xAf8fB426D07Ef11c15e51d8DE512Bfb7cEC24B04',
+}
+
+const LAUNCHPAD_ACCESS_MANAGERS: { [chainId: number]: string } = {
+    [ChainId.ZKMAINNET]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
+    [ChainId.ZKTESTNET]: '0x01C2d40418858562f8E5852895a48E2a8B3D01b5',
+    [ChainId.GOERLI]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
+    [ChainId.MUMBAI]: '0x9A8E9cC9f45055946E70Cd9e5E16e2BAf08b7B11',
+}
+
 export const WRAPPED_NATIVE_ADDRESSES: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
     [ChainId.ZKTESTNET]: '0x20b28b1e4665fff290650586ad76e977eab90c5d',
@@ -47,9 +68,8 @@ const Faucet: { [chainId: number]: string } = {
     [ChainId.ZKTESTNET]: '0x512f8823C8541e371c6eAB6eee22d5CaB9945a7E',
     [ChainId.GOERLI]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
     [ChainId.MUMBAI]: '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
-    [ChainId.ZKMAINNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6'
+    [ChainId.ZKMAINNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
 }
-
 
 export {
     MULTICALL_ABI,
@@ -61,4 +81,8 @@ export {
     FAUCET_ABI,
     Faucet,
     INIT_CODE_HASHES,
+    LAUNCHPADS,
+    LAUNCHPAD_ACCESS_MANAGERS,
+    STAKING,
+    STAKING_ABI
 }

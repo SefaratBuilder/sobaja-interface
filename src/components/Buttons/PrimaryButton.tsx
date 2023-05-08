@@ -49,13 +49,14 @@ export const Button = styled.button<{ height?: any; color?: any }>`
             ? color
             : 'linear-gradient(87.2deg, #00B2FF 2.69%, #003655 98.02%);'};
     font-size: 1rem;
-    font-style: italic;
+
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
     letter-spacing: 0.3;
     cursor: ${({ disabled }) => (disabled ? 'no-drop' : 'pointer')};
     opacity: ${({ disabled }) => (disabled ? 0.7 : 1)};
     color: var(--text1);
+    font-family: Inter, sans-serif;
 
     :hover {
         opacity: 0.8;
@@ -63,5 +64,14 @@ export const Button = styled.button<{ height?: any; color?: any }>`
 
     @media screen and (max-width: 576px) {
         font-size: 0.8rem;
+    }
+
+    &.modal {
+        background: #00b2ff;
+        width: 85%;
+        margin: auto;
+        span {
+            font-style: normal;
+        }
     }
 `

@@ -1,3 +1,4 @@
+import { ChainId } from 'interfaces';
 import { useActiveWeb3React } from 'hooks'
 import { Contract } from '@ethersproject/contracts'
 import { useMemo } from 'react'
@@ -10,10 +11,17 @@ import {
     ROUTER_ABI,
     ROUTERS,
     FAUCET_ABI,
-    Faucet
+    Faucet,
+    LAUNCHPADS,
+    STAKING_ABI,
+    STAKING
 } from 'constants/addresses'
 import ERC20 from 'constants/jsons/erc20.json'
 import { PAIR_ABI } from 'constants/jsons/pair'
+import LAUNCHPAD_ABI from 'constants/jsons/launchpad.json'
+import { FAIRLAUNCH_ABI } from 'constants/jsons/fairlaunch'
+import ACCESS_MANAGER_ABI from 'constants/jsons/accessManager.json'
+import { LAUNCHPAD_ACCESS_MANAGERS } from 'constants/addresses'
 
 // returns null on errors
 export const useContract = (
@@ -56,16 +64,39 @@ export function useRouterContract(): Contract | null {
     return useContract(ROUTERS[chainId], ROUTER_ABI)
 }
 
+export function useStakingContract(): Contract | null {
+    const { chainId } = useActiveWeb3React()
+    if (!chainId) return null
+    return useContract(STAKING[chainId], STAKING_ABI)
+}
+
 export function useTokenContract(address: string | undefined): Contract | null {
     return useContract(address, ERC20)
 }
 
 export function useFaucetContract(): Contract | null {
-    const { chainId } = useActiveWeb3React();
-    if (!chainId) return null;
+    const { chainId } = useActiveWeb3React()
+    if (!chainId) return null
     return useContract(Faucet[chainId], FAUCET_ABI)
 }
 
 export function usePairContract(address: string | undefined): Contract | null {
     return useContract(address, PAIR_ABI)
+}
+
+export function useLaunchpadContract(): Contract | null {
+    const { chainId } = useActiveWeb3React()
+    if (!chainId) return null
+    return useContract(LAUNCHPADS[chainId], LAUNCHPAD_ABI)
+}
+
+
+export function useFairLaunchContract(address: string | undefined): Contract | null {
+    return useContract(address, FAIRLAUNCH_ABI)
+}
+
+export function useAccessManagerContract(): Contract | null {
+    const { chainId } = useActiveWeb3React()
+    if (!chainId) return null
+    return useContract(LAUNCHPAD_ACCESS_MANAGERS[chainId], ACCESS_MANAGER_ABI)
 }

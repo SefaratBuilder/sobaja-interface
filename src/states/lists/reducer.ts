@@ -14,14 +14,13 @@ const initialState: ListState = {
 }
 
 export default createReducer(initialState, (builder) => {
-    builder
-        .addCase(updateCurrentList, (state, action) => {
-            const { chainId, newList } = action.payload
-            return {
-                currentList: {
-                    ...state.currentList,
-                    [chainId]: newList
-                }
-            }
-        })
+    builder.addCase(updateCurrentList, (state, action) => {
+        const { chainId, newList } = action.payload
+        return {
+            currentList: {
+                ...state.currentList,
+                [chainId]: newList,
+            },
+        }
+    })
 })

@@ -32,11 +32,11 @@
         "chainId": 324
     },
     {
-        "address": "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa",
-        "symbol": "WETH",
+        "address": "0x9c3c9283d3e44854697cd22d3faa240cfb032889",
+        "symbol": "WMATIC",
         "decimals": 18,
-        "logoURI": "https://raw.githubusercontent.com/forbitspace/icons/main/token/eth.jpg",
-        "name": "Wrapped Ethereum",
+        "logoURI": "https://seeklogo.com/images/P/polygon-matic-logo-1DFDA3A3A8-seeklogo.com.png",
+        "name": "Wrapped Matic",
         "chainId": 80001
     },
     {
@@ -48,19 +48,19 @@
         "chainId": 324
     },
     {
-        "address": "0x2958c4F56fc4d40ad99E06759b548e02cA2c5ab7",
-        "symbol": "SBJ",
+        "address": "0xD22aabc72743F22D52e00A2f7554D9112eBa9F1d",
+        "symbol": "SOBA",
         "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "Sobaja token",
+        "logoURI": "/images/sbj.svg",
+        "name": "Sobaja test token",
         "chainId": 80001
     },
     {
-        "address": "0x116BDAC75BB21edc50ea54baa6feb33A022a6abc",
-        "symbol": "SP",
+        "address": "0x1cebe52e6d399d7188986a3d6cfc881d50391932",
+        "symbol": "SOBA2",
         "decimals": 18,
-        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/link.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-        "name": "Space",
+        "logoURI": "/images/sbj.svg",
+        "name": "Sobaja test token 2",
         "chainId": 80001
     },
     {

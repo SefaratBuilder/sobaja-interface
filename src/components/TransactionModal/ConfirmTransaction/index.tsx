@@ -25,8 +25,8 @@ const ConfirmTransactionModal = ({
         setConfirmTransaction(false)
     })
 
-    const Swap = () => {
-        const detail = payload?.method === 'swap' ? 'for' : 'x'
+    const Details = () => {
+        const detail = payload?.method === 'swap' ? 'to' : 'x'
         return (
             <ContainerItem>
                 <Header>
@@ -41,12 +41,12 @@ const ConfirmTransactionModal = ({
                 </Header>
                 <EstimatedNotice>
                     <TitleEstimate style={{ gap: '5px' }}>
-                        <h2>{payload?.input || 999}</h2>
+                        <h2 className="to">{payload?.input || 999}</h2>
                         <h2>{payload?.tokenIn?.symbol || 'X'}</h2>
                     </TitleEstimate>
                     <h3>{detail}</h3>
                     <TitleEstimate style={{ gap: '5px' }}>
-                        <h2>{payload?.output || 9999}</h2>
+                        <h2 className="to">{payload?.output || 9999}</h2>
                         <h2>{payload?.tokenOut?.symbol || 'Y'}</h2>
                     </TitleEstimate>
                     {/* <h2>{payload.tokenIn + "/" + payload.tokenOut} Pool Tokens</h2> */}
@@ -73,7 +73,7 @@ const ConfirmTransactionModal = ({
     return (
         <>
             <Container ref={ref}>
-                {<Swap />}
+                {<Details />}
                 {/* <h1>Hello</h1> */}
                 {/* {payload && payload?.method === 'Add' && <AddLiquidity />}
                 {payload?.method === 'Remove' && <Remove />}
@@ -91,23 +91,20 @@ const Container = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 3;
     background: var(--bg5) !important;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
-    background: linear-gradient(
-        to top right,
-        rgba(0, 28, 44, 0.3),
-        rgba(0, 28, 44, 0.3)
-    );
+    background-color: #00000073;
     box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
     max-width: 500px;
     width: 100%;
     padding: 20px 30px;
     backdrop-filter: blur(40px);
+    z-index: 999;
     @media screen and (max-width: 576px) {
         max-width: 400px;
+        width: 90%;
         padding: 20px 20px;
     }
     @media screen and (max-width: 390px) {
@@ -157,11 +154,10 @@ const EstimatedNotice = styled.div`
     }
     span {
         font-size: 12px;
-        font-style: italic;
     }
     .details {
         font-size: 16px;
-        font-style: italic;
+
         padding-bottom: 5px;
     }
 `

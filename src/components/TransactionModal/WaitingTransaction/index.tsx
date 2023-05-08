@@ -1,12 +1,10 @@
 import Blur from 'components/Blur'
-// import HiddenGlobalScroll from "components/HiddenGlobalScroll"
-// import { Loader } from "components/Loader"
-// import { payloadTxnModal } from "constants/index"
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import imgClose from 'assets/icons/x.svg'
 import Loader from 'components/Loader'
+import CustomLoader from 'components/CustomLoader'
 
 interface WaitingTransactionModalProps {
     setModalRemove?: any
@@ -94,7 +92,8 @@ const WaitingTransactionModal = ({
                     <WrapInfoLoad>
                         <div>Waiting For Confirmation</div>
                         <WrapLoader>
-                            <Loader size="42px" />
+                            {/* <Loader size="42px" /> */}
+                            <CustomLoader size="4em" />
                         </WrapLoader>
                         <div>{message}</div>
                         <div>Confirm this transaction in your wallet</div>
@@ -112,7 +111,6 @@ const Container = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 3;
     border: 1.5px solid var(--border2);
     border-radius: 12px;
     padding: 20px 25px;
@@ -121,11 +119,18 @@ const Container = styled.div`
         rgba(0, 28, 44, 0.3),
         rgba(0, 28, 44, 0.3)
     );
+    background-color: #00000073;
+
     box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
     max-width: 500px;
     width: 100%;
     padding: 20px 30px;
     backdrop-filter: blur(40px);
+    z-index: 999;
+
+    @media screen and (max-width: 576px) {
+        width: 90%;
+    }
 `
 const Header = styled.div`
     display: flex;

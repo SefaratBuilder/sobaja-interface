@@ -5,6 +5,12 @@ import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { ChainId, Token } from 'interfaces'
 import { add, div, divNumberWithDecimal, mul, sub } from './math'
+import { WRAPPED_NATIVE_COIN } from 'constants/index'
+
+export function convertNativeToWrappedToken(token: Token, chainId: number): Token {
+    if (isNativeCoin(token)) return WRAPPED_NATIVE_COIN[chainId]
+    return token
+}
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {
@@ -102,29 +108,21 @@ export function getEtherscanLink(
     }
 }
 
-
 //current time + deadline second
 export function calcTransactionDeadline(deadline: number) {
     return (new Date().getTime() / 1000 + deadline).toFixed()
 }
 
-//amountOut * (1 - 0.3 /100)
-//amountIn / (1 - 0.3 /100)
-
 export const calcSlippageAmount = (
-    amount: string,
-    slippage: string
-): [ string, string] =>{
-
-    if(Number(slippage) <0 || Number(slippage) > 1){
-        throw new Error (`Please input properly slippage amount`)
+    amount: string | number,
+    slippage: string | number,
+): [string, string] => {
+    if (Number(slippage) < 0 || Number(slippage) > 100) {
+        throw new Error(`Please input properly slippage amount`)
     }
 
-    const amountIn = div(amount,(div((sub(1,slippage)),100)))
-    const amountOut = mul(amount,(div((sub(1,slippage)),100)))
-
-    //   const amountIn = div(amount,(((sub(1,slippage)))))
-    //   const amountOut = mul(amount,(((sub(1,slippage)))))
+    const amountOut = mul(amount, sub(1, div(slippage, 100)))
+    const amountIn = div(amount, sub(1, div(slippage, 100)))
 
     return [amountOut, amountIn]
 }

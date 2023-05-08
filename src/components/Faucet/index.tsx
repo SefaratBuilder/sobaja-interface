@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import PrimaryButton, { Button } from 'components/Buttons/PrimaryButton'
 import styled from 'styled-components'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
@@ -10,30 +10,84 @@ import { OpacityModal } from 'components/Web3Status'
 import { useActiveWeb3React } from 'hooks'
 import { Error } from 'components/Text'
 import { Row } from 'components/Layouts'
+import { sendEvent } from 'utils/analytics'
+import Blur from 'components/Blur'
+import ComponentsTransaction, {
+    InitCompTransaction,
+} from 'components/TransactionModal'
+import { URLSCAN_BY_CHAINID } from 'constants/index'
+import { useTransactionHandler } from 'states/transactions/hooks'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
     const { chainId } = useActiveWeb3React()
-    
+    const initDataTransaction = InitCompTransaction()
+    const { addTxn } = useTransactionHandler()
+
+    const isDisable = useMemo(
+        () => (chainId && chainId != 280) || false,
+        [chainId],
+    )
+
     useOnClickOutside(ref, () => {
         setIsDisplayFaucet(false)
     })
 
-    const clickFaucetToken = (erc20: string) => {
-        if (faucetContract == null) return
-        faucetContract?.requestTokens(erc20)
+    useEffect(() => {
+        initDataTransaction.setError('')
+        initDataTransaction.setIsOpenResultModal(false)
+    }, [isDislayFaucet])
+
+    const clickFaucetToken = async (erc20: string) => {
+        try {
+            if (faucetContract == null) return
+            setIsDisplayFaucet(false)
+            initDataTransaction.setIsOpenWaitingModal(true)
+
+            const tx = await faucetContract?.requestTokens(erc20)
+
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
+            const result = await tx.wait()
+
+            initDataTransaction.setIsOpenResultModal(false)
+
+            addTxn({
+                hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                    result.hash || ''
+                }`,
+                msg: 'Faucet',
+                status: result.status === 1 ? true : false,
+            })
+            sendEvent({
+                category: 'Defi',
+                action: 'Faucet',
+                label: erc20,
+            })
+            setIsDisplayFaucet(false)
+        } catch (err) {
+            console.log('Failed to approve token: ', err)
+            initDataTransaction.setError('Failed')
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
+        }
     }
 
     const showMintCoins = () => {
+        console.log({ isDisable })
+
         if (tokenList && tokenList.length > 0) {
             return tokenList.map((item) => {
                 if (item.type == 'faucet' && item.chainId == 280) {
                     return (
                         <MintCoinButton
                             key={item.address}
-                            onClick={() => clickFaucetToken(item.address)}
+                            onClick={() => {
+                                chainId == 280 && clickFaucetToken(item.address)
+                            }}
+                            isDisable={isDisable}
                         >
                             <Icon
                                 src={
@@ -53,6 +107,10 @@ const Faucet = () => {
             <BtnFaucet onClick={() => setIsDisplayFaucet(!isDislayFaucet)}>
                 Faucet
             </BtnFaucet>
+            <ComponentsTransaction
+                data={initDataTransaction}
+                onConfirm={() => {}}
+            />
             {isDislayFaucet ? (
                 <FaucetModalDiv>
                     <ContainerFaucetModal
@@ -69,7 +127,7 @@ const Faucet = () => {
                         <BodyModalFaucet>
                             <ContentFaucet>
                                 <TextCoin>
-                                    Get BTC, USDT, USDC, DAI for testing ZkSync
+                                    Get BTC, USDT, USDC, DAI for testing zkSync
                                     Testnet on Sobajaswap, test token can
                                     nullify the reality of Mainnet.
                                 </TextCoin>
@@ -80,7 +138,7 @@ const Faucet = () => {
                                     <Row>
                                         <Error fontSize="14px">
                                             Wrong network! Please switch to
-                                            ZkSync Goerli network to faucet
+                                            zkSync Goerli network to faucet
                                             tokens.
                                         </Error>
                                     </Row>
@@ -92,7 +150,7 @@ const Faucet = () => {
             ) : (
                 ''
             )}
-            {isDislayFaucet ? <OpacityModal></OpacityModal> : ''}
+            {isDislayFaucet ? <Blur /> : ''}
         </>
     )
 }
@@ -103,12 +161,12 @@ const Icon = styled.img`
     border-radius: 50%;
 `
 
-const MintCoinButton = styled.button`
+const MintCoinButton = styled.button<{ isDisable: boolean }>`
     gap: 5px;
     align-items: center;
     display: flex;
     font-size: 1rem;
-    font-style: italic;
+    font-family: Inter;
     font-weight: 300;
     color: var(--text1);
     width: 100%;
@@ -119,7 +177,7 @@ const MintCoinButton = styled.button`
     color: ${({ theme }) => theme.text1};
     border: none;
     border-radius: 12px;
-    cursor: pointer;
+    cursor: ${({ isDisable }) => (isDisable ? 'not-allowed' : 'pointer')};
     :hover {
         opacity: 0.7;
     }
@@ -175,7 +233,7 @@ const FaucetModalDiv = styled.div`
     right: 0;
     bottom: 0;
     margin: auto;
-    z-index: 3;
+    z-index: 9999;
     display: flex;
     @media (max-width: 576px) {
         width: 90%;
@@ -191,7 +249,7 @@ const ContainerFaucetModal = styled.div<{ isDislayFaucet: boolean }>`
     width: 100%;
     margin: auto;
     transition: all 0.1s ease-in-out;
-    z-index: ${({ isDislayFaucet }) => (isDislayFaucet ? 3 : -1)};
+    z-index: ${({ isDislayFaucet }) => (isDislayFaucet ? 999 : -1)};
     scale: ${({ isDislayFaucet }) => (isDislayFaucet ? 1 : 0.95)};
     opacity: ${({ isDislayFaucet }) => (isDislayFaucet ? 1 : 0)};
     padding: 10px;

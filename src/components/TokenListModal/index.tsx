@@ -30,6 +30,8 @@ const TokenListModal = ({
     const [renderedTokenList, setRenderTokenList] = useState<Token[] | []>([])
     const allTokenBalances = useAllTokenBalances()
     const tokens = useTokenList()
+    const { chainId } = useActiveWeb3React()
+    console.log({ tokens })
     const queriedToken = useToken(searchQuery)
 
     const handleSearchToken = async (
@@ -61,7 +63,6 @@ const TokenListModal = ({
     }
 
     const handleAddToken = (token: Token) => {
-        console.log('aaaa')
         addTokenToCurrentList(token)
         setSearchQuery('')
     }
@@ -75,11 +76,8 @@ const TokenListModal = ({
 
         const newTokens = tokens.filter((t) => !sortedTokenList.includes(t))
 
-        const filteredByChainIdTokens = [
-            ...sortedTokenList,
-            ...newTokens,
-        ]
-        
+        const filteredByChainIdTokens = [...sortedTokenList, ...newTokens]
+
         setRenderTokenList(filteredByChainIdTokens)
     }
 
@@ -111,22 +109,25 @@ const TokenListModal = ({
                     placeholder="Search name or paste address"
                 />
                 <Row gap="10px" wrap="wrap">
-                    {CommonBaseTokens.map((token: Token, index: number) => {
-                        return (
-                            <CommonBase
-                                key={index + 1}
-                                token={token}
-                                onUserSelect={(e) => {
-                                    onUserSelect(field, token)
-                                    onClose()
-                                }}
-                            />
-                        )
-                    })}
+                    {chainId &&
+                        CommonBaseTokens[chainId].map(
+                            (token: Token, index: number) => {
+                                return (
+                                    <CommonBase
+                                        key={index + 1}
+                                        token={token}
+                                        onUserSelect={(e) => {
+                                            onUserSelect(field, token)
+                                            onClose()
+                                        }}
+                                    />
+                                )
+                            },
+                        )}
                 </Row>
                 <Hr />
                 <WrapList>
-                    {  renderedTokenList.length > 0 ?
+                    {renderedTokenList.length > 0 ? (
                         renderedTokenList.map((token: Token, index: number) => {
                             return (
                                 <TokenSelection
@@ -139,18 +140,20 @@ const TokenListModal = ({
                                     }}
                                 />
                             )
-                        }) : queriedToken ? (
-                            <TokenSelection 
-                                token={queriedToken} 
-                                onUserSelect={(e) => {
-                                    onUserSelect(field, queriedToken)
-                                    onClose()
-                                }}
-                                hideAddButton={false}
-                                onAdd={() => handleAddToken(queriedToken)}
-                            />
-                        ) : <></>
-                    }
+                        })
+                    ) : queriedToken ? (
+                        <TokenSelection
+                            token={queriedToken}
+                            onUserSelect={(e) => {
+                                onUserSelect(field, queriedToken)
+                                onClose()
+                            }}
+                            hideAddButton={false}
+                            onAdd={() => handleAddToken(queriedToken)}
+                        />
+                    ) : (
+                        <></>
+                    )}
                 </WrapList>
             </ModalContentWrapper>
         )

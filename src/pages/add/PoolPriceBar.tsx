@@ -6,116 +6,62 @@ import { useSwapState } from 'states/swap/hooks'
 import { Row } from 'components/Layouts'
 import { div } from 'utils/math'
 import NotiIcon from 'assets/icons/notification.svg'
+import { Pair } from 'utils/pair'
+import { convertNativeToWrappedToken } from 'utils'
+import { useActiveWeb3React } from 'hooks'
 
 const PoolPriceBar = ({
     dropDown,
     setDropDown,
+    pair
 }: {
     dropDown: boolean
     setDropDown: React.Dispatch<React.SetStateAction<boolean>>
+    pair: Pair
 }) => {
-    const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } =
+    const { inputAmount, outputAmount, tokenIn, tokenOut } =
         useSwapState()
-    const slippage = 0
-    const maximumSent =
-        Number(inputAmount) && slippage
-            ? Number(inputAmount) * (1 + Number(slippage) / 100)
-            : 0
-    const minimumReceived = outputAmount
-        ? Number(outputAmount) * (1 - Number(slippage) / 100)
-        : 0
-    const rate =
-        Number(inputAmount) && Number(outputAmount)
-            ? Number(div(inputAmount, outputAmount)).toFixed(8)
-            : 0
-    const priceImpact =
-        Number(inputAmount) && Number(outputAmount)
-            ? Number(div(inputAmount, outputAmount)).toFixed(8)
-            : 0
+    const { chainId } = useActiveWeb3React()
+    const shareOfPool = chainId && inputAmount && outputAmount && tokenIn && tokenOut ? pair.calcShareOfPool(inputAmount, outputAmount, convertNativeToWrappedToken(tokenIn, chainId), convertNativeToWrappedToken(tokenOut, chainId)) : 0
+    const rate0 = pair.reserve0 && pair.reserve1 ? Number(pair.reserve0) / Number(pair.reserve1) : 0
+    const rate1 = pair.reserve0 && pair.reserve1 ? Number(pair.reserve1) / Number(pair.reserve0) : 0
+    console.log({pair})
 
     return (
         <>
             <PoolPriceWrapper>
-                <WrapFee
-                    dropDown={dropDown}
-                    onClick={() => setDropDown(!dropDown)}
-                >
-                    <Row al="center" gap="2px">
-                        <img src={NotiIcon} alt="notification icon" />
-                        <span>
-                            1 {tokenOut?.symbol} = {rate} {tokenIn?.symbol}{' '}
-                            (including fee)
-                        </span>
-                    </Row>
-                    <img
-                        className={dropDown ? 'active' : ''}
-                        src={imgDownArrowDark}
-                        alt="chevron down"
-                    />
-                </WrapFee>
                 <WrapExpectedOutput
                     className={dropDown ? 'active' : 'chevron down'}
                     dropDown={dropDown}
                 >
                     <ContentOutput>
-                        <ItemOutput>
-                            <div>
-                                <div>Expected output</div>
-                            </div>
-                            <div>
-                                <div>
-                                    {outputAmount
-                                        ? Number(outputAmount).toFixed(8)
-                                        : 0}{' '}
-                                    {tokenOut?.symbol}
-                                </div>
-                            </div>
-                        </ItemOutput>
-                        <ItemOutput>
-                            <div>
-                                <div>Price impact</div>
-                            </div>
-                            <div>
-                                <div>
-                                    {priceImpact
-                                        ? Number(priceImpact).toFixed(2)
-                                        : 0}{' '}
-                                    %
-                                </div>
-                            </div>
-                        </ItemOutput>
+                        <Row jus="space-between">
+                            <div>Price pool share</div>
+                        </Row>
                         <Hr />
                         <ItemOutput>
-                            <div>
-                                {swapType === Field.INPUT ? (
-                                    <div>Minimum received</div>
-                                ) : (
-                                    <div>Maximum sent</div>
-                                )}
-                            </div>
-                            <div>
-                                {swapType === Field.INPUT ? (
-                                    <Row>
-                                        <span>
-                                            {minimumReceived.toFixed(8)}
-                                        </span>
-                                        <span>{tokenOut?.symbol}</span>
-                                    </Row>
-                                ) : (
-                                    <Row>
-                                        <span>{maximumSent.toFixed(8)}</span>
-                                        <span>{tokenIn?.symbol}</span>
-                                    </Row>
-                                )}
-                            </div>
+                            <Row jus="center">
+                                <div>{rate0.toFixed(5)}</div>
+                            </Row>
+                            <Row jus="center">
+                                <div>{rate1.toFixed(5)}</div>
+                            </Row>
+                            <Row jus="center">
+                                <div>
+                                    {shareOfPool.toFixed(2)} %
+                                </div>
+                            </Row>
                         </ItemOutput>
-                        <ItemOutput>
-                            <div>
-                                <span>Fee</span>
-                            </div>
-                            <div>
-                                <span>0.25%</span>
-                            </div>
+                        <ItemOutput className={'nums'}>
+                            <Row jus="center">
+                                <div>{pair.token0.symbol} per {pair.token1.symbol}</div>
+                            </Row>
+                            <Row jus="center">
+                                <Row>{pair.token1.symbol} per {pair.token0.symbol}</Row>
+                            </Row>
+                            <Row jus="center">
+                                <Row>Share of pool</Row>
+                            </Row>
                         </ItemOutput>
                     </ContentOutput>
                 </WrapExpectedOutput>
@@ -157,8 +103,8 @@ const WrapExpectedOutput = styled.div<{ dropDown: boolean }>`
     margin: 10px 0;
 
     &.active {
-        height: 116px;
-        @media(max-width: 576px) {
+        height: 114px;
+        @media (max-width: 576px) {
             height: 130px;
         }
     }
@@ -182,11 +128,19 @@ const ContentOutput = styled.div`
 `
 
 const ItemOutput = styled.div`
-    font-size: 12px;
-    display: flex;
-    justify-content: space-between;
+    font-size: 14px;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    justify-content: center;
     align-items: center;
-    color: var(--text2);
+    color: var(--text1);
+
+    &.nums {
+        color: var(--text2);
+        font-size: 12px;
+        text-align: center;
+    }
+
     div {
         display: flex;
         align-items: center;

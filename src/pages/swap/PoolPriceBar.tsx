@@ -8,6 +8,8 @@ import { div, mulNumberWithDecimal } from 'utils/math'
 import NotiIcon from 'assets/icons/notification.svg'
 import { useAppState } from 'states/application/hooks'
 import { Pair } from 'utils/pair'
+import { convertNativeToWrappedToken } from 'utils'
+import { useWeb3React } from '@web3-react/core'
 
 const PoolPriceBar = ({
     pair,
@@ -18,6 +20,7 @@ const PoolPriceBar = ({
     dropDown: boolean
     setDropDown: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
+    const { chainId } = useWeb3React()
     const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } =
         useSwapState()
     const { slippage } = useAppState()
@@ -32,12 +35,25 @@ const PoolPriceBar = ({
         Number(inputAmount) && Number(outputAmount)
             ? Number(div(inputAmount, outputAmount)).toFixed(8)
             : 0
-    function getPriceImpact(fee: number, amountTrade: number, reservesA: number) {
-        let amount = amountTrade * (1 - fee);
-        return amount / (reservesA + amount) * 100;
+    function getPriceImpact(
+        fee: number,
+        amountTrade: number,
+        reservesA: number,
+    ) {
+        let amount = amountTrade * (1 - fee)
+        return (amount / (reservesA + amount)) * 100
     }
-    const reserveIn = pair && (tokenIn?.symbol == pair.token0.address ? pair.reserve0 : pair.reserve1)
-    const priceImpact = tokenIn && inputAmount && pair ? getPriceImpact(Number(pair.fee), Number(mulNumberWithDecimal(inputAmount, tokenIn.decimals)), Number(reserveIn)) : 0
+    const reserveIn =
+        pair && tokenIn && chainId &&
+        (convertNativeToWrappedToken(tokenIn, chainId).address == pair.token0.address ? pair.reserve0 : pair.reserve1)
+    const priceImpact =
+        tokenIn && inputAmount && pair
+            ? getPriceImpact(
+                  Number(pair.fee),
+                  Number(mulNumberWithDecimal(inputAmount, tokenIn.decimals)),
+                  Number(reserveIn),
+              )
+            : 0
 
     return (
         <>
@@ -120,7 +136,7 @@ const PoolPriceBar = ({
                                 <span>Fee</span>
                             </div>
                             <div>
-                                <span>0.25%</span>
+                                <span>{pair ? Number(pair.fee) * 100 : 0} %</span>
                             </div>
                         </ItemOutput>
                     </ContentOutput>
@@ -164,7 +180,7 @@ const WrapExpectedOutput = styled.div<{ dropDown: boolean }>`
 
     &.active {
         height: 116px;
-        @media(max-width: 576px) {
+        @media (max-width: 576px) {
             height: 130px;
         }
     }

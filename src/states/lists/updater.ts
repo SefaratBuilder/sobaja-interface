@@ -1,7 +1,7 @@
 import { useActiveWeb3React } from 'hooks'
 import { useEffect } from 'react'
 import { useTokenList, useUpdateCurrentList } from './hooks'
-import { NATIVE_COIN, ZERO_ADDESS } from 'constants/index'
+import { NATIVE_COIN, ZERO_ADDRESS } from 'constants/index'
 
 const Updater = () => {
     const updateCurrentList = useUpdateCurrentList()
@@ -10,7 +10,11 @@ const Updater = () => {
 
     useEffect(() => {
         if (chainId) {
-            const newList = currentList.filter((item) => item.chainId === chainId || item.address === NATIVE_COIN.address)
+            const newList = currentList.filter(
+                (item) =>
+                    item.chainId === chainId ||
+                    item.address === NATIVE_COIN[chainId].address,
+            )
             updateCurrentList(newList)
         }
     }, [chainId])

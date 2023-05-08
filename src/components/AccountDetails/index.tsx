@@ -12,6 +12,7 @@ import imgPlusWallet from 'assets/icons/plus-wallet.svg'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
 import iconSetting from 'assets/icons/setting.svg'
+import { NATIVE_COIN } from 'constants/index'
 
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -21,14 +22,14 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account, deactivate } = useActiveWeb3React()
+    const { account, deactivate, chainId } = useActiveWeb3React()
 
     const [isCopied, setIsCopied] = useState<boolean>(false)
 
     const balance = account && useETHBalances([account])?.[account]
 
     const handleCopyAddress = () => {
-        if (account && navigator.clipboard) {
+        if (account) {
             navigator.clipboard.writeText(account.toString()).then(() => {
                 setIsCopied(true)
                 setTimeout(() => {
@@ -77,11 +78,15 @@ const AccountDetails = ({
                 </WrapBtnHeader>
             </Header>
             <WrapContent>
-                <NameBalance>ETH Balance</NameBalance>
+                <NameBalance>
+                    {(chainId && NATIVE_COIN[chainId].symbol) || 'ETH'} Balance
+                </NameBalance>
                 <Balance className={'to'}>
                     {balance ? balance.toString() : 0}
                 </Balance>
-                <Balance>ETH</Balance>
+                <Balance>
+                    {(chainId && NATIVE_COIN[chainId].symbol) || 'ETH'}
+                </Balance>
                 <WrapButton>
                     <NavLink to="">
                         <PrimaryButton
@@ -327,7 +332,6 @@ const Title = styled.div`
     color: ${({ theme }) => theme.text1};
 
     div:first-child {
-        font-style: italic;
         letter-spacing: 0.5px;
         display: flex;
         flex-wrap: wrap;
@@ -396,27 +400,7 @@ const Item = styled.div<{ isChecked: boolean }>`
         width: 45%;
     }
 `
-const ItemContent = styled.button`
-    font-family: 'Montserrat', sans-serif !important;
-    background: none;
-    border: none;
-    color: ${({ theme }) => theme.text1};
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
 
-    img {
-        height: 50px;
-        width: 50px;
-        object-fit: contain;
-    }
-    span {
-        font-size: 11.5px;
-        color: white;
-    }
-`
 const Footer = styled.div`
     display: flex;
     flex-direction: column;
@@ -482,6 +466,7 @@ const WrapAccountInfo = styled.div`
 const ImgAccount = styled.img`
     height: 20px;
     border-radius: 50%;
+    width: 20px;
 `
 const IdAccount = styled.div``
 const CopyAccountAddress = styled.img`
@@ -519,6 +504,7 @@ const WrapConnectModal = styled(Container)`
     transform: unset;
     margin: unset;
     overflow: unset;
+
     @media screen and (max-width: 1100px) {
         right: 10px;
         top: unset;

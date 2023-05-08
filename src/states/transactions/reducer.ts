@@ -6,28 +6,34 @@ export interface Txn {
     msg: string
     status: boolean
 }
+export interface HistoryTrans {
+    method: string
+    status: boolean
+
+}
 
 export interface TxnState {
     txnList: Txn[]
 }
 
 const initialState: TxnState = {
-    txnList: []
+    txnList: [],
 }
 
 export default createReducer(initialState, (builder) => {
     builder
+
         .addCase(addTxn, (state, action) => {
             const txnList = [...state.txnList, action.payload]
             return {
-                txnList
+                txnList,
             }
         })
         .addCase(removeTxn, (state, action) => {
             const txn = action.payload
-            const txnList = state.txnList.filter(t => t.hash !== txn.hash)
+            const txnList = state.txnList.filter((t) => t.hash !== txn.hash)
             return {
-                txnList
+                txnList,
             }
         })
 })

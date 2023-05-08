@@ -1,4 +1,11 @@
-import React, { useState, Fragment, useMemo, useCallback } from 'react'
+import React, {
+    useState,
+    Fragment,
+    useMemo,
+    useCallback,
+    useRef,
+    useEffect,
+} from 'react'
 import styled from 'styled-components'
 import { useMyPosition, useTokensUrl } from 'hooks/useAllPairs'
 import UnknowToken from 'assets/icons/question-mark-button-dark.svg'
@@ -9,7 +16,10 @@ import {
     isNativeCoin,
 } from 'utils'
 import { div, mul, mulNumberWithDecimal } from 'utils/math'
-import { useAppState } from 'states/application/hooks'
+import {
+    useAppState,
+    useUpdateApplicationState,
+} from 'states/application/hooks'
 import { useActiveWeb3React } from 'hooks'
 import { useRouterContract } from 'hooks/useContract'
 import { useNavigate } from 'react-router-dom'
@@ -23,28 +33,62 @@ import { useTokenApproval } from 'hooks/useToken'
 import { ROUTERS } from 'constants/addresses'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import { Row } from 'components/Layouts'
+import { ZeroAddress } from 'ethers'
+import { sendEvent } from 'utils/analytics'
+import { useOnClickOutside } from 'hooks/useOnClickOutSide'
+import Pagination from 'components/Pagination'
+import { useMintActionHandlers } from 'states/mint/hooks'
 
-const MyPools = () => {
+interface Positions {
+    position: (
+        | {
+              value: string
+              valueWithDec: string
+              tokenLp: any
+              token0: any
+              token1: any
+              percent: number
+              totalLp: any
+              totalReserve0: any
+              totalReserve1: any
+          }
+        | undefined
+    )[]
+    tokenList: string[]
+}
+
+const MyPools = ({ position, tokenList }: Positions) => {
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
     const [percentValue, setPercentValue] = useState(0)
-    const { position, tokenList } = useMyPosition()
+    // const { position, tokenList } = useMyPosition()
+    const totalPage = position?.length > 0 ? Math.ceil(position?.length / 6) : 1
+    const [page, setPage] = useState(1)
+
+    const [positionInCurrentPage, setPositionInCurrentPage] = useState<
+        typeof position
+    >(position?.slice(0, 6))
+
     const [poolRemove, setPoolRemove] = useState<(typeof position)[0]>()
     const navigate = useNavigate()
     const urlTokens = useTokensUrl(tokenList)
-    const { onTokenSelection } = useSwapActionHandlers()
+    const { onTokenSelection } = useMintActionHandlers()
+    const updateAppication = useUpdateApplicationState()
     const { slippage } = useAppState()
     const { account, chainId } = useActiveWeb3React()
     const routerContract = useRouterContract()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
     const { deadline } = useAppState()
-
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(
         account,
         routerAddress,
         poolRemove?.tokenLp,
     )
+
+    useEffect(() => {
+        setPositionInCurrentPage(position?.slice(0, 6) || [])
+    }, [position])
 
     const isInsufficientAllowance = useMemo(
         () =>
@@ -101,6 +145,8 @@ const MyPools = () => {
     }
 
     const handleOnAdd = (item: (typeof position)[0]) => {
+        console.log({ item })
+
         onTokenSelection(Field.INPUT, item?.token0)
         onTokenSelection(Field.OUTPUT, item?.token1)
 
@@ -115,11 +161,18 @@ const MyPools = () => {
                 initDataTransaction.setError('')
                 initDataTransaction.setPayload({
                     method: 'remove',
-                    input: (poolRemove?.token0?.value * percentValue) / 100,
-                    output: (poolRemove?.token1?.value * percentValue) / 100,
                     tokenIn: poolRemove?.token0,
                     tokenOut: poolRemove?.token1,
+                    input: (
+                        (poolRemove?.token0?.value * percentValue) /
+                        100
+                    ).toFixed(4),
+                    output: (
+                        (poolRemove?.token1?.value * percentValue) /
+                        100
+                    ).toFixed(4),
                 })
+
                 initDataTransaction.setIsOpenConfirmModal(true)
             }
         } catch (error) {
@@ -178,6 +231,7 @@ const MyPools = () => {
                           ),
                           account,
                           calcTransactionDeadline(deadline),
+                          ZeroAddress,
                       ]
                     : [
                           poolRemove.token0.address,
@@ -208,6 +262,7 @@ const MyPools = () => {
                           ),
                           account,
                           calcTransactionDeadline(deadline),
+                          ZeroAddress,
                       ]
                 console.log(...args)
                 const gasLimit = await routerContract?.estimateGas?.[method]?.(
@@ -215,6 +270,17 @@ const MyPools = () => {
                 )
                 const callResult = await routerContract?.[method]?.(...args, {
                     gasLimit: gasLimit && gasLimit.add(1000),
+                })
+
+                sendEvent({
+                    category: 'Defi',
+                    action: 'Remove liquidity',
+                    label: [
+                        poolRemove.token0?.symbol,
+                        poolRemove.token0?.address,
+                        poolRemove.token1?.symbol,
+                        poolRemove.token1?.address,
+                    ].join('/'),
                 })
 
                 initDataTransaction.setIsOpenWaitingModal(false)
@@ -232,9 +298,12 @@ const MyPools = () => {
                             'transaction',
                         ) || '',
                     // hash: tx?.hash || '',
-                    msg: 'Remove',
+                    msg: `Remove ${poolRemove.token0?.symbol} and ${poolRemove.token1?.symbol}`,
                     status: txn.status === 1 ? true : false,
                 })
+
+                updateAppication()
+                // navigate('/pools')
             }
         } catch (error) {
             console.log(error)
@@ -242,6 +311,20 @@ const MyPools = () => {
             initDataTransaction.setIsOpenResultModal(true)
         }
     }, [initDataTransaction])
+
+    useEffect(() => {
+        const filterData = position.filter(
+            (d, index) => index >= (page - 1) * 6 && index < page * 6,
+        )
+        setPositionInCurrentPage(filterData)
+    }, [page])
+
+    /*
+     * Update position when account change
+     */
+    useEffect(() => {
+        setPositionInCurrentPage(position?.slice(0, 6))
+    }, [account])
 
     return (
         <>
@@ -252,9 +335,9 @@ const MyPools = () => {
             {/* <ToastMessage /> */}
             <WrapMyPools>
                 <RowMyPools>
-                    {position &&
-                        position?.length > 0 &&
-                        position.map((item, index) => {
+                    {positionInCurrentPage &&
+                        positionInCurrentPage?.length > 0 &&
+                        positionInCurrentPage.map((item, index) => {
                             return (
                                 <ColMyPools key={index}>
                                     <WrapContent>
@@ -352,9 +435,19 @@ const MyPools = () => {
                             )
                         })}
                 </RowMyPools>
-                {
-                    position.length <= 0 && <Row jus="center">You don't have a liquidity position yet. Try to add new position.</Row>
-                }
+                {positionInCurrentPage.length <= 0 ? (
+                    <Row jus="center">
+                        You don't have a liquidity position yet. Try to add new
+                        position.
+                    </Row>
+                ) : (
+                    <Pagination
+                        page={page}
+                        setPage={setPage}
+                        isSorted={false}
+                        totalPage={totalPage}
+                    />
+                )}
                 {modalRemovePool && (
                     <ModalRemovePool>
                         <WrapRemovePool>
@@ -393,9 +486,9 @@ const MyPools = () => {
                                         disabled={false}
                                     />
                                     <DotPercent>
-                                        {arrPrecent.map((item) => {
+                                        {arrPrecent.map((item, index) => {
                                             return (
-                                                <div key={item}>
+                                                <div key={index}>
                                                     <span>
                                                         {item == 100
                                                             ? 'Max'
@@ -455,7 +548,11 @@ const MyPools = () => {
                             <TextPrice></TextPrice>
                             <ValuePrice>1 USDT = 0.00050 </ValuePrice>
                         </WrapPrice> */}
-                            {isInsufficientAllowance ? (
+                            {Number(percentValue) === 0 ? (
+                                <BtnConfirm isDisabled={true}>
+                                    Select your percent
+                                </BtnConfirm>
+                            ) : isInsufficientAllowance ? (
                                 <BtnConfirm onClick={() => handleOnApprove()}>
                                     Approve
                                 </BtnConfirm>
@@ -599,7 +696,7 @@ const WrapTip = styled.div`
     }
 `
 
-const BtnConfirm = styled.div`
+const BtnConfirm = styled.div<{ isDisabled?: boolean }>`
     margin-top: 20px;
     background: #00b2ff;
     border-radius: 12px;
@@ -609,7 +706,7 @@ const BtnConfirm = styled.div`
     font-size: 20px;
     font-weight: 400;
     color: #ffffff;
-    cursor: pointer;
+    cursor: ${({ isDisabled }) => (isDisabled ? 'not-allowed' : 'pointer')};
 `
 const Title = styled.div`
     font-weight: 700;
@@ -625,7 +722,14 @@ const WrapRemovePool = styled.div`
     backdrop-filter: blur(25px);
     border-radius: 12px;
     padding: 20px;
-    min-width: 500px;
+    max-width: 500px;
+    height: fit-content;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin: auto;
 
     @media screen and (max-width: 550px) {
         min-width: 300px;
@@ -641,11 +745,11 @@ const ModalRemovePool = styled.div`
     left: 0;
     height: fit-content;
     z-index: 1;
-    /* max-width: 500px; */
-    /* width: 100%; */
     margin: auto;
     display: flex;
     justify-content: center;
+    background: #00000055;
+    height: 100%;
 
     @media screen and (max-width: 1100px) {
         /* width: 90%; */
@@ -678,6 +782,11 @@ const BtnRemove = styled.div`
     text-align: center;
     padding: 5px 0px;
     cursor: pointer;
+    transition: all ease-in-out 0.3s;
+
+    &:hover {
+        background: var(--bg6);
+    }
 `
 const BtnAdd = styled(BtnRemove)``
 const WrapAddAndRemove = styled.div`
@@ -745,6 +854,8 @@ const RowMyPools = styled.div`
         grid-template-columns: minmax(100px, 1fr);
     }
 `
-const WrapMyPools = styled.div``
+const WrapMyPools = styled.div`
+    margin-top: 10px;
+`
 
 export default MyPools

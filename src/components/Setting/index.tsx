@@ -8,7 +8,8 @@ import {
     useTransactionDeadline,
 } from 'states/application/hooks'
 import SwitchButton from 'components/Buttons/SwitchButton'
-
+import { Switch } from '@mui/material'
+import { styled as styledUI } from '@mui/material/styles'
 interface TransactionProps {
     setSetting: React.Dispatch<React.SetStateAction<boolean>>
     setting: boolean
@@ -44,21 +45,20 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
         }
     }
     const validateInputDealine = (e: string) => {
-        const value = e
+        e = e
             .replace(/[^0-9.,]/g, '')
             .replace(' ', '')
             .replace(',', '.')
             .replace(/(\..*?)\..*/g, '$1')
-        if (Number(value) < 1) {
-            const value2 = e
-            setDeadline(Number(value2) * 60)
+        console.log('eeeeeeee', e)
+        if (Number(e) < 1) {
+            setDeadline(Number(1) * 60)
             setTextError('Your transaction may be failed')
-        } else if (Number(value) > 60) {
+        } else if (Number(e) > 60) {
             setTextError('Your transaction can take a long time')
         } else {
-            const value2 = e
             setTextError('')
-            setDeadline(Number(value2) * 60)
+            setDeadline(Number(e) * 60)
         }
     }
 
@@ -67,8 +67,8 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
 
     return (
         <>
-            <Container className={setting ? 'active' : ''}>
-                <Wrap className={setting ? 'active' : ''} ref={ref}>
+            <Container ref={ref} className={setting ? 'active' : ''}>
+                <Wrap>
                     <TransactionSetting>
                         <Title>Settings</Title>
                         <SubTitle>
@@ -145,9 +145,9 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
                         </SubTitle>
                         <SubTitle>
                             <InputTime
-                                placeholder="0.0 "
+                                placeholder={(deadline / 60).toString()}
                                 type={'text'}
-                                // value={Number(deadline)/60}
+                                value={Number(deadline) / 60}
                                 onChange={(e) =>
                                     validateInputDealine(e.target.value)
                                 }
@@ -155,30 +155,8 @@ const Transaction = ({ setSetting, setting }: TransactionProps) => {
                             <p> minutes</p>
                         </SubTitle>
                     </TransactionSetting>
-                    {/* <InterfaceSetting>
-						<Title>Interface Settings</Title>
-						<Toggle>
-							<SubTitle>
-								<span>Auto Rounter API</span>
-								<IconQuestion>
-									?<SlippageText>Allow high price impact trades and skip the confirm screen. Use at your own risk.</SlippageText>
-								</IconQuestion>
-							</SubTitle>
-							<SwitchButton active={activeExpertMode} />
-						</Toggle>
-						<Multihop>
-							<SubTitle>
-								<span>Expert Mode</span>
-								<IconQuestion>
-									?<SlippageText>Restricts swaps to direct pairs only.</SlippageText>
-								</IconQuestion>
-							</SubTitle>
-							<SwitchButton active={multihop} />
-						</Multihop>
-					</InterfaceSetting> */}
                 </Wrap>
             </Container>
-            <Blur />
         </>
     )
 }
@@ -204,8 +182,6 @@ const InputTime = styled.input`
     border-radius: 6px;
     text-align: right;
     ::placeholder {
-        font-family: 'Montserrat', sans-serif;
-        font-style: italic;
         color: #c9c9c9;
     }
 `
@@ -217,8 +193,8 @@ const TransactionSetting = styled.div`
     justify-content: center;
     align-items: flex-start;
 `
-const InterfaceSetting = styled(TransactionSetting)``
-const Container = styled.div`
+
+const Container = styled.div<{ ref: any }>`
     position: absolute;
     /* width: 360px; */
     height: fit-content;
@@ -227,7 +203,9 @@ const Container = styled.div`
     transform: translateX(-50%);
     opacity: 0;
     transition: all 0.2s linear;
+    z-index: 9999;
     /* z-index: -1; */
+
     &.active {
         opacity: 1;
         z-index: 3;
@@ -255,7 +233,10 @@ const Wrap = styled.div`
     padding: 15px;
     // width: 360px;
     // height: 360px;
-    background: var(--bg5);
+    /* background: var(--bg5); */
+
+    background: linear-gradient(180deg, #002033 0%, rgba(0, 38, 60, 0.8) 100%);
+    backdrop-filter: blur(10px);
     border: 1px solid #003b5c;
 
     @media screen and (max-width: 390px) {
@@ -274,7 +255,7 @@ const Title = styled.div`
 const SubTitle = styled.div`
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 10px;
 `
 const GroupButton = styled.div`
     display: flex;
@@ -374,7 +355,7 @@ const SlippageText = styled.div`
     padding: 0.6rem 1rem;
     font-weight: 400;
     word-break: break-word;
-    font-style: italic;
+
     background: rgba(157, 195, 230, 0.8);
     box-shadow: ${({ theme }) => theme.boxShadow};
     border: 1px solid ${({ theme }) => theme.bd1};

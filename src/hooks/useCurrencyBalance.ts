@@ -11,7 +11,7 @@ import { Token } from 'interfaces'
 import ERC20_INTERFACE from 'constants/jsons/erc20'
 import { NATIVE_COIN } from 'constants/index'
 import { useTokenList } from 'states/lists/hooks'
-import { divNumberWithDecimal } from 'utils/math'
+import { divNumberWithDecimal, fixNum } from 'utils/math'
 
 /**
  * Returns a map of the given addresses to their eventually consistent ETH balances.
@@ -43,7 +43,10 @@ export function useETHBalances(
                 (memo, address, i) => {
                     const value = results?.[i]?.result?.[0]
                     if (value && value._hex)
-                        memo[address] = divNumberWithDecimal(Number(value._hex), 18)
+                        memo[address] = divNumberWithDecimal(
+                            Number(value._hex),
+                            18,
+                        )
                     return memo
                 },
                 {},
@@ -58,6 +61,7 @@ export function useETHBalances(
 export function useTokenBalancesWithLoadingIndicator(
     address?: string | null,
     tokens?: (Token | undefined)[],
+    isUpdateApplication?: boolean
 ): [{ [tokenAddress: string]: string | undefined }, boolean] {
     const validatedTokens: Token[] = useMemo(
         () =>
@@ -92,13 +96,18 @@ export function useTokenBalancesWithLoadingIndicator(
                         [tokenAddress: string]: string | undefined
                     }>((memo, token, i) => {
                         const value = balances?.[i]?.result?.[0]
+
                         if (value && value._hex) {
-                            memo[token.address] = divNumberWithDecimal(Number(value._hex), token.decimals)
+
+                            memo[token.address] = divNumberWithDecimal(
+                                fixNum(value),
+                                token.decimals,
+                            )
                         }
                         return memo
                     }, {})
                     : {},
-            [address, validatedTokens, balances],
+            [address, validatedTokens, balances, isUpdateApplication],
         ),
         anyLoading,
     ]
@@ -107,8 +116,9 @@ export function useTokenBalancesWithLoadingIndicator(
 export function useTokenBalances(
     address?: string | null,
     tokens?: (Token | undefined)[],
+    isUpdateApplication?: boolean
 ): { [tokenAddress: string]: string | undefined } {
-    return useTokenBalancesWithLoadingIndicator(address, tokens)[0]
+    return useTokenBalancesWithLoadingIndicator(address, tokens, isUpdateApplication)[0]
 }
 
 // get the balance for a single token/account combo
@@ -132,8 +142,8 @@ export function useCurrencyBalances(
     return useMemo(
         () =>
             currencies?.map((currency) => {
-                if (!account || !currency) return undefined
-                if (currency.address === NATIVE_COIN.address) {
+                if (!account || !currency || !chainId) return undefined
+                if (currency.address === NATIVE_COIN[chainId].address) {
                     return ethBalance[account]
                 }
                 if (currency) return tokenBalances[currency.address]
@@ -154,18 +164,18 @@ export function useCurrencyBalance(
 export function useAllTokenBalances(): {
     [tokenAddress: string]: string | undefined
 } {
-    const { account } = useActiveWeb3React()
+    const { account, chainId } = useActiveWeb3React()
     const currentList = useTokenList()
     const balances = useTokenBalances(account ?? undefined, currentList)
     let ethBalanceWithAccountKey = useETHBalances([account])
     let ethBalanceWithTokenKey = {}
-
-    Object.keys(ethBalanceWithAccountKey).map((k) => {
-        ethBalanceWithTokenKey = {
-            [NATIVE_COIN.address]: ethBalanceWithAccountKey[k],
-            ...ethBalanceWithTokenKey,
-        }
-    })
+    chainId &&
+        Object.keys(ethBalanceWithAccountKey).map((k) => {
+            ethBalanceWithTokenKey = {
+                [NATIVE_COIN[chainId].address]: ethBalanceWithAccountKey[k],
+                ...ethBalanceWithTokenKey,
+            }
+        })
 
     return { ...ethBalanceWithTokenKey, ...balances } ?? {}
 }
