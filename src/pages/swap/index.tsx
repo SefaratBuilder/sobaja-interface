@@ -24,7 +24,6 @@ import {
     WRAPPED_NATIVE_COIN,
 } from 'constants/index'
 import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
-import { ZeroAddress } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { useRouterContract } from 'hooks/useContract'
 import {
@@ -33,6 +32,7 @@ import {
     computeGasLimit,
     isNativeCoin,
 } from 'utils'
+import { ZERO_ADDRESS } from 'constants/index'
 import {
     useAppState,
     useSlippageTolerance,
@@ -280,7 +280,7 @@ const Swap = () => {
             }
             const { args, value } = swapArguments
 
-            const referralAddress = refAddress || ZeroAddress
+            const referralAddress = refAddress || ZERO_ADDRESS
             const newArgs = [...args, referralAddress]
             console.log('🤦‍♂️ ⟹ args:', newArgs)
 
@@ -315,10 +315,7 @@ const Swap = () => {
             initDataTransaction.setIsOpenResultModal(false)
 
             addTxn({
-                hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
-                    callResult.hash || ''
-                }`,
-                // hash: tx?.hash || '',
+                hash: callResult.hash,
                 msg: `Swap ${tokenIn?.symbol} to ${tokenOut?.symbol}`,
                 status: txn.status === 1 ? true : false,
             })
@@ -494,7 +491,6 @@ const Swap = () => {
                     initDataTransaction.isOpenResultModal ||
                     initDataTransaction.isOpenWaitingModal) && <Blur />}
             </>
-            <ToastMessage />
             <SwapContainer ref={ref}>
                 {!account && isOpenWalletModal && (
                     <>

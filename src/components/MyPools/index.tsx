@@ -12,7 +12,6 @@ import UnknowToken from 'assets/icons/question-mark-button-dark.svg'
 import {
     calcSlippageAmount,
     calcTransactionDeadline,
-    getEtherscanLink,
     isNativeCoin,
 } from 'utils'
 import { div, mul, mulNumberWithDecimal } from 'utils/math'
@@ -33,11 +32,11 @@ import { useTokenApproval } from 'hooks/useToken'
 import { ROUTERS } from 'constants/addresses'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import { Row } from 'components/Layouts'
-import { ZeroAddress } from 'ethers'
 import { sendEvent } from 'utils/analytics'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import Pagination from 'components/Pagination'
 import { useMintActionHandlers } from 'states/mint/hooks'
+import { ZERO_ADDRESS } from 'constants/index'
 
 interface Positions {
     position: (
@@ -125,13 +124,7 @@ const MyPools = ({ position, tokenList }: Positions) => {
                 const txn = await callResult.wait()
                 initDataTransaction.setIsOpenResultModal(false)
                 addTxn({
-                    hash:
-                        getEtherscanLink(
-                            chainId,
-                            callResult.hash,
-                            'transaction',
-                        ) || '',
-                    // hash: tx?.hash || '',
+                    hash:callResult.hash,
                     msg: 'Approve',
                     status: txn.status === 1 ? true : false,
                 })
@@ -291,13 +284,7 @@ const MyPools = ({ position, tokenList }: Positions) => {
                 initDataTransaction.setIsOpenResultModal(false)
 
                 addTxn({
-                    hash:
-                        getEtherscanLink(
-                            chainId,
-                            callResult.hash,
-                            'transaction',
-                        ) || '',
-                    // hash: tx?.hash || '',
+                    hash: callResult.hash,
                     msg: `Remove ${poolRemove.token0?.symbol} and ${poolRemove.token1?.symbol}`,
                     status: txn.status === 1 ? true : false,
                 })
@@ -332,7 +319,6 @@ const MyPools = ({ position, tokenList }: Positions) => {
                 data={initDataTransaction}
                 onConfirm={onConfirm}
             />
-            {/* <ToastMessage /> */}
             <WrapMyPools>
                 <RowMyPools>
                     {positionInCurrentPage &&

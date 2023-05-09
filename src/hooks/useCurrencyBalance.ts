@@ -24,8 +24,7 @@ export function useETHBalances(
         () =>
             uncheckedAddresses
                 ? uncheckedAddresses
-                    .map(isAddress)
-                    .filter((a): a is string => a !== false)
+                    .filter((a): a is string => a !== null && a !== undefined)
                     .sort()
                 : [],
         [uncheckedAddresses],
@@ -65,7 +64,7 @@ export function useTokenBalancesWithLoadingIndicator(
 ): [{ [tokenAddress: string]: string | undefined }, boolean] {
     const validatedTokens: Token[] = useMemo(
         () =>
-            tokens?.filter(
+            tokens?.filter?.(
                 (t?: Token): t is Token => isAddress(t?.address) !== false,
             ) ?? [],
         [tokens],
@@ -138,12 +137,13 @@ export function useCurrencyBalances(
     const tokens = currencies
     const tokenBalances = useTokenBalances(account, tokens)
     const ethBalance = useETHBalances([account])
-
+    console.log({ ethBalance })
     return useMemo(
         () =>
             currencies?.map((currency) => {
                 if (!account || !currency || !chainId) return undefined
                 if (currency.address === NATIVE_COIN[chainId].address) {
+                    console.log('eth balance', ethBalance[account], account)
                     return ethBalance[account]
                 }
                 if (currency) return tokenBalances[currency.address]

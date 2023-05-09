@@ -17,6 +17,12 @@
             content="Decentralized Exchange on the zkSync Era"
         />
         <meta name="keywords" content="Defi Swap zkSync Swap" />
+        <script type="module">
+          import { Buffer } from "buffer";
+          import process from "process";
+          window.Buffer = Buffer;
+          window.process = process;
+        </script>
     </head>
     <body>
         <div id="root"></div>

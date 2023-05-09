@@ -108,14 +108,6 @@ const ComponentsTransaction = ({ data, onConfirm }: Data) => {
                     txnHash={data.TransactionHash}
                 />
             )}
-            {data.isOpenToastMessageModal && (
-                <ToastMessage
-                // payload={data.payload}
-                // setToastMessageModal={data.setIsOpenToastMessageModal}
-                // isSuccess={data.isTransactionSuccess}
-                // txnHash={data.TransactionHash}
-                />
-            )}
         </Container>
     )
 }

@@ -487,7 +487,6 @@ const Stake = () => {
                     initDataTransaction.isOpenResultModal ||
                     initDataTransaction.isOpenWaitingModal) && <Blur />}
             </>
-            <ToastMessage />
             <SwapContainer ref={ref}>
                 {!account && isOpenWalletModal && (
                     <>

@@ -17,7 +17,6 @@ import {
     ZERO_ADDRESS,
 } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
-import { ZeroAddress } from 'ethers'
 import { useFactoryContract, useRouterContract } from 'hooks/useContract'
 import { useActiveWeb3React } from 'hooks'
 import { mulNumberWithDecimal } from 'utils/math'
@@ -184,7 +183,7 @@ const Add = () => {
                           valueMin,
                           account,
                           (new Date().getTime() / 1000 + 1000).toFixed(0),
-                          refAddress || ZeroAddress,
+                          refAddress || ZERO_ADDRESS,
                       ]
                     : [
                           tokenIn.address,
@@ -231,9 +230,7 @@ const Add = () => {
                 initDataTransaction.setIsOpenResultModal(false)
 
                 addTxn({
-                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
-                        callResult.hash || ''
-                    }`,
+                    hash: callResult.hash,
                     msg: `Add liquidity ${tokenIn?.symbol} and ${tokenOut?.symbol}`,
                     status: txn.status === 1 ? true : false,
                 })
@@ -458,7 +455,6 @@ const Add = () => {
             {(initDataTransaction.isOpenConfirmModal ||
                 initDataTransaction.isOpenResultModal ||
                 initDataTransaction.isOpenWaitingModal) && <Blur />}
-            <ToastMessage />
             <SwapContainer ref={ref}>
                 {!account && isOpenWalletModal && (
                     <>

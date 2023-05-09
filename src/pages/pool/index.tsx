@@ -407,7 +407,6 @@ export default function Pools() {
 
     return (
         <>
-            <ToastMessage />
             <Container>
                 <CustomizeBox
                     sx={{

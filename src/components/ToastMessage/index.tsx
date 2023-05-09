@@ -11,9 +11,12 @@ import SuccessIcon from 'assets/icons/success.svg'
 import ErrorIcon from 'assets/icons/close.png'
 import { InitCompTransaction } from 'components/TransactionModal'
 import { useUpdateApplicationState } from 'states/application/hooks'
+import { getEtherscanLink } from 'utils'
+import { useActiveWeb3React } from 'hooks'
 
 const Toast = ({ txn }: { txn: Txn }) => {
     const { removeTxn } = useTransactionHandler()
+    const { chainId } = useActiveWeb3React()
 
     useEffect(() => {
         let timeX = setTimeout(() => {
@@ -38,7 +41,7 @@ const Toast = ({ txn }: { txn: Txn }) => {
             </Row>
             <span
                 className="view-link"
-                onClick={() => txn.hash && window.open(txn.hash)}
+                onClick={() => txn.hash && window.open(getEtherscanLink(chainId || 80001, txn.hash, 'transaction'))}
             >
                 View on explorer
             </span>

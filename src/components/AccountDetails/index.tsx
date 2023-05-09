@@ -23,7 +23,7 @@ const AccountDetails = ({
     openOptions,
 }: connectModalWallet) => {
     const { account, deactivate, chainId } = useActiveWeb3React()
-
+    console.log({deactivate})
     const [isCopied, setIsCopied] = useState<boolean>(false)
 
     const balance = account && useETHBalances([account])?.[account]

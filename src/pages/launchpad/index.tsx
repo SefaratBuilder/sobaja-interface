@@ -70,7 +70,7 @@ const Launchpad = () => {
            )
             const amountToken = launchpadState.totalToken
             console.log('Creating...')
-            const txn = await launchpadContract?.createLaunchpad(1, token.address, mulNumberWithDecimal(amountToken, token.decimals), data)
+            const txn = await launchpadContract?.createLaunchpad(3, token.address, mulNumberWithDecimal(amountToken, token.decimals), data)
             await txn.wait()
             console.log('Create successful...', txn.hash)
 

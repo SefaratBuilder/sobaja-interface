@@ -22,6 +22,9 @@ import { FAIRLAUNCH_ABI } from 'constants/jsons/fairlaunch'
 import ACCESS_MANAGER_ABI from 'constants/jsons/accessManager.json'
 import { LAUNCHPAD_ACCESS_MANAGERS } from 'constants/addresses'
 import AAEntryPoint_ABI from 'constants/jsons/aaentry.json'
+import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
+import { ethers } from 'ethers'
+import NFT_ABI from 'constants/jsons/nft.json'
 
 // returns null on errors
 export const useContract = (
@@ -105,3 +108,10 @@ export function useAAEntryPointContract(): Contract | null {
     if (!chainId) return null
     return useContract(AAEntryPoints[chainId], AAEntryPoint_ABI)
 }
+
+export function useNftSmartAccountContract() {
+    const { web3Provider } = useWeb3AuthContext()
+    const { chainId } = useActiveWeb3React()
+    if (!web3Provider || !chainId) return
+    return new ethers.Contract('0xdd526eba63ef200ed95f0f0fb8993fe3e20a23d0', NFT_ABI, web3Provider)
+}   

@@ -34,7 +34,8 @@ export function isNativeCoin(token: Token | undefined) {
 }
 
 // shorten the checksummed version of the input address to have 0x + 4 characters at start and end
-export const shortenAddress = (address: string, chars = 4): string => {
+export const shortenAddress = (address: string | undefined, chars = 4): string => {
+    if (!address) return ''
     const parsed = isAddress(address) && address
     if (!parsed) {
         throw Error(`Invalid 'address' parameter '${address}'.`)
