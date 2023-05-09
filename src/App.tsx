@@ -57,12 +57,7 @@ const App = () => {
                         <Route path="/swap" element={<Swap />} />
                         <Route path="/pools" element={<Pools />} />
                         <Route path="/add" element={<AddLiquidity />} />
-                        {/* <Route
-                            path="/test-launchpad"
-                            element={
-                                    <Launchpad />
-                            }
-                        /> */}
+                        <Route path="/test-launchpad" element={<Launchpad />} />
                         <Route path="/staking" element={<StakeDetails />} />
                         <Route path="/bridge" element={<Bridge />} />
                         <Route path="/nfts" element={<NFTs />} />
