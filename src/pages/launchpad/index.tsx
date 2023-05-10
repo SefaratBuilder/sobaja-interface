@@ -17,11 +17,32 @@ import Admin from './components/Admin'
 import { LaunchpadInfo } from 'interfaces'
 import CreateLaunchpad from './components/CreateLaunchpad'
 import ListLaunchpad from './components/List'
+import LaunchpadDetails from './components/LaunchpadDetails'
+
+export interface ILaunchpadDetails {
+    token: {
+        address: string
+        symbol: string
+    }
+    details: string
+    paymentCurrency: Array<string>
+    currencies: Array<string>
+    timeline: Array<string>
+    img: string
+    softCap: string
+    hardCap: string
+    price: string
+    individualCap: string
+    overflow: string
+    totalToken: string
+}
 
 const Launchpad = () => {
     const [currentPage, setCurrentPage] = useState<
         'Admin' | 'Create' | 'Details' | 'Infomation'
-    >('Create')
+    >('Infomation')
+    const [lpDetails, setLpDetails] = useState<ILaunchpadDetails>()
+
     const [launchpadState, setLaunchpadState] = useState({
         token: '0xdEfd221072dD078d11590D58128399C2fe8cCa7e',
         paymentCurrency: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
@@ -137,17 +158,29 @@ const Launchpad = () => {
             console.log('failed :', err)
         }
     }
-    console.log({ data })
+
     return (
         <Container>
-            <button onClick={() => setCurrentPage('Create')}>Create1</button>
+            {/* <button onClick={() => setCurrentPage('Create')}>Create1</button>
             <button onClick={() => setCurrentPage('Infomation')}>
                 Infomation
             </button>
             <button onClick={() => setCurrentPage('Admin')}>Admin</button>
+            <button onClick={() => setCurrentPage('Details')}>Details</button> */}
 
-            {currentPage === 'Infomation' && <ListLaunchpad />}
+            {currentPage === 'Infomation' && (
+                <ListLaunchpad
+                    setCurrentPage={setCurrentPage}
+                    setLpDetails={setLpDetails}
+                />
+            )}
             {currentPage === 'Create' && <CreateLaunchpad />}
+            {currentPage === 'Details' && (
+                <LaunchpadDetails
+                    details={lpDetails}
+                    setCurrentPage={setCurrentPage}
+                />
+            )}
             {currentPage === 'Admin' && (
                 <Row gap="5px" jus="space-between">
                     <form onSubmit={handleOnCreateLaunchpad}>

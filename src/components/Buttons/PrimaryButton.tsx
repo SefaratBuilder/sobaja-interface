@@ -74,4 +74,18 @@ export const Button = styled.button<{ height?: any; color?: any }>`
             font-style: normal;
         }
     }
+
+    &.launch-pad {
+        /* width: 65%; */
+        /* border-radius: 2px; */
+        border: none;
+        padding: 8px;
+        height: fit-content;
+        background: #111;
+        /* font-size: 14px; */
+
+        span {
+            font-size: 14px !important;
+        }
+    }
 `

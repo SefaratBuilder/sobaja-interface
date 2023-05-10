@@ -343,7 +343,7 @@ const CreateLaunchpad = () => {
                     </WrapLabel>
                     <WrapInput>
                         <Input
-                            placeholder="Type address token"
+                            placeholder="Token address"
                             onChange={(e) => setTitle(e.target.value)}
                         />
                     </WrapInput>
@@ -352,7 +352,7 @@ const CreateLaunchpad = () => {
                     </WrapLabel>
                     <WrapInput>
                         <Input
-                            placeholder="Type address token"
+                            placeholder="Payment token address"
                             onChange={(e) => setTitle(e.target.value)}
                         />
                     </WrapInput>
