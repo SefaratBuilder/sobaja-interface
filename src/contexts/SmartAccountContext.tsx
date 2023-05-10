@@ -78,13 +78,25 @@ export const SmartAccountProvider = ({ children }: any) => {
   const [isFetchingBalance, setIsFetchingBalance] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const resetState = useCallback(() => {
+    setWallet(null)
+    setState(null)
+    setSelectedAccount(null)
+    setSmartAccountsArray([])
+    setBalance({
+        totalBalanceInUsd: 0,
+        alltokenBalances: []
+    })
+    setIsFetchingBalance(false)
+    setLoading(false)
+  }, [])
+
   const getSmartAccount = useCallback(async () => {
-    if (!provider || !address) return "Wallet not connected";
+    if (!provider || !address) return resetState()
 
     try {
       setLoading(true);
       const walletProvider = new ethers.providers.Web3Provider(provider);
-      console.log("walletProvider", walletProvider);
       // New instance, all config params are optional
       const wallet = new SmartAccount(walletProvider, {
         activeNetworkId: activeChainId,
@@ -92,7 +104,7 @@ export const SmartAccountProvider = ({ children }: any) => {
         networkConfig: [
           {
             chainId: ChainId.POLYGON_MUMBAI,
-            dappAPIKey: "WEX9LXdFW.13107308-4631-4ba5-9e23-2a8bf8270948",
+            dappAPIKey: process.env.REACT_APP_BICONOMY_API_KEY,
           },
         ],
       });
@@ -208,6 +220,10 @@ export const SmartAccountProvider = ({ children }: any) => {
   useEffect(() => {
     getSmartAccount();
   }, [getSmartAccount]);
+
+  useEffect(() => {
+
+  }, [address, provider])
 
   return (
     <SmartAccountContext.Provider

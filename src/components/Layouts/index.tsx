@@ -11,6 +11,7 @@ export const Row = styled.div<{
     justify-content: ${({ jus }) => jus};
     align-items: ${({ al }) => al};
     flex-wrap: ${({ wrap }) => wrap};
+    width: 100%;
 `
 
 export const Columns = styled.div<{ gap?: string; jus?: string; al?: string }>`

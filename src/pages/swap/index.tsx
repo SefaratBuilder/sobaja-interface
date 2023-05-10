@@ -50,6 +50,8 @@ import { sendEvent } from 'utils/analytics'
 import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -59,6 +61,8 @@ const Swap = () => {
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
     const { chainId, library, account } = useActiveWeb3React()
+    const { ethersProvider } = useWeb3AuthContext()
+    const { wallet } = useSmartAccountContext()
     const { refAddress } = useAppState()
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
     const pair = usePair(chainId, tokenIn, tokenOut)
@@ -242,7 +246,6 @@ const Swap = () => {
                     routerAddress,
                     mulNumberWithDecimal(inputAmount, tokenIn.decimals),
                 )
-
                 initDataTransaction.setIsOpenWaitingModal(false)
                 initDataTransaction.setIsOpenResultModal(true)
 

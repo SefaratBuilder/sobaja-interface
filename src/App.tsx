@@ -6,7 +6,6 @@ import {
     HashRouter,
     useLocation,
 } from 'react-router-dom'
-import { GlobalStyle } from './styles'
 import styled from 'styled-components'
 import Header from 'components/Header'
 import Web3ReactManager from 'components/Web3ReactManager'
@@ -48,7 +47,6 @@ const App = () => {
     return (
         <Web3ReactManager>
             <HashRouter>
-                <GlobalStyle />
                 <Updater />
                 <Header />
 
