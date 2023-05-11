@@ -8,6 +8,8 @@ import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { injected } from 'connectors'
 import arrowDown from 'assets/icons/arrow-down.svg'
+import { ListNetwork } from 'constants/networks/index'
+import { changeNetwork } from 'utils/network'
 
 const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
     const { account, connector, error } = useWeb3React()
@@ -50,7 +52,16 @@ const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
                     <NetworkIcon></NetworkIcon>
                     <span>
                         {error instanceof UnsupportedChainIdError ? (
-                            <p>Wrong Network</p>
+                            <p
+                                onClick={() =>
+                                    changeNetwork(
+                                        ListNetwork[0].switchNetwork,
+                                        ListNetwork[0].name,
+                                    )
+                                }
+                            >
+                                Wrong Network
+                            </p>
                         ) : (
                             <p>Error</p>
                         )}
