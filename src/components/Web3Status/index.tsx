@@ -6,10 +6,12 @@ import { Activity } from 'react-feather'
 import { shortenAddress } from 'utils'
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
 import arrowDown from 'assets/icons/arrow-down.svg'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Web3Status = () => {
-    const { account, connector, error, library } = useWeb3React()
+    const { account, error } = useWeb3React()
     const [toggleWalletModal, setToggleWalletModal] = useState<boolean>(false)
+    const { wallet } = useSmartAccountContext()
 
     function formatConnectorName(account: any) {
         return (
@@ -62,7 +64,7 @@ const Web3Status = () => {
     return (
         <Fragment>
             <Web3StatusWrapper>
-                {Web3StatusInner(account, error)}
+                {Web3StatusInner(wallet?.address || account, error)}
             </Web3StatusWrapper>
             {toggleWalletModal ? (
                 <WalletModal setToggleWalletModal={setToggleWalletModal} />

@@ -167,10 +167,15 @@ export const GlobalStyle = createGlobalStyle`
     }
 
     #w3a-modal.w3a-modal--light button.w3a-button {
-        background-color: #ffffff;
+        background-color: #d6f8ff;
         border: 1px solid #f3f3f4;
         box-shadow: none;
         color: #595857;
+    }
+
+    #w3a-modal.w3a-modal--light button.w3a-button:nth-child(2) {
+        background-color: #f25f07;
+        color: white;
     }
 
     #w3a-modal button.w3a-button {

@@ -7,9 +7,10 @@ import { useActiveWeb3React } from "hooks"
 import { useSmartAccountContext } from "contexts/SmartAccountContext"
 import { computeGasLimit, shortenAddress } from "utils"
 import { mulNumberWithDecimal } from "utils/math"
-import { NATIVE_COIN } from "constants/index"
+import { NATIVE_COIN, WRAPPED_NATIVE_COIN } from "constants/index"
 import { useETHBalances } from "hooks/useCurrencyBalance"
 import { Error } from "components/Text"
+import { useTransactionHandler } from "states/transactions/hooks"
 
 const DepositModal = () => {    
     const { account, library, chainId } = useActiveWeb3React()
@@ -18,6 +19,7 @@ const DepositModal = () => {
     const [isLoading, setIsLoading] = useState(false)
     const balance = useETHBalances([account])?.[account || '']
     const [error, setError] = useState('')
+    const { addTxn } = useTransactionHandler()
     
     const onChangeValue = (val: string) => {
         const validValue = val
@@ -31,7 +33,7 @@ const DepositModal = () => {
     const Button = (onOpen: () => void) => {
         return (
             <PrimaryButton
-                name="Deposit fund"
+                name="Deposit"
                 onClick={onOpen}
             />
         )
@@ -56,11 +58,18 @@ const DepositModal = () => {
                 const gasLimit = await library?.estimateGas(tx)
                 const signer = await library?.getSigner()
                 const txn = await signer?.sendTransaction({...tx, gasLimit: computeGasLimit(gasLimit)})
-                await txn?.wait()
+                const txnHash = await txn?.wait()
+                if(!txnHash || !chainId) return
+                addTxn({
+                    hash: txnHash.transactionHash,
+                    msg: `Deposited ${value} ${NATIVE_COIN[chainId].symbol} into Smart account`,
+                    status: true
+                })
                 setIsLoading(false)
                 onClose()
             }
             catch(err) {
+                onClose()
                 setError('Transaction failed')
                 setIsLoading(false)
                 console.log('failed to deposit fund into smart account:', err)

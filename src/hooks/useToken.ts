@@ -103,6 +103,7 @@ export function useTokenApproval(
 ): {
     allowance: FixedNumber | undefined
     approve: (to: string, amount: number | string) => void
+    approveEncodeData: (to: string, amount: number | string) => string | undefined
 } {
     from = from == null ? undefined : from
     to = to == null ? undefined : to
@@ -132,12 +133,18 @@ export function useTokenApproval(
         [from, to],
     )
 
+    const approveEncodeData = (to: string, amount: number | string): string | undefined => {
+        if (!tokenContract) return
+        return tokenContract.interface.encodeFunctionData('approve', [to, amount])
+    }
+
     return useMemo(() => {
         const value = allowance?.[0]?.result?.[0]?._hex || 0
 
         return {
             allowance: value && FixedNumber.fromValue(value, token?.decimals),
             approve,
+            approveEncodeData
         }
     }, [from, to, token, tokenContract, allowance])
 }

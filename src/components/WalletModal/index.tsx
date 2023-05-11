@@ -33,9 +33,6 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
         chainId,
         library,
     } = useWeb3React()
-    console.log('account11', account)
-    console.log('chainId11', chainId)
-    console.log('library11', library)
 
     const [pendingError, setPendingError] = useState<boolean>(false)
     const [pendingWallet, setPendingWallet] = useState<

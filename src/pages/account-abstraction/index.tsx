@@ -18,35 +18,62 @@ const AA = () => {
     const balances = useCurrencyBalances(wallet?.address?.toLowerCase(), [NATIVE_COIN[80001]])
     const [nftBalance, setNftBalance] = useState('')
     const {addTxn} = useTransactionHandler()
+    const [paidTxn, setPaidTxn] = useState<any>()
+    const [sign, setSign] = useState<string>('')
 
     const onMint = async () => {
         if (!wallet || !walletState || !web3Provider || !nftContract) return;
         try {
-            console.log('populating...')
+
             setTxnLoading(true)
             const safeMintTx = await nftContract.populateTransaction.safeMint(
               wallet.address
             );
-            console.log('data', safeMintTx.data);
+
             const tx1 = {
               to: nftContract.address,
               data: safeMintTx.data,
             };
-            const txResponse = await wallet.sendTransaction({
-                transaction: tx1,
-            });
-            const txHash = await txResponse.wait()
-            setTxnLoading(false)
-            addTxn({
-                hash: txHash.transactionHash,
-                msg: 'Mint nft success',
-                status: true
+            const feeQuotes = await wallet.getFeeQuotes({
+                transaction: tx1
             })
-            console.log('mint success with hash: ', txHash.transactionHash)
+            console.log({feeQuotes})
+            const paidTransaction = await wallet.createUserPaidTransaction({
+                transaction: tx1,
+                feeQuote: feeQuotes[0]
+            })
+            setPaidTxn(paidTransaction)
+            console.log('signing...', {paidTransaction})
+            const signed = await wallet.signUserPaidTransaction({
+                tx: paidTransaction,
+                signer: wallet.signer
+            })
+            setSign(signed)
+            console.log('sign', signed)
+
+            setTxnLoading(false)
         }
         catch(err) {
             setTxnLoading(false)
             console.log('failed to mint nft', err)
+        }
+    }
+
+    const sendSignedTxn = async () => {
+        try{
+            if(!wallet) return
+            setTxnLoading(true)
+            console.log({paidTxn, sign})
+            console.log('sending...')
+            const txResponse = await wallet.sendSignedTransactionWithFeeQuote({
+                tx: paidTxn,
+                signature: sign
+            })
+            setTxnLoading(false)
+            console.log('sent txn', {txResponse})
+        }
+        catch(err) {
+            console.log('failed', err)
         }
     }
 
@@ -111,6 +138,9 @@ const AA = () => {
             <Row gap="10px">
                 <PrimaryButton onClick={onMint} name={'Mint nft'} isLoading={txnLoading} />
                 <PrimaryButton onClick={onBatchMint} name ={'Batch mint nfts'} isLoading={txnLoading} />
+            </Row>
+            <Row gap="10px">
+                <PrimaryButton onClick={sendSignedTxn} name={'Send signed txn'} isLoading={txnLoading} />
             </Row>
             <Row gap="10px">
                 <PrimaryButton onClick={connect} name={'Connect AA'} />

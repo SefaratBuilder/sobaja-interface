@@ -17,7 +17,7 @@ import {
     ZERO_ADDRESS,
 } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
-import { useFactoryContract, useRouterContract } from 'hooks/useContract'
+import { useFactoryContract, useRouterContract, useRouterSmartAccountContract } from 'hooks/useContract'
 import { useActiveWeb3React } from 'hooks'
 import { mulNumberWithDecimal } from 'utils/math'
 import { usePair } from 'hooks/useAllPairs'
@@ -25,7 +25,6 @@ import { calcSlippageAmount, isNativeCoin, shortenAddress } from 'utils'
 import WalletModal from 'components/WalletModal'
 import { InitCompTransaction } from 'components/TransactionModal'
 import ComponentsTransaction from 'components/TransactionModal'
-import ToastMessage from 'components/ToastMessage'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import PoolPriceBar from './PoolPriceBar'
 import BackArrow from 'assets/icons/arrow-left.svg'
@@ -41,31 +40,30 @@ import { useMintActionHandlers, useMintState } from 'states/mint/hooks'
 import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Add = () => {
     const mintState = useMintState()
-    const router = useRouterContract()
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
     const [isCopied, setIsCopied] = useState(false)
-
     const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } = mintState
     const { onUserInput, onTokenSelection, onChangeMintState } =
         useMintActionHandlers()
     const { account, chainId } = useActiveWeb3React()
+    const { wallet } = useSmartAccountContext()
     const routerContract = useRouterContract()
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
-    const tokenInApproval = useTokenApproval(account, routerAddress, tokenIn)
-    const tokenOutApproval = useTokenApproval(account, routerAddress, tokenOut)
+    const tokenInApproval = useTokenApproval(wallet?.address || account, routerAddress, tokenIn)
+    const tokenOutApproval = useTokenApproval(wallet?.address || account, routerAddress, tokenOut)
     const { slippage } = useSlippageTolerance()
     const { refAddress } = useAppState()
-    const factoryContract = useFactoryContract()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
     const loca = useLocation()
     const pair = usePair(chainId, tokenIn, tokenOut)
-
     const ref = useRef<any>()
+    const routerSmartAccountContract = useRouterSmartAccountContract()
 
     useOnClickOutside(ref, () => {
         setIsOpenWalletModal(false)
@@ -200,18 +198,64 @@ const Add = () => {
                           ), //
                           account,
                           (new Date().getTime() / 1000 + 1000).toFixed(0),
-                          refAddress || ZeroAddress,
+                          refAddress || ZERO_ADDRESS,
                       ]
+                let callResult: any
+                if(!wallet) {
+                    const gasLimit = await routerContract?.estimateGas?.[method]?.(
+                        ...args,
+                        { value },
+                    )
+                    callResult = await routerContract?.[method]?.(...args, {
+                        value,
+                        gasLimit: gasLimit && gasLimit.add(1000),
+                    })
+                } else {
+                    // addliquidity using account abstraction
+                    if(!routerSmartAccountContract) return
+                    const addData = await routerSmartAccountContract?.populateTransaction?.[method]?.(
+                        ...args
+                    )
+                    if(!addData) return
+                    
+                    const txApproveIn = {
+                        to: tokenIn.address,
+                        data: tokenInApproval.approveEncodeData(routerSmartAccountContract.address, mulNumberWithDecimal(inputAmount, tokenIn.decimals))
+                    }
+                    const txApproveOut = {
+                        to: tokenOut.address,
+                        data: tokenOutApproval.approveEncodeData(routerSmartAccountContract.address, mulNumberWithDecimal(outputAmount, tokenOut.decimals))
+                    }
+                    const txAddliqudity = {
+                        to: routerSmartAccountContract.address,
+                        data: addData.data,
+                        value
+                    }
+                    const txns = isInsufficientAllowanceTokenIn && isInsufficientAllowanceTokenOut 
+                        ? [txApproveIn, txApproveOut, txAddliqudity]
+                        : isInsufficientAllowanceTokenIn 
+                        ? [txApproveIn, txAddliqudity]
+                        : isInsufficientAllowanceTokenOut
+                        ? [txApproveOut, txAddliqudity]
+                        : [txAddliqudity]
+                    if(isInsufficientAllowance) {
+                        callResult = await wallet.sendTransactionBatch({
+                            transactions: txns
+                        })
+                    } else {
+                        callResult = await wallet.sendTransaction({
+                            transaction: txns[0]
+                        })
+                    }
+                }
+                const txn = await callResult.wait()
+                initDataTransaction.setIsOpenResultModal(false)
 
-                const gasLimit = await routerContract?.estimateGas?.[method]?.(
-                    ...args,
-                    { value },
-                )
-                const callResult = await routerContract?.[method]?.(...args, {
-                    value,
-                    gasLimit: gasLimit && gasLimit.add(1000),
+                addTxn({
+                    hash: txn?.transactionHash || callResult.hash,
+                    msg: `Add liquidity ${tokenIn?.symbol} and ${tokenOut?.symbol}`,
+                    status: txn.status === 1 ? true : false,
                 })
-
                 initDataTransaction.setIsOpenWaitingModal(false)
                 initDataTransaction.setIsOpenResultModal(true)
 
@@ -226,14 +270,6 @@ const Add = () => {
                     ].join('/'),
                 })
 
-                const txn = await callResult.wait()
-                initDataTransaction.setIsOpenResultModal(false)
-
-                addTxn({
-                    hash: callResult.hash,
-                    msg: `Add liquidity ${tokenIn?.symbol} and ${tokenOut?.symbol}`,
-                    status: txn.status === 1 ? true : false,
-                })
                 /**
                  * @dev reset input && output state when transaction success
                  */
@@ -245,7 +281,7 @@ const Add = () => {
             initDataTransaction.setError('Failed')
             initDataTransaction.setIsOpenResultModal(true)
         }
-    }, [initDataTransaction])
+    }, [initDataTransaction, isInsufficientAllowance, isInsufficientAllowanceTokenIn, isInsufficientAllowanceTokenOut])
 
     const handleOnApprove = async (
         approve: (to: string, amount: string) => void,
@@ -359,7 +395,7 @@ const Add = () => {
                 tO,
                 Field.OUTPUT,
             )
-            console.log({ addRate })
+
             onChangeMintState({
                 ...mintState,
                 inputAmount: addRate,
@@ -375,9 +411,9 @@ const Add = () => {
     ])
 
     const AddButton = () => {
-        const balanceIn = useCurrencyBalance(account, tokenIn)
-        const balanceOut = useCurrencyBalance(account, tokenOut)
-        const isNotConnected = !account
+        const balanceIn = useCurrencyBalance(wallet?.address || account, tokenIn)
+        const balanceOut = useCurrencyBalance(wallet?.address || account, tokenOut)
+        const isNotConnected = !wallet?.address && !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
         const isUndefinedAmount = !inputAmount || !outputAmount
@@ -393,7 +429,6 @@ const Add = () => {
             <Row>
                 {isNotConnected ? (
                     <PrimaryButton
-                        // onClick={() => setIsConnected(!isConnected)}
                         onClick={() => {
                             openWalletModal()
                         }}
@@ -407,7 +442,7 @@ const Add = () => {
                     <LabelButton name="Enter an amount" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
-                ) : isInsufficientAllowance ? (
+                ) : isInsufficientAllowance && !wallet ? (
                     <ButtonGroup>
                         {isInsufficientAllowanceTokenIn && (
                             <PrimaryButton

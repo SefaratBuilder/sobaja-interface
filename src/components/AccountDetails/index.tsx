@@ -18,6 +18,7 @@ import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { Row } from 'components/Layouts'
 import { mulNumberWithDecimal } from 'utils/math'
 import DepositModal from './DepositModal'
+import SendModal from './SendModal'
 
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -31,7 +32,7 @@ const AccountDetails = ({
     const [isCopied, setIsCopied] = useState<boolean>(false)
     const { connect, disconnect, web3Provider } = useWeb3AuthContext()
     const { wallet, state, loading } = useSmartAccountContext()
-    const balance = wallet?.address && useETHBalances([wallet.address])?.[wallet.address] || account && useETHBalances([account])?.[account]
+    const balance = useETHBalances([wallet?.address || account])?.[wallet?.address || account || '']
 
     const handleCopyAddress = () => {
         if (wallet?.address) {
@@ -131,7 +132,13 @@ const AccountDetails = ({
                             />
                         </>
                     }
-                    <DepositModal />
+                    {
+                        wallet &&
+                        <>
+                            <DepositModal />
+                            <SendModal />
+                        </>
+                    }
                 </WrapButton>
             </WrapContent>
             <Footer className="isLogged">
@@ -303,7 +310,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     transform: translateY(-50%);
     margin: auto;
     transition: all 0.1s ease-in-out;
-    z-index: 999;
+    z-index: 10;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
     color: ${({ theme }) => theme.text1};

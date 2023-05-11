@@ -150,7 +150,7 @@ export const SmartAccountProvider = ({ children }: any) => {
         chainId: activeChainId,
         owner: address,
       });
-      console.info("getSmartAccountsByOwner", data);
+
       const accountData = [];
       for (let i = 0; i < data.length; ++i) {
         accountData.push(data[i]);
@@ -177,8 +177,8 @@ export const SmartAccountProvider = ({ children }: any) => {
   }, [provider, address]);
 
   const getSmartAccountBalance = async () => {
-    if (!provider || !address) return "Wallet not connected";
-    if (!state || !wallet) return "Init Smart Account First";
+    if (!provider || !address) return console.log("Wallet not connected");
+    if (!state || !wallet) return console.log("Init Smart Account First");
 
     try {
       setIsFetchingBalance(true);
@@ -192,9 +192,8 @@ export const SmartAccountProvider = ({ children }: any) => {
         tokenAddresses: [],
       };
       const balFromSdk = await wallet.getAlltokenBalances(balanceParams);
-
       const usdBalFromSdk = await wallet.getTotalBalanceInUsd(balanceParams);
-
+      console.log({balFromSdk})
       setBalance({
         totalBalanceInUsd: usdBalFromSdk.data.totalBalance,
         alltokenBalances: balFromSdk.data,
@@ -222,8 +221,8 @@ export const SmartAccountProvider = ({ children }: any) => {
   }, [getSmartAccount]);
 
   useEffect(() => {
-
-  }, [address, provider])
+    getSmartAccountBalance();
+  }, [wallet, state])
 
   return (
     <SmartAccountContext.Provider

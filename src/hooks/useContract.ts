@@ -51,25 +51,20 @@ export const useContract = (
 
 export function useMulticallContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
-    if (!chainId) return null
-    return useContract(MULTICALL_NETWORKS[chainId], MULTICALL_ABI)
+    return useContract(MULTICALL_NETWORKS[chainId || 80001], MULTICALL_ABI)
 }
 
 export function useFactoryContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
-    if (!chainId) return null
-    return useContract(FACTORIES[chainId], FACTORY_ABI)
+    return useContract(FACTORIES[chainId || 80001], FACTORY_ABI)
 }
 
 export function useRouterContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
-    if (!chainId) return null
-    return useContract(ROUTERS[chainId], ROUTER_ABI)
+    return useContract(ROUTERS[chainId || 80001], ROUTER_ABI)
 }
 
 export function useStakingContract(): Contract | null {
-    const { chainId } = useActiveWeb3React()
-    if (!chainId) return null
     return useContract('0x6E7E86F3CE091C4a842b0D27d1c8c4059090eC65', STAKING_ABI)
 }
 
@@ -79,8 +74,7 @@ export function useTokenContract(address: string | undefined): Contract | null {
 
 export function useFaucetContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
-    if (!chainId) return null
-    return useContract(Faucet[chainId], FAUCET_ABI)
+    return useContract(Faucet[chainId || 80001], FAUCET_ABI)
 }
 
 export function usePairContract(address: string | undefined): Contract | null {
@@ -89,8 +83,7 @@ export function usePairContract(address: string | undefined): Contract | null {
 
 export function useLaunchpadContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
-    if (!chainId) return null
-    return useContract(LAUNCHPADS[chainId], LAUNCHPAD_ABI)
+    return useContract(LAUNCHPADS[chainId || 80001], LAUNCHPAD_ABI)
 }
 
 export function useFairLaunchContract(address: string | undefined): Contract | null {
@@ -99,14 +92,12 @@ export function useFairLaunchContract(address: string | undefined): Contract | n
 
 export function useAccessManagerContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
-    if (!chainId) return null
-    return useContract(LAUNCHPAD_ACCESS_MANAGERS[chainId], ACCESS_MANAGER_ABI)
+    return useContract(LAUNCHPAD_ACCESS_MANAGERS[chainId || 80001], ACCESS_MANAGER_ABI)
 }
 
 export function useAAEntryPointContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
-    if (!chainId) return null
-    return useContract(AAEntryPoints[chainId], AAEntryPoint_ABI)
+    return useContract(AAEntryPoints[chainId || 80001], AAEntryPoint_ABI)
 }
 
 export function useNftSmartAccountContract() {
@@ -114,4 +105,18 @@ export function useNftSmartAccountContract() {
     const { chainId } = useActiveWeb3React()
     if (!web3Provider || !chainId) return
     return new ethers.Contract('0xdd526eba63ef200ed95f0f0fb8993fe3e20a23d0', NFT_ABI, web3Provider)
-}   
+}
+
+export function useTokenSmartAccountContract(address: string | undefined) {
+    const { web3Provider } = useWeb3AuthContext()
+    const { chainId } = useActiveWeb3React()
+    if (!web3Provider || !chainId || !address) return
+    return new ethers.Contract(address, ERC20, web3Provider)
+}
+
+export function useRouterSmartAccountContract(): Contract | null {
+    const { web3Provider } = useWeb3AuthContext()
+    const { chainId } = useActiveWeb3React()
+    if (!web3Provider || !chainId) return null
+    return new ethers.Contract(ROUTERS[chainId || 80001], ROUTER_ABI, web3Provider)
+}
