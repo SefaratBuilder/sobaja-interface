@@ -98,5 +98,13 @@
         "name": "Bitcoin",
         "chainId": 280,
         "type": "faucet"
+    },
+    {
+        "address": "0x4cD67E306ecaD1Cac71a2BD4abC1A4c22B55d331",
+        "symbol": "SOBA",
+        "decimals": 18,
+        "logoURI": "/images/sbj.svg",
+        "name": "Sobaja Coin",
+        "chainId": 280
     }
 ]

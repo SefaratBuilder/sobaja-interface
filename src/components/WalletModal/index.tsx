@@ -218,21 +218,18 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             Sobajaswap
                         </div>
                     </Title> */}
-                    
-                    <WrapItem>
-                        {getOptions()}
-                    </WrapItem>
+
+                    <WrapItem>{getOptions()}</WrapItem>
                     <Title>
                         <div>
-                            By connecting a wallet, you agree to
-                            Sobajaswap &nbsp;
+                            By connecting a wallet, you agree to Sobajaswap
+                            &nbsp;
                             <a href="#" target="_blank" rel="noreferrer">
                                 Terms of Service &nbsp;
                             </a>
-                           
-                             and 
+                            and
                             <a href="#" target="_blank" rel="noreferrer">
-                            &nbsp; Privacy Policy.
+                                &nbsp; Privacy Policy.
                             </a>
                         </div>
                         {/* <div>
@@ -376,7 +373,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     height: 100vh;
     margin: auto;
     animation: fadeIn 0.3s linear;
-    z-index: 999999;
+    z-index: 9999;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
     color: ${({ theme }) => theme.text1};
@@ -388,35 +385,35 @@ const Container = styled.div<{ isConnected: boolean }>`
         height: calc(100vh - 10rem);
     }
     @keyframes fadeIn {
-		from {
-			transform: translateX(100%);
-			opacity: 1;
-		}
-		to {
-			transform: translateX(0px);
-			opacity: 1;
-		}
-	}
+        from {
+            transform: translateX(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(0px);
+            opacity: 1;
+        }
+    }
     @keyframes fadeOut {
-		from {
-			transform: translateX(0px);
-			opacity: 1;
-		}
-		to {
-			transform: translateX(400px);
-			opacity: 1;
-		}
-	}
+        from {
+            transform: translateX(0px);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 1;
+        }
+    }
     @keyframes fadeUp {
-		from {
-			transform: translateY(100%);
-			opacity: 1;
-		}
-		to {
-			transform: translateY(0px);
-			opacity: 1;
-		}
-	}
+        from {
+            transform: translateY(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(0px);
+            opacity: 1;
+        }
+    }
 `
 
 const BtnClose = styled.img`
