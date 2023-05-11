@@ -12,7 +12,8 @@ import {
     FAUCET_ABI,
     Faucet,
     LAUNCHPADS,
-    STAKING_ABI
+    STAKING_ABI,
+    AAEntryPoints
 } from 'constants/addresses'
 import ERC20 from 'constants/jsons/erc20.json'
 import { PAIR_ABI } from 'constants/jsons/pair'
@@ -20,6 +21,7 @@ import LAUNCHPAD_ABI from 'constants/jsons/launchpad.json'
 import { FAIRLAUNCH_ABI } from 'constants/jsons/fairlaunch'
 import ACCESS_MANAGER_ABI from 'constants/jsons/accessManager.json'
 import { LAUNCHPAD_ACCESS_MANAGERS } from 'constants/addresses'
+import AAEntryPoint_ABI from 'constants/jsons/aaentry.json'
 
 // returns null on errors
 export const useContract = (
@@ -96,4 +98,10 @@ export function useAccessManagerContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
     if (!chainId) return null
     return useContract(LAUNCHPAD_ACCESS_MANAGERS[chainId], ACCESS_MANAGER_ABI)
+}
+
+export function useAAEntryPointContract(): Contract | null {
+    const { chainId } = useActiveWeb3React()
+    if (!chainId) return null
+    return useContract(AAEntryPoints[chainId], AAEntryPoint_ABI)
 }

@@ -23,6 +23,7 @@ const Content = styled.div`
     padding: 4rem 20px;
 `;
 const Title = styled.div`
+    font-family: Inter sans-serif;
     display: flex;
     justify-content: center;
     text-align: center;
