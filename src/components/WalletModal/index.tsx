@@ -200,7 +200,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             <Container isConnected={true}>
                 <Header>
                     <span>Connect a wallet</span>
-                    {/* <div>
+                    <div>
                         {' '}
                         <BtnClose
                             onClick={() => {
@@ -209,7 +209,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             src={imgClose}
                             alt=""
                         />
-                    </div> */}
+                    </div>
                 </Header>
                 <WrapContent>
                     {/* <Title>
@@ -464,8 +464,19 @@ const Header = styled.div`
         height: 35px;
         top: -62px;
     }
+    div{
+        display: none;
+    }
     @media screen and (max-width: 390px) {
         padding: 0.5rem 1rem;
+    }
+    @media screen and (max-width: 640px) {
+        div{
+            display: block;
+        }
+        span{
+            margin: auto;
+        }
     }
 `
 
@@ -557,7 +568,7 @@ const WrapItem = styled.div`
         opacity: 1;
     }
     @media screen and (max-width: 576px) {
-        padding: 1rem;
+        // padding: 1rem;
         grid-template-columns: 1fr;
         // max-height: 300px;
         // overflow: auto;

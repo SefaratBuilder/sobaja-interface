@@ -22,15 +22,6 @@ interface WalletInfo {
 }
 
 export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
-    BitKeep: {
-        connector: bitkeep,
-        name: 'BitKeep Wallet',
-        iconURL: BITKEEP_ICON,
-        description: 'Login using BitKeep hosted wallet',
-        href: 'https://bitkeep.com/',
-        color: '#4A6C9B',
-        mobile: true,
-    },
     METAMASK: {
         connector: injected,
         name: 'MetaMask',
@@ -38,6 +29,15 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
         description: 'Easy-to-use browser extension.',
         href: 'https://metamask.io/',
         color: '#E8831D',
+    },
+    Argent: {
+        connector: argent,
+        name: 'Argent',
+        iconURL: ARGENT_ICON,
+        description: 'Login using Argent wallet',
+        href: null,
+        color: '#4A6C9B',
+        mobile: true,
     },
     WALLET_LINK: {
         connector: CoinbaseWallet,
@@ -66,13 +66,14 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
         color: '#4A6C9B',
         mobile: true,
     },
-    Argent: {
-        connector: argent,
-        name: 'Argent',
-        iconURL: ARGENT_ICON,
-        description: 'Login using Argent wallet',
-        href: null,
+    BitKeep: {
+        connector: bitkeep,
+        name: 'BitKeep Wallet',
+        iconURL: BITKEEP_ICON,
+        description: 'Login using BitKeep hosted wallet',
+        href: 'https://bitkeep.com/',
         color: '#4A6C9B',
         mobile: true,
     },
+
 }
