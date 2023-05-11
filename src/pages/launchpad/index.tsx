@@ -14,27 +14,15 @@ import { useQueryLaunchpad } from 'hooks/useQueryLaunchpad'
 import { shortenAddress } from 'utils'
 import LaunchpadItem from './components/LaunchpadItem'
 import Admin from './components/Admin'
-import { LaunchpadInfo } from 'interfaces'
+import { LaunchpadInfo, LaunchpadInfoX, Token } from 'interfaces'
 import CreateLaunchpad from './components/CreateLaunchpad'
 import ListLaunchpad from './components/List'
 import LaunchpadDetails from './components/LaunchpadDetails'
 
-export interface ILaunchpadDetails {
-    token: {
-        address: string
-        symbol: string
-    }
-    details: string
-    paymentCurrency: Array<string>
-    currencies: Array<string>
-    timeline: Array<string>
+export interface ILaunchpadDetails extends LaunchpadInfoX {
     img: string
-    softCap: string
-    hardCap: string
-    price: string
-    individualCap: string
-    overflow: string
-    totalToken: string
+    lPadToken: Token
+    paymentToken: Token
 }
 
 const Launchpad = () => {
@@ -56,6 +44,7 @@ const Launchpad = () => {
         totalToken: '40',
     })
     const { error, loading, data, refetch } = useQueryLaunchpad()
+    // console.log('🤦‍♂️ ⟹ Launchpad ⟹ data:', { data })
     const { account, chainId, library } = useActiveWeb3React()
     const token = useToken(
         launchpadState.token ? launchpadState.token : undefined,
@@ -165,8 +154,8 @@ const Launchpad = () => {
             <button onClick={() => setCurrentPage('Infomation')}>
                 Infomation
             </button>
+        <button onClick={() => setCurrentPage('Details')}>Details</button> */}
             <button onClick={() => setCurrentPage('Admin')}>Admin</button>
-            <button onClick={() => setCurrentPage('Details')}>Details</button> */}
 
             {currentPage === 'Infomation' && (
                 <ListLaunchpad
@@ -174,7 +163,9 @@ const Launchpad = () => {
                     setLpDetails={setLpDetails}
                 />
             )}
-            {currentPage === 'Create' && <CreateLaunchpad />}
+            {currentPage === 'Create' && (
+                <CreateLaunchpad setCurrentPage={setCurrentPage} />
+            )}
             {currentPage === 'Details' && (
                 <LaunchpadDetails
                     details={lpDetails}

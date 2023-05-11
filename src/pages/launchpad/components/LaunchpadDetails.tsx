@@ -5,7 +5,8 @@ import { Row } from 'components/Layouts'
 import { handleTime } from 'utils/convertTime'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { ILaunchpadDetails } from '..'
-
+import { add, divNumberWithDecimal } from 'utils/math'
+import ETH from 'assets/token-logos/dai.svg'
 interface IDetails {
     details: ILaunchpadDetails | undefined
     setCurrentPage: React.Dispatch<
@@ -14,23 +15,22 @@ interface IDetails {
 }
 
 const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
-    const currencies = details?.currencies
-    const [currencySelected, setCurrencySelected] = useState('ETH')
+    console.log('🤦‍♂️ ⟹ LaunchpadDetails ⟹ details:', details)
     const timeLine = [
         {
-            time: '1683700636',
+            time: details?.startTime,
             title: 'Soba Holding Calculation Period',
         },
         {
-            time: '1683700896',
+            time: details?.endTime,
             title: 'Subscription Period',
         },
         {
-            time: '1685501136',
+            time: add(details?.endTime, 3600),
             title: 'Calculation Period',
         },
         {
-            time: '1685511136',
+            time: add(details?.endTime, 3600 * 2),
             title: 'Final Token Distribution',
         },
     ]
@@ -48,6 +48,10 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
         return { ...result, index: i }
     }, timeLine)
 
+    const isClosed = (time: string) => {
+        return Number(time) <= new Date().getTime() / 1000
+    }
+
     return (
         <Container>
             <div
@@ -60,15 +64,30 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
             <WrapTitle>
                 <LeftSide>
                     <Thumbnail>
-                        <img src={details?.img} alt="" />
+                        <img src={details?.img || ETH} alt="" />
                     </Thumbnail>
                     <DetailsHeader>
                         <div>
                             <div className="title">
-                                <div>{details?.token.symbol}</div>
-                                <Badge>On sale</Badge>
+                                <div>
+                                    {
+                                        // details?.token?.symbol ||
+                                        details?.lPadToken?.symbol
+                                    }
+                                </div>
+                                <Badge type="closed">
+                                    {details?.endTime &&
+                                    isClosed(details?.endTime)
+                                        ? 'Closed'
+                                        : 'On sale'}
+                                </Badge>
                             </div>
-                            <div className="details">{details?.details}</div>
+                            <div className="details">
+                                {
+                                    // details?.details ||
+                                    details?.lPadToken?.name
+                                }
+                            </div>
                         </div>
                         <div className="social-contact">
                             <div>Website</div>
@@ -77,32 +96,63 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                     </DetailsHeader>
                 </LeftSide>
                 <RightSide>
-                    End date: {handleTime(timeLine[timeLine.length - 1].time)}
+                    <span>End date:</span>
+                    <span>
+                        {' '}
+                        {handleTime(timeLine[timeLine.length - 1].time)}
+                    </span>
                 </RightSide>
             </WrapTitle>
             <Line></Line>
             <WrapBody>
                 <WrapBodyHead>
-                    <div>
+                    <span>
                         <div className="title">Type:</div>
                         <div className="details">Subscription</div>
-                    </div>
-                    <div>
+                    </span>
+                    <span>
                         <div>Token Sale Price:</div>
-                        <div className="details">1 Soba = 100 USD</div>
-                    </div>
-                    <div>
+                        <div className="details">
+                            1 TEST ={' '}
+                            {details?.price
+                                ? divNumberWithDecimal(details?.price, 18)
+                                : '0'}{' '}
+                            USD
+                        </div>
+                    </span>
+                    <span>
                         <div>Tokens Offered:</div>
-                        <div className="details">50,000,000 Soba</div>
-                    </div>
-                    <div>
+                        <div className="details">
+                            {details?.totalTokenSale
+                                ? divNumberWithDecimal(
+                                      details?.totalTokenSale,
+                                      18,
+                                  )
+                                : '0'}{' '}
+                            TEST
+                        </div>
+                    </span>
+                    <span>
                         <div>Single Initial Investment:</div>
-                        <div className="details">10 Soba</div>
-                    </div>
-                    <div>
+                        <div className="details">
+                            {details?.individualCap
+                                ? divNumberWithDecimal(
+                                      details?.individualCap,
+                                      18,
+                                  )
+                                : '0'}{' '}
+                            Soba
+                        </div>
+                    </span>
+                    <span>
                         <div>Hard cap per user:</div>
-                        <div className="details">30,000 Soba</div>
-                    </div>
+                        <div className="details">
+                            {details?.hardcap
+                                ? divNumberWithDecimal(details?.hardcap, 18)
+                                : '0'}{' '}
+                            Soba
+                        </div>
+                    </span>
                 </WrapBodyHead>
 
                 <WrapTimeLine>
@@ -149,14 +199,43 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                                 <div>Finalized</div>
                             </div>
                             <div className="economics right">
-                                <div>{details?.hardCap || '30,000'}</div>
-                                <div>{details?.softCap || '1,000'}</div>
-                                <div>{details?.individualCap || '1,000'}</div>
-                                <div>{details?.totalToken || '1,000'}</div>
                                 <div>
-                                    {details?.paymentCurrency?.reduce(
+                                    {details?.hardcap
+                                        ? divNumberWithDecimal(
+                                              details?.hardcap,
+                                              18,
+                                          )
+                                        : '30,000'}
+                                </div>
+                                <div>
+                                    {details?.softcap
+                                        ? divNumberWithDecimal(
+                                              details?.softcap,
+                                              18,
+                                          )
+                                        : '1,000'}
+                                </div>
+                                <div>
+                                    {details?.individualCap
+                                        ? divNumberWithDecimal(
+                                              details?.individualCap,
+                                              18,
+                                          )
+                                        : '1,000'}
+                                </div>
+                                <div>
+                                    {details?.totalTokenSale
+                                        ? divNumberWithDecimal(
+                                              details?.totalTokenSale,
+                                              18,
+                                          )
+                                        : '1,000'}
+                                </div>
+                                <div>
+                                    {/* {details?.paymentCurrency?.reduce(
                                         (a, b) => a + ' | ' + b,
-                                    ) || 'ETH'}
+                                    ) || 'ETH'} */}
+                                    MATIC
                                 </div>
                                 <div>{'????'}</div>
                             </div>
@@ -173,7 +252,7 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                             </WrapInput>
                             <div className="label-currency">
                                 <div>Payment currency: </div>
-                                {currencies &&
+                                {/* {currencies &&
                                     currencies.map((crc) => {
                                         return (
                                             <div
@@ -189,12 +268,13 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                                                 {crc}
                                             </div>
                                         )
-                                    })}
+                                    })} */}
+                                MATIC
                             </div>
-                            <div className="label-recap">
+                            {/* <div className="label-recap">
                                 <div>Recap: </div>
                                 <div>5 ETH - 30 Soba</div>
-                            </div>
+                            </div> */}
                             <PrimaryButton
                                 name="Confirm"
                                 onClick={() => {}}
@@ -216,16 +296,28 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
 }
 
 const Container = styled.div`
-    padding: 30px 8rem;
+    padding: 30px 4rem;
+
+    @media screen and (max-width: 1240px) {
+        padding: 30px 4rem;
+    }
+    @media screen and (max-width: 890px) {
+        padding: 30px 1.5rem;
+        font-size: 14px;
+    }
+
     .btn-back {
         cursor: pointer;
         padding: 0 0 1rem;
+        font-size: 24px;
     }
 `
 const WrapCommit = styled.div`
     display: flex;
     justify-content: space-between;
     color: #111;
+    flex-wrap: wrap;
+    gap: 1rem;
     .title-commit {
         font-size: 24px;
         font-weight: bolder;
@@ -247,7 +339,7 @@ const WrapCommit = styled.div`
         color: #fff;
 
         padding: 20px 0;
-        min-width: 600px;
+        /* min-width: 600px; */
         span {
             color: #a2a0a0;
             div:nth-child(1) {
@@ -355,6 +447,8 @@ const Line = styled.div`
 const WrapTitle = styled.div`
     display: flex;
     justify-content: space-between;
+    gap: 1rem;
+    /* flex-wrap: wrap; */
 `
 const Thumbnail = styled.div`
     width: 300px;
@@ -365,13 +459,33 @@ const Thumbnail = styled.div`
         height: 100%;
         object-fit: cover;
     }
+
+    @media screen and (max-width: 920px) {
+        width: 150px;
+        height: 90px;
+    }
+    /* @media screen and (max-width: 576px) {
+        width: 120px;
+        height: 90px;
+    } */
 `
 const LeftSide = styled.div`
     display: flex;
+    flex-wrap: wrap;
     gap: 20px;
 `
 const RightSide = styled.div`
     display: flex;
+    gap: 10px;
+    span {
+        /* flex-direction: column; */
+    }
+
+    @media screen and (max-width: 768px) {
+        flex-direction: column;
+        gap: 0;
+        min-width: 89px;
+    }
 `
 
 const DetailsHeader = styled.div`
@@ -391,7 +505,7 @@ const DetailsHeader = styled.div`
     .details {
         color: #9c9999;
         font-size: 16px;
-        max-width: 600px;
+        /* max-width: 600px; */
     }
 
     .social-contact {
@@ -417,25 +531,36 @@ const Badge = styled.div<{ type?: string }>`
 const WrapBody = styled.div`
     display: flex;
     flex-direction: column;
+
     gap: 4.5rem;
 `
 
 const WrapBodyHead = styled.div`
     display: flex;
-    /* justify-content: space-between; */
-    gap: 10rem;
-    padding: 2rem 0 0;
-    div {
-        .details {
-            font-size: 18px;
-            color: #ffffff85;
-        }
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 0 0;
+    span {
+        width: 180px;
+    }
+
+    .details {
+        font-size: 18px;
+        color: #ffffff85;
+    }
+
+    @media screen and (max-width: 962px) {
+        /* padding: 30px 1.5rem; */
+        justify-content: start;
     }
 `
 
 const WrapTimeLine = styled.div`
     display: flex;
     justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
 
     /* padding-top: 2rem; */
 
@@ -451,9 +576,9 @@ const WrapTimeLine = styled.div`
 const LabelEconomics = styled(Row)`
     /* border: 1px solid white; */
     div {
-        min-width: 300px;
         /* :nth-child(2 ), */
         div {
+            min-width: 150px;
             padding: 10px 0;
 
             border: 1px solid white;

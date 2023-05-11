@@ -5,6 +5,11 @@ import Soba from 'assets/token-logos/sbj.svg'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { handleTime } from 'utils/convertTime'
 import { ILaunchpadDetails } from '..'
+import { useQueryLaunchpad } from 'hooks/useQueryLaunchpad'
+import { useToken, useTokens } from 'hooks/useToken'
+import UnknowToken from 'assets/token-logos/dai.svg'
+import { divNumberWithDecimal } from 'utils/math'
+import { Token } from 'interfaces'
 interface IListLaunchpad {
     setCurrentPage: React.Dispatch<
         React.SetStateAction<'Admin' | 'Create' | 'Details' | 'Infomation'>
@@ -15,184 +20,177 @@ interface IListLaunchpad {
 }
 
 const ListLaunchpad = ({ setCurrentPage, setLpDetails }: IListLaunchpad) => {
-    const data = [
-        {
-            url: 'https://static.okx.com/cdn/grow/jumpstart/projects/20230413/1681376287536.png?x-oss-process=image/format,webp',
-            token: {
-                symbol: 'SUI ',
-                name: 'SUI Token',
-                url: 'https://static.okx.com/cdn/oksupport/asset/currency/icon/sui20230414104031.png?x-oss-process=image/format,webp',
-            },
-            totalReward: '999999999',
-            rateToUSD: '99',
-            payment: ['ETH', 'USDC'],
-            startDate: '1683085885',
-            endDate: '1683363368',
-            softCap: '1',
-            hardCap: '100',
-            price: '0.1',
-            individualCap: '5',
-            overflow: '10',
-            totalToken: '40',
-            details: 'Sui is a high throughput, low latency Layer 1 blockchain',
-        },
-        {
-            url: 'https://static.okx.com/cdn/oksupport/active/ieo/20220422/1650607744430.png?x-oss-process=image/format,webp',
-            token: {
-                symbol: 'TAKI',
-                name: 'Taki',
-                url: 'https://static.okx.com/cdn/oksupport/asset/currency/icon/taki.png?x-oss-process=image/format,webp',
-            },
-            totalReward: '999999999',
-            rateToUSD: '100',
-            payment: ['ETH', 'USDT'],
-            startDate: '1683085885',
-            endDate: '1683363368',
-            softCap: '1',
-            hardCap: '200',
-            price: '0.1',
-            individualCap: '1',
-            overflow: '10',
-            totalToken: '40',
-            details:
-                'Taki is a global social network where anyone can earn social crypto tokens simply by participating within the community',
-        },
-        {
-            url: 'https://static.okx.com/cdn/oksupport/active/ieo/20220414/1649904954608.png?x-oss-process=image/format,webp',
-            token: {
-                symbol: 'ELT',
-                name: 'Element Black',
-                url: 'https://static.okx.com/cdn/oksupport/asset/currency/icon/elt.png?x-oss-process=image/format,webp',
-            },
-            totalReward: '999999999',
-            rateToUSD: '100',
-            payment: ['ETH'],
-            startDate: '1683085885',
-            endDate: '1683363368',
-            softCap: '1',
-            hardCap: '300',
-            price: '0.1',
-            individualCap: '1',
-            overflow: '10',
-            totalToken: '40',
-            details:
-                'Element Black (ELT) is a Social-Fi NFT Game development company dedicated to building an NFT 2.0/Create-To-Earn ecosystem',
-        },
-    ]
-    const handleOnClick = (launchpad: (typeof data)[0]) => {
-        setCurrentPage('Details')
-        setLpDetails({
-            img: launchpad.url,
-            currencies: launchpad.payment,
-            timeline: [''],
+    const { data } = useQueryLaunchpad()
+    console.log('🤦‍♂️ ⟹ ListLaunchpad ⟹ data:', data)
+    const { launchpads } = data
+    const launchpadTokens = useTokens(
+        launchpads?.map((lp) => lp.launchpadToken),
+    )
+    const paymentCurrencies = useTokens(
+        launchpads?.map((lp) =>
+            lp.paymentCurrency === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+                ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+                : lp.paymentCurrency,
+        ),
+    )
 
-            token: {
-                address: launchpad.token.name,
-                symbol: launchpad.token.symbol,
-                // name: launchpad.token.name,
-            },
-            details: launchpad.details,
-            paymentCurrency: ['ETH', 'USDC'],
-            softCap: launchpad.softCap,
-            hardCap: launchpad.hardCap,
-            price: launchpad.price,
-            individualCap: launchpad.individualCap,
-            overflow: launchpad.overflow,
-            totalToken: launchpad.totalToken,
+    console.log('🤦‍♂️ ⟹ ListLaunchpad ⟹ paymentCurrencies:', paymentCurrencies)
+
+    const handleOnClick = (
+        launchpad: (typeof launchpads)[0],
+        lPadToken: Token | undefined,
+        pmCur: Token | undefined,
+    ) => {
+        setCurrentPage('Details')
+
+        setLpDetails({
+            ...launchpad,
+            img: '',
+            lPadToken: lPadToken,
+            paymentToken: pmCur,
         })
+    }
+
+    const isClosed = (time: string) => {
+        return Number(time) <= new Date().getTime() / 1000
     }
     return (
         <Container>
             <Title>
                 <p>Launchpad</p>
+                <div
+                    className="btn-create"
+                    onClick={() => setCurrentPage('Create')}
+                >
+                    + Create market
+                </div>
             </Title>
             <WrapLaunchpad>
-                {data.map((launchpad, index) => {
-                    return (
-                        <CardDetails>
-                            <div className="thumbnail">
-                                <img src={launchpad.url} alt="launchpad" />
-                            </div>
-                            <Details>
-                                <div className="label">
-                                    <WrapHeader>
-                                        <LogoToken>
-                                            <img
-                                                src={launchpad.token.url}
-                                                alt=""
-                                            />
-                                        </LogoToken>
-                                        <div>
-                                            <span>
-                                                {launchpad.token.symbol}
-                                            </span>
-                                            <Badge
-                                                type={
-                                                    index !== 2
-                                                        ? undefined
-                                                        : 'closed'
-                                                }
-                                            >
-                                                {index !== 2
-                                                    ? 'On Sale'
-                                                    : 'Closed'}
-                                            </Badge>
-                                        </div>
-                                        <div className="name-token">
-                                            {launchpad.token.name}
-                                        </div>
-                                    </WrapHeader>
-                                    <WrapDetails>
-                                        <div>
-                                            Total Reward:{' '}
-                                            {launchpad.totalReward}
-                                        </div>
-                                        <div>
-                                            Sale Price: 1 Test -{' '}
-                                            {launchpad.rateToUSD} USDC
-                                        </div>
-                                        <div>
-                                            Start Time:{' '}
-                                            {handleTime(launchpad.startDate)}
-                                        </div>
-                                        <div>
-                                            End Time:{' '}
-                                            {handleTime(launchpad.endDate)}
-                                        </div>
-                                        <div>
-                                            Payment Crypto:{' '}
-                                            {launchpad.payment.reduce(
-                                                (a, b) => a + ' | ' + b,
-                                            )}
-                                        </div>
-
-                                        <div className="btn-view">
-                                            <PrimaryButton
-                                                name="View more"
-                                                onClick={() =>
-                                                    handleOnClick(launchpad)
-                                                }
-                                                type="launch-pad"
-                                            />
-                                        </div>
-                                    </WrapDetails>
+                {launchpads &&
+                    launchpads?.map((launchpad, index) => {
+                        return (
+                            <CardDetails>
+                                <div className="thumbnail">
+                                    <img src={UnknowToken} alt="launchpad" />
                                 </div>
-                            </Details>
-                        </CardDetails>
-                    )
-                })}
+                                <Details>
+                                    <div className="label">
+                                        <WrapHeader>
+                                            <LogoToken>
+                                                <img src={UnknowToken} alt="" />
+                                            </LogoToken>
+                                            <div>
+                                                <span>
+                                                    {
+                                                        launchpadTokens?.[index]
+                                                            ?.symbol
+                                                    }
+                                                </span>
+                                                <Badge
+                                                    type={
+                                                        isClosed(
+                                                            launchpad.endTime,
+                                                        )
+                                                            ? 'closed'
+                                                            : undefined
+                                                    }
+                                                >
+                                                    {isClosed(launchpad.endTime)
+                                                        ? 'Closed'
+                                                        : 'On Sale'}
+                                                </Badge>
+                                            </div>
+                                            <div className="name-token">
+                                                {/* {"launchpad.token.name"} */}
+                                                {launchpadTokens?.[index]?.name}
+                                            </div>
+                                        </WrapHeader>
+                                        <WrapDetails>
+                                            <div>
+                                                Total Token:{' '}
+                                                {divNumberWithDecimal(
+                                                    launchpad.totalTokenSale,
+                                                    18,
+                                                )}
+                                            </div>
+                                            <div>
+                                                Sale Price: 1{' '}
+                                                {
+                                                    launchpadTokens?.[index]
+                                                        ?.symbol
+                                                }{' '}
+                                                -{' '}
+                                                {divNumberWithDecimal(
+                                                    launchpad.price,
+                                                    18,
+                                                )}{' '}
+                                                USDC
+                                            </div>
+                                            <div>
+                                                Start Time:{' '}
+                                                {handleTime(
+                                                    launchpad.startTime,
+                                                )}
+                                            </div>
+                                            <div>
+                                                End Time:{' '}
+                                                {handleTime(launchpad.endTime)}
+                                            </div>
+                                            <div>
+                                                Payment Crypto:{' '}
+                                                {
+                                                    launchpadTokens?.[index]
+                                                        ?.symbol
+                                                }
+                                            </div>
+
+                                            <div className="btn-view">
+                                                <PrimaryButton
+                                                    name="View more"
+                                                    onClick={() =>
+                                                        handleOnClick(
+                                                            launchpad,
+                                                            launchpadTokens?.[
+                                                                index
+                                                            ],
+                                                            paymentCurrencies?.[
+                                                                index
+                                                            ],
+                                                        )
+                                                    }
+                                                    type="launch-pad"
+                                                />
+                                            </div>
+                                        </WrapDetails>
+                                    </div>
+                                </Details>
+                            </CardDetails>
+                        )
+                    })}
             </WrapLaunchpad>
         </Container>
     )
 }
 
 const Container = styled.div`
+    margin: 0 auto 40px;
+    max-width: 1440px;
+
     padding: 30px 0.5rem;
 `
 const Title = styled.div`
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
     padding-bottom: 4.5rem;
+
+    .btn-create {
+        padding: 5px;
+        border: 1px solid white;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
     p {
         font-weight: 800;
         font-size: 34px;
@@ -209,16 +207,16 @@ const CardDetails = styled(Row)`
     border: 1px solid black;
     border-radius: 10px;
     background: #fff;
-    display: flex;
-    gap: 5.5rem;
-    max-width: 1200px;
+    /* gap: 5.5rem; */
+    display: block;
+    /* max-width: 300px; */
 
     .thumbnail {
-        min-width: 750px;
-        max-height: 300px;
-        display: flex;
-        align-items: center;
-        border: 3px solid #fff;
+        /* min-width: 550px; */
+        /* max-height: 300px; */
+        /* display: flex; */
+        /* align-items: center; */
+        border-bottom: 1px solid #111;
     }
 
     img {
@@ -229,8 +227,9 @@ const CardDetails = styled(Row)`
 `
 
 const Details = styled.div`
-    width: 100%;
-    max-width: 500px;
+    width: 400px;
+    /* min-width: 400px; */
+    padding: 0 1.5rem;
 
     .label {
         display: flex;
@@ -283,10 +282,13 @@ const WrapDetails = styled.div`
     /* padding-top: 1rem; */
     display: flex;
     flex-direction: column;
-    padding: 1rem 0;
     gap: 8px;
+    /* padding: 1rem 0.5rem; */
+    padding: 0 1rem;
+
     .btn-view {
-        width: 50%;
+        /* width: 50%; */
+        padding: 0 0 1rem;
     }
 `
 

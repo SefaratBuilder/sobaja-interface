@@ -5,13 +5,12 @@ import styled from 'styled-components'
 
 interface TimePickerProps {
     onChange: (number) => void
+    idx: number
 }
 
-function TimePicker({ onChange }: TimePickerProps) {
-    // const [hour, setHour] = useState(0)
-    // const [minute, setMinute] = useState(0)
+function TimePicker({ onChange, idx }: TimePickerProps) {
     const [selectedHour, setSelectedHour] = useState(0)
-    const [selectedMinute, setSelectedMinute] = useState(0)
+    const [selectedMinute, setSelectedMinute] = useState(idx === 1 ? 2 : 0)
     const [hourList, setHourList] = useState(false)
     const [minutesList, setMinutesList] = useState(false)
 

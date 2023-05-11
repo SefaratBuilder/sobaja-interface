@@ -4,7 +4,7 @@ import styled from 'styled-components'
 
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { useActiveWeb3React } from 'hooks'
-import { githubAssetRepo } from 'constants/index'
+import { URLSCAN_BY_CHAINID, githubAssetRepo } from 'constants/index'
 
 import imgUpload from 'assets/icons/upload.svg'
 // import { Octokit } from '@octokit/rest'
@@ -16,102 +16,226 @@ import {
     useAppState,
     useUpdateApplicationState,
 } from 'states/application/hooks'
+import { add, mulNumberWithDecimal } from 'utils/math'
+import { useLaunchpadContract } from 'hooks/useContract'
+import { LAUNCHPADS } from 'constants/addresses'
+import { useToken, useTokenApproval } from 'hooks/useToken'
+import FAIRLAUNCH_INTERFACE from 'constants/jsons/fairlaunch'
+import { InitCompTransaction } from 'components/TransactionModal'
+import { useTransactionHandler } from 'states/transactions/hooks'
 
-const CreateLaunchpad = () => {
-    const [calendarModal, setCalendarModal] = useState(false)
-    const [isOpenCategory, setIsOpenCategory] = useState(false)
-    const [optionCategory, setOptionCategory] = useState('Crypto')
-    const listCategories = [
-        'Crypto',
-        'Sports',
-        'Economics',
-        'Esport',
-        'Politics',
-    ]
+interface ICreateLaunchpad {
+    setCurrentPage: React.Dispatch<
+        React.SetStateAction<'Admin' | 'Create' | 'Details' | 'Infomation'>
+    >
+}
+type ILaunchpadKey =
+    | 'addressTokenSale'
+    | 'addressTokenPayment'
+    | 'softCap'
+    | 'hardCap'
+    | 'tokenSalePrice'
+    | 'individualCap'
+    | 'overflowTokenReward'
+    | 'totalToken'
+    | 'startTime'
+    | 'endTime'
+
+const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
     const refDatePicker = useRef(null)
-    const refCategory = useRef(null)
     const [file, setFile] = useState<File>()
-    const { chainId } = useActiveWeb3React()
-    const [liquidity, setLiquidity] = useState<string>()
-    const [fee, setFee] = useState<number>(1)
-    const [ratios, setRatios] = useState({ left: 50, right: 50 })
-    const [outcomes, setOutcomes] = useState({ yes: 'Yes', no: 'No' })
-    const [title, setTitle] = useState<string>('')
-    const [desc, setDesc] = useState<string>('')
+    const { chainId, account } = useActiveWeb3React()
     const [err, setErr] = useState('')
-    const { refAddress } = useAppState()
-    const updateApplication = useUpdateApplicationState()
-    const delayDefault = 4000
+    const [indexType, setIndexType] = useState(0)
+    const [launchpadState, setLaunchpadState] = useState<{
+        addressTokenSale: string
+        addressTokenPayment: string
+        softCap: string
+        hardCap: string
+        tokenSalePrice: string
+        individualCap: string
+        overflowTokenReward: string
+        totalToken: string
+        startTime: string
+        endTime: string
+    }>({
+        addressTokenSale: '0xdEfd221072dD078d11590D58128399C2fe8cCa7e',
+        addressTokenPayment: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        softCap: '',
+        hardCap: '',
+        tokenSalePrice: '',
+        individualCap: '',
+        overflowTokenReward: '',
+        totalToken: '',
+        startTime: '',
+        endTime: '',
+    })
 
+    const initDataTransaction = InitCompTransaction()
+    const { addTxn } = useTransactionHandler()
+    const types = ['Normal', 'FairLaunch', 'WhiteList']
+
+    const token = useToken(
+        launchpadState.addressTokenSale
+            ? launchpadState.addressTokenSale
+            : undefined,
+    )
+
+    const tokenApproval = useTokenApproval(
+        account,
+        chainId ? LAUNCHPADS[chainId] : null,
+        token,
+    )
+
+    const handleOnChange = (type: ILaunchpadKey | string, value: string) => {
+        const newState = { ...launchpadState, [type]: value }
+        setLaunchpadState(newState)
+    }
     const [dateRange, setDateRange] = useState({
         startDate: new Date(
             moment(new Date().toString()).format('ddd MMM DD YYYY 00:00:00'),
         ),
         endDate: new Date(
-            moment(new Date(new Date().getTime() + 86400000).toString()).format(
+            moment(new Date(new Date().getTime()).toString()).format(
                 'ddd MMM DD YYYY 00:00:00',
             ),
         ),
         key: 'selection',
     })
-    const [hourRange, setHourRange] = useState({
-        startTime: 0, //time now + 5min
-        endTime: 0,
-    })
 
-    const onMaxBalance =
-        // useOnMaxBalance(USDC[chainId]?.type)
-        0
+    // useOnClickOutside(refDatePicker, () => setCalendarModal(false))
+    // useOnClickOutside(refCategory, () => setIsOpenCategory(false))
 
-    // const deployer = Modules.DeployerAddress
+    const launchpadContract = useLaunchpadContract()
+    console.log('🤦‍♂️ ⟹ CreateLaunchpad ⟹ launchpadContract:', launchpadContract)
 
-    useOnClickOutside(refDatePicker, () => setCalendarModal(false))
-    useOnClickOutside(refCategory, () => setIsOpenCategory(false))
+    const handleOnCreateLaunchpad = async () => {
+        try {
+            if (!token || !chainId) return
 
-    const handleChangeInput1 = (event) => {
-        const value = event.target.value
-        if (value > 100) {
-            setRatios({
-                left: 100,
-                right: 0,
-            })
-        } else {
-            setRatios({
-                left: value,
-                right: 100 - value,
-            })
+            const startTimeUnix =
+                new Date(dateRange.startDate).getTime() / 1000 +
+                Number(launchpadState.startTime)
+            const expiredTimeUnix =
+                new Date(dateRange.endDate).getTime() / 1000 +
+                Number(launchpadState.startTime) +
+                10
+            // Number(launchpadState.endTime)
+
+            const args = [
+                LAUNCHPADS[chainId],
+                launchpadState.addressTokenSale,
+                account,
+                launchpadState.addressTokenPayment,
+                startTimeUnix,
+                expiredTimeUnix,
+                mulNumberWithDecimal(launchpadState.softCap, 18),
+                mulNumberWithDecimal(launchpadState.hardCap, 18),
+                mulNumberWithDecimal(launchpadState.tokenSalePrice, 18),
+                mulNumberWithDecimal(launchpadState.individualCap, 18),
+                mulNumberWithDecimal(
+                    launchpadState.overflowTokenReward,
+                    token.decimals,
+                ),
+            ]
+            console.log('🤦‍♂️ ⟹ handleOnCreateLaunchpad ⟹ args:', { args })
+            const data = FAIRLAUNCH_INTERFACE._abiCoder.encode(
+                [
+                    'address',
+                    'address',
+                    'address',
+                    'address',
+                    'uint256',
+                    'uint256',
+                    'uint256',
+                    'uint256',
+                    'uint256',
+                    'uint256',
+                    'uint256',
+                ],
+                args,
+            )
+            const amountToken = launchpadState.totalToken
+            console.log(
+                '🤦‍♂️ ⟹ handleOnCreateLaunchpad ⟹ amountToken:',
+                amountToken,
+            )
+
+            const gasLimit = await launchpadContract?.estimateGas[
+                'createLaunchpad'
+            ](
+                1,
+                token.address,
+                mulNumberWithDecimal(amountToken, token.decimals),
+                data,
+            )
+            console.log('🤦‍♂️ ⟹ handleOnCreateLaunchpad ⟹ gasLimit:', gasLimit)
+
+            const txn = await launchpadContract?.createLaunchpad(
+                1,
+                token.address,
+                mulNumberWithDecimal(amountToken, token.decimals),
+                data,
+            )
+            console.log('🤦‍♂️ ⟹ handleOnCreateLaunchpad ⟹ txn:', txn)
+            const result = await txn.wait()
+            console.log('🤦‍♂️ ⟹ handleOnCreateLaunchpad ⟹ result:', result)
+            console.log('Create successful...', txn.hash)
+        } catch (err) {
+            console.log('failed to create', err)
         }
     }
 
-    const handleChangeInput2 = (event) => {
-        const value = event.target.value
-        if (value > 100) {
-            setRatios({
-                right: 100,
-                left: 0,
-            })
-        } else {
-            setRatios({
-                right: value,
-                left: 100 - value,
-            })
+    const handleOnApprove = async () => {
+        try {
+            initDataTransaction.setError('')
+            console.log({ launchpadState })
+            if (
+                launchpadState.addressTokenSale &&
+                launchpadState.totalToken &&
+                chainId
+            ) {
+                console.log('approving....')
+                initDataTransaction.setIsOpenWaitingModal(true)
+                const callResult: any = await tokenApproval?.approve(
+                    LAUNCHPADS[chainId],
+                    mulNumberWithDecimal(launchpadState.totalToken, 18),
+                )
+
+                initDataTransaction.setIsOpenWaitingModal(false)
+                initDataTransaction.setIsOpenResultModal(true)
+
+                const txn = await callResult.wait()
+                initDataTransaction.setIsOpenResultModal(false)
+
+                addTxn({
+                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                        callResult.hash || ''
+                    }`,
+                    msg: 'Approve',
+                    status: txn.status === 1 ? true : false,
+                })
+            }
+        } catch (err) {
+            console.log('Failed to approve token: ', err)
+            initDataTransaction.setError('Failed')
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
         }
     }
 
-    const handleChangeFee = (event) => {
-        setFee(event.target.value)
-    }
-
-    const handleCreateMarket = async () => {
+    const handleCreateMarketZ = async () => {
         try {
             const startTimeUnix =
                 new Date(dateRange.startDate).getTime() / 1000 +
-                hourRange.startTime
+                launchpadState.startTime
             const expiredTimeUnix =
-                new Date(dateRange.endDate).getTime() / 1000 + hourRange.endTime
+                new Date(dateRange.endDate).getTime() / 1000 +
+                launchpadState.endTime
+
             const path = `assets/${Date.now()}.png`
-            const thumbnailUrl = githubAssetRepo + path
-            console.log({ startTimeUnix, expiredTimeUnix, ...hourRange })
+            // const thumbnailUrl = githubAssetRepo + path
+            console.log({ launchpadState })
             // const payload = {
             //     function: `${Modules.Scripts}::create_new_market`,
             //     type_arguments: [USDC[chainId].type],
@@ -136,8 +260,8 @@ const CreateLaunchpad = () => {
             //     ],
             //     type: 'entry_function_payload',
             // }
-            const result = await uploadFile(file, path)
-            console.log({ result })
+            // const result = await uploadFile(file, path)
+            // console.log({ result })
 
             // setPayload({
             //     method: 'CreateMarket',
@@ -150,18 +274,9 @@ const CreateLaunchpad = () => {
             // setIsOpenToastMsg(true)
             // await updateApplication()
             // await handleRefAddress(address, refAddress, 'createPrediction')
-
-            setTimeout(() => {
-                window.location.replace('/#/compassshare')
-            }, delayDefault)
         } catch (err) {
             console.log('failed to create market', err)
         }
-    }
-
-    const handleChangeCategory = (option) => {
-        setOptionCategory(option)
-        setIsOpenCategory(false)
     }
 
     const handleChangeFile = (file) => {
@@ -218,26 +333,12 @@ const CreateLaunchpad = () => {
         // return reader.readAsDataURL(file)
     }
 
-    const handleOnMaxBalance = () => {
-        const balance =
-            // onMaxBalance().toString()
-            0
-        setLiquidity(balance)
-    }
-    console.log({ hourRange })
-
     const onChangeHourStart = (timeUnix: number) => {
-        setHourRange({
-            ...hourRange,
-            startTime: timeUnix,
-        })
+        handleOnChange('startTime', timeUnix.toFixed())
     }
 
     const onChangeHourExpiry = (timeUnix: number) => {
-        setHourRange({
-            ...hourRange,
-            endTime: timeUnix,
-        })
+        handleOnChange('endTime', timeUnix.toFixed())
     }
 
     useEffect(() => {
@@ -246,304 +347,190 @@ const CreateLaunchpad = () => {
         }
     }, [file])
 
-    useEffect(() => {
-        if (!title) {
-            return setErr('Please set market question.')
-        }
-        if (!desc) {
-            return setErr('Please input description.')
-        }
-        if (!liquidity) {
-            return setErr('Please input liquidity amount.')
-        }
-        if (Number(liquidity) < 100) {
-            return setErr('Liquidity must be greater than 100 USDC!')
-        }
-        if (!file) {
-            return setErr('Please upload a thumnail!')
-        }
+    const handleErr = () => {
+        const keys = Object.keys(launchpadState)
+        const findErr = keys.find((i) => !launchpadState?.[i])
+        if (Number(launchpadState.startTime) > Number(launchpadState.endTime))
+            return setErr('Wrong time!')
+        if (!findErr) return setErr('')
 
-        if (hourRange) {
-            const startTime =
-                new Date(dateRange.startDate).getTime() / 1000 +
-                hourRange.startTime
-            const endTime =
-                new Date(dateRange.endDate).getTime() / 1000 + hourRange.endTime
-            const now = new Date().getTime() / 1000
-            if (startTime < now) {
-                return setErr('Start time must be greater than current time!')
-            }
-            if (endTime <= startTime) {
-                return setErr('End time must be greater than start time!')
-            }
-        }
-        return setErr('')
-    }, [file, hourRange, dateRange, liquidity, title, desc])
-
-    {
-        /* <Row gap="5px" jus="space-between">
-                <form onSubmit={handleOnCreateLaunchpad}>
-                    <label>Launchpad Token</label>
-                    {
-                        token ? (
-                            <div>{token.name}({token.symbol})</div>
-                        ) : <></>
-                    }
-                    <input type="text" placeholder="launchpad token" value={launchpadState.token} onChange={(e) => setLaunchpadState({...launchpadState, token: e.target.value})} required />
-                    <label>Payment currency</label>
-                    {
-                        paymentToken ? (
-                            <div>{paymentToken.name}({paymentToken.symbol})</div>
-                        ) : <></>
-                    } 
-                    <input type="text" placeholder="payment currency" value={launchpadState.paymentCurrency} onChange={(e) => setLaunchpadState({...launchpadState, paymentCurrency: e.target.value})} required />
-                        
-                    <label>Soft cap</label>
-                    <input type="text" placeholder="soft cap" value={launchpadState.softCap} onChange={(e) => setLaunchpadState({...launchpadState, softCap: e.target.value})} required />
-                    <label>Hard cap</label>
-                    <input type="text" placeholder="hard cap" value={launchpadState.hardCap} onChange={(e) => setLaunchpadState({...launchpadState, hardCap: e.target.value})} required />
-                    <label>Price</label>
-                    <input type="text" placeholder="price" value={launchpadState.price} onChange={(e) => setLaunchpadState({...launchpadState, price: e.target.value})} required />
-                    <label>Individual cap</label>
-                    <input type="text" placeholder="individual cap" value={launchpadState.individualCap} onChange={(e) => setLaunchpadState({...launchpadState, individualCap: e.target.value})} required />
-                    <label>Overflow token reward</label>
-                    <input type="text" placeholder="overflow token reward" value={launchpadState.overflow} onChange={(e) => setLaunchpadState({...launchpadState, overflow: e.target.value})} required />
-                    <label>Total tokens</label>
-                    <input type="text" placeholder="total tokens" value={launchpadState.totalToken} onChange={(e) => setLaunchpadState({...launchpadState, totalToken: e.target.value})} required />
-                    {
-                        Number(tokenApproval.allowance?._value) < Number(launchpadState.totalToken) 
-                            ? <button onClick={handleOnApprove}>{`Approve ${token?.symbol}`}</button>
-                            : <input type="submit" value="Create Fairlaunch" />
-                    }
-                </form>
-                <Admin />
-                <Columns gap="10px" al="flex-end">
-                    <LaunchpadList gap="10px" jus="flex-end">
-                        {data?.launchpads?.map((item: LaunchpadInfo) => {
-                            return (
-                                <LaunchpadItem key={item.id} {...item} />
-                            )
-                        })}
-                    </LaunchpadList>
-                    <button style={{width: 100}} onClick={() => refetch()}>Refetch</button>
-                </Columns>
-            </Row>
-            <Row>
-                Account abstraction testing
-                <button onClick={handleOnSendTransaction}>Send transaction</button>
-            </Row> */
+        const err =
+            'Please fill ' +
+            findErr.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase()
+        return setErr(err)
     }
+
+    const listState = [
+        { name: 'Token sale', key: 'addressTokenSale', plh: '0x' },
+        { name: 'Payment currency', key: 'addressTokenPayment', plh: '0x' },
+        { name: 'Soft cap', key: 'softCap', plh: '1' },
+        { name: 'Hard cap', key: 'hardCap', plh: '3' },
+        { name: 'Token sale price', key: 'tokenSalePrice', plh: '0.1' },
+        { name: 'Individual cap', key: 'individualCap', plh: '1' },
+        {
+            name: 'Overflow token reward',
+            key: 'overflowTokenReward',
+            plh: '10',
+        },
+        { name: 'Total tokens', key: 'totalToken', plh: '40' },
+    ]
+
+    useEffect(() => {
+        return handleErr()
+    }, [launchpadState])
 
     return (
         <>
             <Container>
-                <WrapFirstContent>
-                    <WrapLabel>
-                        <Label>Launchpad Token</Label>
-                    </WrapLabel>
-                    <WrapInput>
-                        <Input
-                            placeholder="Token address"
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </WrapInput>
-                    <WrapLabel>
-                        <Label>Payment Currency</Label>
-                    </WrapLabel>
-                    <WrapInput>
-                        <Input
-                            placeholder="Payment token address"
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </WrapInput>
-                    <WrapLabel>
-                        <Label>Soft cap</Label>
-                    </WrapLabel>
-                    <WrapInput>
-                        <Input
-                            placeholder="1"
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </WrapInput>
-                    <WrapLabel>
-                        <Label>Hard cap</Label>
-                    </WrapLabel>
-                    <WrapInput>
-                        <Input
-                            placeholder="3"
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </WrapInput>
-                    <WrapLabel>
-                        <Label>Price</Label>
-                    </WrapLabel>
-                    <WrapInput>
-                        <Input
-                            placeholder="0.1"
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </WrapInput>
-                    <WrapLabel>
-                        <Label>Individual cap</Label>
-                    </WrapLabel>
-                    <WrapInput>
-                        <Input
-                            placeholder="1"
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </WrapInput>
-                    <WrapLabel>
-                        <Label>Overflow token reward</Label>
-                    </WrapLabel>
-                    <WrapInput>
-                        <Input
-                            placeholder="10"
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </WrapInput>
-                    <WrapLabel>
-                        <Label>Total tokens</Label>
-                    </WrapLabel>
-                    <WrapInput>
-                        <Input
-                            placeholder="10"
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </WrapInput>
-                </WrapFirstContent>
-
-                <WrapSecondContent>
-                    <WrapLabel className="title-img">
-                        <Label>Upload thumbnail</Label>
-                    </WrapLabel>
-
-                    <WrapInput>
-                        <Input
-                            id="file-upload"
-                            accept="image/png, image/jpeg, image/gif, image/png, image/webp"
-                            type="file"
-                            placeholder="1USDC"
-                            onChange={(e) =>
-                                handleChangeFile(e?.target?.files[0])
-                            }
-                        />
-                        <PreviewThumbnail id="preview-thumbnail">
-                            {!file !== undefined && (
-                                <img src={imgUpload} alt="upload" />
-                            )}
-                        </PreviewThumbnail>
-                    </WrapInput>
-                    {file && <p className="file-name">{file.name}</p>}
-                    <LabelBtn>
-                        <Label htmlFor="file-upload" className="file-upload">
-                            Choose image
-                        </Label>
-                    </LabelBtn>
-                    {/* <WrapBtn>
-                        <Button>
-                            <NameBtn>Resolution Date</NameBtn>
-                            <DescBtn onClick={() => setCalendarModal(true)}>
-                                Select date
-                            </DescBtn>
-                        </Button>
-                        <Button ref={refCategory}>
-                            <NameBtn>Category</NameBtn>
-                            <DescBtn
-                                onClick={() => {
-                                    setIsOpenCategory(!isOpenCategory)
-                                }}
-                            >
-                                {optionCategory}
-                                <span className="arrow-down" />
-                            </DescBtn>
-                            {isOpenCategory && (
-                                <>
-                                    <ul>
-                                        {listCategories.map((i, index) => {
-                                            return (
-                                                <li key={index}>
-                                                    <p
-                                                        onClick={() => {
-                                                            handleChangeCategory(
-                                                                i,
-                                                            )
-                                                        }}
-                                                    >
-                                                        {i}
-                                                    </p>
-                                                </li>
+                <NavTitle onClick={() => setCurrentPage('Infomation')}>
+                    {'<'} Launchpad
+                </NavTitle>
+                <WrapBody>
+                    <WrapFirstContent>
+                        <WrapSelect>
+                            {/* <div>Type launchpad</div> */}
+                            <WrapLabel>
+                                <Label>Type launchpad</Label>
+                            </WrapLabel>
+                            <Select>
+                                {types.map((t, index) => {
+                                    return (
+                                        <div
+                                            onClick={() => setIndexType(index)}
+                                            className={
+                                                index === indexType
+                                                    ? 'active'
+                                                    : ''
+                                            }
+                                        >
+                                            {t}
+                                        </div>
+                                    )
+                                })}
+                            </Select>
+                        </WrapSelect>
+                        {listState.map((d) => {
+                            return (
+                                <WrapInput>
+                                    <WrapLabel>
+                                        <Label>{d.name}</Label>
+                                    </WrapLabel>
+                                    <Input
+                                        placeholder={d.plh}
+                                        value={launchpadState?.[d.key]}
+                                        onChange={(e) =>
+                                            handleOnChange(
+                                                d.key,
+                                                e.target.value,
                                             )
-                                        })}
-                                    </ul>
+                                        }
+                                    />
+                                </WrapInput>
+                            )
+                        })}
+                    </WrapFirstContent>
+
+                    <WrapSecondContent>
+                        {/* <WrapLabel className="title-img">
+                            <Label>Upload thumbnail</Label>
+                        </WrapLabel>
+
+                        <WrapInput>
+                            <Input
+                                id="file-upload"
+                                accept="image/png, image/jpeg, image/gif, image/png, image/webp"
+                                type="file"
+                                placeholder="1USDC"
+                                onChange={(e) =>
+                                    handleChangeFile(e?.target?.files[0])
+                                }
+                            />
+                            <PreviewThumbnail id="preview-thumbnail">
+                                {!file !== undefined && (
+                                    <img src={imgUpload} alt="upload" />
+                                )}
+                            </PreviewThumbnail>
+                        </WrapInput>
+                        {file && <p className="file-name">{file.name}</p>}
+                        <LabelBtn>
+                            <Label
+                                htmlFor="file-upload"
+                                className="file-upload"
+                            >
+                                Choose image
+                            </Label>
+                        </LabelBtn> */}
+
+                        <WrapDatePicker ref={refDatePicker}>
+                            <DatePicker
+                                dateRange={dateRange}
+                                setDateRange={setDateRange}
+                            />
+                            <p className="title-time">Select Time</p>
+                            <Time>
+                                <TimeInput>
+                                    <p>
+                                        {moment(
+                                            dateRange.startDate.toString(),
+                                        ).format('DD/MM/YYYY')}
+                                    </p>
+                                    <TimePicker
+                                        onChange={onChangeHourStart}
+                                        idx={0}
+                                    />
+                                </TimeInput>
+                                <p>to</p>
+                                <TimeInput className="time-right">
+                                    <p>
+                                        {' '}
+                                        {moment(
+                                            dateRange.endDate.toString(),
+                                        ).format('DD/MM/YYYY')}
+                                    </p>
+                                    <TimePicker
+                                        onChange={onChangeHourExpiry}
+                                        idx={1}
+                                    />
+                                </TimeInput>
+                            </Time>
+                        </WrapDatePicker>
+                        <ContentBottom>
+                            {err && (
+                                <>
+                                    <WrapWarning>
+                                        {/* <img src={'imgWarningIcon'} alt="" /> */}
+                                        <Error>{err}</Error>
+                                    </WrapWarning>
                                 </>
                             )}
-                        </Button>
-                        <Button>
-                            <NameBtn>Arbitrator</NameBtn>
-                            <DescBtn>forbitswap</DescBtn>
-                        </Button>
-                        <Hr />
-                    </WrapBtn> */}
-                    {/* {calendarModal && <WrapDatePicker ref={refDatePicker}><DateRangePickerComponent closeModal={setCalendarModal} type="calendar" /></WrapDatePicker>} */}
-                    {/* <DatePicker date={date} onPickDate={setDate} /> */}
-                    <WrapDatePicker ref={refDatePicker}>
-                        <DatePicker
-                            dateRange={dateRange}
-                            setDateRange={setDateRange}
-                        />
-                        <p className="title-time">Select Time</p>
-                        <Time>
-                            <TimeInput>
-                                <p>
-                                    {moment(
-                                        dateRange.startDate.toString(),
-                                    ).format('DD/MM/YYYY')}
-                                </p>
-                                <TimePicker onChange={onChangeHourStart} />
-                            </TimeInput>
-                            <p>to</p>
-                            <TimeInput className="time-right">
-                                <p>
-                                    {' '}
-                                    {moment(
-                                        dateRange.endDate.toString(),
-                                    ).format('DD/MM/YYYY')}
-                                </p>
-                                <TimePicker onChange={onChangeHourExpiry} />
-                            </TimeInput>
-                        </Time>
-                    </WrapDatePicker>
-                    <ContentBottom>
-                        {err && <Error>{err}</Error>}
-                        {/* <WrapWarning>
-						<img src={imgWarningIcon} alt="" />
-						<div>
-							Set the market resolution date at least 6 days after the correct outcome will be known and make sure that this market won't be{" "}
-							<a href="#" target="_blank">
-								invalid
-							</a>
-						</div>
-					</WrapWarning> */}
-                        <WrapSubmitBtn>
-                            <PrimaryButton
-                                type="transparent"
-                                name="Cancel"
-                                onClick={() =>
-                                    window.location.replace('/#/compassshare')
-                                }
-                            />
-                            <PrimaryButton
-                                // disabled={!!err}
-                                type="blue"
-                                name="Continue"
-                                onClick={() =>
-                                    // !err &&
-                                    handleCreateMarket()
-                                }
-                            />
-                        </WrapSubmitBtn>
-                    </ContentBottom>
-                </WrapSecondContent>
+                            <WrapSubmitBtn>
+                                <PrimaryButton
+                                    type="transparent"
+                                    name="Cancel"
+                                    onClick={() => {}}
+                                />
+                                {Number(tokenApproval.allowance?._value) <
+                                Number(launchpadState.totalToken) ? (
+                                    <PrimaryButton
+                                        disabled={!!err}
+                                        type="blue"
+                                        name="Approve"
+                                        onClick={() => handleOnApprove()}
+                                    />
+                                ) : (
+                                    <PrimaryButton
+                                        disabled={!!err}
+                                        type="blue"
+                                        name="Continue"
+                                        onClick={() =>
+                                            handleOnCreateLaunchpad()
+                                        }
+                                    />
+                                )}
+                            </WrapSubmitBtn>
+                        </ContentBottom>
+                    </WrapSecondContent>
+                </WrapBody>
             </Container>
         </>
     )
@@ -604,7 +591,7 @@ const WrapDatePicker = styled.div`
     flex-direction: column;
     .title-time {
         margin: 1rem 0;
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 600;
     }
 `
@@ -728,41 +715,6 @@ const WrapInputRatio = styled.div`
         }
     }
 `
-const TitleRatio = styled.div`
-    font-weight: 600;
-    font-size: 18px;
-    margin-bottom: 0.8rem;
-`
-const Ratio = styled.div``
-const Hr = styled.div`
-    position: absolute;
-    height: 1px;
-    right: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(255, 255, 255, 0.3);
-`
-const DescBtn = styled.div`
-    font-weight: 600;
-    text-align: center;
-    position: relative;
-    cursor: pointer;
-    display: flex;
-    align-items: flex-end;
-    gap: 5px;
-    .arrow-down {
-        display: block;
-        height: 0;
-        width: 0;
-        border: 5px solid white;
-        border-left: 5px solid transparent;
-        border-bottom: 5px solid transparent;
-        border-right: 5px solid transparent;
-    }
-    :hover {
-        opacity: 0.8;
-    }
-`
 const WrapSubmitBtn = styled.div`
     display: flex;
     gap: 20px;
@@ -796,69 +748,15 @@ const WrapWarning = styled.div`
         margin: 0.5rem 0 1.5rem;
     }
 `
-const NameBtn = styled.div`
-    text-align: center;
-`
-const Button = styled.div`
+const WrapFirstContent = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    position: relative;
-
-    img {
-        display: none;
-    }
-    :last-child {
-        button {
-            justify-content: space-between;
-        }
-        img {
-            display: inline;
-        }
-    }
-    ul {
-        z-index: 1;
-        position: absolute;
-
-        left: 50%;
-        text-align: center;
-        border-radius: 8px;
-        background: rgba(157, 195, 230, 0.6);
-        backdrop-filter: invert(1);
-        transform: translate(-50%, 50%);
-        backdrop-filter: revert(1%);
-        li {
-            cursor: pointer;
-            width: 100px;
-            list-style: none;
-            padding: 0.25rem;
-            :hover {
-                opacity: 0.7;
-            }
-        }
-    }
-    ul::before {
-        content: '';
-        display: block;
-        width: 100%;
-        height: 100%;
-    }
-`
-
-const WrapBtn = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 0.5rem;
-    position: relative;
-`
-
-const WrapFirstContent = styled.div`
-    padding: 0 15px;
+    gap: 30px;
+    padding: 1rem 15px 0;
     flex-basis: 50%;
-    border-right: 0.75px solid rgba(255, 255, 255, 0.5);
+    /* border-right: 0.75px solid rgba(255, 255, 255, 0.5); */
     div {
-        margin-top: 0.75rem;
+        /* margin-top: 0.75rem; */
     }
     .file-name {
         text-align: center;
@@ -896,21 +794,23 @@ const WrapSecondContent = styled(WrapFirstContent)`
 `
 
 const Container = styled.div`
-    display: flex;
+    display: block;
+    max-width: 990px;
+    padding: 0 2rem;
+    margin: 20px auto;
+    font-size: 16px;
     .calendar {
         position: inherit;
     }
-    @media screen and (max-width: 992px) {
+    /* @media screen and (max-width: 992px) {
         display: block;
-    }
+    } */
 `
 const WrapInput = styled.div`
     display: flex;
-    position: relative;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
     gap: 10px;
-    margin-top: 1rem;
     button {
         position: absolute;
         right: 20px;
@@ -930,7 +830,6 @@ const WrapLabel = styled.div`
         border: none;
         background: none;
         font-size: inherit;
-        cursor: pointer;
     }
     @media screen and (max-width: 576px) {
         font-size: 14px;
@@ -969,7 +868,7 @@ const Input = styled.input`
     width: 100%;
     padding: 5px 10px;
     border: 1px solid #ffffff;
-    height: 50px;
+    height: 40px;
     border-radius: 6px;
     background: none;
     :focus {
@@ -1010,6 +909,35 @@ const TextArea = styled.textarea`
         display: none;
     }
     @media screen and (max-width: 576px) {
+    }
+`
+const WrapBody = styled.div``
+
+const NavTitle = styled.div`
+    cursor: pointer;
+    padding: 0.5rem 0;
+    font-size: 24px;
+    max-width: 165px;
+`
+const WrapSelect = styled.div`
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+    gap: 10px;
+`
+const Select = styled.div`
+    display: flex;
+    gap: 15px;
+    div {
+        margin: auto 0;
+        border: 1px solid white;
+        padding: 2px 5px;
+        cursor: pointer;
+        border-radius: 6px;
+    }
+    .active {
+        background: #848282;
+        scale: 1.1;
     }
 `
 
