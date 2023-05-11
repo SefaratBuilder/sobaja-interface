@@ -1,15 +1,31 @@
 import { ApolloClient, InMemoryCache, gql, useQuery } from '@apollo/client';
 import { LAUNCHPAD_SUBGRAPH_URL } from 'constants/index';
+import { LaunchpadInfo } from 'interfaces';
+import { useMemo } from 'react';
 
 const GetTopLaunchpad = gql`
-    query GetTopLaunchpad {
-        launchpadCreateds {
-            address
-            id
-            launchpadTemplate
-            owner
+query GetTopLaunchpad {
+    launchpads {
+        claims {
+        address
+        amount
+        token
         }
+        endTime
+        finalized
+        hardcap
+        id
+        launchpadOwner
+        individualCap
+        overflow
+        price
+        result
+        softcap
+        startTime
+        totalCommitment
+        totalTokenSale
     }
+}
 `;
 
 const client = new ApolloClient({
@@ -18,10 +34,24 @@ const client = new ApolloClient({
 })
 
 export const useQueryLaunchpad = () => {
+
     const launchpadData = useQuery(GetTopLaunchpad, {
         client
     })
 
-    return launchpadData
+    return useMemo(() => {
+        const launchpads = launchpadData?.data?.launchpads?.map((item: LaunchpadInfo) => {
+            return {
+                ...item,
+
+            }
+        })
+        return {
+            ...launchpadData,
+            data: {
+                launchpads,
+            }
+        }
+    }, [launchpadData])
 }
 

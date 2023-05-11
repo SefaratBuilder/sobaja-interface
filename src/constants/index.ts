@@ -112,10 +112,10 @@ export const CommonBaseTokens: { [chainId in number]: Token[] } = {
 }
 
 export const DEFAULT_TOKEN_LIST: { [chainId in number]: TokenList } = {
-    [ChainId.GOERLI]: [NATIVE_COIN[ChainId.GOERLI], ...tokenList.filter(token => token.chainId === ChainId.GOERLI).slice(0, 5)],
-    [ChainId.MUMBAI]: [NATIVE_COIN[ChainId.MUMBAI], ...tokenList.filter(token => token.chainId === ChainId.MUMBAI).slice(0, 5)],
-    [ChainId.ZKMAINNET]: [NATIVE_COIN[ChainId.ZKMAINNET], ...tokenList.filter(token => token.chainId === ChainId.ZKMAINNET).slice(0, 5)],
-    [ChainId.ZKTESTNET]: [NATIVE_COIN[ChainId.ZKTESTNET], ...tokenList.filter(token => token.chainId === ChainId.ZKTESTNET).slice(0, 5)],
+    [ChainId.GOERLI]: [NATIVE_COIN[ChainId.GOERLI], ...tokenList],
+    [ChainId.MUMBAI]: [NATIVE_COIN[ChainId.MUMBAI], ...tokenList],
+    [ChainId.ZKMAINNET]: [NATIVE_COIN[ChainId.ZKMAINNET], ...tokenList],
+    [ChainId.ZKTESTNET]: [NATIVE_COIN[ChainId.ZKTESTNET], ...tokenList],
 }
 
 export const ALL_SUPPORTED_CHAIN_IDS: ChainId[] = [

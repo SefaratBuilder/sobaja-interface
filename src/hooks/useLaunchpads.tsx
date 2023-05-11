@@ -41,7 +41,6 @@ export const useLaunchpadInfo = (address: string | undefined) : LaunchpadInfo | 
         if(!launchpadInfo.result) return undefined
         const info = launchpadInfo.result[4]
         const status = launchpadInfo.result[5]
-        console.log({status})
         if(!info || !status) return undefined
         return {
             startTime: Number(info.startTime),

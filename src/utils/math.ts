@@ -64,6 +64,7 @@ export const divNumberWithDecimal = (
     n: number | string,
     decimals: number,
 ): string => {
+    if(!n) return '0'
     return fixNum(div(n, 10 ** decimals))
 }
 

@@ -200,7 +200,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
             <Container isConnected={true}>
                 <Header>
                     <span>Connect a wallet</span>
-                    <div>
+                    {/* <div>
                         {' '}
                         <BtnClose
                             onClick={() => {
@@ -209,7 +209,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             src={imgClose}
                             alt=""
                         />
-                    </div>
+                    </div> */}
                 </Header>
                 <WrapContent>
                     {/* <Title>
@@ -225,7 +225,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                     <Title>
                         <div>
                             By connecting a wallet, you agree to
-                            Sobajaswap <br></br>
+                            Sobajaswap &nbsp;
                             <a href="#" target="_blank" rel="noreferrer">
                                 Terms of Service &nbsp;
                             </a>
@@ -366,7 +366,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     // border-radius: 12px;
     border: 1px solid #003b5c;
     box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
-    overflow: hidden;
+    overflow: auto;
     max-width: 420px;
     width: 100%;
     // left: 0px;
@@ -375,17 +375,21 @@ const Container = styled.div<{ isConnected: boolean }>`
     top: 0px;
     height: 100vh;
     margin: auto;
-    animation: ${({ isConnected }) => (isConnected ? 'fadeIn 0.3s linear;' : 'fadeOut 0.5s linear')};
+    animation: fadeIn 0.3s linear;
     z-index: 999999;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
     color: ${({ theme }) => theme.text1};
-    @media screen and (max-width: 1100px) {
-        width: 90%;
+    @media screen and (max-width: 640px) {
+        top: 10rem;
+        max-width: unset;
+        border-radius: 12px 12px 0px 0px;
+        animation: fadeUp 0.3s linear;
+        height: calc(100vh - 10rem);
     }
     @keyframes fadeIn {
 		from {
-			transform: translateX(400px);
+			transform: translateX(100%);
 			opacity: 1;
 		}
 		to {
@@ -400,6 +404,16 @@ const Container = styled.div<{ isConnected: boolean }>`
 		}
 		to {
 			transform: translateX(400px);
+			opacity: 1;
+		}
+	}
+    @keyframes fadeUp {
+		from {
+			transform: translateY(100%);
+			opacity: 1;
+		}
+		to {
+			transform: translateY(0px);
 			opacity: 1;
 		}
 	}
@@ -470,7 +484,7 @@ const Title = styled.div`
     flex-direction: column;
     gap: 3px;
     color: ${({ theme }) => theme.text1};
-
+    margin-bottom: 50px;
     div {
         font-size: 14px;
         margin-bottom: 15px;
@@ -490,6 +504,8 @@ const Title = styled.div`
         // color: rgba(0, 178, 255, 1);
         text-decoration: none;
         font-weight: 600;
+        margin-left: -4px;
+        margin-right: -4px;
     }
     @media screen and (max-width: 576px) {
         display: flex;
@@ -596,7 +612,7 @@ const ItemContent = styled.button`
         border-radius: 50%;
     }
     span {
-        font-size: 14px;
+        font-size: 18px;
         color: white;
     }
 `

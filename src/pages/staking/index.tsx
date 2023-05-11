@@ -228,6 +228,7 @@ const Stake = () => {
     const handleOnHarvest = async() =>{
         console.log("Testing harvest ....");
         try {
+            const positionsIndex = 
             console.log('Harvesting ....');
 
             const args = [

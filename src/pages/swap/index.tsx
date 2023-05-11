@@ -521,12 +521,12 @@ const Swap = () => {
                 )}
                 <Row jus="space-between">
                     <Nav gap="20px">
-                        <Link to="/swap" className="active-link">
+                        <Link to="/swap" className="active-link" style={{fontWeight: 700}}>
                             Swap
                         </Link>
                         {/* <Link to="/add">Add</Link> */}
                         {/* <Link to="/pools">Pool</Link> */}
-                        <Link to="/limit">Limit</Link>
+                        <Link to="/limit" style={{fontWeight: 700}}>Limit</Link>
                     </Nav>
                     <Setting />
                 </Row>
