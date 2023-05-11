@@ -21,15 +21,6 @@ interface WalletInfo {
 }
 
 export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
-    BitKeep: {
-        connector: bitkeep,
-        name: 'BitKeep Wallet',
-        iconURL: BITKEEP_ICON,
-        description: 'Login using BitKeep hosted wallet',
-        href: 'https://bitkeep.com/',
-        color: '#4A6C9B',
-        mobile: true,
-    },
     METAMASK: {
         connector: injected,
         name: 'MetaMask',
@@ -62,6 +53,15 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
         iconURL: OKEX_ICON,
         description: 'Login using OKX hosted wallet',
         href: 'https://www.okx.com/vi/download',
+        color: '#4A6C9B',
+        mobile: true,
+    },
+    BitKeep: {
+        connector: bitkeep,
+        name: 'BitKeep Wallet',
+        iconURL: BITKEEP_ICON,
+        description: 'Login using BitKeep hosted wallet',
+        href: 'https://bitkeep.com/',
         color: '#4A6C9B',
         mobile: true,
     },
