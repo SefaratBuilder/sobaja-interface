@@ -66,5 +66,14 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
         color: '#4A6C9B',
         mobile: true,
     },
+    BitKeep: {
+        connector: bitkeep,
+        name: 'BitKeep Wallet',
+        iconURL: BITKEEP_ICON,
+        description: 'Login using BitKeep hosted wallet',
+        href: 'https://bitkeep.com/',
+        color: '#4A6C9B',
+        mobile: true,
+    },
 
 }
