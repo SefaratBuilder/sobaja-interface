@@ -724,6 +724,7 @@ const Container = styled.div`
         background-size: cover;
         background-size: cover;
         min-width: 84px;
+        border-radius: 12px 12px 0px 0px;
     }
 
     .black-bg2 {
