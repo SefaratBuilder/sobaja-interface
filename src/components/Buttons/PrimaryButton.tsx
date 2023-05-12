@@ -62,7 +62,9 @@ export const Button = styled.button<{
     opacity: ${({ disabled }) => (disabled ? 0.7 : 1)};
     color: var(--text1);
     font-family: Inter, sans-serif;
-
+    span{
+        font-weight: 700;
+    }
     :hover {
         opacity: 0.8;
     }

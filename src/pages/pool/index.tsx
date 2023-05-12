@@ -27,6 +27,7 @@ import AVA from 'assets/token-logos/ava.svg'
 import SUSHI from 'assets/token-logos/sushi.svg'
 import DAI from 'assets/token-logos/dai.svg'
 import UNKNOWN from 'assets/icons/question-mark-button-dark.svg'
+import BgPool from 'assets/brand/bg-pool.png'
 
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import SearchIcon from 'assets/icons/search.svg'
@@ -718,8 +719,12 @@ const Container = styled.div`
     margin-bottom: 50px;
 
     .black-bg {
-        background: rgba(0, 0, 0, 0.3) !important;
+        background: url('${BgPool}');
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-size: cover;
         min-width: 84px;
+        border-radius: 12px 12px 0px 0px;
     }
 
     .black-bg2 {
@@ -799,7 +804,7 @@ const RowTable = styled(TableRow)`
     }
 
     :hover {
-        background: rgb(255 255 255 / 39%);
+        background: rgba(0, 124, 192, 0.3);
     }
 `
 

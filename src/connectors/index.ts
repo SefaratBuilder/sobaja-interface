@@ -8,6 +8,7 @@ import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 import { BscConnector } from '@binance-chain/bsc-connector'
 import { ChainId } from 'interfaces'
 import { BitKeepConnector } from "bitkeep-connector";
+import { ArgentConnector } from "./ArgentConnector";
 
 const NETWORK_URLS: { [key in ChainId]: string } = {
     [ChainId.ZKMAINNET]: `https://mainnet.era.zksync.io`,
@@ -25,6 +26,11 @@ let networkLibrary: Web3Provider | undefined
 export function getNetworkLibrary(): Web3Provider {
     return (networkLibrary = networkLibrary ?? getLibrary(network.provider))
 }
+
+export const argent = new ArgentConnector({
+    supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
+});
+
 
 export const okex = new InjectedConnector({
     supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
