@@ -24,6 +24,7 @@ import Bridge from 'pages/bridge'
 import ReactGA from 'react-ga4'
 import StakeDetails from 'pages/staking/index'
 import Launchpad from 'pages/launchpad'
+import ToastMessage from 'components/ToastMessage'
 
 const App = () => {
     const Updater = () => {
@@ -51,18 +52,13 @@ const App = () => {
                 <Header />
 
                 <AppContainer>
-                    {/* <ToastMessage /> */}
+                    <ToastMessage />
                     {/* <TestTransaction /> */}
                     <Routes>
                         <Route path="/swap" element={<Swap />} />
                         <Route path="/pools" element={<Pools />} />
                         <Route path="/add" element={<AddLiquidity />} />
-                        {/* <Route
-                            path="/test-launchpad"
-                            element={
-                                    <Launchpad />
-                            }
-                        /> */}
+                        <Route path="/test-launchpad" element={<Launchpad />} />
                         <Route path="/staking" element={<StakeDetails />} />
                         <Route path="/bridge" element={<Bridge />} />
                         <Route path="/nfts" element={<NFTs />} />

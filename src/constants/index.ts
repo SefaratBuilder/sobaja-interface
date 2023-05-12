@@ -131,3 +131,6 @@ export const LAUNCHPAD_SUBGRAPH_URL: { [chainId in number]: string } = {
     [ChainId.ZKMAINNET]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad',
     [ChainId.ZKMAINNET]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad'
 }
+
+export const githubAssetRepo =
+    'https://raw.githubusercontent.com/forbitswap/prediction-market-assets/main/'
