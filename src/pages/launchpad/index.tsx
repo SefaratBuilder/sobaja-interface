@@ -2,7 +2,7 @@ import { Row, Columns } from 'components/Layouts'
 import { LAUNCHPADS } from 'constants/addresses'
 import { useActiveWeb3React } from 'hooks'
 import { useTokenApproval, useToken } from 'hooks/useToken'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { add, div, mulNumberWithDecimal } from 'utils/math'
 import {
@@ -60,7 +60,7 @@ const Launchpad = () => {
         token,
     )
     const launchpadContract = useLaunchpadContract()
-    const entryContract = useAAEntryPointContract()
+    // const entryContract = useAAEntryPointContract()
 
     const handleOnCreateLaunchpad = async (e: any) => {
         try {
@@ -115,38 +115,21 @@ const Launchpad = () => {
         tokenApproval.approve(LAUNCHPADS[chainId], '11')
     }
 
-    const handleOnSendTransaction = async () => {
-        try {
-            if (!library || !account) return
-            const args = [
-                [
-                    {
-                        sender: account,
-                        nonce: await library.getTransactionCount(account),
-                        initCode:
-                            '0x9406cc6185a346906296840746125a0e449764545fbfb9cf000000000000000000000000116a9704b565bbe2ec70d95075404da3950871760000000000000000000000000000000000000000000000000000000000000000',
-                        callData:
-                            '0xb61d27f60000000000000000000000004cfb958a43323bc0068472fb1ebb4799124bc8450000000000000000000000000000000000000000000000000011c37937e0800000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000',
-                        callGasLimit: '33100',
-                        verificationGasLimit: '361460',
-                        preVerificationGas: '44992',
-                        maxFeePerGas: '1695000032',
-                        maxPriorityFeePerGas: '1695000000',
-                        paymasterAndData: '0x',
-                        signature:
-                            '0x706a1ea7f721803e915300063cbfe291912ddeeb39a383033b54844ace43c90c2db8356bf7f69276ddaf8a9236bd6de0ed11230ff3a3243fc73908a000151a181c',
-                    },
-                ],
-                account,
-            ]
-            const result = await entryContract?.handleOps(...args, {
-                gasLimit: '1000000',
-            })
-            await result.wait()
-        } catch (err) {
-            console.log('failed :', err)
+    /**
+     * @notice
+     * refresh data launchpad
+     */
+    useEffect(() => {
+        if (!data) return
+        const refeshLaunchpad = data?.launchpads?.find(
+            (d) => d.id === lpDetails?.id,
+        )
+        if (refeshLaunchpad && lpDetails) {
+            const newData = { ...lpDetails, ...refeshLaunchpad }
+            console.log('is updated', newData)
+            setLpDetails(newData)
         }
-    }
+    }, [data])
 
     return (
         <Container>

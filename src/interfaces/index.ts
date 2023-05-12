@@ -43,6 +43,10 @@ export interface LaunchpadInfo {
     result: string,
     launchpadOwner: string
 }
+
+export interface LaunchpadCommitment {
+    commitment: string
+}
 export interface LaunchpadInfoX {
     claims: any
     endTime: string

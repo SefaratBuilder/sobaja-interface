@@ -1,5 +1,5 @@
 import { Row } from 'components/Layouts'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import Soba from 'assets/token-logos/sbj.svg'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
@@ -21,11 +21,15 @@ interface IListLaunchpad {
 
 const ListLaunchpad = ({ setCurrentPage, setLpDetails }: IListLaunchpad) => {
     const { data } = useQueryLaunchpad()
-    console.log('🤦‍♂️ ⟹ ListLaunchpad ⟹ data:', data)
     const { launchpads } = data
+
+    const [launchpadId, setLaunchpadId] = useState(
+        Number(launchpads?.[0]?.id) || 0,
+    )
     const launchpadTokens = useTokens(
         launchpads?.map((lp) => lp.launchpadToken),
     )
+
     const paymentCurrencies = useTokens(
         launchpads?.map((lp) =>
             lp.paymentCurrency === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
@@ -34,13 +38,12 @@ const ListLaunchpad = ({ setCurrentPage, setLpDetails }: IListLaunchpad) => {
         ),
     )
 
-    console.log('🤦‍♂️ ⟹ ListLaunchpad ⟹ paymentCurrencies:', paymentCurrencies)
-
     const handleOnClick = (
         launchpad: (typeof launchpads)[0],
         lPadToken: Token | undefined,
         pmCur: Token | undefined,
     ) => {
+        setLaunchpadId(Number(launchpad?.id))
         setCurrentPage('Details')
 
         setLpDetails({
@@ -69,7 +72,7 @@ const ListLaunchpad = ({ setCurrentPage, setLpDetails }: IListLaunchpad) => {
                 {launchpads &&
                     launchpads?.map((launchpad, index) => {
                         return (
-                            <CardDetails>
+                            <CardDetails key={index}>
                                 <div className="thumbnail">
                                     <img src={UnknowToken} alt="launchpad" />
                                 </div>
@@ -283,6 +286,7 @@ const Badge = styled.div<{ type?: string }>`
     display: flex;
     justify-content: center;
     background: ${({ type }) => (type ? 'red' : 'aquamarine')};
+    color: ${({ type }) => (type ? 'white' : '')};
 `
 
 const WrapDetails = styled.div`

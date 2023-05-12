@@ -83,7 +83,9 @@ export function useTokens(
             const name = nameResult?.[index]?.result?.[0]
             const decimals = decimalsResult?.[index]?.result?.[0]
 
-            if (!symbol || !name || !decimals || !chainId || !address) return
+            if (!chainId) return
+            if (address == ETHER_ADDRESS || address == ZERO_ADDRESS) return NATIVE_COIN[chainId]
+            if (!symbol || !name || !decimals || !address) return
             return {
                 address,
                 name,
