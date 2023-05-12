@@ -175,8 +175,9 @@ interface IStakeToken {
         setIsShowHistory: React.Dispatch<React.SetStateAction<boolean>>
         balanceIn: string | undefined
     }
+    onApprove: () => void
 }
-const StakeToken = ({ data }: IStakeToken) => {
+const StakeToken = ({ data, onApprove }: IStakeToken) => {
     const {
         tokenApproval,
         inputStakeValue,
@@ -257,7 +258,7 @@ const StakeToken = ({ data }: IStakeToken) => {
                         onClick={openWalletModal}
                     />
                 ) : isInsufficientAllowance ? (
-                    <ButtonStake>
+                    <ButtonStake onClick={() => onApprove()}>
                         <div>
                             <img src={Lock} alt="lock" />
                         </div>
@@ -470,16 +471,12 @@ const Stake = () => {
     const initDataTransaction = InitCompTransaction()
     const ref = useRef<any>()
 
-    useOnClickOutside(ref, () => {
-        setIsOpenWalletModal(false)
-    })
-
     const handleOnApprove = async () => {
         try {
             initDataTransaction.setError('')
+            console.log('approving....')
 
-            if (stakingToken && inputStakeValue && routerAddress) {
-                console.log('approving....')
+            if (true) {
                 initDataTransaction.setIsOpenWaitingModal(true)
                 const callResult: any = await tokenApproval?.approve(
                     routerAddress,
@@ -511,6 +508,9 @@ const Stake = () => {
             initDataTransaction.setIsOpenResultModal(true)
         }
     }
+    useOnClickOutside(ref, () => {
+        setIsOpenWalletModal(false)
+    })
 
     const openWalletModal = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
@@ -521,13 +521,7 @@ const Stake = () => {
             <>
                 <ComponentsTransaction
                     data={initDataTransaction}
-                    onConfirm={
-                        Number(tokenApproval?.allowance) <
-                            Number(inputStakeValue) &&
-                        !isNativeCoin(stakingToken)
-                            ? handleOnApprove
-                            : ''
-                    }
+                    onConfirm={''}
                 />
                 {(initDataTransaction.isOpenConfirmModal ||
                     initDataTransaction.isOpenResultModal ||
@@ -561,6 +555,7 @@ const Stake = () => {
                                 isShowHistory,
                                 setIsShowHistory,
                             }}
+                            onApprove={() => handleOnApprove()}
                         />
                     ) : (
                         <UnStakeToken

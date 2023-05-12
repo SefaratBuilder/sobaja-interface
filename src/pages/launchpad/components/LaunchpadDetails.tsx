@@ -6,7 +6,7 @@ import { handleTime } from 'utils/convertTime'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { ILaunchpadDetails } from '..'
 import { add, divNumberWithDecimal } from 'utils/math'
-import ETH from 'assets/token-logos/dai.svg'
+import ETH from 'assets/token-logos/matic.svg'
 interface IDetails {
     details: ILaunchpadDetails | undefined
     setCurrentPage: React.Dispatch<
@@ -113,7 +113,10 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                     <span>
                         <div>Token Sale Price:</div>
                         <div className="details">
-                            1 TEST ={' '}
+                            {`1 ${
+                                details?.lPadToken && details?.lPadToken?.symbol
+                            }`}{' '}
+                            ={' '}
                             {details?.price
                                 ? divNumberWithDecimal(details?.price, 18)
                                 : '0'}{' '}
@@ -332,7 +335,10 @@ const WrapCommit = styled.div`
         padding: 20px 20px 30px;
         gap: 10px;
         border-radius: 15px;
-        /* padding: 10px 0 15px; */
+
+        @media screen and (max-width: 576px) {
+            /* zoom: 0.8; */
+        }
     }
 
     .requirement {
@@ -357,7 +363,7 @@ const LabelCommit = styled.div`
     gap: 20px;
     padding: 20px 10px;
 
-    width: 400px;
+    /* width: 400px; */
     height: fit-content;
     border: 1px solid #111;
     border-radius: 10px;

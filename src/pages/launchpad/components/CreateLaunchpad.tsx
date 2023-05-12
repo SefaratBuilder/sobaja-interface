@@ -1,5 +1,5 @@
 import PrimaryButton from 'components/Buttons/PrimaryButton'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
@@ -21,8 +21,12 @@ import { useLaunchpadContract } from 'hooks/useContract'
 import { LAUNCHPADS } from 'constants/addresses'
 import { useToken, useTokenApproval } from 'hooks/useToken'
 import FAIRLAUNCH_INTERFACE from 'constants/jsons/fairlaunch'
-import { InitCompTransaction } from 'components/TransactionModal'
+import ComponentsTransaction, {
+    InitCompTransaction,
+} from 'components/TransactionModal'
 import { useTransactionHandler } from 'states/transactions/hooks'
+import Blur from 'components/Blur'
+import { useQueryLaunchpad } from 'hooks/useQueryLaunchpad'
 
 interface ICreateLaunchpad {
     setCurrentPage: React.Dispatch<
@@ -41,24 +45,27 @@ type ILaunchpadKey =
     | 'startTime'
     | 'endTime'
 
+interface ILaunchpadState {
+    addressTokenSale: string
+    addressTokenPayment: string
+    softCap: string
+    hardCap: string
+    tokenSalePrice: string
+    individualCap: string
+    overflowTokenReward: string
+    totalToken: string
+    startTime: string
+    endTime: string
+}
+
 const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
     const refDatePicker = useRef(null)
-    const [file, setFile] = useState<File>()
+    const { refetch } = useQueryLaunchpad()
+
+    // const [file, setFile] = useState<File>()
     const { chainId, account } = useActiveWeb3React()
     const [err, setErr] = useState('')
-    const [indexType, setIndexType] = useState(0)
-    const [launchpadState, setLaunchpadState] = useState<{
-        addressTokenSale: string
-        addressTokenPayment: string
-        softCap: string
-        hardCap: string
-        tokenSalePrice: string
-        individualCap: string
-        overflowTokenReward: string
-        totalToken: string
-        startTime: string
-        endTime: string
-    }>({
+    const [launchpadState, setLaunchpadState] = useState<ILaunchpadState>({
         addressTokenSale: '0xdEfd221072dD078d11590D58128399C2fe8cCa7e',
         addressTokenPayment: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         softCap: '',
@@ -71,13 +78,20 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
         endTime: '',
     })
 
+    const [indexType, setIndexType] = useState(0)
+    const types = ['Normal', 'FairLaunch', 'WhiteList']
+
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
-    const types = ['Normal', 'FairLaunch', 'WhiteList']
 
     const token = useToken(
         launchpadState.addressTokenSale
             ? launchpadState.addressTokenSale
+            : undefined,
+    )
+    const tokenPayment = useToken(
+        launchpadState.addressTokenPayment
+            ? launchpadState.addressTokenPayment
             : undefined,
     )
 
@@ -107,12 +121,41 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
     // useOnClickOutside(refCategory, () => setIsOpenCategory(false))
 
     const launchpadContract = useLaunchpadContract()
-    console.log('🤦‍♂️ ⟹ CreateLaunchpad ⟹ launchpadContract:', launchpadContract)
 
-    const handleOnCreateLaunchpad = async () => {
+    const handleOnCreate = async () => {
+        try {
+            console.log('creating...')
+            if (!err) {
+                const startTimeUnix =
+                    new Date(dateRange.startDate).getTime() / 1000 +
+                    Number(launchpadState.startTime)
+                const expiredTimeUnix =
+                    new Date(dateRange.endDate).getTime() / 1000 +
+                    // Number(launchpadState.endTime)
+                    Number(launchpadState.startTime) +
+                    10
+
+                initDataTransaction.setError('')
+                initDataTransaction.setPayload({
+                    method: 'create launchpad',
+                    launchpad: launchpadState,
+                    tokenSale: token,
+                    tokenPayment,
+                    startTime: startTimeUnix,
+                    endTime: expiredTimeUnix,
+                })
+                initDataTransaction.setIsOpenConfirmModal(true)
+            }
+        } catch (error) {
+            console.log('failed to swap', error)
+        }
+    }
+
+    const onConfirm = useCallback(async () => {
         try {
             if (!token || !chainId) return
-
+            initDataTransaction.setIsOpenConfirmModal(false)
+            initDataTransaction.setIsOpenWaitingModal(true)
             const startTimeUnix =
                 new Date(dateRange.startDate).getTime() / 1000 +
                 Number(launchpadState.startTime)
@@ -138,7 +181,7 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
                     token.decimals,
                 ),
             ]
-            console.log('🤦‍♂️ ⟹ handleOnCreateLaunchpad ⟹ args:', { args })
+
             const data = FAIRLAUNCH_INTERFACE._abiCoder.encode(
                 [
                     'address',
@@ -156,10 +199,6 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
                 args,
             )
             const amountToken = launchpadState.totalToken
-            console.log(
-                '🤦‍♂️ ⟹ handleOnCreateLaunchpad ⟹ amountToken:',
-                amountToken,
-            )
 
             const gasLimit = await launchpadContract?.estimateGas[
                 'createLaunchpad'
@@ -169,22 +208,45 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
                 mulNumberWithDecimal(amountToken, token.decimals),
                 data,
             )
-            console.log('🤦‍♂️ ⟹ handleOnCreateLaunchpad ⟹ gasLimit:', gasLimit)
-
-            const txn = await launchpadContract?.createLaunchpad(
+            console.log({ gasLimit })
+            const callResult = await launchpadContract?.createLaunchpad(
                 1,
                 token.address,
                 mulNumberWithDecimal(amountToken, token.decimals),
                 data,
             )
-            console.log('🤦‍♂️ ⟹ handleOnCreateLaunchpad ⟹ txn:', txn)
-            const result = await txn.wait()
-            console.log('🤦‍♂️ ⟹ handleOnCreateLaunchpad ⟹ result:', result)
-            console.log('Create successful...', txn.hash)
-        } catch (err) {
-            console.log('failed to create', err)
+
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
+
+            // sendEvent({
+            //     category: 'Defi',
+            //     action: 'Swap',
+            //     label: [
+            //         tokenIn?.symbol,
+            //         tokenIn?.address,
+            //         tokenOut?.symbol,
+            //         tokenOut?.address,
+            //     ].join('/'),
+            // })
+
+            const txn = await callResult.wait()
+            initDataTransaction.setIsOpenResultModal(false)
+
+            addTxn({
+                hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                    callResult.hash || ''
+                }`,
+                msg: `Create launchpad`,
+                status: txn.status === 1 ? true : false,
+            })
+            refetch()
+            setCurrentPage('Infomation')
+        } catch (error) {
+            initDataTransaction.setError('Failed')
+            initDataTransaction.setIsOpenResultModal(true)
         }
-    }
+    }, [initDataTransaction])
 
     const handleOnApprove = async () => {
         try {
@@ -224,114 +286,59 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
         }
     }
 
-    const handleCreateMarketZ = async () => {
-        try {
-            const startTimeUnix =
-                new Date(dateRange.startDate).getTime() / 1000 +
-                launchpadState.startTime
-            const expiredTimeUnix =
-                new Date(dateRange.endDate).getTime() / 1000 +
-                launchpadState.endTime
+    // const handleChangeFile = (file) => {
+    //     setFile(file)
+    // }
 
-            const path = `assets/${Date.now()}.png`
-            // const thumbnailUrl = githubAssetRepo + path
-            console.log({ launchpadState })
-            // const payload = {
-            //     function: `${Modules.Scripts}::create_new_market`,
-            //     type_arguments: [USDC[chainId].type],
-            //     arguments: [
-            //         title,
-            //         desc,
-            //         optionCategory,
-            //         thumbnailUrl,
-            //         mulNumberWithDecimal(
-            //             liquidity || '100',
-            //             USDC[chainId].decimals,
-            //         ),
-            //         0,
-            //         ratios.left,
-            //         0,
-            //         Number(startTimeUnix.toFixed()),
-            //         Number(expiredTimeUnix.toFixed()),
-            //         mulNumberWithDecimal(fee, 1),
-            //         [outcomes.yes || 'Yes', outcomes.no || 'No'],
-            //         'btc-usd',
-            //         10000
-            //     ],
-            //     type: 'entry_function_payload',
-            // }
-            // const result = await uploadFile(file, path)
-            // console.log({ result })
+    // const readFile = (file) => {
+    //     const preview = document.getElementById('preview-thumbnail')
+    //     if (
+    //         file.type === 'image/jpeg' ||
+    //         file.type === 'image/jpg' ||
+    //         file.type === 'image/gif' ||
+    //         file.type === 'image/png' ||
+    //         file.type === 'image/webp'
+    //     ) {
+    //         const reader = new FileReader()
+    //         reader.onload = function (e) {
+    //             preview.innerHTML = `<img className="image-preview" src="${e?.target?.result}" alt="Image preview" />`
+    //         }
+    //         reader.readAsDataURL(file)
+    //     }
+    // }
 
-            // setPayload({
-            //     method: 'CreateMarket',
-            //     type: 'Create Market',
-            //     txnHash: hash?.hash,
-            //     isSuccess: resultCreate?.success || false,
-            //     delay: delayDefault,
-            // })
+    // const uploadFile = async (file, path) => {
+    //     const owner = 'forbitswap'
+    //     const repo = 'prediction-market-assets'
+    //     const token = process.env['REACT_APP_GITHUB_TOKEN']
+    //     console.log('github token', token)
+    //     // const github = new Octokit({
+    //     //     auth: token,
+    //     //     log: console,
+    //     // })
 
-            // setIsOpenToastMsg(true)
-            // await updateApplication()
-            // await handleRefAddress(address, refAddress, 'createPrediction')
-        } catch (err) {
-            console.log('failed to create market', err)
-        }
-    }
-
-    const handleChangeFile = (file) => {
-        setFile(file)
-    }
-
-    const readFile = (file) => {
-        const preview = document.getElementById('preview-thumbnail')
-        if (
-            file.type === 'image/jpeg' ||
-            file.type === 'image/jpg' ||
-            file.type === 'image/gif' ||
-            file.type === 'image/png' ||
-            file.type === 'image/webp'
-        ) {
-            const reader = new FileReader()
-            reader.onload = function (e) {
-                preview.innerHTML = `<img className="image-preview" src="${e?.target?.result}" alt="Image preview" />`
-            }
-            reader.readAsDataURL(file)
-        }
-    }
-
-    const uploadFile = async (file, path) => {
-        const owner = 'forbitswap'
-        const repo = 'prediction-market-assets'
-        const token = process.env['REACT_APP_GITHUB_TOKEN']
-        console.log('github token', token)
-        // const github = new Octokit({
-        //     auth: token,
-        //     log: console,
-        // })
-
-        // const reader = new FileReader()
-        // reader.onload = function () {
-        //     const content = reader?.result?.toString().split(',')[1]
-        //     github.repos.createOrUpdateFileContents({
-        //         owner,
-        //         repo,
-        //         path,
-        //         message: 'Add image',
-        //         content,
-        //         committer: {
-        //             name: 'pantinho',
-        //             email: 'pantinho@github.com',
-        //         },
-        //         author: {
-        //             name: 'pantinho',
-        //             email: '@pantinho@github.com',
-        //         },
-        //         encoding: 'base64',
-        //     })
-        // }
-        // return reader.readAsDataURL(file)
-    }
+    //     // const reader = new FileReader()
+    //     // reader.onload = function () {
+    //     //     const content = reader?.result?.toString().split(',')[1]
+    //     //     github.repos.createOrUpdateFileContents({
+    //     //         owner,
+    //     //         repo,
+    //     //         path,
+    //     //         message: 'Add image',
+    //     //         content,
+    //     //         committer: {
+    //     //             name: 'pantinho',
+    //     //             email: 'pantinho@github.com',
+    //     //         },
+    //     //         author: {
+    //     //             name: 'pantinho',
+    //     //             email: '@pantinho@github.com',
+    //     //         },
+    //     //         encoding: 'base64',
+    //     //     })
+    //     // }
+    //     // return reader.readAsDataURL(file)
+    // }
 
     const onChangeHourStart = (timeUnix: number) => {
         handleOnChange('startTime', timeUnix.toFixed())
@@ -341,11 +348,11 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
         handleOnChange('endTime', timeUnix.toFixed())
     }
 
-    useEffect(() => {
-        if (file) {
-            readFile(file)
-        }
-    }, [file])
+    // useEffect(() => {
+    //     if (file) {
+    //         readFile(file)
+    //     }
+    // }, [file])
 
     const handleErr = () => {
         const keys = Object.keys(launchpadState)
@@ -381,6 +388,15 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
 
     return (
         <>
+            <>
+                <ComponentsTransaction
+                    data={initDataTransaction}
+                    onConfirm={onConfirm}
+                />
+                {(initDataTransaction.isOpenConfirmModal ||
+                    initDataTransaction.isOpenResultModal ||
+                    initDataTransaction.isOpenWaitingModal) && <Blur />}
+            </>
             <Container>
                 <NavTitle onClick={() => setCurrentPage('Infomation')}>
                     {'<'} Launchpad
@@ -388,7 +404,6 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
                 <WrapBody>
                     <WrapFirstContent>
                         <WrapSelect>
-                            {/* <div>Type launchpad</div> */}
                             <WrapLabel>
                                 <Label>Type launchpad</Label>
                             </WrapLabel>
@@ -523,7 +538,8 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
                                         type="blue"
                                         name="Continue"
                                         onClick={() =>
-                                            handleOnCreateLaunchpad()
+                                            // handleOnCreateLaunchpad()
+                                            handleOnCreate()
                                         }
                                     />
                                 )}
@@ -537,6 +553,16 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
 }
 export default CreateLaunchpad
 
+const Container = styled.div`
+    display: block;
+    max-width: 990px;
+    padding: 0 2rem;
+    margin: 20px auto;
+    font-size: 16px;
+    .calendar {
+        position: inherit;
+    }
+`
 const Error = styled.div`
     color: #f03535;
     font-size: 14px;
@@ -595,126 +621,7 @@ const WrapDatePicker = styled.div`
         font-weight: 600;
     }
 `
-const WrapInputPercent = styled.div<{ percentage: number }>`
-    div {
-        width: 100%;
-        position: relative;
-        align-items: center;
-        display: flex;
-        input {
-            height: 3px;
-            -webkit-appearance: none;
-            width: 100%;
-            ::-webkit-slider-thumb {
-                appearance: none;
-                width: 25px;
-                height: 25px;
-                border-radius: 50%;
-                background: rgba(0, 102, 255, 1);
-                cursor: pointer;
-            }
-        }
-    }
-    .color {
-        position: absolute;
-        height: 3px;
-        background: rgba(0, 102, 255, 1);
-        width: ${({ percentage }) => `${percentage}%`};
-    }
-    display: flex;
-    gap: 25px;
-    align-items: center;
 
-    button {
-        max-width: 140px;
-    }
-    @media screen and (max-width: 576px) {
-        flex-direction: column;
-    }
-`
-const InputPercent = styled.input`
-    max-width: 140px;
-    height: 40px;
-    background: none;
-    border: 1px solid #fff;
-    border-radius: 8px;
-    color: #fff;
-    padding: 0.8rem;
-    text-align: center;
-    ::placeholder {
-        color: #fff;
-    }
-    @media screen and (max-width: 576px) {
-        margin-bottom: 1rem;
-    }
-`
-const TitleMarket = styled.div`
-    font-weight: 600;
-    font-size: 18px;
-    margin: 1rem 0 2rem;
-`
-const WrapMarket = styled.div``
-const WrapInputRatio = styled.div`
-    display: flex;
-    gap: 30px;
-    div {
-        display: flex;
-        align-items: center;
-        height: 40px;
-        border-radius: 8px;
-        border: 1px solid #fff;
-        width: 100%;
-        .label {
-            padding: 1rem;
-            border-radius: 8px 0 0 8px;
-            border-right: 1px solid white;
-            width: 120px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            color: #fff;
-        }
-        input {
-            background: none;
-            border: none;
-            height: 100%;
-            color: #fff;
-            text-align: center;
-            width: 60px;
-            appearance: none;
-            -moz-appearance: textfield;
-
-            ::-webkit-inner-spin-button,
-            ::-webkit-outer-spin-button {
-                -webkit-appearance: none;
-                margin: 0;
-            }
-            :focus {
-                outline: none;
-            }
-        }
-    }
-    @media screen and (max-width: 992px) {
-        gap: 50px;
-        div {
-            width: 100%;
-        }
-    }
-    @media screen and (max-width: 576px) {
-        flex-wrap: wrap;
-        gap: 10px;
-        div {
-            width: 100%;
-            label {
-                flex-basis: 30%;
-                justify-content: center;
-            }
-            input {
-                width: 100%;
-            }
-        }
-    }
-`
 const WrapSubmitBtn = styled.div`
     display: flex;
     gap: 20px;
@@ -793,19 +700,6 @@ const WrapSecondContent = styled(WrapFirstContent)`
     }
 `
 
-const Container = styled.div`
-    display: block;
-    max-width: 990px;
-    padding: 0 2rem;
-    margin: 20px auto;
-    font-size: 16px;
-    .calendar {
-        position: inherit;
-    }
-    /* @media screen and (max-width: 992px) {
-        display: block;
-    } */
-`
 const WrapInput = styled.div`
     display: flex;
     flex-direction: column;

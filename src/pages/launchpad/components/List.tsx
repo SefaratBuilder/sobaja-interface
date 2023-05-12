@@ -185,10 +185,15 @@ const Title = styled.div`
     padding-bottom: 4.5rem;
 
     .btn-create {
-        padding: 5px;
+        padding: 5px 8px;
         border: 1px solid white;
         border-radius: 6px;
         cursor: pointer;
+
+        :hover {
+            background: #fff;
+            color: #111;
+        }
     }
 
     p {
@@ -198,10 +203,11 @@ const Title = styled.div`
 `
 const WrapLaunchpad = styled.div`
     display: flex;
-    justify-content: center;
+    justify-content: space-evenly;
     flex-wrap: wrap;
     color: #111;
     gap: 25px;
+    flex-direction: row-reverse;
 `
 const CardDetails = styled(Row)`
     border: 1px solid black;
@@ -209,7 +215,7 @@ const CardDetails = styled(Row)`
     background: #fff;
     /* gap: 5.5rem; */
     display: block;
-    /* max-width: 300px; */
+    max-width: 350px;
 
     .thumbnail {
         /* min-width: 550px; */
@@ -227,9 +233,10 @@ const CardDetails = styled(Row)`
 `
 
 const Details = styled.div`
-    width: 400px;
+    /* width: 400px; */
     /* min-width: 400px; */
     padding: 0 1.5rem;
+    max-width: 320px;
 
     .label {
         display: flex;
@@ -285,6 +292,7 @@ const WrapDetails = styled.div`
     gap: 8px;
     /* padding: 1rem 0.5rem; */
     padding: 0 1rem;
+    font-size: 14px;
 
     .btn-view {
         /* width: 50%; */

@@ -21,8 +21,8 @@ import LaunchpadDetails from './components/LaunchpadDetails'
 
 export interface ILaunchpadDetails extends LaunchpadInfoX {
     img: string
-    lPadToken: Token
-    paymentToken: Token
+    lPadToken: Token | undefined
+    paymentToken: Token | undefined
 }
 
 const Launchpad = () => {
@@ -319,10 +319,6 @@ const Launchpad = () => {
                     </Columns>
                 </Row>
             )}
-            {/* // <Row>
-            //     Account abstraction testing
-            //     <button onClick={handleOnSendTransaction}>Send transaction</button>
-            // </Row>} */}
         </Container>
     )
 }
