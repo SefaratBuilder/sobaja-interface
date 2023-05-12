@@ -476,7 +476,7 @@ const Stake = () => {
             initDataTransaction.setError('')
             console.log('approving....')
 
-            if (true) {
+            if (stakingToken && inputStakeValue && routerAddress) {
                 initDataTransaction.setIsOpenWaitingModal(true)
                 const callResult: any = await tokenApproval?.approve(
                     routerAddress,
