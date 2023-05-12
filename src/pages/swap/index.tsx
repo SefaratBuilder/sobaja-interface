@@ -326,8 +326,24 @@ const Swap = () => {
                         transactions: [txApprove, txSwap]
                     })
                 } else {
-                    callResult = await wallet.sendTransaction({
+                    // callResult = await wallet.sendTransaction({
+                    //     transaction: txSwap
+                    // })
+                    const feeQuotes = await wallet.getFeeQuotes({
                         transaction: txSwap
+                    })
+                    console.log({feeQuotes})
+                    const paidTransaction = await wallet.createUserPaidTransaction({
+                        transaction: txSwap,
+                        feeQuote: feeQuotes[0]
+                    })
+                    // console.log('paidTransaction...', {paidTransaction})
+                    // const signature = await wallet.signUserPaidTransaction({
+                    //     tx: paidTransaction,
+                    //     signer: wallet.signer
+                    // })
+                    const txn = await wallet.sendUserPaidTransaction({
+                        tx: paidTransaction
                     })
                 }
             }
@@ -346,9 +362,9 @@ const Swap = () => {
                 ].join('/'),
             })
 
-            const txn = await callResult.wait()
+            const txn = await callResult?.wait()
             initDataTransaction.setIsOpenResultModal(false)
-
+            if(!txn) return
             addTxn({
                 hash: txn.transactionHash || callResult.hash,
                 msg: `Swap ${tokenIn?.symbol} to ${tokenOut?.symbol}`,

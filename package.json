@@ -58,6 +58,7 @@
         "web3-react-okexchain-connector": "^6.0.10"
     },
     "devDependencies": {
+        "@account-abstraction/sdk": "^0.6.0",
         "@babel/preset-typescript": "^7.21.4",
         "@biconomy/core-types": "^2.0.0",
         "@biconomy/ethers-lib": "^2.0.0",

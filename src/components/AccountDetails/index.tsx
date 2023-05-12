@@ -126,7 +126,7 @@ const AccountDetails = ({
                         !wallet && 
                         <>
                             <PrimaryButton
-                                name={loading ? "Connecting to smart account" : "Use smart account"}
+                                name={loading ? "Connecting" : "Use smart account"}
                                 onClick={handleOnConnectSmartAccount}
                                 isLoading={loading}
                             />

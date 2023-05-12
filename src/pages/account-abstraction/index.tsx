@@ -9,6 +9,7 @@ import { useNftSmartAccountContract } from 'hooks/useContract';
 import { useCurrencyBalance, useCurrencyBalances, useETHBalances } from 'hooks/useCurrencyBalance';
 import { NATIVE_COIN } from 'constants/index';
 import { useTransactionHandler } from 'states/transactions/hooks';
+import { SimpleAccountAPI } from '@account-abstraction/sdk'
 
 const AA = () => {
     const { connect, address, loading: eoaWalletLding, disconnect, web3Provider } = useWeb3AuthContext()
@@ -34,6 +35,7 @@ const AA = () => {
               to: nftContract.address,
               data: safeMintTx.data,
             };
+            console.log("data", safeMintTx.data)
             const feeQuotes = await wallet.getFeeQuotes({
                 transaction: tx1
             })
@@ -44,12 +46,16 @@ const AA = () => {
             })
             setPaidTxn(paidTransaction)
             console.log('signing...', {paidTransaction})
-            const signed = await wallet.signUserPaidTransaction({
-                tx: paidTransaction,
-                signer: wallet.signer
+            const txn = await wallet.sendUserPaidTransaction({
+                tx: paidTransaction
             })
-            setSign(signed)
-            console.log('sign', signed)
+            console.log('aaaaaa')
+            // const signed = await wallet.signUserPaidTransaction({
+            //     tx: paidTransaction,
+            //     signer: wallet.signer
+            // })
+            // setSign(signed)
+            // console.log('sign', signed)
 
             setTxnLoading(false)
         }
@@ -75,6 +81,32 @@ const AA = () => {
         catch(err) {
             console.log('failed', err)
         }
+    }
+    console.log({wallet})
+    
+    const buildUserOp = async () => {
+        if(!wallet || !web3Provider || !walletState || !nftContract) return 
+        const safeMintTx = await nftContract.populateTransaction.safeMint(
+            wallet.address
+          )
+        const owner = wallet.signer
+        const smartAccountState: any = walletState
+        const walletAPI = new SimpleAccountAPI({
+            provider: web3Provider, 
+            entryPointAddress: smartAccountState.entryPointAddress,
+            owner,
+            factoryAddress: smartAccountState.factoryAddress,
+            index: 0,
+            accountAddress: wallet.address
+        })
+        console.log({walletAPI})
+        console.log(safeMintTx?.data)
+        if(!safeMintTx?.data) return
+        const op = await walletAPI.createSignedUserOp({
+            target: nftContract.address,
+            data: safeMintTx.data
+        })
+        console.log('user operation ', {op})
     }
 
     const onBatchMint = async () => {
@@ -141,6 +173,7 @@ const AA = () => {
             </Row>
             <Row gap="10px">
                 <PrimaryButton onClick={sendSignedTxn} name={'Send signed txn'} isLoading={txnLoading} />
+                <PrimaryButton onClick={buildUserOp} name={'Build userOp'} isLoading={txnLoading} />
             </Row>
             <Row gap="10px">
                 <PrimaryButton onClick={connect} name={'Connect AA'} />

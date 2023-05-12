@@ -12,22 +12,22 @@ import { useCurrencyBalance, useETHBalances, useTokenBalance } from "hooks/useCu
 import { Error } from "components/Text"
 import { useTokenSmartAccountContract } from "hooks/useContract"
 import { useToken } from "hooks/useToken"
+import TokenListModal from "components/TokenListModal"
+import { Field, Token } from "interfaces"
+import { useTransactionHandler } from "states/transactions/hooks"
 
 const SendModal = () => {    
-    const { account, library, chainId } = useActiveWeb3React()
-    const { wallet, balance } = useSmartAccountContext()
+    const { account, chainId } = useActiveWeb3React()
+    const { wallet } = useSmartAccountContext()
     const [value, setValue] = useState('')
     const [toAddress, setToAddress] = useState('')
-    const [token, setToken] = useState({
-        symbol: 'MATIC',
-        address: ZERO_ADDRESS,
-        decimals: 18
-    })
+    const [token, setToken] = useState<Token>(NATIVE_COIN[chainId || 80001])
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
     const tokenContract = useTokenSmartAccountContract(token.address)
     const tokenStruct = useToken(token.address)
     const balanceToken = useCurrencyBalance(wallet?.address, tokenStruct)
+    const { addTxn } = useTransactionHandler()
 
     const onChangeValue = (val: string) => {
         const validValue = val
@@ -36,13 +36,6 @@ const SendModal = () => {
         .replace(',', '.')
         .replace(/(\..*?)\..*/g, '$1')
         setValue(validValue)
-    }
-
-    const handleChangeToken = (symbol: string) => {
-        setToken({
-            ...token,
-            symbol: symbol
-        })
     }
 
     const Button = (onOpen: () => void) => {
@@ -87,7 +80,12 @@ const SendModal = () => {
                 })
                 const hash = await txn.wait()
                 setIsLoading(false)
-                console.log('send success', hash.transactionHash)
+                addTxn({
+                    hash: hash.transactionHash,
+                    msg: `Withdrawed ${value} ${token.symbol} to ${shortenAddress(toAddress)}`,
+                    status: true
+                })
+                onClose()
             }
             catch(err) {
                 onClose()
@@ -97,19 +95,9 @@ const SendModal = () => {
             }
         }
 
-        useEffect(() => {
-            if(token && balance) {
-                const t = balance.alltokenBalances.find(t => t.contract_ticker_symbol === token.symbol)
-                if(!t?.balance || !t?.contract_decimals || !t?.contract_address || !t?.contract_decimals || !chainId) return
-                const address = token.symbol === NATIVE_COIN[chainId].symbol ? ZERO_ADDRESS : t.contract_address 
-                const decimals = t.contract_decimals
-                setToken({
-                    ...token,
-                    address,
-                    decimals
-                })
-            }
-        }, [token.symbol, balance, chainId])
+        const onSelectToken= (f: Field, t: Token) => {
+            if(t) setToken(t)
+        }
     
         return (
             <ModalWrapper>
@@ -121,35 +109,22 @@ const SendModal = () => {
                     <div className="subtitle">
                         Withdraw token in this smart account to an address
                     </div>
-                    <Row gap="10px">
-                        <div>from: </div>
-                        <div>{wallet?.address && shortenAddress(wallet?.address)}</div>
-                    </Row>
-                    <div>
-                        Select a token already in your account
-                    </div>
-                    <Row gap="10px">
-                        <select value={token.symbol} onChange={(e) => handleChangeToken(e.target.value)}>
-                            {
-                                balance?.alltokenBalances?.map((token: any) => {
-                                    return(
-                                        <>
-                                            <option value={token.contract_ticker_symbol}>{token.contract_ticker_symbol}</option>
-                                        </>
-                                    )
-                                })
-                            }
-                        </select>
-                        <div>
-                            balance: {balanceToken || '0'}
+                    <Row gap="10px" al="center">
+                        <div className="to">
+                            Balance: {balanceToken || '0'}
                         </div>
+                        <TokenListModal token={token} field={Field.INPUT} onUserSelect={onSelectToken} />
+                    </Row>
+                    <Row gap="10px">
+                        <div>From: </div>
+                        <div>{wallet?.address && shortenAddress(wallet?.address)}</div>
                     </Row>
                     <div>To: </div>
                     <Input type='text' value={toAddress} onChange={(e) => setToAddress(e.target.value)} placeholder="to address" />
                     <div>
-                        Input amount to send
+                        With amount:
                     </div>
-                    <Input type='text' value={value} onChange={(e) => onChangeValue(e.target.value)} placeholder={chainId && NATIVE_COIN[chainId].symbol || 'ETH'} />
+                    <Input type='text' value={value} onChange={(e) => onChangeValue(e.target.value)} placeholder={token.symbol || 'ETH'} />
                     <PrimaryButton
                         name={'Send'}
                         onClick={onWithdraw}

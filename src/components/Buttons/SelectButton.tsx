@@ -48,7 +48,7 @@ const Button = styled.button`
     justify-content: space-between;
     border-radius: 8px;
     padding: 4px 8px;
-
+    height: 35px;
     gap: 10px;
     box-shadow: rgb(0 0 0 / 25%) 0px 4px 4px 0px;
     color: #fff;
@@ -75,6 +75,7 @@ const Button = styled.button`
         background: var(--);
     }
     .chevron-down {
-        width: 16px;
+        width: 14px;
+        height: 14px;
     }
 `

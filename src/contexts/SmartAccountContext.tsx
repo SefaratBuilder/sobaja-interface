@@ -5,15 +5,10 @@ import {
   SmartAccountState,
   SmartAccountVersion,
 } from "@biconomy/core-types";
-import { supportedChains, activeChainId } from "../utils/chainConfig";
 import { useWeb3AuthContext } from "./SocialLoginContext";
-
-export const ChainId = {
-  MAINNET: 1, // Ethereum
-  GOERLI: 5,
-  POLYGON_MUMBAI: 80001,
-  POLYGON_MAINNET: 137,
-};
+import { useActiveWeb3React } from "hooks";
+import { ChainId } from "interfaces";
+import { supportedChains } from "utils/chainConfig";
 
 // Types
 type Balance = {
@@ -61,7 +56,8 @@ export const SmartAccountContext = React.createContext<smartAccountContextType>(
 export const useSmartAccountContext = () => useContext(SmartAccountContext);
 
 // Provider
-export const SmartAccountProvider = ({ children }: any) => {
+export const SmartAccountProvider = ({ children }: any) => {    
+  const { chainId } = useActiveWeb3React()
   const { provider, address } = useWeb3AuthContext();
   const [wallet, setWallet] = useState<SmartAccount | null>(null);
   const [state, setState] = useState<SmartAccountState | null>(null);
@@ -77,7 +73,9 @@ export const SmartAccountProvider = ({ children }: any) => {
   });
   const [isFetchingBalance, setIsFetchingBalance] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  useEffect(() => {
+    console.log({wallet})
+  }, [wallet])
   const resetState = useCallback(() => {
     setWallet(null)
     setState(null)
@@ -92,20 +90,24 @@ export const SmartAccountProvider = ({ children }: any) => {
   }, [])
 
   const getSmartAccount = useCallback(async () => {
-    if (!provider || !address) return resetState()
+    if (!provider || !address || !chainId) return resetState()
 
     try {
       setLoading(true);
       const walletProvider = new ethers.providers.Web3Provider(provider);
       // New instance, all config params are optional
       const wallet = new SmartAccount(walletProvider, {
-        activeNetworkId: activeChainId,
+        activeNetworkId: chainId,
         supportedNetworksIds: supportedChains,
         networkConfig: [
           {
-            chainId: ChainId.POLYGON_MUMBAI,
+            chainId: 80001, //mumbai
             dappAPIKey: process.env.REACT_APP_BICONOMY_API_KEY,
           },
+          {
+            chainId: 5, //goerli
+            dappAPIKey: process.env.REACT_APP_BICONOMY_API_KEY,
+          }
         ],
       });
 
@@ -147,9 +149,10 @@ export const SmartAccountProvider = ({ children }: any) => {
 
       // get all smart account versions available and update in state
       const { data } = await smartAccount.getSmartAccountsByOwner({
-        chainId: activeChainId,
+        chainId: chainId,
         owner: address,
       });
+      console.log('smart accounts by owner', data)
 
       const accountData = [];
       for (let i = 0; i < data.length; ++i) {
@@ -177,7 +180,7 @@ export const SmartAccountProvider = ({ children }: any) => {
   }, [provider, address]);
 
   const getSmartAccountBalance = async () => {
-    if (!provider || !address) return console.log("Wallet not connected");
+    if (!provider || !address || !chainId) return console.log("Wallet not connected");
     if (!state || !wallet) return console.log("Init Smart Account First");
 
     try {
@@ -187,7 +190,7 @@ export const SmartAccountProvider = ({ children }: any) => {
       // console.log(bal);
       // you may use EOA address my goerli SCW 0x1927366dA53F312a66BD7D09a88500Ccd16f175e
       const balanceParams = {
-        chainId: activeChainId,
+        chainId: chainId,
         eoaAddress: state.address,
         tokenAddresses: [],
       };
