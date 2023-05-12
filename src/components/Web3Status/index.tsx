@@ -6,7 +6,8 @@ import { Activity } from 'react-feather'
 import { shortenAddress } from 'utils'
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
 import arrowDown from 'assets/icons/arrow-down.svg'
-
+import { ListNetwork } from 'constants/networks/index'
+import { changeNetwork } from 'utils/network'
 const Web3Status = () => {
     const { account, connector, error, library } = useWeb3React()
     const [toggleWalletModal, setToggleWalletModal] = useState<boolean>(false)
@@ -22,6 +23,7 @@ const Web3Status = () => {
             </Fragment>
         )
     }
+
     const Web3StatusInner = (account: any, error: any) => {
         if (account) {
             return (
@@ -39,7 +41,16 @@ const Web3Status = () => {
                     <NetworkIcon></NetworkIcon>
                     <span>
                         {error instanceof UnsupportedChainIdError ? (
-                            <p>Wrong Network</p>
+                            <p
+                                onClick={() =>
+                                    changeNetwork(
+                                        ListNetwork[0].switchNetwork,
+                                        ListNetwork[0].name,
+                                    )
+                                }
+                            >
+                                Wrong Network
+                            </p>
                         ) : (
                             <p>Error</p>
                         )}
