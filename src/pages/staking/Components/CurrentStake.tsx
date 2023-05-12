@@ -1,15 +1,12 @@
 import { Columns } from 'components/Layouts'
 import { useActiveWeb3React } from 'hooks'
-import { useStakingContract } from 'hooks/useContract'
 import {
     useAllPosition,
-    useClaimableReward,
-    usePosition,
 } from 'hooks/useStakingData'
 import { useHarvest, useWithDraw } from 'hooks/useStakingFunction'
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import { divNumberWithDecimal, mul } from 'utils/math'
+import { divNumberWithDecimal} from 'utils/math'
 
 const CurrentStake = () => {
     const { account } = useActiveWeb3React()
@@ -40,9 +37,13 @@ const CurrentStake = () => {
                         18,
                     )
 
+                    console.log(claimableReward);
+                    
+
                     const positionIndex = Number(position.positionIndex)
                     const handleHarvest = useHarvest(positionIndex)
                     const handleWithDraw = useWithDraw(positionIndex)
+
 
                     return (
                         <WrapDetails>
