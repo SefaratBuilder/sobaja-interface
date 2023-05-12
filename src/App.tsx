@@ -22,7 +22,7 @@ import Pools from 'pages/pool'
 import NFTs from 'pages/nfts'
 import Bridge from 'pages/bridge'
 import ReactGA from 'react-ga4'
-import StakeDetails from 'pages/staking/staking'
+import StakeDetails from 'pages/staking/index'
 import Launchpad from 'pages/launchpad'
 
 const App = () => {

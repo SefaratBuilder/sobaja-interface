@@ -138,9 +138,9 @@ const Stake = () => {
     const handleOnApprove = async () => {
         try {
             initDataTransaction.setError('')
+            console.log('approving....')
 
             if (tokenIn && inputAmount && routerAddress) {
-                console.log('approving....')
                 initDataTransaction.setIsOpenWaitingModal(true)
                 const callResult: any = await tokenApproval?.approve(
                     routerAddress,
@@ -304,6 +304,7 @@ const Stake = () => {
 
 
     const StakeButton = ({ isInsufficientAllowance }: any) => {
+        console.log({isInsufficientAllowance})
         const isNotConnected = !account
 
         return (
@@ -333,8 +334,8 @@ const Stake = () => {
     const StakeToken = () => {
         const isInsufficientAllowance =
             Number(tokenApproval?.allowance) < Number(inputAmount) &&
-            !isNativeCoin(tokenIn)
-
+            !isNativeCoin(tokenTest)
+        console.log({isInsufficientAllowance })
         return (
             <>
                 <WrapContent image={BGSoba} isStake={true}>
