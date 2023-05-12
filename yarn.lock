@@ -13213,6 +13213,22 @@
   "resolved" "https://registry.npmjs.org/pako/-/pako-1.0.11.tgz"
   "version" "1.0.11"
 
+"pantinho-aa@^0.0.4":
+  "integrity" "sha512-mEjN77acg8e+aXPOdN7wPzUJSXAK8X8BtQe+Bt++Xv8++JExogL7wxGDj5NOceYC9bX+tfsdhOIfyY+g+xF07g=="
+  "resolved" "https://registry.npmjs.org/pantinho-aa/-/pantinho-aa-0.0.4.tgz"
+  "version" "0.0.4"
+  dependencies:
+    "@account-abstraction/contracts" "^0.6.0"
+    "@account-abstraction/utils" "^0.6.0"
+    "@ethersproject/abstract-provider" "^5.7.0"
+    "@ethersproject/abstract-signer" "^5.7.0"
+    "@ethersproject/networks" "^5.7.0"
+    "@ethersproject/properties" "^5.7.0"
+    "@ethersproject/providers" "^5.7.0"
+    "@types/debug" "^4.1.7"
+    "debug" "^4.3.4"
+    "ethers" "^5.7.0"
+
 "parent-module@^1.0.0":
   "integrity" "sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g=="
   "resolved" "https://registry.npmjs.org/parent-module/-/parent-module-1.0.1.tgz"

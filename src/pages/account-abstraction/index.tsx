@@ -9,7 +9,8 @@ import { useNftSmartAccountContract } from 'hooks/useContract';
 import { useCurrencyBalance, useCurrencyBalances, useETHBalances } from 'hooks/useCurrencyBalance';
 import { NATIVE_COIN } from 'constants/index';
 import { useTransactionHandler } from 'states/transactions/hooks';
-import { SimpleAccountAPI } from '@account-abstraction/sdk'
+import { SimpleAccountAPI } from 'pantinho-aa'
+import { useSmartAccount } from 'hooks/useSmartAccount';
 
 const AA = () => {
     const { connect, address, loading: eoaWalletLding, disconnect, web3Provider } = useWeb3AuthContext()
@@ -21,7 +22,8 @@ const AA = () => {
     const {addTxn} = useTransactionHandler()
     const [paidTxn, setPaidTxn] = useState<any>()
     const [sign, setSign] = useState<string>('')
-
+    const { data } = useSmartAccount(wallet?.address)
+    console.log('dataaaaaa', data)
     const onMint = async () => {
         if (!wallet || !walletState || !web3Provider || !nftContract) return;
         try {
@@ -91,22 +93,31 @@ const AA = () => {
           )
         const owner = wallet.signer
         const smartAccountState: any = walletState
+        console.log({walletState: walletState.isDeployed})
         const walletAPI = new SimpleAccountAPI({
             provider: web3Provider, 
             entryPointAddress: smartAccountState.entryPointAddress,
             owner,
             factoryAddress: smartAccountState.factoryAddress,
             index: 0,
-            accountAddress: wallet.address
+            accountAddress: walletState.isDeployed ? wallet.address : undefined
         })
         console.log({walletAPI})
         console.log(safeMintTx?.data)
         if(!safeMintTx?.data) return
+        // console.log('aaaa')
         const op = await walletAPI.createSignedUserOp({
             target: nftContract.address,
-            data: safeMintTx.data
+            data: safeMintTx.data,
+            nonce: data.nonce
         })
-        console.log('user operation ', {op})
+        op.signature = await op.signature
+        op.nonce = await op.nonce
+        op.sender = await op.sender
+        op.preVerificationGas = await op.preVerificationGas
+
+        console.log('opppppp', op)
+
     }
 
     const onBatchMint = async () => {

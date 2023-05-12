@@ -25,6 +25,7 @@ import AAEntryPoint_ABI from 'constants/jsons/aaentry.json'
 import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
 import { ethers } from 'ethers'
 import NFT_ABI from 'constants/jsons/nft.json'
+import AA_ABI from 'constants/jsons/aa.json'
 
 // returns null on errors
 export const useContract = (
@@ -119,4 +120,8 @@ export function useRouterSmartAccountContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
     if (!web3Provider || !chainId) return null
     return new ethers.Contract(ROUTERS[chainId || 80001], ROUTER_ABI, web3Provider)
+}
+
+export function useSmartAccountContract(address: string | undefined): Contract | null {
+    return useContract(address, AA_ABI)
 }
