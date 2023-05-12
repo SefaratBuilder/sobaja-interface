@@ -136,11 +136,11 @@ const Stake = () => {
     }, [tiers])
 
     const handleOnApprove = async () => {
+        console.log('approving....')
         try {
             initDataTransaction.setError('')
 
             if (tokenIn && inputAmount && routerAddress) {
-                console.log('approving....')
                 initDataTransaction.setIsOpenWaitingModal(true)
                 const callResult: any = await tokenApproval?.approve(
                     routerAddress,
@@ -314,7 +314,7 @@ const Stake = () => {
                         onClick={openWalletModal}
                     />
                 ) : isInsufficientAllowance ? (
-                    <ButtonStake>
+                    <ButtonStake onClick={() => handleOnApprove()}>
                         <div>
                             <img src={Lock} alt="lock" />
                         </div>
@@ -622,12 +622,7 @@ const Stake = () => {
             <>
                 <ComponentsTransaction
                     data={initDataTransaction}
-                    onConfirm={
-                        Number(tokenApproval?.allowance) <
-                            Number(inputAmount) && !isNativeCoin(tokenIn)
-                            ? handleOnApprove
-                            : handleOnDeposit
-                    }
+                    onConfirm={() => {}}
                 />
                 {(initDataTransaction.isOpenConfirmModal ||
                     initDataTransaction.isOpenResultModal ||
