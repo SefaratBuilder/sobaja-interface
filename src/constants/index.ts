@@ -3,6 +3,7 @@ import ETH_LOGO from 'assets/token-logos/eth.svg'
 import MATIC_LOGO from 'assets/token-logos/matic.png'
 import tokenList from './jsons/tokenList.json'
 import { WRAPPED_NATIVE_ADDRESSES } from './addresses'
+import gasTokenMumbai from './jsons/gasTokenMumbai.json'
 
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
@@ -130,4 +131,11 @@ export const LAUNCHPAD_SUBGRAPH_URL: { [chainId in number]: string } = {
     [ChainId.MUMBAI]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad',
     [ChainId.ZKMAINNET]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad',
     [ChainId.ZKMAINNET]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad'
+}
+
+export const GAS_TOKEN: { [chainId in number]: Token[] } = {
+    [ChainId.MUMBAI]: gasTokenMumbai,
+    [ChainId.GOERLI]: gasTokenMumbai,
+    [ChainId.ZKMAINNET]: gasTokenMumbai,
+    [ChainId.ZKTESTNET]: gasTokenMumbai,
 }

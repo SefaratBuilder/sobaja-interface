@@ -41,6 +41,7 @@ import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import { useSmartAccount } from 'hooks/useSmartAccount'
 
 const Add = () => {
     const mintState = useMintState()
@@ -63,7 +64,7 @@ const Add = () => {
     const loca = useLocation()
     const pair = usePair(chainId, tokenIn, tokenOut)
     const ref = useRef<any>()
-    const routerSmartAccountContract = useRouterSmartAccountContract()
+    const { sendUserPaidTransaction } = useSmartAccount()
 
     useOnClickOutside(ref, () => {
         setIsOpenWalletModal(false)
@@ -212,23 +213,21 @@ const Add = () => {
                     })
                 } else {
                     // addliquidity using account abstraction
-                    if(!routerSmartAccountContract) return
-                    const addData = await routerSmartAccountContract?.populateTransaction?.[method]?.(
-                        ...args
-                    )
+                    if(!routerContract || !routerAddress) return
+                    const addData = await routerContract.interface.encodeFunctionData(method, [...args])
                     if(!addData) return
                     
                     const txApproveIn = {
                         to: tokenIn.address,
-                        data: tokenInApproval.approveEncodeData(routerSmartAccountContract.address, mulNumberWithDecimal(inputAmount, tokenIn.decimals))
+                        data: tokenInApproval.approveEncodeData(routerAddress, mulNumberWithDecimal(inputAmount, tokenIn.decimals))
                     }
                     const txApproveOut = {
                         to: tokenOut.address,
-                        data: tokenOutApproval.approveEncodeData(routerSmartAccountContract.address, mulNumberWithDecimal(outputAmount, tokenOut.decimals))
+                        data: tokenOutApproval.approveEncodeData(routerAddress, mulNumberWithDecimal(outputAmount, tokenOut.decimals))
                     }
                     const txAddliqudity = {
-                        to: routerSmartAccountContract.address,
-                        data: addData.data,
+                        to: routerAddress,
+                        data: addData,
                         value
                     }
                     const txns = isInsufficientAllowanceTokenIn && isInsufficientAllowanceTokenOut 
@@ -238,24 +237,18 @@ const Add = () => {
                         : isInsufficientAllowanceTokenOut
                         ? [txApproveOut, txAddliqudity]
                         : [txAddliqudity]
-                    if(isInsufficientAllowance) {
-                        callResult = await wallet.sendTransactionBatch({
-                            transactions: txns
-                        })
-                    } else {
-                        callResult = await wallet.sendTransaction({
-                            transaction: txns[0]
-                        })
-                    }
+                    callResult = await sendUserPaidTransaction(txns)
                 }
-                const txn = await callResult.wait()
+                const txn = await callResult?.wait?.()
                 initDataTransaction.setIsOpenResultModal(false)
 
-                addTxn({
-                    hash: txn?.transactionHash || callResult.hash,
-                    msg: `Add liquidity ${tokenIn?.symbol} and ${tokenOut?.symbol}`,
-                    status: txn.status === 1 ? true : false,
-                })
+                if(txn) {
+                    addTxn({
+                        hash: txn?.transactionHash || callResult.hash,
+                        msg: `Add liquidity ${tokenIn?.symbol} and ${tokenOut?.symbol}`,
+                        status: txn?.status === 1 ? true : false,
+                    })
+                }
                 initDataTransaction.setIsOpenWaitingModal(false)
                 initDataTransaction.setIsOpenResultModal(true)
 
@@ -277,7 +270,7 @@ const Add = () => {
                 onUserInput(Field.OUTPUT, '')
             }
         } catch (error) {
-            // initDataTransaction.setIsOpenWaitingModal(false)
+            console.log("error", error)
             initDataTransaction.setError('Failed')
             initDataTransaction.setIsOpenResultModal(true)
         }

@@ -1,24 +1,20 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useActiveWeb3React } from 'hooks'
-import { computeGasLimit, shortenAddress } from 'utils'
-import { NavLink } from 'react-router-dom'
+import { shortenAddress } from 'utils'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import imgPower from 'assets/icons/power.svg'
 import imgCopy from 'assets/icons/copy.svg'
 import imgDownArrow from 'assets/icons/arrow-down.svg'
-import imgPlusWallet from 'assets/icons/plus-wallet.svg'
-import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
-import iconSetting from 'assets/icons/setting.svg'
 import { NATIVE_COIN } from 'constants/index'
 import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { Row } from 'components/Layouts'
-import { mulNumberWithDecimal } from 'utils/math'
 import DepositModal from './DepositModal'
 import SendModal from './SendModal'
+import GasSetting from './GasSetting'
 
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -77,6 +73,9 @@ const AccountDetails = ({
                         }
                     </Row>
                     <WrapBtnHeader>
+                        {
+                            wallet && <GasSetting />
+                        }
                         {isCopied ? (
                             <CopyBtn>
                                 <CopyAccountAddress src={imgCheckMark} />

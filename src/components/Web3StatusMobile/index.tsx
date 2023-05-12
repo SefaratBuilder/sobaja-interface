@@ -8,9 +8,11 @@ import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { injected } from 'connectors'
 import arrowDown from 'assets/icons/arrow-down.svg'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
     const { account, connector, error } = useWeb3React()
+    const { wallet } = useSmartAccountContext()
 
     function formatConnectorName(account: any) {
         const { ethereum } = window
@@ -73,7 +75,7 @@ const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
     return (
         <Fragment>
             <Web3StatusWrapper>
-                {Web3StatusInner(account, error)}
+                {Web3StatusInner(wallet?.address || account, error)}
             </Web3StatusWrapper>
             {toggleWalletModal ? (
                 <OpacityModal

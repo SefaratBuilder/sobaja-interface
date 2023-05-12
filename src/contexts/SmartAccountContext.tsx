@@ -9,6 +9,7 @@ import { useWeb3AuthContext } from "./SocialLoginContext";
 import { useActiveWeb3React } from "hooks";
 import { ChainId } from "interfaces";
 import { supportedChains } from "utils/chainConfig";
+import { useTransactionHandler } from "states/transactions/hooks";
 
 // Types
 type Balance = {
@@ -73,6 +74,8 @@ export const SmartAccountProvider = ({ children }: any) => {
   });
   const [isFetchingBalance, setIsFetchingBalance] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { addTxn } = useTransactionHandler()
+
   useEffect(() => {
     console.log({wallet})
   }, [wallet])
@@ -136,15 +139,20 @@ export const SmartAccountProvider = ({ children }: any) => {
       });
 
       smartAccount.on("txMined", (response: any) => {
-        console.log("txMined event received in AddLP via emitter", response);
-        // showSuccessMessage(
-        //   `Transaction confirmed: ${response.hash}`,
-        //   response.hash
-        // );
+        console.log("Transaction sent successfully", response);
+        addTxn({
+            hash: response.hash,
+            msg: "Transaction has been sent successfully",
+            status: true
+        })
       });
 
       smartAccount.on("error", (response: any) => {
-        console.log("error event received in AddLP via emitter", response);
+        addTxn({
+            hash: response.hash,
+            msg: "Transaction sent failed",
+            status: false
+        })
       });
 
       // get all smart account versions available and update in state

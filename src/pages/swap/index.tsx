@@ -52,6 +52,7 @@ import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
+import { useSmartAccount } from 'hooks/useSmartAccount'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -76,7 +77,8 @@ const Swap = () => {
     const { slippage } = useSlippageTolerance()
     const updateRef = useUpdateRefAddress()
     const ref = useRef<any>()
-    const routerSmartAccountContract = useRouterSmartAccountContract()
+    const { sendUserPaidTransaction } = useSmartAccount()
+
     const isInsufficientAllowance =
     Number(tokenApproval?.allowance) < Number(inputAmount) &&
     !isNativeCoin(tokenIn)
@@ -309,8 +311,8 @@ const Swap = () => {
                     gasLimit: computeGasLimit(gasLimit),
                 })
             } else {
-                if(!routerSmartAccountContract) return
-                const swapData = await routerSmartAccountContract.populateTransaction[method](...newArgs)
+                if(!routerContract) return
+                const swapData = await routerContract.interface.encodeFunctionData(method, [...newArgs])
                 if(!swapData || !tokenIn || !routerAddress || !inputAmount) return
                 const txApprove = {
                     to: tokenIn.address,
@@ -318,33 +320,13 @@ const Swap = () => {
                 }
                 const txSwap = {
                     to: routerAddress,
-                    data: swapData.data,
+                    data: swapData,
                     value: value
                 }
                 if(isInsufficientAllowance) {
-                    callResult = await wallet.sendTransactionBatch({
-                        transactions: [txApprove, txSwap]
-                    })
+                    callResult = await sendUserPaidTransaction([txApprove, txSwap])
                 } else {
-                    // callResult = await wallet.sendTransaction({
-                    //     transaction: txSwap
-                    // })
-                    const feeQuotes = await wallet.getFeeQuotes({
-                        transaction: txSwap
-                    })
-                    console.log({feeQuotes})
-                    const paidTransaction = await wallet.createUserPaidTransaction({
-                        transaction: txSwap,
-                        feeQuote: feeQuotes[0]
-                    })
-                    // console.log('paidTransaction...', {paidTransaction})
-                    // const signature = await wallet.signUserPaidTransaction({
-                    //     tx: paidTransaction,
-                    //     signer: wallet.signer
-                    // })
-                    const txn = await wallet.sendUserPaidTransaction({
-                        tx: paidTransaction
-                    })
+                    callResult = await sendUserPaidTransaction([txSwap])
                 }
             }
 
@@ -362,7 +344,7 @@ const Swap = () => {
                 ].join('/'),
             })
 
-            const txn = await callResult?.wait()
+            const txn = await callResult?.wait?.()
             initDataTransaction.setIsOpenResultModal(false)
             if(!txn) return
             addTxn({
@@ -596,16 +578,6 @@ const Swap = () => {
                     />
                 )}
                 <SwapButton />
-
-                {/* Test */}
-                {/* <div>
-                    <PrimaryButton
-                        name="TEST"
-                        onClick={() =>
-                            initDataTransaction.setIsOpenWaitingModal(true)
-                        }
-                    />
-                </div> */}
                 {wallet || account ? (
                     <Referral>
                         <span>Referral:</span>

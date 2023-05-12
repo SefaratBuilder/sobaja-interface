@@ -88,9 +88,7 @@ const ToastMessage = ({ payload, setToastMessageModal }: ToastMsg) => {
                         <Toast
                             txn={{
                                 hash: txn.hash,
-                                msg: `${txn.msg} ${
-                                    txn.status ? 'successful' : 'failed'
-                                }`,
+                                msg: txn.msg,
                                 status: txn.status,
                             }}
                             key={index + 1}
