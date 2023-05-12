@@ -1,80 +1,125 @@
 import { Columns } from 'components/Layouts'
+import { useActiveWeb3React } from 'hooks'
+import {
+    useAllPosition,
+} from 'hooks/useStakingData'
+import { useHarvest, useWithDraw } from 'hooks/useStakingFunction'
 import React from 'react'
 import styled from 'styled-components'
+import { divNumberWithDecimal} from 'utils/math'
 
 const CurrentStake = () => {
-    const data = [
-        {
-            amount: '100',
-            package: '30 days',
-            endDate: '30-05-2023',
-        },
-        {
-            amount: '100',
-            package: '60 days',
-            endDate: '30-09-2023',
-        },
-        {
-            amount: '123',
-            package: '365 days',
-            endDate: '05-07-2023',
-        },
-        {
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-    ]
+    const { account } = useActiveWeb3React()
+    const AllStakingData = useAllPosition(account)
 
     return (
-        <SwapContainer>
-            <Title>Your current stake:</Title>
-            <WrapDetails className="header-details">
-                <Details isTitle={true}>Amount</Details>
-                <Details isTitle={true}>Package</Details>
-                <Details isTitle={true}>End date</Details>
-                <Details isTitle={true}>Action</Details>
-            </WrapDetails>
-            {data.map((d) => {
-                return (
-                    <WrapDetails>
-                        <Details>{d.amount}</Details>
-                        <Details>{d.package}</Details>
-                        <Details>{d.endDate}</Details>
-                        <Details>
-                            <div>Withdraw</div>
-                            <span></span>
-                            <div>Harvest</div>
-                        </Details>
-                    </WrapDetails>
-                )
-            })}
-        </SwapContainer>
+        <>
+            <SwapContainer>
+                <Title>Your current stake:</Title>
+                <WrapDetails className="header-details">
+                    <Details isTitle={true}>Amount</Details>
+                    <Details isTitle={true}>Package</Details>
+                    <Details isTitle={true}>End date</Details>
+                    <Details isTitle={true}>Last Time Reward</Details>
+                    <Details isTitle={true}>Claimable Reward</Details>
+                    <Details isTitle={true}>Action</Details>
+                </WrapDetails>
+                {AllStakingData.map((position: any) => {
+                    const lastTimeRewardFormat = new Date(
+                        position.lastTimeReward,
+                    )
+                    const formattedLastTimeReward =
+                        lastTimeRewardFormat.toLocaleDateString()
+                    const timeEndFormat = new Date(position.timeEnd)
+                    const formattedTimeEnd = timeEndFormat.toLocaleDateString()
+                    const claimableReward = divNumberWithDecimal(
+                        position.claimableReward,
+                        18,
+                    )
+
+                    console.log(claimableReward);
+                    
+
+                    const positionIndex = Number(position.positionIndex)
+                    const handleHarvest = useHarvest(positionIndex)
+                    const handleWithDraw = useWithDraw(positionIndex)
+
+
+                    return (
+                        <WrapDetails>
+                            <Details>{position.stakedAmount}</Details>
+                            <Details>{position.period}</Details>
+                            <Details>{formattedTimeEnd}</Details>
+                            <Details>{formattedLastTimeReward}</Details>
+                            <Details>{claimableReward}</Details>
+
+                            <Details>
+                                <div>
+                                    {' '}
+                                    <button onClick={handleWithDraw}>
+                                        Withdraw
+                                    </button>
+                                </div>
+                                <span></span>
+                                <div>
+                                    {' '}
+                                    <button onClick={handleHarvest}>
+                                        {' '}
+                                        Harvest
+                                    </button>
+                                </div>
+                            </Details>
+                        </WrapDetails>
+                    )
+                })}
+            </SwapContainer>
+            <SwapContainer>
+                <Title>History (Finished Staking)</Title>
+                <WrapDetails className="header-details">
+                    <Details isTitle={true}>Amount</Details>
+                    <Details isTitle={true}>Package</Details>
+                    <Details isTitle={true}>Start Time</Details>
+                    <Details isTitle={true}>End date</Details>
+                    <Details isTitle={true}>Total Reward</Details>
+                </WrapDetails>
+
+                {AllStakingData.map((position: any) => {
+                    // Calculate totalReward for each staking position
+                    const lastTimeRewardFormat = new Date(
+                        position.lastTimeReward,
+                    )
+                    const formattedLastTimeReward =
+                        lastTimeRewardFormat.toLocaleDateString()
+                    const timeEndFormat = new Date(position.timeEnd)
+                    const formattedTimeEnd = timeEndFormat.toLocaleDateString()
+
+                    return (
+                        <WrapDetails>
+                            <Details>{position.stakedAmount}</Details>
+                            <Details>{position.period}</Details>
+                            <Details>{formattedTimeEnd}</Details>
+                            <Details>{formattedLastTimeReward}</Details>
+                            <Details>
+                                {(() => {
+                                    if (
+                                        position.lastTimeReward -
+                                            position.timeStart <
+                                        30
+                                    ) {
+                                        return 0
+                                    } else {
+                                        return divNumberWithDecimal(
+                                            position.totalReward,
+                                            18,
+                                        )
+                                    }
+                                })()}
+                            </Details>
+                        </WrapDetails>
+                    )
+                })}
+            </SwapContainer>
+        </>
     )
 }
 
@@ -125,7 +170,7 @@ const Details = styled.div<{ isTitle?: boolean }>`
 `
 const WrapDetails = styled.div`
     display: grid;
-    grid-template-columns: 0.2fr 0.2fr 0.25fr 0.35fr;
+    grid-template-columns: 0.2fr 0.2fr 0.25fr 0.35fr 0.2fr 0.2fr;
     border: 2px solid black;
 `
 const Title = styled.div`

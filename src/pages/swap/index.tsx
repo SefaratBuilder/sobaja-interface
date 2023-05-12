@@ -67,6 +67,7 @@ const Swap = () => {
     const balanceIn = useCurrencyBalance(account, tokenIn)
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
+    
     const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
     const loca = useLocation()
@@ -129,6 +130,7 @@ const Swap = () => {
             else return 'swapTokensForExactTokens'
         }
     }
+    console.log(pair);
 
     const getSwapArguments = () => {
         if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
@@ -147,6 +149,7 @@ const Swap = () => {
             if (isNativeCoin(tokenIn))
                 return {
                     args: [
+                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), // amountOutMin
                         amountOutMin, //amountOutMin
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
@@ -157,6 +160,8 @@ const Swap = () => {
             else if (isNativeCoin(tokenOut))
                 return {
                     args: [
+                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
+                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), //amountOutMin
                         amountIn, //amountIn
                         amountOutMin, //amountOutMin
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
@@ -168,6 +173,8 @@ const Swap = () => {
             else
                 return {
                     args: [
+                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
+                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), //amountOutMin
                         amountIn, //amountIn
                         amountOutMin, //amountOutMin
                         [tokenIn.address, tokenOut.address],
@@ -180,6 +187,8 @@ const Swap = () => {
             if (isNativeCoin(tokenOut))
                 return {
                     args: [
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
+                        mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals), //amountInMax
                         amountOut, //amountOut
                         amountInMax, //amountInMax
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
@@ -196,11 +205,14 @@ const Swap = () => {
                         account,
                         calcTransactionDeadline(deadline),
                     ],
-                    value: amountInMax, //amountInMax
+                    value: mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals) //amountInMax
+                    // value: amountInMax, //amountInMax
                 }
             else
                 return {
                     args: [
+                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
+                        mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals), //amountInMax
                         amountOut, //amountOut
                         amountInMax, //amountInMax
                         [tokenIn.address, tokenOut.address],

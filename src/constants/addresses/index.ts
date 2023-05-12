@@ -46,6 +46,10 @@ const LAUNCHPADS: { [chainId: number]: string } = {
     [ChainId.MUMBAI]: '0x57A68Ea4a60723129D353eCB0b439A2c8B1FFAcD',
 }
 
+const STAKING: { [chainId: number]: string } = {
+    [ChainId.MUMBAI]: '0xc488658f788Fd56dD526bBc90538627369f51C3A',
+}
+
 const LAUNCHPAD_ACCESS_MANAGERS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
     [ChainId.ZKTESTNET]: '0x01C2d40418858562f8E5852895a48E2a8B3D01b5',
@@ -86,6 +90,6 @@ export {
     INIT_CODE_HASHES,
     LAUNCHPADS,
     LAUNCHPAD_ACCESS_MANAGERS,
-    STAKING_ABI,
-    AAEntryPoints
+    STAKING,
+    STAKING_ABI
 }

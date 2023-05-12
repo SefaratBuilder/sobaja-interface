@@ -12,7 +12,7 @@ import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
 
 import { URLSCAN_BY_CHAINID } from 'constants/index'
-import { ROUTERS } from 'constants/addresses'
+import { ROUTERS, STAKING } from 'constants/addresses'
 import { FixedNumber } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
 import { isNativeCoin } from 'utils'
@@ -34,6 +34,10 @@ import History from './Components/History'
 import CurrentStake from './Components/CurrentStake'
 import { Token } from 'interfaces'
 import Clock from 'assets/icons/clock.webp'
+import { useStakingContract } from 'hooks/useContract'
+import { sendEvent } from 'utils/analytics'
+import { useSwapActionHandlers } from 'states/swap/hooks'
+import { Field } from 'interfaces'
 
 interface IUnstakeToken {
     isStakeToken: boolean
@@ -62,6 +66,10 @@ const UnStakeToken = ({
             .replace(/(\..*?)\..*/g, '$1')
         setInputUnstakeValue(value)
     }
+
+
+
+
     return (
         <>
             <WrapContent image={BGSoba}>
@@ -189,7 +197,12 @@ const StakeToken = ({ data }: IStakeToken) => {
         setIsShowHistory,
         balanceIn,
     } = data
-    const { account } = useActiveWeb3React()
+    const { account, chainId } = useActiveWeb3React()
+    const stakingContract = useStakingContract();
+    const tokenTest = useToken('0xdEfd221072dD078d11590D58128399C2fe8cCa7e')
+    const {addTxn} = useTransactionHandler()
+    const {onUserInput} = useSwapActionHandlers()
+
 
     const [isOpenEdit, setIsOpenEdit] = useState(false)
     const selection = [
@@ -202,6 +215,8 @@ const StakeToken = ({ data }: IStakeToken) => {
     const percents = [25, 50, 75, 100]
     const [tiers, setTiers] = useState<number>(0)
     const validateInputNumber = (e: string) => {
+
+
         const value = e
             .replace(/[^0-9.,]/g, '')
             .replace(' ', '')
@@ -241,11 +256,64 @@ const StakeToken = ({ data }: IStakeToken) => {
                 ONEDAYTIMESTAMP * Number(selection[tiers].name),
         )
     }, [tiers])
+
+    const handleOnDeposit = async () =>{
+        console.log('..........Testing');
+        
+        try {
+            if(!inputStakeValue || !selection || !tokenTest) return
+                console.log('Staking .........');
+
+                const inputStakingValue = mulNumberWithDecimal(inputStakeValue, tokenTest?.decimals);
+
+                const args = [
+                    inputStakingValue,
+                    selection[tiers].name
+                ]
+                const method = 'deposit'
+                const gasLimit = await stakingContract?.estimateGas?.[method]?.(
+                    ...args
+                )
+                const callResult = await stakingContract?.[method]?.(...args,{
+                    gasLimit: gasLimit && gasLimit.add(1000)
+                })
+                console.log('🤦‍♂️ ⟹ handleOnDeposit ⟹ callResult:', { callResult })
+                
+                sendEvent({
+                    category: 'Defi',
+                    action: 'Staking',
+                    label:[
+                        inputStakeValue,
+                        selection
+                    ].join('/'),
+                })
+
+                const txn = await callResult.wait();
+                addTxn({
+                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx${
+                        callResult.hash || ''
+                    }`,
+                    msg:`Staking ${inputStakeValue} for ${selection}`,
+                    status: txn.status === 1 ? true :false
+                })
+
+                // reset user input
+                onUserInput(Field.INPUT,'')
+            
+        } catch (error) {
+            console.log('====================================');
+            console.log('Error with cause:', error);
+            console.log('====================================');
+        }
+    }
+    
     const isInsufficientAllowance = inputStakeValue
         ? Number(tokenApproval?.allowance) < Number(inputStakeValue) &&
-          !isNativeCoin(stakingToken)
+          !isNativeCoin(tokenTest)
         : true
 
+        // console.log(tokenApproval.allowance);
+        
     const StakeButton = ({ isInsufficientAllowance }: any) => {
         const isNotConnected = !account
 
@@ -265,7 +333,7 @@ const StakeToken = ({ data }: IStakeToken) => {
                     </ButtonStake>
                 ) : (
                     <ButtonStake isStake={true}>
-                        <PrimaryButton onClick={() => {}} name={'Stake'} />
+                        <PrimaryButton onClick={handleOnDeposit} name={'Stake'} />
                     </ButtonStake>
                 )}
             </LabelButtonStake>
@@ -458,13 +526,15 @@ const Stake = () => {
     )
     const [isShowHistory, setIsShowHistory] = useState(false)
     const [isShowCurrent, setIsShowCurrent] = useState(false)
+    const tokenTest = useToken('0xdEfd221072dD078d11590D58128399C2fe8cCa7e')
 
     const { chainId, account } = useActiveWeb3React()
     const stakingToken = useToken('0x3e7676937A7E96CFB7616f255b9AD9FF47363D4b')
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
-    const routerAddress = chainId ? ROUTERS[chainId] : undefined
-    const tokenApproval = useTokenApproval(account, routerAddress, stakingToken)
-    const balanceIn = useCurrencyBalance(account, stakingToken)
+    const routerAddress = chainId ? STAKING[chainId] : undefined
+    const tokenApproval = useTokenApproval(account, routerAddress, tokenTest)
+    const balanceIn = useCurrencyBalance(account, tokenTest)
+
 
     const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
@@ -478,15 +548,12 @@ const Stake = () => {
         try {
             initDataTransaction.setError('')
 
-            if (stakingToken && inputStakeValue && routerAddress) {
+            if (tokenTest && inputStakeValue && routerAddress) {
                 console.log('approving....')
                 initDataTransaction.setIsOpenWaitingModal(true)
                 const callResult: any = await tokenApproval?.approve(
                     routerAddress,
-                    mulNumberWithDecimal(
-                        inputStakeValue,
-                        stakingToken.decimals,
-                    ),
+                    mulNumberWithDecimal(inputStakeValue, tokenTest.decimals),
                 )
 
                 initDataTransaction.setIsOpenWaitingModal(false)
@@ -524,9 +591,9 @@ const Stake = () => {
                     onConfirm={
                         Number(tokenApproval?.allowance) <
                             Number(inputStakeValue) &&
-                        !isNativeCoin(stakingToken)
+                        !isNativeCoin(tokenTest)
                             ? handleOnApprove
-                            : ''
+                            :''
                     }
                 />
                 {(initDataTransaction.isOpenConfirmModal ||

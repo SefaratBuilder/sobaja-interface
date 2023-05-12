@@ -38,6 +38,9 @@ import ETH from 'assets/token-logos/eth.svg'
 import BGSoba from 'assets/icons/soba2.jpg'
 import ArrowUp from 'assets/icons/arrow-up.svg'
 import Lock from 'assets/icons/lock.svg'
+import { useStakingContract } from 'hooks/useContract'
+import { sendEvent } from 'utils/analytics'
+import { Field } from 'interfaces'
 
 const Stake = () => {
     const swapState = useSwapState()
@@ -54,13 +57,15 @@ const Stake = () => {
     const [inputUnstakeValue, setInputUnstakeValue] = useState<number | string>(
         '0',
     )
+    const tokenTest = useToken('0xdEfd221072dD078d11590D58128399C2fe8cCa7e');
 
     const { chainId, library, account } = useActiveWeb3React()
+    const stakingContract = useStakingContract();
     const { refAddress } = useAppState()
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
     const pair = usePair(chainId, tokenIn, tokenOut)
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
-    const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
+    const tokenApproval = useTokenApproval(account, routerAddress, tokenTest)
     const balanceIn = useCurrencyBalance(account, tokenIn)
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
@@ -81,6 +86,10 @@ const Stake = () => {
     ]
     const percents = [25, 50, 75, 100]
     const [tiers, setTiers] = useState<number>(0)
+
+    const positionIndex = 0;
+
+
 
     useOnClickOutside(ref, () => {
         setIsOpenWalletModal(false)
@@ -165,6 +174,135 @@ const Stake = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
     }
 
+    // params : amount, period <=> inputSelectionValue, selection.name
+    const handleOnDeposit = async () =>{
+        console.log('..........Testing');
+        
+        try {
+            if(!inputStakeValue || !selection || !tokenTest) return
+                console.log('Staking .........');
+
+                const inputStakingValue = mulNumberWithDecimal(inputStakeValue, tokenTest?.decimals);
+
+                const args = [
+                    inputStakingValue,
+                    selection[tiers].name
+                ]
+                const method = 'deposit'
+                const gasLimit = await stakingContract?.estimateGas?.[method]?.(
+                    ...args
+                )
+                const callResult = await stakingContract?.[method]?.(...args,{
+                    gasLimit: gasLimit && gasLimit.add(1000)
+                })
+                console.log('🤦‍♂️ ⟹ handleOnDeposit ⟹ callResult:', { callResult })
+                
+                sendEvent({
+                    category: 'Defi',
+                    action: 'Staking',
+                    label:[
+                        inputStakeValue,
+                        selection
+                    ].join('/'),
+                })
+
+                const txn = await callResult.wait();
+                addTxn({
+                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx${
+                        callResult.hash || ''
+                    }`,
+                    msg:`Staking ${inputStakeValue} for ${selection}`,
+                    status: txn.status === 1 ? true :false
+                })
+
+                // reset user input
+                onUserInput(Field.INPUT,'')
+            
+        } catch (error) {
+            console.log('====================================');
+            console.log('Error with cause:', error);
+            console.log('====================================');
+        }
+    }
+
+    const handleOnHarvest = async() =>{
+        console.log("Testing harvest ....");
+        try {
+            const positionsIndex = 
+            console.log('Harvesting ....');
+
+            const args = [
+                positionIndex
+            ]
+            const method = 'harvest'
+            const gasLimit = await stakingContract?.estimateGas?.[method]?.(
+                ...args
+            )
+            const callResult = await stakingContract?.[method]?.(...args,{
+                gasLimit: gasLimit && gasLimit.add(1000)
+            })
+            console.log('🤦‍♂️ ⟹ handleOnHarvest ⟹ callResult:', { callResult })
+
+            sendEvent({
+                category: "Defi",
+                action: 'Harvesting',
+                label:[
+                    positionIndex
+                ].join('/'),
+            })
+            const txn = await callResult.wait();
+            addTxn({
+                hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx${
+                    callResult.hash || ''
+                }`,
+                msg: `Harvesting at index ${positionIndex}`,
+                status: txn.status === 1 ? true : false 
+            })
+        } catch (error) {
+            console.log(error);
+            
+        }
+    }
+
+    const handleOnWithDraw = async() =>{
+        console.log('Testing withdraw .....');
+        try {
+            console.log('Withdrawing ....');
+            const args = [
+                positionIndex
+            ]
+            const method = 'withdraw'
+            const gasLimit = await stakingContract?.estimateGas?.[method]?.(
+                ...args
+            )
+            const callResult = await stakingContract?.[method]?.(...args,{
+                gasLimit: gasLimit && gasLimit.add(1000)
+            })
+            console.log('🤦‍♂️ ⟹ handleOnWithdraw ⟹ callResult:', { callResult })
+
+            sendEvent({
+                category: "Defi",
+                action: 'Withdrawing',
+                label: [
+                    positionIndex
+                ].join('/'),
+            })
+            const txn = await callResult.wait();
+            addTxn({
+                hash:`${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx${
+                    callResult.hash || ''
+                }`,
+                msg:`Withdrawing at index ${positionIndex}`,
+                status: txn.status === 1 ? true : false 
+            })
+        } catch (error) {
+            console.log(error);
+            
+        }
+        
+    }
+
+
     const StakeButton = ({ isInsufficientAllowance }: any) => {
         const isNotConnected = !account
 
@@ -184,8 +322,9 @@ const Stake = () => {
                     </ButtonStake>
                 ) : (
                     <ButtonStake isStake={true}>
-                        <PrimaryButton onClick={() => {}} name={'Stake'} />
+                        <PrimaryButton onClick={handleOnDeposit} name={'Stake'} />
                     </ButtonStake>
+                    
                 )}
             </LabelButtonStake>
         )
@@ -220,6 +359,7 @@ const Stake = () => {
                         </Nav>
                         <Setting />
                     </Row>
+
                     <Row jus="space-between">
                         <div>Amount</div>
                         <div>
@@ -286,6 +426,12 @@ const Stake = () => {
                     <StakeButton
                         isInsufficientAllowance={isInsufficientAllowance}
                     />
+                    <ButtonStake isStake={true}>
+                        <PrimaryButton onClick={handleOnHarvest} name={'Harvest'} />
+                    </ButtonStake>
+                    <ButtonStake isStake={true}>
+                        <PrimaryButton onClick={handleOnWithDraw} name={'Withdraw'} />
+                    </ButtonStake>
 
                     <WrapDetailsStake>
                         <Row jus="space-between">
@@ -480,7 +626,7 @@ const Stake = () => {
                         Number(tokenApproval?.allowance) <
                             Number(inputAmount) && !isNativeCoin(tokenIn)
                             ? handleOnApprove
-                            : ''
+                            : handleOnDeposit
                     }
                 />
                 {(initDataTransaction.isOpenConfirmModal ||
