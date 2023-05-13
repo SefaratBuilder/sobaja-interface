@@ -6,14 +6,14 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 const History = () => {
-    // const data = [
-    //     {
-    //         status: 'Success',
-    //         amount: '100',
-    //         package: '30 days',
-    //         endDate: '30-05-2023',
-    //     },
-    // ]
+    const data = [
+        {
+            status: 'Success',
+            amount: '100',
+            package: '30 days',
+            endDate: '30-05-2023',
+        },
+    ]
 
     const { account } = useActiveWeb3React()
     const stakingContract = useStakingContract();

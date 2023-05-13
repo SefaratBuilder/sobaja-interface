@@ -115,6 +115,16 @@ export function useAllPosition(address: string | undefined | null) {
         ids,
     )
 
+    // const SetStakingRates = useSingleContractMultipleData(
+    //     stakingContract,
+    //     'setStakingRate',
+    //     ids
+    // )
+
+    
+
+
+
     const AllPosition = useMemo(() => {
         if (AllPositionResult.result) {
             return AllPositionResult.result[0].map(
@@ -149,7 +159,8 @@ export function useAllPosition(address: string | undefined | null) {
                             lastTimeReward,
                             claimableReward:
                                 claimableReward && Number(claimableReward),
-                            totalReward: totalReward && Number(totalReward),
+                            totalReward: totalReward && Number(totalReward)
+                            // SetStakingRates
                         }
                     } catch (error) {
                         console.log(error)
