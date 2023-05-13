@@ -442,7 +442,7 @@ const Add = () => {
                 ) : (
                     <PrimaryButton
                         onClick={() => handleOnAdd()}
-                        name={'Add liquidty'}
+                        name={'Add liquidity'}
                     />
                 )}
             </Row>
