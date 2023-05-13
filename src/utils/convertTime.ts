@@ -12,7 +12,8 @@ export const handleTime = (time: string, visibleHour?: boolean) => {
             : `0${t.getDate()}`)
     if (!visibleHour) return date
     const hour = t.getHours() < 10 ? '0' + t.getHours() : t.getHours()
+    const seconds = t.getSeconds() < 10 ? '0' + t.getSeconds() : t.getSeconds()
     const minutes =
         t.getMinutes() < 10 ? '0' + t.getMinutes() : t.getMinutes()
-    return date + " " + hour + ":" + minutes
+    return date + " " + hour + ":" + minutes + ":" + seconds
 }

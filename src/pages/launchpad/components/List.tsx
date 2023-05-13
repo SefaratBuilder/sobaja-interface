@@ -1,15 +1,30 @@
 import { Row } from 'components/Layouts'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import Soba from 'assets/token-logos/sbj.svg'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { handleTime } from 'utils/convertTime'
-import { ILaunchpadDetails } from '..'
+import { ILaunchpadDetails, adminAddress } from '..'
 import { useQueryLaunchpad } from 'hooks/useQueryLaunchpad'
 import { useToken, useTokens } from 'hooks/useToken'
-import UnknowToken from 'assets/token-logos/dai.svg'
 import { divNumberWithDecimal } from 'utils/math'
 import { Token } from 'interfaces'
+import { badgeColors, getCurrentTimeLines } from 'utils/launchpad'
+import UnknowToken from 'assets/token-logos/dai.svg'
+import {
+    CompTransaction,
+    InitCompTransaction,
+} from 'components/TransactionModal'
+import { useTransactionHandler } from 'states/transactions/hooks'
+import { useActiveWeb3React } from 'hooks'
+import { URLSCAN_BY_CHAINID } from 'constants/index'
+import { useFairLaunchContract } from 'hooks/useContract'
+import { getContract } from 'utils'
+import { FAIRLAUNCH_ABI } from 'constants/jsons/fairlaunch'
+
+const UnknowThumbnail =
+    // 'https://thelagostoday.com/wp-content/uploads/2021/07/bit-bitcoin.jpg'
+    'https://p2pb2b.com/static/img/launchpad/banner.png'
 interface IListLaunchpad {
     setCurrentPage: React.Dispatch<
         React.SetStateAction<'Admin' | 'Create' | 'Details' | 'Infomation'>
@@ -17,15 +32,50 @@ interface IListLaunchpad {
     setLpDetails: React.Dispatch<
         React.SetStateAction<ILaunchpadDetails | undefined>
     >
+    setIsOpenAdmin: React.Dispatch<React.SetStateAction<boolean>>
+    initDataTransaction: CompTransaction
 }
 
-const ListLaunchpad = ({ setCurrentPage, setLpDetails }: IListLaunchpad) => {
-    const { data } = useQueryLaunchpad()
+const ListLaunchpad = ({
+    setCurrentPage,
+    setLpDetails,
+    setIsOpenAdmin,
+    initDataTransaction,
+}: IListLaunchpad) => {
+    const { data, refetch } = useQueryLaunchpad()
     const { launchpads } = data
+    // const initDataTransaction = InitCompTransaction()
+    const { addTxn } = useTransactionHandler()
+    const { account, chainId, library } = useActiveWeb3React()
+    // const [launchpadId, setLaunchpadId] = useState(undefined)
 
-    const [launchpadId, setLaunchpadId] = useState(
-        Number(launchpads?.[0]?.id) || 0,
-    )
+    // const fairlaunchContract = useFairLaunchContract(launchpadId)
+
+    /**
+     * @dev
+     * handle timeline for launchpad
+     */
+    const currentTimeLines = useMemo(() => {
+        if (launchpads) {
+            return getCurrentTimeLines(
+                launchpads?.map(({ startTime, endTime, finalized }) => {
+                    return { startTime, endTime, isFinalized: finalized }
+                }),
+            )
+        }
+    }, [launchpads])
+
+    const availableSetTimes = useMemo(() => {
+        const current = new Date().getTime() / 1000
+
+        return launchpads?.map((lp) => {
+            return current < Number(lp.startTime)
+        })
+    }, [launchpads])
+    console.log('🤦‍♂️ ⟹ availableSetTimes ⟹ availableSetTimes:', {
+        availableSetTimes,
+    })
+
     const launchpadTokens = useTokens(
         launchpads?.map((lp) => lp.launchpadToken),
     )
@@ -38,12 +88,61 @@ const ListLaunchpad = ({ setCurrentPage, setLpDetails }: IListLaunchpad) => {
         ),
     )
 
+    const handleOnSetTime = async (id: string) => {
+        try {
+            initDataTransaction.setError('')
+            if (launchpads && library) {
+                console.log('on claim....')
+                initDataTransaction.setIsOpenWaitingModal(true)
+
+                const startTime = new Date().getTime() / 1000 + 300 // start after 5 min
+                const endTime = startTime + 86400 // end after start 1 hour
+
+                const fairlaunchContract = getContract(
+                    id,
+                    FAIRLAUNCH_ABI,
+                    library,
+                    account ? account : undefined,
+                )
+
+                const callResult = await fairlaunchContract?.setTimestamp(
+                    startTime.toFixed(),
+                    endTime.toFixed(),
+                )
+
+                initDataTransaction.setIsOpenWaitingModal(false)
+                initDataTransaction.setIsOpenResultModal(true)
+
+                const txn = await callResult.wait()
+                initDataTransaction.setIsOpenResultModal(false)
+
+                addTxn({
+                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                        callResult.hash || ''
+                    }`,
+                    msg: 'Set time',
+                    status: txn.status === 1 ? true : false,
+                })
+
+                setTimeout(() => {
+                    console.log('refetch data')
+                    refetch()
+                }, 5000)
+            }
+        } catch (err) {
+            console.log('Failed to approve token: ', err)
+            initDataTransaction.setError('Failed')
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
+        }
+    }
+
     const handleOnClick = (
         launchpad: (typeof launchpads)[0],
         lPadToken: Token | undefined,
         pmCur: Token | undefined,
     ) => {
-        setLaunchpadId(Number(launchpad?.id))
+        // setLaunchpadId(Number(launchpad?.id))
         setCurrentPage('Details')
 
         setLpDetails({
@@ -54,18 +153,30 @@ const ListLaunchpad = ({ setCurrentPage, setLpDetails }: IListLaunchpad) => {
         })
     }
 
-    const isClosed = (time: string) => {
-        return Number(time) <= new Date().getTime() / 1000
-    }
+    useEffect(() => {
+        refetch()
+    }, [])
+
     return (
         <Container>
             <Title>
                 <p>Launchpad</p>
-                <div
-                    className="btn-create"
-                    onClick={() => setCurrentPage('Create')}
-                >
-                    + Create market
+                <div>
+                    {adminAddress?.toLocaleLowerCase() ===
+                        account?.toLocaleLowerCase() && (
+                        <div
+                            className="btn-create"
+                            onClick={() => setIsOpenAdmin((i) => !i)}
+                        >
+                            + Grant operator
+                        </div>
+                    )}
+                    <div
+                        className="btn-create"
+                        onClick={() => setCurrentPage('Create')}
+                    >
+                        + Create
+                    </div>
                 </div>
             </Title>
             <WrapLaunchpad>
@@ -74,7 +185,10 @@ const ListLaunchpad = ({ setCurrentPage, setLpDetails }: IListLaunchpad) => {
                         return (
                             <CardDetails key={index}>
                                 <div className="thumbnail">
-                                    <img src={UnknowToken} alt="launchpad" />
+                                    <img
+                                        src={UnknowThumbnail}
+                                        alt="launchpad"
+                                    />
                                 </div>
                                 <Details>
                                     <div className="label">
@@ -90,17 +204,22 @@ const ListLaunchpad = ({ setCurrentPage, setLpDetails }: IListLaunchpad) => {
                                                     }
                                                 </span>
                                                 <Badge
-                                                    type={
-                                                        isClosed(
-                                                            launchpad.endTime,
-                                                        )
-                                                            ? 'closed'
-                                                            : undefined
+                                                    bgColor={
+                                                        currentTimeLines &&
+                                                        badgeColors?.[
+                                                            currentTimeLines?.[
+                                                                index
+                                                            ].badge
+                                                                ?.split(' ')
+                                                                ?.join('')
+                                                        ]
                                                     }
                                                 >
-                                                    {isClosed(launchpad.endTime)
-                                                        ? 'Closed'
-                                                        : 'On Sale'}
+                                                    {
+                                                        currentTimeLines?.[
+                                                            index
+                                                        ].badge
+                                                    }
                                                 </Badge>
                                             </div>
                                             <div className="name-token">
@@ -133,11 +252,15 @@ const ListLaunchpad = ({ setCurrentPage, setLpDetails }: IListLaunchpad) => {
                                                 Start Time:{' '}
                                                 {handleTime(
                                                     launchpad.startTime,
+                                                    true,
                                                 )}
                                             </div>
                                             <div>
                                                 End Time:{' '}
-                                                {handleTime(launchpad.endTime)}
+                                                {handleTime(
+                                                    launchpad.endTime,
+                                                    true,
+                                                )}
                                             </div>
                                             <div>
                                                 Payment Crypto:{' '}
@@ -146,7 +269,21 @@ const ListLaunchpad = ({ setCurrentPage, setLpDetails }: IListLaunchpad) => {
                                                         ?.symbol
                                                 }
                                             </div>
-
+                                            {availableSetTimes[index] &&
+                                                account?.toLocaleLowerCase() ===
+                                                    launchpad.launchpadOwner.toLocaleLowerCase() && (
+                                                    <div>
+                                                        <PrimaryButton
+                                                            name="Set time"
+                                                            onClick={() =>
+                                                                handleOnSetTime(
+                                                                    launchpad.id,
+                                                                )
+                                                            }
+                                                            type="launch-pad"
+                                                        />
+                                                    </div>
+                                                )}
                                             <div className="btn-view">
                                                 <PrimaryButton
                                                     name="View more"
@@ -177,15 +314,35 @@ const ListLaunchpad = ({ setCurrentPage, setLpDetails }: IListLaunchpad) => {
 
 const Container = styled.div`
     margin: 0 auto 40px;
-    max-width: 1440px;
+    max-width: 1475px;
 
-    padding: 30px 0.5rem;
+    padding: 30px 0;
+
+    @media screen and (max-width: 1554px) {
+        max-width: 1100px;
+    }
+
+    @media screen and (max-width: 1163px) {
+        max-width: 725px;
+    }
+
+    @media screen and (max-width: 788px) {
+        max-width: 505px;
+    }
 `
 const Title = styled.div`
     display: flex;
     justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
     align-items: center;
     padding-bottom: 4.5rem;
+
+    div {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
 
     .btn-create {
         padding: 5px 8px;
@@ -206,11 +363,15 @@ const Title = styled.div`
 `
 const WrapLaunchpad = styled.div`
     display: flex;
-    justify-content: space-evenly;
     flex-wrap: wrap;
     color: #111;
     gap: 25px;
-    flex-direction: row-reverse;
+    text-align: end;
+
+    @media screen and (max-width: 788px) {
+        justify-content: center;
+    }
+    /* flex-direction: row-reverse; */
 `
 const CardDetails = styled(Row)`
     border: 1px solid black;
@@ -225,21 +386,24 @@ const CardDetails = styled(Row)`
         /* max-height: 300px; */
         /* display: flex; */
         /* align-items: center; */
-        border-bottom: 1px solid #111;
+        /* border-bottom: 1px solid #111; */
     }
 
     img {
         width: 100%;
-        height: 100%;
-        object-fit: cover;
+        /* height: 100%; */
+        /* object-fit: cover; */
+        border-radius: 8px 8px 0 0;
+        /* border-bottom: 1px solid; */
     }
 `
 
 const Details = styled.div`
     /* width: 400px; */
     /* min-width: 400px; */
-    padding: 0 1.5rem;
+    padding: 0 0.5rem;
     max-width: 320px;
+    margin: auto;
 
     .label {
         display: flex;
@@ -277,7 +441,7 @@ const LogoToken = styled.div`
     }
 `
 
-const Badge = styled.div<{ type?: string }>`
+const Badge = styled.div<{ bgColor?: string }>`
     border: 1px solid #111;
     border-radius: 4px;
     padding: 3px 5px;
@@ -285,8 +449,8 @@ const Badge = styled.div<{ type?: string }>`
     color: #111;
     display: flex;
     justify-content: center;
-    background: ${({ type }) => (type ? 'red' : 'aquamarine')};
-    color: ${({ type }) => (type ? 'white' : '')};
+    background: ${({ bgColor }) => (bgColor ? bgColor : '')};
+    color: ${({ bgColor }) => (bgColor === 'red' ? 'white' : '')};
 `
 
 const WrapDetails = styled.div`

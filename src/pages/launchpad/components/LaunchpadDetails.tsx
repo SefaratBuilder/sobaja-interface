@@ -16,6 +16,12 @@ import { useTransactionHandler } from 'states/transactions/hooks'
 import { useActiveWeb3React } from 'hooks'
 import { URLSCAN_BY_CHAINID } from 'constants/index'
 import { useQueryCommitUser, useQueryLaunchpad } from 'hooks/useQueryLaunchpad'
+import { badgeColors, getCurrentTimeLine } from 'utils/launchpad'
+
+const UnknowThumbnail =
+    // 'https://thelagostoday.com/wp-content/uploads/2021/07/bit-bitcoin.jpg'
+    'https://p2pb2b.com/static/img/launchpad/banner.png'
+
 interface IDetails {
     details: ILaunchpadDetails | undefined
     setCurrentPage: React.Dispatch<
@@ -33,10 +39,21 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
     const delayDuration = 15000
     const { totalCommitment } = useQueryCommitUser(details?.id, account)
 
+    /**
+     * @totalOffered : total commitment of user / this launchpad
+     */
     const totalOffered = useMemo(() => {
         if (!details?.totalCommitment || !details.price) return 0
         return Number(details.totalCommitment) / Number(details.price)
     }, [details])
+
+    const isAdmin = useMemo(() => {
+        if (!account || !details?.launchpadOwner) return false
+        return (
+            account?.toLocaleLowerCase() ===
+            details?.launchpadOwner?.toLocaleLowerCase()
+        )
+    }, [account, details])
 
     const isAtLimit = useMemo(() => {
         if (
@@ -58,46 +75,34 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
         return false
     }, [totalCommitment, details, commitValue])
 
-    const timeLine = [
-        {
-            time: details?.startTime,
-            title: 'Soba Holding Calculation Period',
-        },
-        {
-            time: details?.endTime,
-            title: 'Subscription Period',
-        },
-        {
-            time: add(details?.endTime, 3600),
-            title: 'Calculation Period',
-        },
-        {
-            time: add(details?.endTime, 3600 * 2),
-            title: 'Final Token Distribution',
-            isFinalized: details?.finalized,
-        },
-    ]
-    const currentTimeline = useMemo(() => {
-        const currentTs = new Date().getTime() / 1000
-        let i = 0
-        let result = timeLine[0]
-        timeLine.map((tl, index) => {
-            if (Number(tl.time) < currentTs) {
-                // console.log({ index })
-                i = index
-                result = tl
-            }
-        })
-
-        if (!details?.finalized && i === 3) i -= 1
-        return { ...result, index: i }
-    }, timeLine)
-
-    const isClosed = useMemo(() => {
-        return details?.endTime
-            ? Number(details?.endTime) <= new Date().getTime() / 1000
-            : false
+    const isAvailableConfirm = useMemo(() => {
+        if (details?.startTime && details?.endTime) {
+            const current = new Date().getTime() / 1000
+            return (
+                current > Number(details.startTime) &&
+                current < Number(details.endTime)
+            )
+        }
+        return false
     }, [details])
+
+    const currentTimeline = getCurrentTimeLine(
+        details?.startTime,
+        details?.endTime,
+        details?.finalized,
+    )
+
+    const isAvailableClaim = useMemo(() => {
+        if (details?.claims && details?.claims?.length > 0 && account) {
+            let dClaimed = details?.claims?.find(
+                (d) =>
+                    d.address.toLocaleLowerCase() ===
+                    account.toLocaleLowerCase(),
+            )
+            return dClaimed ? false : true
+        }
+        return true
+    }, [details, account])
 
     const onCommit = async () => {
         console.log('onCommit...')
@@ -152,7 +157,7 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
     const handleOnClaim = async () => {
         try {
             initDataTransaction.setError('')
-            if (isClosed && details?.finalized) {
+            if (details?.finalized) {
                 console.log('on claim....')
                 initDataTransaction.setIsOpenWaitingModal(true)
 
@@ -171,6 +176,51 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                     msg: 'Claim',
                     status: txn.status === 1 ? true : false,
                 })
+
+                setTimeout(() => {
+                    console.log('refetch data')
+                    refetch()
+                }, delayDuration)
+            }
+        } catch (err) {
+            console.log('Failed to approve token: ', err)
+            initDataTransaction.setError('Failed')
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
+        }
+    }
+
+    const handleOnFinalize = async () => {
+        try {
+            initDataTransaction.setError('')
+            if (
+                currentTimeline.badge === 'On Progess' &&
+                !details?.finalized &&
+                details?.launchpadOwner
+            ) {
+                console.log('on claim....')
+                initDataTransaction.setIsOpenWaitingModal(true)
+
+                const callResult = await fairlaunchContract?.finalize()
+
+                initDataTransaction.setIsOpenWaitingModal(false)
+                initDataTransaction.setIsOpenResultModal(true)
+
+                const txn = await callResult.wait()
+                initDataTransaction.setIsOpenResultModal(false)
+
+                addTxn({
+                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                        callResult.hash || ''
+                    }`,
+                    msg: 'Finalize launchpad',
+                    status: txn.status === 1 ? true : false,
+                })
+
+                setTimeout(() => {
+                    console.log('refetch data')
+                    refetch()
+                }, delayDuration)
             }
         } catch (err) {
             console.log('Failed to approve token: ', err)
@@ -187,11 +237,7 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                     data={initDataTransaction}
                     onConfirm={() => onConfirmCommit()}
                 />
-                {(initDataTransaction.isOpenConfirmModal ||
-                    initDataTransaction.isOpenResultModal ||
-                    initDataTransaction.isOpenWaitingModal) && <Blur />}
             </>
-            <button onClick={() => refetch()}>Refect</button>
             <Container>
                 <div
                     className="btn-back"
@@ -200,39 +246,30 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                     {' '}
                     {'<'} Launchpad
                 </div>
+                {/* <button onClick={() => refetch()}>Refect</button> */}
                 <WrapTitle>
                     <LeftSide>
                         <Thumbnail>
-                            <img src={details?.img || ETH} alt="" />
+                            <img src={details?.img || UnknowThumbnail} alt="" />
                         </Thumbnail>
                         <DetailsHeader>
                             <div>
                                 <div className="title">
-                                    <div>
-                                        {
-                                            // details?.token?.symbol ||
-                                            details?.lPadToken?.symbol
-                                        }
-                                    </div>
+                                    <div>{details?.lPadToken?.symbol}</div>
                                     <Badge
-                                        type={
-                                            details?.endTime
-                                                ? isClosed
-                                                    ? 'Closed'
-                                                    : ''
-                                                : ''
+                                        bgColor={
+                                            badgeColors?.[
+                                                currentTimeline?.badge
+                                                    ?.split(' ')
+                                                    ?.join('')
+                                            ]
                                         }
                                     >
-                                        {details?.endTime && isClosed
-                                            ? 'Closed'
-                                            : 'On sale'}
+                                        {currentTimeline?.badge}
                                     </Badge>
                                 </div>
                                 <div className="details">
-                                    {
-                                        // details?.details ||
-                                        details?.lPadToken?.name
-                                    }
+                                    {details?.lPadToken?.name}
                                 </div>
                             </div>
                             <div className="social-contact">
@@ -245,7 +282,11 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                         <span>End date:</span>
                         <span>
                             {' '}
-                            {handleTime(timeLine[timeLine.length - 1].time)}
+                            {handleTime(
+                                currentTimeline.timeLine[
+                                    currentTimeline.timeLine.length - 1
+                                ].time,
+                            )}
                         </span>
                     </RightSide>
                 </WrapTitle>
@@ -322,7 +363,7 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                             <div className="title-body">
                                 Subscription Timeline
                             </div>
-                            {timeLine.map((tl, i) => {
+                            {currentTimeline.timeLine?.map((tl, i) => {
                                 return (
                                     <TimeLine key={i}>
                                         <div className="left-side">
@@ -336,7 +377,10 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                                                     i + 1
                                                 )}
                                             </div>
-                                            {i !== timeLine.length - 1 && (
+                                            {i !==
+                                                currentTimeline.timeLine
+                                                    .length -
+                                                    1 && (
                                                 <div>
                                                     <div className="line-direction"></div>
                                                 </div>
@@ -413,9 +457,11 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                         </div>
                     </WrapTimeLine>
                     <WrapCommit>
-                        {isClosed &&
-                            account?.toLocaleLowerCase() ===
-                                details?.launchpadOwner?.toLocaleLowerCase() && (
+                        {/**
+                         * @dev On progess: launchpad is over and owner is not resolved yet
+                         */}
+                        {currentTimeline.badge === 'On Progess' ? (
+                            isAdmin ? (
                                 <Commit>
                                     <div className="title-commit">Finalize</div>
                                     <LabelCommit className="claim">
@@ -428,56 +474,94 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
 
                                         <PrimaryButton
                                             name={'Resolve'}
-                                            onClick={() => {}}
+                                            onClick={() => handleOnFinalize()}
                                             type="launch-pad"
-                                            disabled={
-                                                account?.toLocaleLowerCase() !==
-                                                details?.launchpadOwner?.toLocaleLowerCase()
-                                            }
+                                            disabled={!isAdmin}
                                         />
                                     </LabelCommit>
                                 </Commit>
-                            )}
-                        {isClosed ? (
-                            <Commit>
-                                <div className="title-commit">
-                                    General claim
-                                </div>
-                                <LabelCommit className="claim">
-                                    <div className="label-currency">
-                                        <div>Your investment: </div>
-                                        <div>
-                                            {divNumberWithDecimal(
-                                                totalCommitment || 0,
-                                                details?.paymentToken
-                                                    ?.decimals || 18,
-                                            )}{' '}
-                                            {details?.paymentToken?.symbol}
-                                        </div>
+                            ) : (
+                                <Commit>
+                                    <div className="title-commit">
+                                        On Progess
                                     </div>
-                                    <div className="label-currency">
-                                        <div>Receive: </div>
-                                        <div>
-                                            {details?.price
-                                                ? Number(totalCommitment) /
-                                                  Number(details?.price)
-                                                : 0}{' '}
-                                            {details?.lPadToken?.symbol}
+                                    <LabelCommit className="claim">
+                                        <div className="label-currency">
+                                            <div>
+                                                Launchpad is over, please wait
+                                                for owner resolve!
+                                            </div>
                                         </div>
-                                    </div>
-                                    <PrimaryButton
-                                        name={
-                                            !details?.finalized
-                                                ? 'Launchpad is not finalized'
-                                                : 'Claim'
-                                        }
-                                        onClick={() => handleOnClaim()}
-                                        type="launch-pad"
-                                        disabled={!details?.finalized}
-                                    />
-                                </LabelCommit>
-                            </Commit>
+                                    </LabelCommit>
+                                </Commit>
+                            )
                         ) : (
+                            <></>
+                        )}
+
+                        {/**
+                         * @dev Closed: launchpad is over and owner resolved
+                         */}
+                        {currentTimeline.badge === 'Closed' ? (
+                            isAvailableClaim ? (
+                                <Commit>
+                                    <div className="title-commit">
+                                        General claim
+                                    </div>
+                                    <LabelCommit className="claim">
+                                        <div className="label-currency">
+                                            <div>Your investment: </div>
+                                            <div>
+                                                {divNumberWithDecimal(
+                                                    totalCommitment || 0,
+                                                    details?.paymentToken
+                                                        ?.decimals || 18,
+                                                )}{' '}
+                                                {details?.paymentToken?.symbol}
+                                            </div>
+                                        </div>
+                                        <div className="label-currency">
+                                            <div>Receive: </div>
+                                            <div>
+                                                {details?.price
+                                                    ? Number(totalCommitment) /
+                                                      Number(details?.price)
+                                                    : 0}{' '}
+                                                {details?.lPadToken?.symbol}
+                                            </div>
+                                        </div>
+                                        <PrimaryButton
+                                            name={
+                                                !details?.finalized
+                                                    ? 'Launchpad is not finalized'
+                                                    : 'Claim'
+                                            }
+                                            onClick={() => handleOnClaim()}
+                                            type="launch-pad"
+                                            disabled={!details?.finalized}
+                                        />
+                                    </LabelCommit>
+                                </Commit>
+                            ) : (
+                                <Commit>
+                                    <div className="title-commit">
+                                        General claim
+                                    </div>
+                                    <LabelCommit className="claim">
+                                        <div className="label-currency">
+                                            <div>You already claimed</div>
+                                        </div>
+                                    </LabelCommit>
+                                </Commit>
+                            )
+                        ) : (
+                            <></>
+                        )}
+
+                        {/**
+                         * @dev On Sale: launchpad is start and available for commit
+                         */}
+                        {currentTimeline.badge === 'On Sale' && (
                             <Commit>
                                 <div className="title-commit">General sale</div>
                                 <LabelCommit>
@@ -505,7 +589,9 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                                         name="Confirm"
                                         onClick={() => onCommit()}
                                         type="launch-pad"
-                                        disabled={isAtLimit}
+                                        disabled={
+                                            isAtLimit || !isAvailableConfirm
+                                        }
                                     />
                                 </LabelCommit>
                             </Commit>
@@ -747,7 +833,7 @@ const DetailsHeader = styled.div`
     }
 `
 
-const Badge = styled.div<{ type?: string }>`
+const Badge = styled.div<{ bgColor?: string }>`
     border: 1px solid #111;
     border-radius: 4px;
     padding: 3px 5px;
@@ -756,7 +842,7 @@ const Badge = styled.div<{ type?: string }>`
     display: flex;
     align-items: center;
     justify-content: center;
-    background: ${({ type }) => (type ? 'red' : 'aquamarine')};
+    background: ${({ bgColor }) => (bgColor ? bgColor : '')};
 `
 const WrapBody = styled.div`
     display: flex;
