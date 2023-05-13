@@ -71,20 +71,6 @@ export const InitCompTransaction = (): CompTransaction => {
 }
 
 const ComponentsTransaction = ({ data, onConfirm }: Data) => {
-    // console.log('🤦‍♂️ ⟹ ComponentsTransaction ⟹ onConfirm:', onConfirm)
-    // const { addTxn } = useTransactionHandler()
-
-    // // useEffect(() => {
-    // //     console.log('🤦‍♂️ ⟹ ComponentsTransaction ⟹ data:', data)
-    // //     if (data.isOpenToastMessageModal) {
-    // //         addTxn({
-    // //             hash: data.payload?.hash || '',
-    // //             msg: data.payload?.msg || '',
-    // //             status: data.payload?.status || false,
-    // //         })
-    // //     }
-    // // }, [data])
-
     return (
         <Container>
             {data.isOpenConfirmModal && (

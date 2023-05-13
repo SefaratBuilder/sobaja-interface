@@ -5,6 +5,8 @@ import { Row, Columns } from 'components/Layouts'
 
 import { useSwapActionHandlers, useSwapState } from 'states/swap/hooks'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
+import History from './Components/History'
+import CurrentStake from './Components/CurrentStake'
 
 import { useActiveWeb3React } from 'hooks'
 import { usePair } from 'hooks/useAllPairs'
@@ -35,9 +37,13 @@ import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
 import ETH from 'assets/token-logos/eth.svg'
+import SOBA from '/favicon.ico'
 import BGSoba from 'assets/icons/soba2.jpg'
 import ArrowUp from 'assets/icons/arrow-up.svg'
 import Lock from 'assets/icons/lock.svg'
+import { useStakingContract } from 'hooks/useContract'
+import { sendEvent } from 'utils/analytics'
+import { Field } from 'interfaces'
 
 const Stake = () => {
     const swapState = useSwapState()
@@ -54,13 +60,15 @@ const Stake = () => {
     const [inputUnstakeValue, setInputUnstakeValue] = useState<number | string>(
         '0',
     )
+    const tokenTest = useToken('0xdEfd221072dD078d11590D58128399C2fe8cCa7e');
 
     const { chainId, library, account } = useActiveWeb3React()
+    const stakingContract = useStakingContract();
     const { refAddress } = useAppState()
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
     const pair = usePair(chainId, tokenIn, tokenOut)
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
-    const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
+    const tokenApproval = useTokenApproval(account, routerAddress, tokenTest)
     const balanceIn = useCurrencyBalance(account, tokenIn)
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
@@ -81,6 +89,10 @@ const Stake = () => {
     ]
     const percents = [25, 50, 75, 100]
     const [tiers, setTiers] = useState<number>(0)
+
+    const positionIndex = 0;
+
+
 
     useOnClickOutside(ref, () => {
         setIsOpenWalletModal(false)
@@ -127,11 +139,12 @@ const Stake = () => {
     }, [tiers])
 
     const handleOnApprove = async () => {
+        console.log('approving....')
         try {
             initDataTransaction.setError('')
+            console.log('approving....')
 
             if (tokenIn && inputAmount && routerAddress) {
-                console.log('approving....')
                 initDataTransaction.setIsOpenWaitingModal(true)
                 const callResult: any = await tokenApproval?.approve(
                     routerAddress,
@@ -165,7 +178,137 @@ const Stake = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
     }
 
+    // params : amount, period <=> inputSelectionValue, selection.name
+    const handleOnDeposit = async () =>{
+        console.log('..........Testing');
+        
+        try {
+            if(!inputStakeValue || !selection || !tokenTest) return
+                console.log('Staking .........');
+
+                const inputStakingValue = mulNumberWithDecimal(inputStakeValue, tokenTest?.decimals);
+
+                const args = [
+                    inputStakingValue,
+                    selection[tiers].name
+                ]
+                const method = 'deposit'
+                const gasLimit = await stakingContract?.estimateGas?.[method]?.(
+                    ...args
+                )
+                const callResult = await stakingContract?.[method]?.(...args,{
+                    gasLimit: gasLimit && gasLimit.add(1000)
+                })
+                console.log('🤦‍♂️ ⟹ handleOnDeposit ⟹ callResult:', { callResult })
+                
+                sendEvent({
+                    category: 'Defi',
+                    action: 'Staking',
+                    label:[
+                        inputStakeValue,
+                        selection
+                    ].join('/'),
+                })
+
+                const txn = await callResult.wait();
+                addTxn({
+                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx${
+                        callResult.hash || ''
+                    }`,
+                    msg:`Staking ${inputStakeValue} for ${selection}`,
+                    status: txn.status === 1 ? true :false
+                })
+
+                // reset user input
+                onUserInput(Field.INPUT,'')
+            
+        } catch (error) {
+            console.log('====================================');
+            console.log('Error with cause:', error);
+            console.log('====================================');
+        }
+    }
+
+    const handleOnHarvest = async() =>{
+        console.log("Testing harvest ....");
+        try {
+            const positionsIndex = 
+            console.log('Harvesting ....');
+
+            const args = [
+                positionIndex
+            ]
+            const method = 'harvest'
+            const gasLimit = await stakingContract?.estimateGas?.[method]?.(
+                ...args
+            )
+            const callResult = await stakingContract?.[method]?.(...args,{
+                gasLimit: gasLimit && gasLimit.add(1000)
+            })
+            console.log('🤦‍♂️ ⟹ handleOnHarvest ⟹ callResult:', { callResult })
+
+            sendEvent({
+                category: "Defi",
+                action: 'Harvesting',
+                label:[
+                    positionIndex
+                ].join('/'),
+            })
+            const txn = await callResult.wait();
+            addTxn({
+                hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx${
+                    callResult.hash || ''
+                }`,
+                msg: `Harvesting at index ${positionIndex}`,
+                status: txn.status === 1 ? true : false 
+            })
+        } catch (error) {
+            console.log(error);
+            
+        }
+    }
+
+    const handleOnWithDraw = async() =>{
+        console.log('Testing withdraw .....');
+        try {
+            console.log('Withdrawing ....');
+            const args = [
+                positionIndex
+            ]
+            const method = 'withdraw'
+            const gasLimit = await stakingContract?.estimateGas?.[method]?.(
+                ...args
+            )
+            const callResult = await stakingContract?.[method]?.(...args,{
+                gasLimit: gasLimit && gasLimit.add(1000)
+            })
+            console.log('🤦‍♂️ ⟹ handleOnWithdraw ⟹ callResult:', { callResult })
+
+            sendEvent({
+                category: "Defi",
+                action: 'Withdrawing',
+                label: [
+                    positionIndex
+                ].join('/'),
+            })
+            const txn = await callResult.wait();
+            addTxn({
+                hash:`${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx${
+                    callResult.hash || ''
+                }`,
+                msg:`Withdrawing at index ${positionIndex}`,
+                status: txn.status === 1 ? true : false 
+            })
+        } catch (error) {
+            console.log(error);
+            
+        }
+        
+    }
+
+
     const StakeButton = ({ isInsufficientAllowance }: any) => {
+        console.log({isInsufficientAllowance})
         const isNotConnected = !account
 
         return (
@@ -176,7 +319,7 @@ const Stake = () => {
                         onClick={openWalletModal}
                     />
                 ) : isInsufficientAllowance ? (
-                    <ButtonStake>
+                    <ButtonStake onClick={() => handleOnApprove()}>
                         <div>
                             <img src={Lock} alt="lock" />
                         </div>
@@ -184,8 +327,9 @@ const Stake = () => {
                     </ButtonStake>
                 ) : (
                     <ButtonStake isStake={true}>
-                        <PrimaryButton onClick={() => {}} name={'Stake'} />
+                        <PrimaryButton onClick={handleOnDeposit} name={'Stake'} />
                     </ButtonStake>
+                    
                 )}
             </LabelButtonStake>
         )
@@ -194,8 +338,8 @@ const Stake = () => {
     const StakeToken = () => {
         const isInsufficientAllowance =
             Number(tokenApproval?.allowance) < Number(inputAmount) &&
-            !isNativeCoin(tokenIn)
-
+            !isNativeCoin(tokenTest)
+        console.log({isInsufficientAllowance })
         return (
             <>
                 <WrapContent image={BGSoba} isStake={true}>
@@ -220,6 +364,7 @@ const Stake = () => {
                         </Nav>
                         <Setting />
                     </Row>
+
                     <Row jus="space-between">
                         <div>Amount</div>
                         <div>
@@ -233,11 +378,11 @@ const Stake = () => {
                         <Row jus="space-between">
                             <WrapCustom>
                                 <div className="title details-token">
-                                    ETH Token
+                                    SOBA Token
                                 </div>
                                 <div className="group">
-                                    <img src={ETH} alt="logo-eth" />
-                                    <div className="value">ETH</div>
+                                    <img src={SOBA} alt="logo-eth" />
+                                    <div className="value">SOBA</div>
                                 </div>
                             </WrapCustom>
                             <LabelRight>
@@ -286,12 +431,13 @@ const Stake = () => {
                     <StakeButton
                         isInsufficientAllowance={isInsufficientAllowance}
                     />
+                   
 
                     <WrapDetailsStake>
                         <Row jus="space-between">
                             <div>Stake:</div>
                             <Row gap="5px">
-                                <div>30 ETH</div>
+                                <div>30 SOBA</div>
                             </Row>
                         </Row>
                         <Row jus="space-between">
@@ -416,10 +562,10 @@ const Stake = () => {
                     <LabelData>
                         <Row jus="space-between">
                             <WrapCustom>
-                                <div className="title">ETH Token</div>
+                                <div className="title">SOBA Token</div>
                                 <div className="group">
-                                    <img src={ETH} alt="logo-eth" />
-                                    <div className="value">ETH</div>
+                                    <img src={SOBA} alt="logo-soba" />
+                                    <div className="value">SOBA</div>
                                 </div>
                             </WrapCustom>
                             <LabelRight>
@@ -457,7 +603,7 @@ const Stake = () => {
                             <p>Tx Cost</p>
                         </Details>
                         <Details>
-                            <p className="value">0 ETH</p>
+                            <p className="value">0 SOBA</p>
                             <Row gap="5px">
                                 <p>Edit</p>
                                 <p>Market</p>
@@ -466,6 +612,14 @@ const Stake = () => {
                         </Details>
                     </WrapDetailsUnstake>
                     <PrimaryButton name="Unstake" />
+                    <WrapButtonBottom>
+                    <ButtonStake isStake={true}>
+                        <PrimaryButton onClick={handleOnHarvest} name={'Harvest'} />
+                    </ButtonStake>
+                    <ButtonStake isStake={true}>
+                        <PrimaryButton onClick={handleOnWithDraw} name={'Withdraw'} />
+                    </ButtonStake>
+                    </WrapButtonBottom>
                 </WrapContent>
             </>
         )
@@ -476,18 +630,14 @@ const Stake = () => {
             <>
                 <ComponentsTransaction
                     data={initDataTransaction}
-                    onConfirm={
-                        Number(tokenApproval?.allowance) <
-                            Number(inputAmount) && !isNativeCoin(tokenIn)
-                            ? handleOnApprove
-                            : ''
-                    }
+                    onConfirm={() => {}}
                 />
                 {(initDataTransaction.isOpenConfirmModal ||
                     initDataTransaction.isOpenResultModal ||
                     initDataTransaction.isOpenWaitingModal) && <Blur />}
             </>
             <ToastMessage />
+            <WrapStaking>
             <SwapContainer ref={ref}>
                 {!account && isOpenWalletModal && (
                     <>
@@ -502,12 +652,22 @@ const Stake = () => {
                 )}
                 {isStakeToken ? <StakeToken /> : <UnStakeToken />}
             </SwapContainer>
+            <CurrentStake />
+            </WrapStaking>
         </>
     )
 }
-
+const WrapStaking = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    @media (max-width: 1250px) {
+        flex-direction: column;
+        align-items: center;
+    }
+`;
 const SwapContainer = styled(Columns)`
-    margin: 0 auto 40px;
+    // margin: 0 auto 40px;
     height: fit-content;
     max-width: 520px;
 
@@ -579,9 +739,12 @@ const Nav = styled(Row)`
         border-radius: 4px;
         text-decoration: none !important;
         font-size: 14px;
-        font-weight: 400;
+        font-weight: 700;
         :hover {
             text-decoration: none !important;
+        }
+        @media (max-width: 400px){
+            font-size: 12px
         }
     }
 
@@ -820,4 +983,9 @@ const WrapDetailsStake = styled.div`
         }
     }
 `
+const WrapButtonBottom = styled.div`
+    display: flex;
+    gap: 40px;
+`;
+
 export default Stake

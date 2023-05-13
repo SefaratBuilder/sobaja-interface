@@ -1,3 +1,4 @@
+import { ChainId } from 'interfaces';
 import { useActiveWeb3React } from 'hooks'
 import { Contract } from '@ethersproject/contracts'
 import { useMemo } from 'react'
@@ -13,7 +14,8 @@ import {
     Faucet,
     LAUNCHPADS,
     STAKING_ABI,
-    AAEntryPoints
+    STAKING,
+    // AAEntryPoints
 } from 'constants/addresses'
 import ERC20 from 'constants/jsons/erc20.json'
 import { PAIR_ABI } from 'constants/jsons/pair'
@@ -67,7 +69,7 @@ export function useRouterContract(): Contract | null {
 export function useStakingContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
     if (!chainId) return null
-    return useContract('0x6E7E86F3CE091C4a842b0D27d1c8c4059090eC65', STAKING_ABI)
+    return useContract(STAKING[chainId], STAKING_ABI)
 }
 
 export function useTokenContract(address: string | undefined): Contract | null {
@@ -90,6 +92,7 @@ export function useLaunchpadContract(): Contract | null {
     return useContract(LAUNCHPADS[chainId], LAUNCHPAD_ABI)
 }
 
+
 export function useFairLaunchContract(address: string | undefined): Contract | null {
     return useContract(address, FAIRLAUNCH_ABI)
 }
@@ -103,5 +106,5 @@ export function useAccessManagerContract(): Contract | null {
 export function useAAEntryPointContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
     if (!chainId) return null
-    return useContract(AAEntryPoints[chainId], AAEntryPoint_ABI)
+    return useContract(LAUNCHPAD_ACCESS_MANAGERS[chainId], AAEntryPoint_ABI)
 }
