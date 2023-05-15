@@ -72,9 +72,6 @@ const ListLaunchpad = ({
             return current < Number(lp.startTime)
         })
     }, [launchpads])
-    console.log('🤦‍♂️ ⟹ availableSetTimes ⟹ availableSetTimes:', {
-        availableSetTimes,
-    })
 
     const launchpadTokens = useTokens(
         launchpads?.map((lp) => lp.launchpadToken),
@@ -159,155 +156,175 @@ const ListLaunchpad = ({
 
     return (
         <Container>
-            <Title>
-                <p>Launchpad</p>
-                <div>
-                    {adminAddress?.toLocaleLowerCase() ===
-                        account?.toLocaleLowerCase() && (
-                        <div
-                            className="btn-create"
-                            onClick={() => setIsOpenAdmin((i) => !i)}
-                        >
-                            + Grant operator
-                        </div>
-                    )}
-                    <div
-                        className="btn-create"
-                        onClick={() => setCurrentPage('Create')}
-                    >
-                        + Create
-                    </div>
-                </div>
-            </Title>
-            <WrapLaunchpad>
-                {launchpads &&
-                    launchpads?.map((launchpad, index) => {
-                        return (
-                            <CardDetails key={index}>
-                                <div className="thumbnail">
-                                    <img
-                                        src={UnknowThumbnail}
-                                        alt="launchpad"
-                                    />
+            {!account ? (
+                <div className="notice">Please connect wallet</div>
+            ) : (
+                <>
+                    <Title>
+                        <p>Launchpad</p>
+                        <div>
+                            {adminAddress?.toLocaleLowerCase() ===
+                                account?.toLocaleLowerCase() && (
+                                <div
+                                    className="btn-create"
+                                    onClick={() => setIsOpenAdmin((i) => !i)}
+                                >
+                                    + Grant operator
                                 </div>
-                                <Details>
-                                    <div className="label">
-                                        <WrapHeader>
-                                            <LogoToken>
-                                                <img src={UnknowToken} alt="" />
-                                            </LogoToken>
-                                            <div>
-                                                <span>
-                                                    {
-                                                        launchpadTokens?.[index]
-                                                            ?.symbol
-                                                    }
-                                                </span>
-                                                <Badge
-                                                    bgColor={
-                                                        currentTimeLines &&
-                                                        badgeColors?.[
-                                                            currentTimeLines?.[
-                                                                index
-                                                            ].badge
-                                                                ?.split(' ')
-                                                                ?.join('')
-                                                        ]
-                                                    }
-                                                >
-                                                    {
-                                                        currentTimeLines?.[
-                                                            index
-                                                        ].badge
-                                                    }
-                                                </Badge>
-                                            </div>
-                                            <div className="name-token">
-                                                {/* {"launchpad.token.name"} */}
-                                                {launchpadTokens?.[index]?.name}
-                                            </div>
-                                        </WrapHeader>
-                                        <WrapDetails>
-                                            <div>
-                                                Total Token:{' '}
-                                                {divNumberWithDecimal(
-                                                    launchpad.totalTokenSale,
-                                                    18,
-                                                )}
-                                            </div>
-                                            <div>
-                                                Sale Price: 1{' '}
-                                                {
-                                                    launchpadTokens?.[index]
-                                                        ?.symbol
-                                                }{' '}
-                                                -{' '}
-                                                {divNumberWithDecimal(
-                                                    launchpad.price,
-                                                    18,
-                                                )}{' '}
-                                                USDC
-                                            </div>
-                                            <div>
-                                                Start Time:{' '}
-                                                {handleTime(
-                                                    launchpad.startTime,
-                                                    true,
-                                                )}
-                                            </div>
-                                            <div>
-                                                End Time:{' '}
-                                                {handleTime(
-                                                    launchpad.endTime,
-                                                    true,
-                                                )}
-                                            </div>
-                                            <div>
-                                                Payment Crypto:{' '}
-                                                {
-                                                    launchpadTokens?.[index]
-                                                        ?.symbol
-                                                }
-                                            </div>
-                                            {availableSetTimes[index] &&
-                                                account?.toLocaleLowerCase() ===
-                                                    launchpad.launchpadOwner.toLocaleLowerCase() && (
+                            )}
+                            <div
+                                className="btn-create"
+                                onClick={() => setCurrentPage('Create')}
+                            >
+                                + Create
+                            </div>
+                        </div>
+                    </Title>
+                    <WrapLaunchpad>
+                        {launchpads &&
+                            launchpads?.map((launchpad, index) => {
+                                return (
+                                    <CardDetails key={index}>
+                                        <div className="thumbnail">
+                                            <img
+                                                src={UnknowThumbnail}
+                                                alt="launchpad"
+                                            />
+                                        </div>
+                                        <Details>
+                                            <div className="label">
+                                                <WrapHeader>
+                                                    <LogoToken>
+                                                        <img
+                                                            src={UnknowToken}
+                                                            alt=""
+                                                        />
+                                                    </LogoToken>
                                                     <div>
+                                                        <span>
+                                                            {
+                                                                launchpadTokens?.[
+                                                                    index
+                                                                ]?.symbol
+                                                            }
+                                                        </span>
+                                                        <Badge
+                                                            bgColor={
+                                                                currentTimeLines &&
+                                                                badgeColors?.[
+                                                                    currentTimeLines?.[
+                                                                        index
+                                                                    ].badge
+                                                                        ?.split(
+                                                                            ' ',
+                                                                        )
+                                                                        ?.join(
+                                                                            '',
+                                                                        )
+                                                                ]
+                                                            }
+                                                        >
+                                                            {
+                                                                currentTimeLines?.[
+                                                                    index
+                                                                ].badge
+                                                            }
+                                                        </Badge>
+                                                    </div>
+                                                    <div className="name-token">
+                                                        {/* {"launchpad.token.name"} */}
+                                                        {
+                                                            launchpadTokens?.[
+                                                                index
+                                                            ]?.name
+                                                        }
+                                                    </div>
+                                                </WrapHeader>
+                                                <WrapDetails>
+                                                    <div>
+                                                        Total Token:{' '}
+                                                        {divNumberWithDecimal(
+                                                            launchpad.totalTokenSale,
+                                                            18,
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        Sale Price: 1{' '}
+                                                        {
+                                                            launchpadTokens?.[
+                                                                index
+                                                            ]?.symbol
+                                                        }{' '}
+                                                        -{' '}
+                                                        {divNumberWithDecimal(
+                                                            launchpad.price,
+                                                            18,
+                                                        )}{' '}
+                                                        USDC
+                                                    </div>
+                                                    <div>
+                                                        Start Time:{' '}
+                                                        {handleTime(
+                                                            launchpad.startTime,
+                                                            true,
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        End Time:{' '}
+                                                        {handleTime(
+                                                            launchpad.endTime,
+                                                            true,
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        Payment Crypto:{' '}
+                                                        {
+                                                            launchpadTokens?.[
+                                                                index
+                                                            ]?.symbol
+                                                        }
+                                                    </div>
+                                                    {availableSetTimes[index] &&
+                                                        account?.toLocaleLowerCase() ===
+                                                            launchpad.launchpadOwner.toLocaleLowerCase() && (
+                                                            <div>
+                                                                <PrimaryButton
+                                                                    name="Set time"
+                                                                    onClick={() =>
+                                                                        handleOnSetTime(
+                                                                            launchpad.id,
+                                                                        )
+                                                                    }
+                                                                    type="launch-pad"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    <div className="btn-view">
                                                         <PrimaryButton
-                                                            name="Set time"
+                                                            name="View more"
                                                             onClick={() =>
-                                                                handleOnSetTime(
-                                                                    launchpad.id,
+                                                                handleOnClick(
+                                                                    launchpad,
+                                                                    launchpadTokens?.[
+                                                                        index
+                                                                    ],
+                                                                    paymentCurrencies?.[
+                                                                        index
+                                                                    ],
                                                                 )
                                                             }
                                                             type="launch-pad"
                                                         />
                                                     </div>
-                                                )}
-                                            <div className="btn-view">
-                                                <PrimaryButton
-                                                    name="View more"
-                                                    onClick={() =>
-                                                        handleOnClick(
-                                                            launchpad,
-                                                            launchpadTokens?.[
-                                                                index
-                                                            ],
-                                                            paymentCurrencies?.[
-                                                                index
-                                                            ],
-                                                        )
-                                                    }
-                                                    type="launch-pad"
-                                                />
+                                                </WrapDetails>
                                             </div>
-                                        </WrapDetails>
-                                    </div>
-                                </Details>
-                            </CardDetails>
-                        )
-                    })}
-            </WrapLaunchpad>
+                                        </Details>
+                                    </CardDetails>
+                                )
+                            })}
+                    </WrapLaunchpad>
+                </>
+            )}
         </Container>
     )
 }
@@ -317,6 +334,10 @@ const Container = styled.div`
     max-width: 1475px;
 
     padding: 30px 0;
+
+    .notice {
+        text-align: center;
+    }
 
     @media screen and (max-width: 1554px) {
         max-width: 1100px;
