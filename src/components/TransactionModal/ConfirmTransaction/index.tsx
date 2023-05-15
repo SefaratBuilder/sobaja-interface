@@ -128,7 +128,8 @@ const ConfirmTransactionModal = ({
                         />
                     </div>
                 </Header>
-                {payload?.method === 'swap' ? (
+                {payload?.method === 'swap' ||
+                payload?.method === 'add liquidity' ? (
                     <EstimatedNotice>
                         <TitleEstimate style={{ gap: '5px' }}>
                             <h2 className="to">{payload?.input || 999}</h2>
@@ -162,10 +163,13 @@ const ConfirmTransactionModal = ({
                 <ContentBottom>
                     <WrapButton>
                         <PrimaryButton
-                            onClick={() => {
-                                onConfirm()
+                            onClick={
+                                () =>
+                                    payload?.onConfirm
+                                        ? payload?.onConfirm()
+                                        : onConfirm()
                                 // setConfirmTransaction(false)
-                            }}
+                            }
                             type="light-blue"
                             name="Confirm Supply"
                         />
