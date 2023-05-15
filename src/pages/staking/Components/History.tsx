@@ -16,9 +16,8 @@ const History = () => {
     ]
 
     const { account } = useActiveWeb3React()
-    const stakingContract = useStakingContract();
-    const getAllUserStaking = usePosition(account,1);
-
+    const stakingContract = useStakingContract()
+    const getAllUserStaking = usePosition(account, 1)
 
     return (
         <SwapContainer>
