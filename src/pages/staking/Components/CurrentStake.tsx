@@ -20,14 +20,14 @@ const Position = ({
         React.SetStateAction<{
             stake: string
             reward: string
-            stakingId: string
+            stakingId: string | undefined
             token: Token | undefined
         }>
     >
     unstakeData: {
         stake: string
         reward: string
-        stakingId: string
+        stakingId: string | undefined
         token: Token | undefined
     }
     index: number
@@ -67,10 +67,7 @@ const Position = ({
         })
     }
     return (
-        <WrapDetails
-            key={position?.positionIndex}
-            isSelected={index === Number(unstakeData.stakingId)}
-        >
+        <WrapDetails isSelected={index === Number(unstakeData.stakingId)}>
             <Details>{position?.stakedAmount}</Details>
             <Details>{position?.period}</Details>
             <Details>{formattedTimeEnd}</Details>
@@ -107,19 +104,19 @@ const CurrentStake = ({
         React.SetStateAction<{
             stake: string
             reward: string
-            stakingId: string
+            stakingId: string | undefined
             token: Token | undefined
         }>
     >
     unstakeData: {
         stake: string
         reward: string
-        stakingId: string
+        stakingId: string | undefined
         token: Token | undefined
     }
 }) => {
     const { account } = useActiveWeb3React()
-    const AllStakingData = useAllPosition(account)
+    const { currentStake, history } = useAllPosition(account)
 
     return (
         <>
@@ -134,7 +131,7 @@ const CurrentStake = ({
                         <Details isTitle={true}>Claimable Reward</Details>
                         <Details isTitle={true}>Action</Details>
                     </WrapDetails>
-                    {AllStakingData.map((position: any, index: number) => {
+                    {currentStake.map((position: any, index: number) => {
                         return (
                             <Position
                                 key={index}
@@ -142,7 +139,7 @@ const CurrentStake = ({
                                 setIsStakeToken={setIsStakeToken}
                                 setUnstakeData={setUnstakeData}
                                 unstakeData={unstakeData}
-                                index={index}
+                                index={position?.positionIndex}
                             />
                         )
                     })}
@@ -157,7 +154,7 @@ const CurrentStake = ({
                         <Details isTitle={true}>Total Reward</Details>
                     </WrapDetails>
 
-                    {AllStakingData.map((position: any, index: number) => {
+                    {history.map((position: any, index: number) => {
                         // Calculate totalReward for each staking position
                         const lastTimeRewardFormat = new Date(
                             position.lastTimeReward,

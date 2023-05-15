@@ -36,12 +36,12 @@ const Stake = () => {
     const [unstakeData, setUnstakeData] = useState<{
         stake: string
         reward: string
-        stakingId: string
+        stakingId: string | undefined
         token: Token | undefined
     }>({
         stake: '0',
         reward: '0',
-        stakingId: '',
+        stakingId: undefined,
         token: stakingToken,
     })
     const [isShowHistory, setIsShowHistory] = useState(false)
