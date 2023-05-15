@@ -5,6 +5,8 @@ import { Row, Columns } from 'components/Layouts'
 
 import { useSwapActionHandlers, useSwapState } from 'states/swap/hooks'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
+import History from './Components/History'
+import CurrentStake from './Components/CurrentStake'
 
 import { useActiveWeb3React } from 'hooks'
 import { usePair } from 'hooks/useAllPairs'
@@ -35,6 +37,7 @@ import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
 import ETH from 'assets/token-logos/eth.svg'
+import SOBA from '/favicon.ico'
 import BGSoba from 'assets/icons/soba2.jpg'
 import ArrowUp from 'assets/icons/arrow-up.svg'
 import Lock from 'assets/icons/lock.svg'
@@ -44,8 +47,6 @@ import { Field } from 'interfaces'
 
 const Stake = () => {
     const swapState = useSwapState()
-    const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
-    const [isCopied, setIsCopied] = useState(false)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
@@ -57,26 +58,20 @@ const Stake = () => {
     const [inputUnstakeValue, setInputUnstakeValue] = useState<number | string>(
         '0',
     )
-    const tokenTest = useToken('0xdEfd221072dD078d11590D58128399C2fe8cCa7e');
-
+    const tokenTest = useToken(WRAPPED_NATIVE_ADDRESSES[80001]);
     const { chainId, library, account } = useActiveWeb3React()
     const stakingContract = useStakingContract();
-    const { refAddress } = useAppState()
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
-    const pair = usePair(chainId, tokenIn, tokenOut)
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, tokenTest)
     const balanceIn = useCurrencyBalance(account, tokenIn)
-    const routerContract = useRouterContract()
-    const { deadline } = useTransactionDeadline()
-    const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
     const loca = useLocation()
-    const { slippage } = useSlippageTolerance()
     const updateRef = useUpdateRefAddress()
     const ref = useRef<any>()
-    // const [stakeDays, setStakeDays] = useState('30')
     const [isOpenEdit, setIsOpenEdit] = useState(false)
+    const { addTxn } = useTransactionHandler()
+
     const selection = [
         { name: 30, value: 12 },
         { name: 60, value: 25 },
@@ -139,6 +134,7 @@ const Stake = () => {
         console.log('approving....')
         try {
             initDataTransaction.setError('')
+            console.log('approving....')
 
             if (tokenIn && inputAmount && routerAddress) {
                 initDataTransaction.setIsOpenWaitingModal(true)
@@ -304,6 +300,7 @@ const Stake = () => {
 
 
     const StakeButton = ({ isInsufficientAllowance }: any) => {
+        console.log({isInsufficientAllowance})
         const isNotConnected = !account
 
         return (
@@ -333,8 +330,8 @@ const Stake = () => {
     const StakeToken = () => {
         const isInsufficientAllowance =
             Number(tokenApproval?.allowance) < Number(inputAmount) &&
-            !isNativeCoin(tokenIn)
-
+            !isNativeCoin(tokenTest)
+        console.log({isInsufficientAllowance })
         return (
             <>
                 <WrapContent image={BGSoba} isStake={true}>
@@ -373,11 +370,11 @@ const Stake = () => {
                         <Row jus="space-between">
                             <WrapCustom>
                                 <div className="title details-token">
-                                    ETH Token
+                                    SOBA Token
                                 </div>
                                 <div className="group">
-                                    <img src={ETH} alt="logo-eth" />
-                                    <div className="value">ETH</div>
+                                    <img src={SOBA} alt="logo-eth" />
+                                    <div className="value">SOBA</div>
                                 </div>
                             </WrapCustom>
                             <LabelRight>
@@ -426,18 +423,13 @@ const Stake = () => {
                     <StakeButton
                         isInsufficientAllowance={isInsufficientAllowance}
                     />
-                    <ButtonStake isStake={true}>
-                        <PrimaryButton onClick={handleOnHarvest} name={'Harvest'} />
-                    </ButtonStake>
-                    <ButtonStake isStake={true}>
-                        <PrimaryButton onClick={handleOnWithDraw} name={'Withdraw'} />
-                    </ButtonStake>
+                   
 
                     <WrapDetailsStake>
                         <Row jus="space-between">
                             <div>Stake:</div>
                             <Row gap="5px">
-                                <div>30 ETH</div>
+                                <div>30 SOBA</div>
                             </Row>
                         </Row>
                         <Row jus="space-between">
@@ -562,10 +554,10 @@ const Stake = () => {
                     <LabelData>
                         <Row jus="space-between">
                             <WrapCustom>
-                                <div className="title">ETH Token</div>
+                                <div className="title">SOBA Token</div>
                                 <div className="group">
-                                    <img src={ETH} alt="logo-eth" />
-                                    <div className="value">ETH</div>
+                                    <img src={SOBA} alt="logo-soba" />
+                                    <div className="value">SOBA</div>
                                 </div>
                             </WrapCustom>
                             <LabelRight>
@@ -603,7 +595,7 @@ const Stake = () => {
                             <p>Tx Cost</p>
                         </Details>
                         <Details>
-                            <p className="value">0 ETH</p>
+                            <p className="value">0 SOBA</p>
                             <Row gap="5px">
                                 <p>Edit</p>
                                 <p>Market</p>
@@ -612,6 +604,14 @@ const Stake = () => {
                         </Details>
                     </WrapDetailsUnstake>
                     <PrimaryButton name="Unstake" />
+                    <WrapButtonBottom>
+                    <ButtonStake isStake={true}>
+                        <PrimaryButton onClick={handleOnHarvest} name={'Harvest'} />
+                    </ButtonStake>
+                    <ButtonStake isStake={true}>
+                        <PrimaryButton onClick={handleOnWithDraw} name={'Withdraw'} />
+                    </ButtonStake>
+                    </WrapButtonBottom>
                 </WrapContent>
             </>
         )
@@ -629,6 +629,7 @@ const Stake = () => {
                     initDataTransaction.isOpenWaitingModal) && <Blur />}
             </>
             <ToastMessage />
+            <WrapStaking>
             <SwapContainer ref={ref}>
                 {!account && isOpenWalletModal && (
                     <>
@@ -643,12 +644,22 @@ const Stake = () => {
                 )}
                 {isStakeToken ? <StakeToken /> : <UnStakeToken />}
             </SwapContainer>
+            <CurrentStake />
+            </WrapStaking>
         </>
     )
 }
-
+const WrapStaking = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    @media (max-width: 1250px) {
+        flex-direction: column;
+        align-items: center;
+    }
+`;
 const SwapContainer = styled(Columns)`
-    margin: 0 auto 40px;
+    // margin: 0 auto 40px;
     height: fit-content;
     max-width: 520px;
 
@@ -720,9 +731,12 @@ const Nav = styled(Row)`
         border-radius: 4px;
         text-decoration: none !important;
         font-size: 14px;
-        font-weight: 400;
+        font-weight: 700;
         :hover {
             text-decoration: none !important;
+        }
+        @media (max-width: 400px){
+            font-size: 12px
         }
     }
 
@@ -961,4 +975,9 @@ const WrapDetailsStake = styled.div`
         }
     }
 `
+const WrapButtonBottom = styled.div`
+    display: flex;
+    gap: 40px;
+`;
+
 export default Stake

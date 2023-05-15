@@ -242,9 +242,9 @@ const StakeToken = ({ data, onApprove }: IStakeToken) => {
     }
 
     const handleChangeBalance = (percent: number | string) => {
-        setInputStakeValue(
-            (i) => Number(balanceIn) * Number(`${percent}` / 100),
-        )
+        // setInputStakeValue(
+        //     (i) => Number(balanceIn) * Number(`${percent}` / 100),
+        // )
     }
     const endDate = useMemo(() => {
         const now = new Date()
