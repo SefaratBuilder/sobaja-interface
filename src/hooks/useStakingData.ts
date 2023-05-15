@@ -120,12 +120,7 @@ export function useAllPosition(address: string | undefined | null) {
     //     stakingContract,
     //     'setStakingRate',
     //     ids
-    // )
-
-
-
-
-
+    // 
     const AllPosition = useMemo(() => {
         if (AllPositionResult.result) {
             return AllPositionResult.result[0].map(
@@ -172,5 +167,13 @@ export function useAllPosition(address: string | undefined | null) {
             return []
         }
     }, [address, AllPositionResult.result])
-    return AllPosition
+
+    const currentStake = useMemo(() => {
+        return AllPosition && AllPosition?.length > 0 ? AllPosition.filter((position: any) => Number(position?.timeEnd) !== Number(position?.lastTimeReward)) : []
+    }, [AllPosition])
+    const history = useMemo(() => {
+        return AllPosition && AllPosition?.length > 0 ? AllPosition.filter((position: any) => Number(position?.timeEnd) === Number(position?.lastTimeReward)) : []
+    }, [AllPosition])
+
+    return { currentStake, history }
 }

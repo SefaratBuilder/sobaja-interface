@@ -20,7 +20,7 @@ interface IUnstakeToken {
     unstakeData: {
         stake: string
         reward: string
-        stakingId: string
+        stakingId: string | undefined
         token: Token | undefined
     }
     // inputUnstakeValue: string | number
@@ -248,8 +248,16 @@ const LabelUnStake = ({
                 </WrapDetailsUnstake>
                 {/* <PrimaryButton name="Unstake" /> */}
                 <LabelButton>
-                    <PrimaryButton onClick={harvest} name={'Harvest'} />
-                    <PrimaryButton onClick={withdraw} name={'Withdraw'} />
+                    <PrimaryButton
+                        onClick={harvest}
+                        name={'Harvest'}
+                        disabled={!unstakeData?.stakingId}
+                    />
+                    <PrimaryButton
+                        onClick={withdraw}
+                        name={'Withdraw'}
+                        disabled={!unstakeData?.stakingId}
+                    />
                 </LabelButton>
             </WrapContent>
         </>
