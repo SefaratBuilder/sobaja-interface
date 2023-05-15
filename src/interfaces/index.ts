@@ -5,7 +5,6 @@ export enum Field {
 
 export interface Token {
     address: string
-    address: string
     symbol: string
     decimals: number
     name: string
@@ -43,8 +42,16 @@ export interface LaunchpadInfo {
     result: string,
     launchpadOwner: string
 }
+
+export interface LaunchpadCommitment {
+    commitment: string
+}
 export interface LaunchpadInfoX {
-    claims: any
+    claims: Array<{
+        address: string
+        amount: string
+        token: string
+    }>
     endTime: string
     finalized: boolean
     hardcap: string

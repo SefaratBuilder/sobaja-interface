@@ -97,10 +97,11 @@ export function useAllPosition(address: string | undefined | null) {
         'getUserStakingHistory',
         [address],
     )
+    console.log("🤦‍♂️ ⟹ useAllPosition ⟹ AllPositionResult:", AllPositionResult)
     const ids = AllPositionResult?.result?.[0]
         ? AllPositionResult?.result?.[0]?.map((pos: any) => {
-              return [address, pos?.positionId?.toString()]
-          })
+            return [address, pos?.positionId?.toString()]
+        })
         : undefined
 
     const ClaimableRewards = useSingleContractMultipleData(
@@ -121,7 +122,7 @@ export function useAllPosition(address: string | undefined | null) {
     //     ids
     // )
 
-    
+
 
 
 

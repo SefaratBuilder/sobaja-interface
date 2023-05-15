@@ -94,17 +94,48 @@ const ComponentsTransaction = ({ data, onConfirm }: Data) => {
                     txnHash={data.TransactionHash}
                 />
             )}
-            {data.isOpenToastMessageModal && (
+            {/* {data.isOpenToastMessageModal && (
                 <ToastMessage
                 // payload={data.payload}
                 // setToastMessageModal={data.setIsOpenToastMessageModal}
                 // isSuccess={data.isTransactionSuccess}
                 // txnHash={data.TransactionHash}
                 />
-            )}
+            )} */}
         </Container>
     )
 }
 
 const Container = styled.div``
 export default ComponentsTransaction
+
+/**
+ * @dev example onConfirm
+ */
+
+// const onConfirm = useCallback(async () => {
+//     try {
+//         initDataTransaction.setIsOpenConfirmModal(false)
+//         initDataTransaction.setIsOpenWaitingModal(true)
+
+//         // handle data + call
+
+//         initDataTransaction.setIsOpenWaitingModal(false)
+//         initDataTransaction.setIsOpenResultModal(true)
+
+//         const txn = await callResult.wait()
+
+//         initDataTransaction.setIsOpenResultModal(false)
+
+//         addTxn({
+//             hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+//                 callResult.hash || ''
+//             }`,
+//             msg: `Example`,
+//             status: txn.status === 1 ? true : false,
+//         })
+//     } catch (error) {
+//         initDataTransaction.setError('Failed')
+//         initDataTransaction.setIsOpenResultModal(true)
+//     }
+// }, [initDataTransaction])
