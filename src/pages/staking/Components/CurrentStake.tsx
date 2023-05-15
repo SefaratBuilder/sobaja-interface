@@ -1,12 +1,49 @@
 import { Columns } from 'components/Layouts'
 import { useActiveWeb3React } from 'hooks'
-import {
-    useAllPosition,
-} from 'hooks/useStakingData'
+import { useAllPosition } from 'hooks/useStakingData'
 import { useHarvest, useWithDraw } from 'hooks/useStakingFunction'
 import React from 'react'
 import styled from 'styled-components'
-import { divNumberWithDecimal} from 'utils/math'
+import { divNumberWithDecimal } from 'utils/math'
+
+const Position = ({ position }: { position: any }) => {
+    const lastTimeRewardFormat = new Date(position.lastTimeReward)
+    const formattedLastTimeReward = lastTimeRewardFormat.toLocaleDateString()
+    const timeEndFormat = new Date(position.timeEnd)
+    const formattedTimeEnd = timeEndFormat.toLocaleDateString()
+    const claimableReward = divNumberWithDecimal(position.claimableReward, 17)
+    const roundedClaimableReward = parseFloat(
+        Number(claimableReward).toFixed(2),
+    )
+
+    console.log(claimableReward)
+
+    const positionIndex = Number(position.positionIndex)
+    const handleHarvest = useHarvest(positionIndex)
+    const handleWithDraw = useWithDraw(positionIndex)
+
+    return (
+        <WrapDetails>
+            <Details>{position.stakedAmount}</Details>
+            <Details>{position.period}</Details>
+            <Details>{formattedTimeEnd}</Details>
+            <Details>{formattedLastTimeReward}</Details>
+            <Details>{roundedClaimableReward}</Details>
+
+            <Details>
+                <div>
+                    {' '}
+                    <button onClick={handleWithDraw}>Withdraw</button>
+                </div>
+                <span></span>
+                <div>
+                    {' '}
+                    <button onClick={handleHarvest}> Harvest</button>
+                </div>
+            </Details>
+        </WrapDetails>
+    )
+}
 
 const CurrentStake = () => {
     const { account } = useActiveWeb3React()
@@ -26,52 +63,7 @@ const CurrentStake = () => {
                     <Details isTitle={true}>Action</Details>
                 </WrapDetails>
                 {AllStakingData.map((position: any) => {
-                    const lastTimeRewardFormat = new Date(
-                        position.lastTimeReward,
-                    )
-                    const formattedLastTimeReward =
-                        lastTimeRewardFormat.toLocaleDateString()
-                    const timeEndFormat = new Date(position.timeEnd)
-                    const formattedTimeEnd = timeEndFormat.toLocaleDateString()
-                    const claimableReward = divNumberWithDecimal(
-                        position.claimableReward,
-                        18,
-                    )
-
-                    console.log(claimableReward);
-                    
-
-                    const positionIndex = Number(position.positionIndex)
-                    const handleHarvest = useHarvest(positionIndex)
-                    const handleWithDraw = useWithDraw(positionIndex)
-
-
-                    return (
-                        <WrapDetails>
-                            <Details>{position.stakedAmount}</Details>
-                            <Details>{position.period}</Details>
-                            <Details>{formattedTimeEnd}</Details>
-                            <Details>{formattedLastTimeReward}</Details>
-                            <Details>{claimableReward}</Details>
-
-                            <Details>
-                                <div>
-                                    {' '}
-                                    <button onClick={handleWithDraw}>
-                                        Withdraw
-                                    </button>
-                                </div>
-                                <span></span>
-                                <div>
-                                    {' '}
-                                    <button onClick={handleHarvest}>
-                                        {' '}
-                                        Harvest
-                                    </button>
-                                </div>
-                            </Details>
-                        </WrapDetails>
-                    )
+                    return <Position position={position} />
                 })}
             </SwapContainer>
             <SwapContainer>
@@ -93,6 +85,13 @@ const CurrentStake = () => {
                         lastTimeRewardFormat.toLocaleDateString()
                     const timeEndFormat = new Date(position.timeEnd)
                     const formattedTimeEnd = timeEndFormat.toLocaleDateString()
+                    const totalReward = divNumberWithDecimal(
+                        position.totalReward,
+                        18,
+                    )
+                    const roundedTotalReward = parseFloat(
+                        Number(totalReward).toFixed(2),
+                    )
 
                     return (
                         <WrapDetails>
@@ -109,10 +108,7 @@ const CurrentStake = () => {
                                     ) {
                                         return 0
                                     } else {
-                                        return divNumberWithDecimal(
-                                            position.totalReward,
-                                            18,
-                                        )
+                                        return roundedTotalReward
                                     }
                                 })()}
                             </Details>

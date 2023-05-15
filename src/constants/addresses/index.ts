@@ -47,7 +47,7 @@ const LAUNCHPADS: { [chainId: number]: string } = {
 }
 
 const STAKING: { [chainId: number]: string } = {
-    [ChainId.MUMBAI]: '0xc488658f788Fd56dD526bBc90538627369f51C3A',
+    [ChainId.MUMBAI]: '0xbb61B03fa28502599f398326B3Bffb07e8053C49',
 }
 
 const LAUNCHPAD_ACCESS_MANAGERS: { [chainId: number]: string } = {
