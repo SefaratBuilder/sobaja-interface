@@ -8,6 +8,14 @@
         "chainId": 324
     },
     {
+        "address": "0xdEfd221072dD078d11590D58128399C2fe8cCa7e",
+        "symbol": "NARUTO",
+        "decimals": 18,
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/mute.svg?alt=media&token=91b36efd-93fe-4e05-86dd-b97890f5f137",
+        "name": "Mute.io",
+        "chainId": 80001
+    },
+    {
         "address": "0x0e97C7a0F8B2C9885C8ac9fC6136e829CbC21d42",
         "symbol": "MUTE",
         "decimals": 18,
@@ -15,6 +23,7 @@
         "name": "Mute.io",
         "chainId": 324
     },
+
     {
         "address": "0xc2B13Bb90E33F1E191b8aA8F44Ce11534D5698E3",
         "symbol": "COMBO",
@@ -37,6 +46,14 @@
         "decimals": 18,
         "logoURI": "https://seeklogo.com/images/P/polygon-matic-logo-1DFDA3A3A8-seeklogo.com.png",
         "name": "Wrapped Matic",
+        "chainId": 80001
+    },
+    {
+        "address": "0xdEfd221072dD078d11590D58128399C2fe8cCa7e",
+        "symbol": "NARUTO",
+        "decimals": 18,
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/mute.svg?alt=media&token=91b36efd-93fe-4e05-86dd-b97890f5f137",
+        "name": "NARUTO",
         "chainId": 80001
     },
     {

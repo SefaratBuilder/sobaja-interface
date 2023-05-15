@@ -114,17 +114,6 @@ export function useAllPosition(address: string | undefined | null) {
         'getTotalReward',
         ids,
     )
-
-    // const SetStakingRates = useSingleContractMultipleData(
-    //     stakingContract,
-    //     'setStakingRate',
-    //     ids
-    // )
-
-    
-
-
-
     const AllPosition = useMemo(() => {
         if (AllPositionResult.result) {
             return AllPositionResult.result[0].map(
@@ -150,6 +139,9 @@ export function useAllPosition(address: string | undefined | null) {
 
                         const totalReward =
                             TotalRewards?.[positionIndex]?.result?.[0]
+
+                        console.log('Total Reward:', totalReward)
+
                         return {
                             positionIndex,
                             period,
@@ -159,7 +151,7 @@ export function useAllPosition(address: string | undefined | null) {
                             lastTimeReward,
                             claimableReward:
                                 claimableReward && Number(claimableReward),
-                            totalReward: totalReward && Number(totalReward)
+                            totalReward: totalReward && Number(totalReward),
                             // SetStakingRates
                         }
                     } catch (error) {

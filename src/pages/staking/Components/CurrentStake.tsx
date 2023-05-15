@@ -11,7 +11,7 @@ const Position = ({ position }: { position: any }) => {
     const formattedLastTimeReward = lastTimeRewardFormat.toLocaleDateString()
     const timeEndFormat = new Date(position.timeEnd)
     const formattedTimeEnd = timeEndFormat.toLocaleDateString()
-    const claimableReward = divNumberWithDecimal(position.claimableReward, 17)
+    const claimableReward = divNumberWithDecimal(position.claimableReward, 18)
     const roundedClaimableReward = parseFloat(
         Number(claimableReward).toFixed(2),
     )
@@ -51,84 +51,85 @@ const CurrentStake = () => {
 
     return (
         <>
-        <WrapCurrentStake>
-            <SwapContainer>
-                <Title>Your current stake:</Title>
-                <WrapDetails className="header-details">
-                    <Details isTitle={true}>Amount</Details>
-                    <Details isTitle={true}>Package</Details>
-                    <Details isTitle={true}>End date</Details>
-                    <Details isTitle={true}>Last Time Reward</Details>
-                    <Details isTitle={true}>Claimable Reward</Details>
-                    <Details isTitle={true}>Action</Details>
-                </WrapDetails>
-                {AllStakingData.map((position: any) => {
-                    return <Position position={position} />
-                })}
-            </SwapContainer>
-            <SwapContainer>
-                <Title>History (Finished Staking)</Title>
-                <WrapDetails className="header-details">
-                    <Details isTitle={true}>Amount</Details>
-                    <Details isTitle={true}>Package</Details>
-                    <Details isTitle={true}>Start Time</Details>
-                    <Details isTitle={true}>End date</Details>
-                    <Details isTitle={true}>Total Reward</Details>
-                </WrapDetails>
+            <WrapCurrentStake>
+                <SwapContainer>
+                    <Title>Your current stake:</Title>
+                    <WrapDetails className="header-details">
+                        <Details isTitle={true}>Amount</Details>
+                        <Details isTitle={true}>Package</Details>
+                        <Details isTitle={true}>End date</Details>
+                        <Details isTitle={true}>Last Time Reward</Details>
+                        <Details isTitle={true}>Claimable Reward</Details>
+                        <Details isTitle={true}>Action</Details>
+                    </WrapDetails>
+                    {AllStakingData.map((position: any) => {
+                        return <Position position={position} />
+                    })}
+                </SwapContainer>
+                <SwapContainer>
+                    <Title>History (Finished Staking)</Title>
+                    <WrapDetails className="header-details">
+                        <Details isTitle={true}>Amount</Details>
+                        <Details isTitle={true}>Package</Details>
+                        <Details isTitle={true}>Start Time</Details>
+                        <Details isTitle={true}>End date</Details>
+                        <Details isTitle={true}>Total Reward</Details>
+                    </WrapDetails>
 
-                {AllStakingData.map((position: any) => {
-                    // Calculate totalReward for each staking position
-                    const lastTimeRewardFormat = new Date(
-                        position.lastTimeReward,
-                    )
-                    const formattedLastTimeReward =
-                        lastTimeRewardFormat.toLocaleDateString()
-                    const timeEndFormat = new Date(position.timeEnd)
-                    const formattedTimeEnd = timeEndFormat.toLocaleDateString()
-                    const totalReward = divNumberWithDecimal(
-                        position.totalReward,
-                        18,
-                    )
-                    const roundedTotalReward = parseFloat(
-                        Number(totalReward).toFixed(2),
-                    )
+                    {AllStakingData.map((position: any) => {
+                        // Calculate totalReward for each staking position
+                        const lastTimeRewardFormat = new Date(
+                            position.lastTimeReward,
+                        )
+                        const formattedLastTimeReward =
+                            lastTimeRewardFormat.toLocaleDateString()
+                        const timeEndFormat = new Date(position.timeEnd)
+                        const formattedTimeEnd =
+                            timeEndFormat.toLocaleDateString()
+                        const totalReward = divNumberWithDecimal(
+                            position.totalReward,
+                            18,
+                        )
+                        const roundedTotalReward = parseFloat(
+                            Number(totalReward).toFixed(2),
+                        )
+                        console.log('Rounded Total Reward', roundedTotalReward)
 
-                    return (
-                        <WrapDetails>
-                            <Details>{position.stakedAmount}</Details>
-                            <Details>{position.period}</Details>
-                            <Details>{formattedTimeEnd}</Details>
-                            <Details>{formattedLastTimeReward}</Details>
-                            <Details>
-                                {(() => {
-                                    if (
-                                        position.lastTimeReward -
-                                            position.timeStart <
-                                        30
-                                    ) {
-                                        return 0
-                                    } else {
-                                        return roundedTotalReward
-                                    }
-                                })()}
-                            </Details>
-                        </WrapDetails>
-                    )
-                })}
-            </SwapContainer>
+                        return (
+                            <WrapDetails>
+                                <Details>{position.stakedAmount}</Details>
+                                <Details>{position.period}</Details>
+                                <Details>{formattedTimeEnd}</Details>
+                                <Details>{formattedLastTimeReward}</Details>
+                                <Details>
+                                    {(() => {
+                                        if (
+                                            position.lastTimeReward -
+                                                position.timeStart <
+                                            30
+                                        ) {
+                                            return 0
+                                        } else {
+                                            return roundedTotalReward
+                                        }
+                                    })()}
+                                </Details>
+                            </WrapDetails>
+                        )
+                    })}
+                </SwapContainer>
             </WrapCurrentStake>
         </>
     )
 }
 const WrapCurrentStake = styled.div`
     max-width: 100%;
-`;
+`
 const SwapContainer = styled(Columns)`
     /* margin: 0 auto 40px; */
     height: fit-content;
     max-height: 442px;
     width: 100%;
-    
 
     max-width: 600px;
     border: 2px solid #003b5c;
@@ -165,15 +166,16 @@ const Details = styled.div<{ isTitle?: boolean }>`
     font-size: 14px;
     /* text-align: center; */
     padding: 10px;
-    @media screen and (max-width: 399px){
+    @media screen and (max-width: 399px) {
         font-size: 10px;
         padding: 5px;
     }
-    @media screen and (min-width: 400px) and (max-width: 767px){
+    @media screen and (min-width: 400px) and (max-width: 767px) {
         font-size: 13px;
         padding: 5px;
     }
-    // background: ${({ isTitle }) =>isTitle ? 'rgba(0,38,59,0.6)' : 'rgba(255,255,255,0.1)'};
+    // background: ${({ isTitle }) =>
+        isTitle ? 'rgba(0,38,59,0.6)' : 'rgba(255,255,255,0.1)'};
 
     div {
         cursor: pointer;
@@ -191,7 +193,7 @@ const WrapDetails = styled.div`
     text-align: center;
     border: 2px solid black;
     overflow: auto;
-    background: rgba(0,38,59,0.6)
+    background: rgba(0, 38, 59, 0.6);
 `
 const Title = styled.div`
     max-width: 600px;
@@ -200,10 +202,10 @@ const Title = styled.div`
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: calc(10px);
     border-radius: 16px 16px 0 0;
-    @media (max-width: 399px){
+    @media (max-width: 399px) {
         font-size: 12px;
     }
-    @media screen and (min-width: 400px) and (max-width: 767px){
+    @media screen and (min-width: 400px) and (max-width: 767px) {
         font-size: 14px;
     }
 `

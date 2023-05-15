@@ -24,9 +24,9 @@ import {
     WRAPPED_NATIVE_COIN,
 } from 'constants/index'
 import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
-import { ZeroAddress } from 'ethers'
+import { Contract, ZeroAddress } from 'ethers'
 import { mulNumberWithDecimal } from 'utils/math'
-import { useRouterContract } from 'hooks/useContract'
+import { useRouterContract, useStakingContract } from 'hooks/useContract'
 import {
     calcSlippageAmount,
     calcTransactionDeadline,
@@ -50,6 +50,8 @@ import { sendEvent } from 'utils/analytics'
 import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
+import { useEstimateGas } from 'hooks/useEstimateGas'
+import { BigNumber } from '@ethersproject/bignumber'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -67,7 +69,8 @@ const Swap = () => {
     const balanceIn = useCurrencyBalance(account, tokenIn)
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
-    
+    const [gasCost, setGasCost] = useState<BigNumber>()
+
     const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
     const loca = useLocation()
@@ -130,7 +133,7 @@ const Swap = () => {
             else return 'swapTokensForExactTokens'
         }
     }
-    console.log(pair);
+    console.log(pair)
 
     const getSwapArguments = () => {
         if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
@@ -149,7 +152,10 @@ const Swap = () => {
             if (isNativeCoin(tokenIn))
                 return {
                     args: [
-                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), // amountOutMin
+                        mulNumberWithDecimal(
+                            calcSlippageAmount(outputAmount, slippage)[0],
+                            tokenOut.decimals,
+                        ), // amountOutMin
                         amountOutMin, //amountOutMin
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
@@ -161,7 +167,10 @@ const Swap = () => {
                 return {
                     args: [
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), //amountOutMin
+                        mulNumberWithDecimal(
+                            calcSlippageAmount(outputAmount, slippage)[0],
+                            tokenOut.decimals,
+                        ), //amountOutMin
                         amountIn, //amountIn
                         amountOutMin, //amountOutMin
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
@@ -174,7 +183,10 @@ const Swap = () => {
                 return {
                     args: [
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), //amountOutMin
+                        mulNumberWithDecimal(
+                            calcSlippageAmount(outputAmount, slippage)[0],
+                            tokenOut.decimals,
+                        ), //amountOutMin
                         amountIn, //amountIn
                         amountOutMin, //amountOutMin
                         [tokenIn.address, tokenOut.address],
@@ -188,7 +200,10 @@ const Swap = () => {
                 return {
                     args: [
                         mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
-                        mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals), //amountInMax
+                        mulNumberWithDecimal(
+                            calcSlippageAmount(inputAmount, slippage)[1],
+                            tokenIn.decimals,
+                        ), //amountInMax
                         amountOut, //amountOut
                         amountInMax, //amountInMax
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
@@ -205,14 +220,20 @@ const Swap = () => {
                         account,
                         calcTransactionDeadline(deadline),
                     ],
-                    value: mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals) //amountInMax
+                    value: mulNumberWithDecimal(
+                        calcSlippageAmount(inputAmount, slippage)[1],
+                        tokenIn.decimals,
+                    ), //amountInMax
                     // value: amountInMax, //amountInMax
                 }
             else
                 return {
                     args: [
                         mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
-                        mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals), //amountInMax
+                        mulNumberWithDecimal(
+                            calcSlippageAmount(inputAmount, slippage)[1],
+                            tokenIn.decimals,
+                        ), //amountInMax
                         amountOut, //amountOut
                         amountInMax, //amountInMax
                         [tokenIn.address, tokenOut.address],
@@ -224,6 +245,36 @@ const Swap = () => {
         }
     }
 
+    const gasEstimate = useEstimateGas(
+        routerContract,
+        getSwapMethod,
+        getSwapArguments,
+    )
+
+    // useEffect(() => {
+    //     if (gasEstimate) {
+    //         ;(async () => {
+    //             const gasPrice = await routerContract?.provider.getGasPrice()
+    //             if (gasPrice) {
+    //                 setGasCost(gasEstimate.mul(gasPrice))
+    //             }
+    //         })()
+    //     }
+    // }, [gasEstimate])
+    useEffect(() => {
+        if (gasEstimate) {
+            ;(async () => {
+                const gasPrice =
+                    routerContract?.provider?.getGasPrice &&
+                    (await routerContract.provider.getGasPrice())
+                if (gasPrice) {
+                    setGasCost(gasEstimate.mul(gasPrice))
+                }
+            })()
+        }
+    }, [gasEstimate])
+
+    useEffect(() => {})
     const handleOnSwap = async () => {
         try {
             if (inputAmount && outputAmount && tokenIn && tokenOut) {
@@ -521,12 +572,18 @@ const Swap = () => {
                 )}
                 <Row jus="space-between">
                     <Nav gap="20px">
-                        <Link to="/swap" className="active-link" style={{fontWeight: 700}}>
+                        <Link
+                            to="/swap"
+                            className="active-link"
+                            style={{ fontWeight: 700 }}
+                        >
                             Swap
                         </Link>
                         {/* <Link to="/add">Add</Link> */}
                         {/* <Link to="/pools">Pool</Link> */}
-                        <Link to="/limit" style={{fontWeight: 700}}>Limit</Link>
+                        <Link to="/limit" style={{ fontWeight: 700 }}>
+                            Limit
+                        </Link>
                     </Nav>
                     <Setting />
                 </Row>
