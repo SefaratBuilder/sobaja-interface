@@ -4,6 +4,7 @@ import { useActiveWeb3React } from 'hooks'
 import { useAllPosition } from 'hooks/useStakingData'
 import { useHarvest, useWithDraw } from 'hooks/useStakingFunction'
 import { Token } from 'interfaces'
+import { useState } from 'react'
 import styled from 'styled-components'
 import { divNumberWithDecimal } from 'utils/math'
 
@@ -117,11 +118,22 @@ const CurrentStake = ({
 }) => {
     const { account } = useActiveWeb3React()
     const { currentStake, history } = useAllPosition(account)
+    const [scrollTopCurrentStake, setScrollTopCurrentStake] = useState(0)
+    const [scrollTopHistory, setScrollTopHistory] = useState(0)
 
+    const handleScroll = (event: any) => {
+        setScrollTopCurrentStake(event.currentTarget.scrollTop)
+    }
+    const handleScrollHistory = (event: any) => {
+        setScrollTopHistory(event.currentTarget.scrollTop)
+    }
     return (
         <>
             <WrapCurrentStake>
-                <SwapContainer>
+                <SwapContainer
+                    onScroll={handleScroll}
+                    isScroll={scrollTopCurrentStake > 11}
+                >
                     <Title>Your current stake:</Title>
                     <WrapDetails className="header-details">
                         <Details isTitle={true}>Amount</Details>
@@ -144,7 +156,10 @@ const CurrentStake = ({
                         )
                     })}
                 </SwapContainer>
-                <SwapContainer>
+                <SwapContainer
+                    onScroll={handleScrollHistory}
+                    isScroll={scrollTopHistory > 11}
+                >
                     <Title>History (Finished Staking)</Title>
                     <WrapDetails className="header-details">
                         <Details isTitle={true}>Amount</Details>
@@ -207,7 +222,7 @@ const CurrentStake = ({
 const WrapCurrentStake = styled.div`
     max-width: 100%;
 `
-const SwapContainer = styled(Columns)`
+const SwapContainer = styled(Columns)<{ isScroll?: boolean }>`
     /* margin: 0 auto 40px; */
     height: fit-content;
     width: 100%;
@@ -215,7 +230,7 @@ const SwapContainer = styled(Columns)`
 
     max-width: 600px;
     border: 2px solid #003b5c;
-    border-radius: 16px 16px 0 0;
+    border-radius: 8px 8px 0 0;
     position: relative;
     z-index: 0;
     overflow: scroll;
@@ -229,8 +244,11 @@ const SwapContainer = styled(Columns)`
     }
 
     .header-details {
-        padding-top: 10px;
-        padding-bottom: 10px;
+        padding: 10px 5px;
+        border-top-right-radius: ${({ isScroll }) =>
+            isScroll ? '10px' : 'unset'};
+        border-top-left-radius: ${({ isScroll }) =>
+            isScroll ? '10px' : 'unset'};
     }
     @media (max-width: 500px) {
         width: 90%;
@@ -297,7 +315,7 @@ const Title = styled.div`
     padding: 10px;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(5px);
-    border-radius: 16px 16px 0 0;
+    border-radius: 8px 8px 0 0;
     @media (max-width: 399px) {
         font-size: 12px;
     }

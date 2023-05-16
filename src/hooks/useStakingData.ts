@@ -171,6 +171,7 @@ export function useAllPosition(address: string | undefined | null) {
     const currentStake = useMemo(() => {
         return AllPosition && AllPosition?.length > 0 ? AllPosition.filter((position: any) => Number(position?.timeEnd) !== Number(position?.lastTimeReward)) : []
     }, [AllPosition])
+    console.log("🤦‍♂️ ⟹ currentStake ⟹ currentStake:", currentStake)
     const history = useMemo(() => {
         return AllPosition && AllPosition?.length > 0 ? AllPosition.filter((position: any) => Number(position?.timeEnd) === Number(position?.lastTimeReward)) : []
     }, [AllPosition])
