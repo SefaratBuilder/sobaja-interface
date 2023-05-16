@@ -84,7 +84,7 @@ export const useQueryCommitUser = (id: string | undefined, address: string | und
 
             }
         })
-        const totalCommitment = launchpads?.[0]?.commits?.length > 0 ? launchpads?.[0]?.commits?.map(i => i?.commitment)?.reduce((a, b) => Number(a) + Number(b)) : '0'
+        const totalCommitment = launchpads?.[0]?.commits?.length > 0 ? launchpads?.[0]?.commits?.map(i => i?.commitment)?.reduce((a, b) => (Number(a) + Number(b))?.toString()) : '0'
         return {
             // ...launchpadData,
             // data: {

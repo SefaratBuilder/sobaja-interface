@@ -47,7 +47,12 @@ const LAUNCHPADS: { [chainId: number]: string } = {
 }
 
 const STAKING: { [chainId: number]: string } = {
-    [ChainId.MUMBAI]: '0xbb61B03fa28502599f398326B3Bffb07e8053C49',
+    // [ChainId.MUMBAI]: '0xbb61B03fa28502599f398326B3Bffb07e8053C49',
+    [ChainId.MUMBAI]: '0x6b1d9BF7a17F80dAbf350FDFDa9087E342FBFAbA',
+}
+
+const STAKING_TOKEN: { [chainId: number]: string } = {
+    [ChainId.MUMBAI]: '0xdEfd221072dD078d11590D58128399C2fe8cCa7e',
 }
 
 const LAUNCHPAD_ACCESS_MANAGERS: { [chainId: number]: string } = {
@@ -91,5 +96,6 @@ export {
     LAUNCHPADS,
     LAUNCHPAD_ACCESS_MANAGERS,
     STAKING,
+    STAKING_TOKEN,
     STAKING_ABI
 }

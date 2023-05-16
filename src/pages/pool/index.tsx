@@ -43,6 +43,7 @@ import { useMyPosition } from 'hooks/useAllPairs'
 import { Data, useQueryPool } from 'hooks/useQueryPool'
 import Loader from 'components/Loader'
 import CustomLoader from 'components/CustomLoader'
+import { Columns, Row } from 'components/Layouts'
 
 export interface PoolData {
     name: string
@@ -232,6 +233,8 @@ export default function Pools() {
     const [isMyPositionPage, setIsMyPositionPage] = useState(false)
     const { width } = useWindowDimensions()
     const { position, tokenList } = useMyPosition()
+    const [isShowAction, setIsShowAction] = useState(false)
+    const [indexShowAction, setIndexShowAction] = useState<number>()
 
     const rows = useQueryPool()
 
@@ -406,6 +409,35 @@ export default function Pools() {
     console.log({ poolsAdminInCurrentPag })
     const isSelected = (name: string) => selected.indexOf(name) !== -1
 
+    const handleIsMobile = (row: Data | PoolDataMobile) => {
+        return 'network' in row && 'fee' in row && 'tvl' in row
+    }
+
+    const handleOnClickShowPool = (index: number) => {
+        if (isShowAction && indexShowAction) {
+            /**
+             * handle click show when already show another modal
+             */
+            if (index !== Number(indexShowAction)) {
+                return setIndexShowAction(index)
+            }
+
+            /**
+             * click to hide same show modal
+             */
+            setIndexShowAction(undefined)
+            setIsShowAction(false)
+            return
+        }
+
+        /**
+         * else
+         */
+        isShowAction ? setIndexShowAction(undefined) : setIndexShowAction(index)
+
+        setIsShowAction((i) => !i)
+    }
+
     return (
         <>
             <ToastMessage />
@@ -462,7 +494,7 @@ export default function Pools() {
                     </HeadLabel>
                     {!isMyPositionPage && (
                         <>
-                            <TableContainer>
+                            <CustomTableContainer>
                                 <Table
                                     sx={{ minWidth: 400 }}
                                     aria-labelledby="tableTitle"
@@ -490,10 +522,9 @@ export default function Pools() {
                                                         const labelId = `enhanced-table-checkbox-${index}`
                                                         return (
                                                             <>
-                                                                {'network' in
-                                                                    row &&
-                                                                'fee' in row &&
-                                                                'tvl' in row ? (
+                                                                {handleIsMobile(
+                                                                    row,
+                                                                ) ? (
                                                                     <>
                                                                         <RowTable
                                                                             role="checkbox"
@@ -512,6 +543,11 @@ export default function Pools() {
                                                                             sx={{
                                                                                 cursor: 'pointer',
                                                                             }}
+                                                                            onClick={() =>
+                                                                                handleOnClickShowPool(
+                                                                                    index,
+                                                                                )
+                                                                            }
                                                                         >
                                                                             <CellTable
                                                                                 component="th"
@@ -582,11 +618,49 @@ export default function Pools() {
                                                                                 }
                                                                             </CellTable>
                                                                         </RowTable>
-                                                                        <TableRow
-                                                                            style={{
-                                                                                height: 5,
-                                                                            }}
-                                                                        ></TableRow>
+                                                                        {isShowAction &&
+                                                                        indexShowAction ===
+                                                                            index ? (
+                                                                            <>
+                                                                                <TableRow
+                                                                                    sx={{
+                                                                                        height: '120px',
+                                                                                    }}
+                                                                                >
+                                                                                    <CellTable
+                                                                                        align="center"
+                                                                                        colSpan={
+                                                                                            2
+                                                                                        }
+                                                                                    >
+                                                                                        <div className="action">
+                                                                                            <PrimaryButton name="Add" />
+                                                                                        </div>
+                                                                                    </CellTable>
+                                                                                    <CellTable
+                                                                                        align="center"
+                                                                                        colSpan={
+                                                                                            4
+                                                                                        }
+                                                                                    >
+                                                                                        <div className="action">
+                                                                                            <PrimaryButton name="Remove" />
+                                                                                        </div>
+                                                                                    </CellTable>
+                                                                                </TableRow>
+                                                                                <TableRow
+                                                                                    style={{
+                                                                                        height: 5,
+                                                                                    }}
+                                                                                ></TableRow>
+                                                                            </>
+                                                                        ) : (
+                                                                            <TableRow
+                                                                                style={{
+                                                                                    height: 5,
+                                                                                }}
+                                                                            ></TableRow>
+                                                                        )}
                                                                     </>
                                                                 ) : (
                                                                     <>
@@ -679,7 +753,7 @@ export default function Pools() {
                                         <LabelNotFound>Not Found</LabelNotFound>
                                     )}
                                 </Table>
-                            </TableContainer>
+                            </CustomTableContainer>
                             {poolsAdminInCurrentPag &&
                                 poolsAdminInCurrentPag.length > 0 && (
                                     <Pagination
@@ -918,6 +992,11 @@ const CellTable = styled(TableCell)`
     .network {
         width: 14px;
     }
+
+    .action {
+        width: 200px;
+        margin: auto;
+    }
 `
 const InputSearchModal = styled.div`
     min-width: 150px;
@@ -1028,4 +1107,16 @@ const BtnSort = styled.div`
 const LabelNotFound = styled.div`
     text-align: center;
     padding: 20px 0;
+`
+const CustomTableContainer = styled(TableContainer)`
+    overflow: scroll;
+    ::-webkit-scrollbar {
+        display: none;
+    }
+`
+
+const ShowAction = styled.div`
+    /* background: #fff; */
+    display: block;
+    /* gap: 500px; */
 `

@@ -8,7 +8,7 @@ import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
 
 import { URLSCAN_BY_CHAINID } from 'constants/index'
-import { STAKING } from 'constants/addresses'
+import { STAKING, STAKING_TOKEN } from 'constants/addresses'
 import { mulNumberWithDecimal } from 'utils/math'
 
 import { useTransactionHandler } from 'states/transactions/hooks'
@@ -32,22 +32,28 @@ const Stake = () => {
         '25',
     )
 
-    const stakingToken = useToken('0xdEfd221072dD078d11590D58128399C2fe8cCa7e')
+    const { chainId, account } = useActiveWeb3React()
+
+    const stakingToken = useToken(
+        chainId ? STAKING_TOKEN?.[chainId] : undefined,
+    )
+
     const [unstakeData, setUnstakeData] = useState<{
         stake: string
         reward: string
         stakingId: string | undefined
         token: Token | undefined
+        position: any
     }>({
         stake: '0',
         reward: '0',
         stakingId: undefined,
         token: stakingToken,
+        position: '',
     })
     const [isShowHistory, setIsShowHistory] = useState(false)
     const [isShowCurrent, setIsShowCurrent] = useState(false)
 
-    const { chainId, account } = useActiveWeb3React()
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
     const routerAddress = chainId ? STAKING[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, stakingToken)
@@ -142,6 +148,7 @@ const Stake = () => {
                                 isShowHistory,
                                 setIsShowHistory,
                                 initDataTransaction,
+                                setUnstakeData,
                             }}
                             onApprove={() => handleOnApprove()}
                         />
