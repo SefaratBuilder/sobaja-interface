@@ -47,8 +47,6 @@ import { Field } from 'interfaces'
 
 const Stake = () => {
     const swapState = useSwapState()
-    const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
-    const [isCopied, setIsCopied] = useState(false)
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
@@ -60,26 +58,20 @@ const Stake = () => {
     const [inputUnstakeValue, setInputUnstakeValue] = useState<number | string>(
         '0',
     )
-    const tokenTest = useToken('0xdEfd221072dD078d11590D58128399C2fe8cCa7e');
-
+    const tokenTest = useToken(WRAPPED_NATIVE_ADDRESSES[80001]);
     const { chainId, library, account } = useActiveWeb3React()
     const stakingContract = useStakingContract();
-    const { refAddress } = useAppState()
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
-    const pair = usePair(chainId, tokenIn, tokenOut)
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, tokenTest)
     const balanceIn = useCurrencyBalance(account, tokenIn)
-    const routerContract = useRouterContract()
-    const { deadline } = useTransactionDeadline()
-    const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
     const loca = useLocation()
-    const { slippage } = useSlippageTolerance()
     const updateRef = useUpdateRefAddress()
     const ref = useRef<any>()
-    // const [stakeDays, setStakeDays] = useState('30')
     const [isOpenEdit, setIsOpenEdit] = useState(false)
+    const { addTxn } = useTransactionHandler()
+
     const selection = [
         { name: 30, value: 12 },
         { name: 60, value: 25 },

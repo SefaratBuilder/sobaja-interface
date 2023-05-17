@@ -20,20 +20,19 @@ export function useHarvest(positionIndex: Number | null | undefined) {
             const gasLimit = await stakingContract?.estimateGas?.[method]?.(
                 ...args,
             )
-            
+
             const callResult = await stakingContract?.[method]?.(...args, {
                 gasLimit: gasLimit && gasLimit.add(1000),
             })
             console.log('🤦‍♂️ ⟹ handleOnHarvest ⟹ callResult:', { callResult })
-            
+
             sendEvent({
                 category: 'Defi',
                 action: 'Harvesting',
                 label: [positionIndex].join('/'),
             })
             const txn = await callResult.wait()
-            console.log("TXN", txn);
-            
+            console.log('TXN', txn)
 
             addTxn({
                 hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx${
@@ -87,6 +86,3 @@ export function useWithDraw(positionIndex: Number | null | undefined) {
     }
     return handleOnWithDraw
 }
-
-
-
