@@ -9,10 +9,6 @@ type SwapArgs = {
     args: (string | string[] | null | undefined)[]
     value: string
 }
-type AddArgs = {
-    args: (string | string[] | null | undefined)[]
-    value: string
-}
 
 export function useEstimateGas(
     contract: Contract | null,
