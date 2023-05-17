@@ -1,11 +1,4 @@
-import React, {
-    useState,
-    useEffect,
-    useCallback,
-    MouseEvent,
-    ChangeEvent,
-    useMemo,
-} from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -16,23 +9,11 @@ import TableRow from '@mui/material/TableRow'
 import Typography from '@mui/material/Typography'
 import styled from 'styled-components'
 import LogoETH from 'assets/token-logos/eth-transparent.png'
-import ETH from 'assets/token-logos/eth.svg'
-import USDC from 'assets/token-logos/usdc.svg'
-import USDT from 'assets/token-logos/usdt.svg'
-import MATIC from 'assets/token-logos/matic.svg'
-import BTC from 'assets/token-logos/btc.svg'
-import UNI from 'assets/token-logos/uni.svg'
-import BNB from 'assets/token-logos/bnb.svg'
-import AVA from 'assets/token-logos/ava.svg'
-import SUSHI from 'assets/token-logos/sushi.svg'
-import DAI from 'assets/token-logos/dai.svg'
-import UNKNOWN from 'assets/icons/question-mark-button-dark.svg'
 import BgPool from 'assets/brand/bg-pool.png'
 
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import SearchIcon from 'assets/icons/search.svg'
 import PairTokens from 'components/LogoToken/PairTokens'
-import imgDownArrowWhite from 'assets/icons/chevron-white.svg'
 import arrowDown from 'assets/icons/arrowDown.svg'
 import { useNavigate } from 'react-router-dom'
 import MyPools from 'components/MyPools'
@@ -40,10 +21,15 @@ import ToastMessage from 'components/ToastMessage'
 import Pagination from 'components/Pagination'
 import { useWindowDimensions } from 'hooks/useWindowSize'
 import { useMyPosition } from 'hooks/useAllPairs'
-import { Data, useQueryPool } from 'hooks/useQueryPool'
-import Loader from 'components/Loader'
+import {
+    Data,
+    useGetPoolsTransactions,
+    useGetTotalPools,
+    useQueryPool,
+} from 'hooks/useQueryPool'
+
 import CustomLoader from 'components/CustomLoader'
-import { Columns, Row } from 'components/Layouts'
+import Overview from './Components/Overview'
 
 export interface PoolData {
     name: string
@@ -60,39 +46,6 @@ export interface PoolDataMobile {
     tvlValue: string | number
     addresses: string[]
     symbols: string[]
-}
-
-function createData(
-    network: string,
-    name: string,
-    tvl: string,
-    volume: string,
-    fee: string,
-    apr: string,
-): PoolData {
-    return {
-        network,
-        name,
-        tvl,
-        volume,
-        fee,
-        apr,
-    }
-}
-
-const Logos: any = {
-    ETH,
-    WETH: ETH,
-    USDC,
-    DAI,
-    SUSHI,
-    BTC,
-    BNB,
-    MATIC,
-    UNI,
-    USDT,
-    AVA,
-    UNKNOWN,
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -198,7 +151,7 @@ function EnhancedTableToolbar() {
             variant="h6"
             id="tableTitle"
             component="div"
-            className="black-bg"
+            // className="black-bg"
         >
             <HeadTitle>
                 <div>
@@ -227,66 +180,42 @@ export default function Pools() {
     const [dense, setDense] = useState(false)
     const [isAsc, setIsAsc] = useState(false)
     const [page, setPage] = useState<number>(1)
-    const [totalPage, setTotalPage] = useState<number>(1)
+    const numTotalPools = useGetTotalPools()
+    const [totalPage, setTotalPage] = useState<number>(
+        Math.ceil(numTotalPools / 10),
+    )
     const [listHeader, setListHeader] = useState(headCells)
     const [searchName, setSearchName] = useState('')
-    const [isMyPositionPage, setIsMyPositionPage] = useState(false)
+    const [loadingChangePage, setLoadingChangePage] = useState(false)
     const { width } = useWindowDimensions()
     const { position, tokenList } = useMyPosition()
-    const [isShowAction, setIsShowAction] = useState(false)
-    const [indexShowAction, setIndexShowAction] = useState<number>()
+    const [currentPage, setCurrentPage] = useState<
+        'Pools' | 'Details' | 'Position'
+    >('Pools')
 
-    const rows = useQueryPool()
+    const rows = useQueryPool((page - 1) * 10)
+    const transactions = useGetPoolsTransactions()
 
-    const [totalPool, setTotalPool] = useState<Data[] | PoolDataMobile[]>()
-    const [poolsAdminInCurrentPag, setPoolsAdminInCurrentPag] = useState<
-        Data[] | PoolDataMobile[]
-    >()
+    const [overviewPool, setOverviewPool] = useState<Data>()
 
-    const handleDataInCurrentPage = () => {
-        if (!totalPool) return
-
-        if (width <= 576) {
-            const filterData = totalPool.filter(
-                (d, index) => index >= (page - 1) * 10 && index < page * 10,
-            )
-
-            const newFilterData = filterData.map((i) => {
-                return {
-                    name: i.name,
-                    volume: i.volume,
-                    apr: i.apr,
-                    tvlValue: i.tvlValue,
-                    addresses: i.addresses,
-                    symbols: i.symbols,
-                }
-            })
-            setPoolsAdminInCurrentPag(newFilterData)
-            return
-        }
-        setTotalPage(
-            totalPool?.length > 0 ? Math.ceil(totalPool.length / 10) : 1,
-        )
-
-        const filterData = totalPool.filter(
-            (d, index) => index >= (page - 1) * 10 && index < page * 10,
-        )
-        setPoolsAdminInCurrentPag(filterData)
-    }
+    const [poolsAdminInCurrentPag, setPoolsAdminInCurrentPag] =
+        useState<Data[]>()
 
     useEffect(() => {
         if (rows.length > 0) {
-            setTotalPool(rows)
+            setPoolsAdminInCurrentPag(rows)
         }
     }, [rows])
 
     useEffect(() => {
-        if (totalPool) handleDataInCurrentPage()
-    }, [totalPool, page])
-
-    useEffect(() => {
         isAsc ? setOrder('asc') : setOrder('desc')
     }, [isAsc])
+
+    useEffect(() => {
+        numTotalPools !== 0 &&
+            page === 1 &&
+            setTotalPage(Math.ceil(numTotalPools / 10))
+    }, [numTotalPools])
 
     const handleOnSort = () => {
         setIsAsc((i) => !i)
@@ -344,35 +273,23 @@ export default function Pools() {
 
     useEffect(() => {
         if (width <= 576) {
-            let newRow = stableSort<PoolDataMobile>(
-                rows.map((i) => {
-                    return {
-                        name: i.name,
-                        volume: i.volume,
-                        apr: i.apr,
-                        tvlValue: i.tvlValue,
-                        addresses: i.addresses,
-                        symbols: i.symbols,
-                    }
-                }),
-                getComparator(order, 'tvlValue'),
-            )
             let newHeader = headCells.filter(
                 (i) => i.id === 'name' || i.id === 'apr' || i.id === 'volume',
             )
             setListHeader(newHeader)
-
-            newRow = newRow.slice(
-                0 * DEFAULT_ROWS_PER_PAGE,
-                0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE,
-            )
-            setPoolsAdminInCurrentPag(newRow)
         } else {
             setListHeader(headCells)
-            let rowsOnMount = stableSort(rows, getComparator(order, 'tvlValue'))
-            rowsOnMount = rowsOnMount.slice(
-                0 * DEFAULT_ROWS_PER_PAGE,
-                0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE,
+
+            const currentRows = searchName
+                ? rows.filter((i) =>
+                      i.name
+                          ?.toLowerCase()
+                          ?.includes(searchName?.toLowerCase()),
+                  )
+                : rows
+            let rowsOnMount = stableSort(
+                currentRows,
+                getComparator(order, 'tvlValue'),
             )
             setPoolsAdminInCurrentPag(rowsOnMount)
         }
@@ -386,13 +303,14 @@ export default function Pools() {
                     ?.includes(e?.target?.value?.toLowerCase()),
             )
             setSearchName(e.target.value)
-            setTotalPool(newRows)
+            setPoolsAdminInCurrentPag(newRows)
             setTotalPage(
                 newRows?.length > 0 ? Math.ceil(newRows.length / 10) : 1,
             )
+            setPage(1)
         } else {
             setSearchName('')
-            setTotalPool(rows)
+            setPoolsAdminInCurrentPag(rows)
 
             let rowsOnMount = stableSort<any>(
                 rows,
@@ -402,42 +320,16 @@ export default function Pools() {
                 0 * DEFAULT_ROWS_PER_PAGE,
                 0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE,
             )
-            setPoolsAdminInCurrentPag(rowsOnMount)
-            setTotalPage(rows?.length > 0 ? Math.ceil(rows.length / 10) : 1)
+            setTotalPage(Math.ceil(numTotalPools / 10))
         }
     }
-    console.log({ poolsAdminInCurrentPag })
+
     const isSelected = (name: string) => selected.indexOf(name) !== -1
 
-    const handleIsMobile = (row: Data | PoolDataMobile) => {
-        return 'network' in row && 'fee' in row && 'tvl' in row
+    const handleOnClick = (row: Data) => {
+        setOverviewPool(row)
+        setCurrentPage('Details')
     }
-
-    const handleOnClickShowPool = (index: number) => {
-        if (isShowAction && indexShowAction) {
-            /**
-             * handle click show when already show another modal
-             */
-            if (index !== Number(indexShowAction)) {
-                return setIndexShowAction(index)
-            }
-
-            /**
-             * click to hide same show modal
-             */
-            setIndexShowAction(undefined)
-            setIsShowAction(false)
-            return
-        }
-
-        /**
-         * else
-         */
-        isShowAction ? setIndexShowAction(undefined) : setIndexShowAction(index)
-
-        setIsShowAction((i) => !i)
-    }
-
     return (
         <>
             <ToastMessage />
@@ -449,50 +341,56 @@ export default function Pools() {
                         paddingTop: '15px',
                     }}
                 >
-                    <EnhancedTableToolbar />
+                    <div className="black-bg">
+                        <EnhancedTableToolbar />
 
-                    <HeadLabel className="black-bg">
-                        <HeadLabelLeft>
-                            <div className="title-pool">
-                                <PrimaryButton
-                                    name="Pools"
-                                    height="35px"
-                                    color={
-                                        !isMyPositionPage
-                                            ? 'rgba(0, 178, 255, 1)'
-                                            : 'none'
-                                    }
-                                    onClick={() => setIsMyPositionPage(false)}
-                                />
-                            </div>
-                            <div>
-                                <PrimaryButton
-                                    name="My positions"
-                                    height="35px"
-                                    color={
-                                        isMyPositionPage
-                                            ? 'rgba(0, 178, 255, 1)'
-                                            : 'none'
-                                    }
-                                    onClick={() => setIsMyPositionPage(true)}
-                                />
-                            </div>
-                            <div className="circle">{position?.length}</div>
-                        </HeadLabelLeft>
-                        {!isMyPositionPage && (
-                            <HeadLabelRight>
-                                <InputSearchModal>
-                                    <img src={SearchIcon} alt="" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search"
-                                        onChange={(e) => handleOnSearch(e)}
+                        <HeadLabel>
+                            <HeadLabelLeft>
+                                <div className="title-pool">
+                                    <PrimaryButton
+                                        name="Pools"
+                                        height="35px"
+                                        color={
+                                            currentPage === 'Pools'
+                                                ? 'rgba(0, 178, 255, 1)'
+                                                : 'none'
+                                        }
+                                        onClick={() => setCurrentPage('Pools')}
                                     />
-                                </InputSearchModal>
-                            </HeadLabelRight>
-                        )}
-                    </HeadLabel>
-                    {!isMyPositionPage && (
+                                </div>
+                                <div>
+                                    <PrimaryButton
+                                        name="My positions"
+                                        height="35px"
+                                        color={
+                                            currentPage === 'Position'
+                                                ? 'rgba(0, 178, 255, 1)'
+                                                : 'none'
+                                        }
+                                        onClick={() =>
+                                            setCurrentPage('Position')
+                                        }
+                                    />
+                                </div>
+                                <div className="circle">{position?.length}</div>
+                            </HeadLabelLeft>
+                            {currentPage === 'Pools' && (
+                                <HeadLabelRight>
+                                    <InputSearchModal>
+                                        <img src={SearchIcon} alt="" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search"
+                                            value={searchName}
+                                            onChange={(e) => handleOnSearch(e)}
+                                        />
+                                    </InputSearchModal>
+                                </HeadLabelRight>
+                            )}
+                        </HeadLabel>
+                    </div>
+
+                    {currentPage === 'Pools' && (
                         <>
                             <CustomTableContainer>
                                 <Table
@@ -500,7 +398,8 @@ export default function Pools() {
                                     aria-labelledby="tableTitle"
                                     size={dense ? 'small' : 'medium'}
                                 >
-                                    {poolsAdminInCurrentPag &&
+                                    {!loadingChangePage &&
+                                    poolsAdminInCurrentPag &&
                                     poolsAdminInCurrentPag?.length > 0 ? (
                                         <>
                                             <EnhancedTableHead
@@ -509,239 +408,199 @@ export default function Pools() {
                                                 orderBy={orderBy}
                                                 rowCount={rows.length}
                                             />
-                                            <TableBody>
-                                                {poolsAdminInCurrentPag.map(
-                                                    (
-                                                        row:
-                                                            | Data
-                                                            | PoolDataMobile,
-                                                        index,
-                                                    ) => {
-                                                        const isItemSelected =
-                                                            isSelected(row.name)
-                                                        const labelId = `enhanced-table-checkbox-${index}`
-                                                        return (
-                                                            <>
-                                                                {handleIsMobile(
-                                                                    row,
-                                                                ) ? (
-                                                                    <>
-                                                                        <RowTable
-                                                                            role="checkbox"
-                                                                            aria-checked={
-                                                                                isItemSelected
+
+                                            {poolsAdminInCurrentPag.map(
+                                                (
+                                                    row: Data,
+
+                                                    index,
+                                                ) => {
+                                                    const isItemSelected =
+                                                        isSelected(row.name)
+                                                    const labelId = `enhanced-table-checkbox-${index}`
+                                                    /**
+                                                         * @dev !isMobile: 'network' in
+                                                                    row &&
+                                                                'fee' in row &&
+                                                                'tvl' in row 
+                                                         */
+                                                    return (
+                                                        <TableBody key={index}>
+                                                            {width > 576 ? (
+                                                                <RowTable
+                                                                    role="checkbox"
+                                                                    aria-checked={
+                                                                        isItemSelected
+                                                                    }
+                                                                    tabIndex={
+                                                                        -1
+                                                                    }
+                                                                    key={index}
+                                                                    selected={
+                                                                        isItemSelected
+                                                                    }
+                                                                    sx={{
+                                                                        cursor: 'pointer',
+                                                                    }}
+                                                                    onClick={() =>
+                                                                        handleOnClick(
+                                                                            row,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <CellTable
+                                                                        component="th"
+                                                                        id={
+                                                                            labelId
+                                                                        }
+                                                                        scope="row"
+                                                                        padding="normal"
+                                                                        sx={{
+                                                                            width: '20px',
+                                                                        }}
+                                                                        align="center"
+                                                                        //   visible-mobile
+                                                                    >
+                                                                        <img
+                                                                            className="network"
+                                                                            src={
+                                                                                LogoETH
                                                                             }
-                                                                            tabIndex={
-                                                                                -1
-                                                                            }
-                                                                            key={
-                                                                                index
-                                                                            }
-                                                                            selected={
-                                                                                isItemSelected
-                                                                            }
-                                                                            sx={{
-                                                                                cursor: 'pointer',
-                                                                            }}
-                                                                            onClick={() =>
-                                                                                handleOnClickShowPool(
-                                                                                    index,
-                                                                                )
+                                                                            alt=""
+                                                                        />
+                                                                    </CellTable>
+                                                                    <CellTable
+                                                                        align="center"
+                                                                        sx={{
+                                                                            width: '500px',
+                                                                        }}
+                                                                    >
+                                                                        <div className="label">
+                                                                            <PairTokens
+                                                                                tokenA={
+                                                                                    row
+                                                                                        .symbols[1]
+                                                                                }
+                                                                                tokenB={
+                                                                                    row
+                                                                                        .symbols[2]
+                                                                                }
+                                                                            />
+                                                                            <div className="name">
+                                                                                {
+                                                                                    row.name
+                                                                                }
+                                                                            </div>
+                                                                            <Badge>
+                                                                                0.30%
+                                                                            </Badge>
+                                                                        </div>
+                                                                    </CellTable>
+                                                                    <CellTable align="right">
+                                                                        {
+                                                                            row?.tvl
+                                                                        }
+                                                                    </CellTable>
+                                                                    <CellTable align="right">
+                                                                        {
+                                                                            row.volume
+                                                                        }
+                                                                    </CellTable>
+                                                                    <CellTable align="right">
+                                                                        {
+                                                                            row?.fee
+                                                                        }
+                                                                    </CellTable>
+                                                                    <CellTable align="right">
+                                                                        {
+                                                                            row.apr
+                                                                        }
+                                                                    </CellTable>
+                                                                </RowTable>
+                                                            ) : (
+                                                                <RowTable
+                                                                    role="checkbox"
+                                                                    aria-checked={
+                                                                        isItemSelected
+                                                                    }
+                                                                    tabIndex={
+                                                                        -1
+                                                                    }
+                                                                    key={index}
+                                                                    selected={
+                                                                        isItemSelected
+                                                                    }
+                                                                    sx={{
+                                                                        cursor: 'pointer',
+                                                                    }}
+                                                                    onClick={() =>
+                                                                        handleOnClick(
+                                                                            row,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <CellTable
+                                                                        align="left"
+                                                                        className="visible-mobile"
+                                                                    >
+                                                                        <div
+                                                                            className={
+                                                                                width >
+                                                                                576
+                                                                                    ? 'label'
+                                                                                    : 'label-mobile'
                                                                             }
                                                                         >
-                                                                            <CellTable
-                                                                                component="th"
-                                                                                id={
-                                                                                    labelId
+                                                                            <PairTokens
+                                                                                tokenA={
+                                                                                    row
+                                                                                        .symbols[1]
                                                                                 }
-                                                                                scope="row"
-                                                                                padding="normal"
-                                                                                sx={{
-                                                                                    width: '20px',
-                                                                                }}
-                                                                                align="center"
-                                                                                //   visible-mobile
-                                                                            >
-                                                                                <img
-                                                                                    className="network"
-                                                                                    src={
-                                                                                        LogoETH
-                                                                                    }
-                                                                                    alt=""
-                                                                                />
-                                                                            </CellTable>
-                                                                            <CellTable
-                                                                                align="center"
-                                                                                sx={{
-                                                                                    width: '500px',
-                                                                                }}
-                                                                            >
-                                                                                <div className="label">
-                                                                                    <PairTokens
-                                                                                        tokenA={
-                                                                                            row
-                                                                                                .symbols[1]
-                                                                                        }
-                                                                                        tokenB={
-                                                                                            row
-                                                                                                .symbols[2]
-                                                                                        }
-                                                                                    />
-                                                                                    <div className="name">
-                                                                                        {
-                                                                                            row.name
-                                                                                        }
-                                                                                    </div>
-                                                                                    <Badge>
-                                                                                        0.30%
-                                                                                    </Badge>
-                                                                                </div>
-                                                                            </CellTable>
-                                                                            <CellTable align="right">
+                                                                                tokenB={
+                                                                                    row
+                                                                                        .symbols[2]
+                                                                                }
+                                                                            />
+                                                                            <div className="name">
                                                                                 {
-                                                                                    row?.tvl
+                                                                                    row.name
                                                                                 }
-                                                                            </CellTable>
-                                                                            <CellTable align="right">
-                                                                                {
-                                                                                    row.volume
-                                                                                }
-                                                                            </CellTable>
-                                                                            <CellTable align="right">
-                                                                                {
-                                                                                    row?.fee
-                                                                                }
-                                                                            </CellTable>
-                                                                            <CellTable align="right">
-                                                                                {
-                                                                                    row.apr
-                                                                                }
-                                                                            </CellTable>
-                                                                        </RowTable>
-                                                                        {isShowAction &&
-                                                                        indexShowAction ===
-                                                                            index ? (
-                                                                            <>
-                                                                                <TableRow
-                                                                                    sx={{
-                                                                                        height: '120px',
-                                                                                    }}
-                                                                                >
-                                                                                    <CellTable
-                                                                                        align="center"
-                                                                                        colSpan={
-                                                                                            2
-                                                                                        }
-                                                                                    >
-                                                                                        <div className="action">
-                                                                                            <PrimaryButton name="Add" />
-                                                                                        </div>
-                                                                                    </CellTable>
-                                                                                    <CellTable
-                                                                                        align="center"
-                                                                                        colSpan={
-                                                                                            4
-                                                                                        }
-                                                                                    >
-                                                                                        <div className="action">
-                                                                                            <PrimaryButton name="Remove" />
-                                                                                        </div>
-                                                                                    </CellTable>
-                                                                                </TableRow>
-                                                                                <TableRow
-                                                                                    style={{
-                                                                                        height: 5,
-                                                                                    }}
-                                                                                ></TableRow>
-                                                                            </>
-                                                                        ) : (
-                                                                            <TableRow
-                                                                                style={{
-                                                                                    height: 5,
-                                                                                }}
-                                                                            ></TableRow>
-                                                                        )}
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <RowTable
-                                                                            role="checkbox"
-                                                                            aria-checked={
-                                                                                isItemSelected
-                                                                            }
-                                                                            tabIndex={
-                                                                                -1
-                                                                            }
-                                                                            key={
-                                                                                index
-                                                                            }
-                                                                            selected={
-                                                                                isItemSelected
-                                                                            }
-                                                                            sx={{
-                                                                                cursor: 'pointer',
-                                                                            }}
-                                                                        >
-                                                                            <CellTable
-                                                                                align="left"
-                                                                                className="visible-mobile"
-                                                                            >
-                                                                                <div
-                                                                                    className={
-                                                                                        width >
-                                                                                        576
-                                                                                            ? 'label'
-                                                                                            : 'label-mobile'
-                                                                                    }
-                                                                                >
-                                                                                    <PairTokens
-                                                                                        tokenA={
-                                                                                            row
-                                                                                                .symbols[1]
-                                                                                        }
-                                                                                        tokenB={
-                                                                                            row
-                                                                                                .symbols[2]
-                                                                                        }
-                                                                                    />
-                                                                                    <div className="name">
-                                                                                        {
-                                                                                            row.name
-                                                                                        }
-                                                                                    </div>
-                                                                                </div>
-                                                                            </CellTable>
+                                                                            </div>
+                                                                        </div>
+                                                                    </CellTable>
 
-                                                                            <CellTable
-                                                                                align="right"
-                                                                                className="visible-mobile"
-                                                                            >
-                                                                                {
-                                                                                    row.volume
-                                                                                }
-                                                                            </CellTable>
+                                                                    <CellTable
+                                                                        align="right"
+                                                                        className="visible-mobile"
+                                                                    >
+                                                                        {
+                                                                            row.volume
+                                                                        }
+                                                                    </CellTable>
 
-                                                                            <CellTable
-                                                                                align="right"
-                                                                                className="visible-mobile"
-                                                                            >
-                                                                                {
-                                                                                    row.apr
-                                                                                }
-                                                                            </CellTable>
-                                                                        </RowTable>
-                                                                        <TableRow
-                                                                            style={{
-                                                                                height: 5,
-                                                                            }}
-                                                                        ></TableRow>
-                                                                    </>
-                                                                )}
-                                                            </>
-                                                        )
-                                                    },
-                                                )}
-                                            </TableBody>
+                                                                    <CellTable
+                                                                        align="right"
+                                                                        className="visible-mobile"
+                                                                    >
+                                                                        {
+                                                                            row.apr
+                                                                        }
+                                                                    </CellTable>
+                                                                </RowTable>
+                                                            )}
+                                                            <TableRow
+                                                                style={{
+                                                                    height: 5,
+                                                                }}
+                                                                key={
+                                                                    index * 10 +
+                                                                    1
+                                                                }
+                                                            ></TableRow>
+                                                        </TableBody>
+                                                    )
+                                                },
+                                            )}
                                         </>
                                     ) : !searchName ? (
                                         <LoaderLabel>
@@ -759,15 +618,24 @@ export default function Pools() {
                                     <Pagination
                                         page={page}
                                         setPage={setPage}
-                                        isSorted={isAsc}
+                                        setLoadingChangePage={
+                                            setLoadingChangePage
+                                        }
                                         totalPage={totalPage}
                                     />
                                 )}
                         </>
                     )}
 
-                    {isMyPositionPage && (
+                    {currentPage === 'Position' && (
                         <MyPools position={position} tokenList={tokenList} />
+                    )}
+                    {currentPage === 'Details' && (
+                        <Overview
+                            pool={overviewPool}
+                            transaction={transactions}
+                            width={width}
+                        />
                     )}
                 </CustomizeBox>
             </Container>
@@ -795,7 +663,6 @@ const Container = styled.div`
     .black-bg {
         background: url('${BgPool}');
         background-repeat: no-repeat;
-        background-size: cover;
         background-size: cover;
         min-width: 84px;
         border-radius: 12px 12px 0px 0px;
@@ -914,10 +781,14 @@ const HeadLabelRight = styled.div`
     gap: 15px;
 
     @media screen and (max-width: 576px) {
-        flex-direction: column;
+        display: block;
+        div {
+            width: 50%;
+        }
+        /* flex-direction: column;
         div {
             width: 100%;
-        }
+        } */
     }
 `
 

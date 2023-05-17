@@ -44,7 +44,6 @@ const LabelUnStake = ({
     stakingToken,
     initDataTransaction,
 }: IUnstakeToken) => {
-    console.log('🤦‍♂️ ⟹ unstakeData:', { unstakeData })
     const stakingContract = useStakingContract()
     const { addTxn } = useTransactionHandler()
     const { chainId } = useActiveWeb3React()

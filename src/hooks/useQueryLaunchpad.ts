@@ -49,7 +49,6 @@ export const useQueryLaunchpad = () => {
             }
         })
         const sortLaunchpad = launchpads?.sort((a, b) => Number(b.startTime) - Number(a.startTime))
-        console.log("🤦‍♂️ ⟹ returnuseMemo ⟹ sortLaunchpad:", sortLaunchpad)
         return {
             ...launchpadData,
             data: {

@@ -30,6 +30,7 @@ interface IDetails {
 }
 
 const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
+    console.log('🤦‍♂️ ⟹ LaunchpadDetails ⟹ details:', details)
     const { refetch } = useQueryLaunchpad()
     const [commitValue, setCommitValue] = useState('0')
     const fairlaunchContract = useFairLaunchContract(details?.id)
@@ -99,8 +100,10 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                     d.address.toLocaleLowerCase() ===
                     account.toLocaleLowerCase(),
             )
-            return dClaimed ? false : true
+            console.log('🤦‍♂️ ⟹ isAvailableClaim ⟹ dClaimed:', dClaimed)
+            return dClaimed === undefined ? false : true
         }
+
         return true
     }, [details, account])
 
@@ -542,7 +545,8 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                                         />
                                     </LabelCommit>
                                 </Commit>
-                            ) : (
+                            ) : totalCommitment &&
+                              Number(totalCommitment) > 0 ? (
                                 <Commit>
                                     <div className="title-commit">
                                         General claim
@@ -550,6 +554,20 @@ const LaunchpadDetails = ({ details, setCurrentPage }: IDetails) => {
                                     <LabelCommit className="claim">
                                         <div className="label-currency">
                                             <div>You already claimed</div>
+                                        </div>
+                                    </LabelCommit>
+                                </Commit>
+                            ) : (
+                                <Commit>
+                                    <div className="title-commit">
+                                        General claim
+                                    </div>
+                                    <LabelCommit className="claim">
+                                        <div className="label-currency">
+                                            <div>
+                                                WUT ? You are not joined this
+                                                project
+                                            </div>
                                         </div>
                                     </LabelCommit>
                                 </Commit>

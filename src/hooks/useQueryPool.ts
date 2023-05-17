@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
+import { ApolloClient, InMemoryCache, gql, useQuery } from '@apollo/client';
 import { useEffect, useMemo, useState } from 'react';
 // import { InMemoryCache } from '@apollo/client/cache/index'
 export interface Data {
@@ -12,25 +12,76 @@ export interface Data {
     aprValue: number,
     fee: string,
     addresses: string[],
-    symbols: string[]
+    symbols: string[],
+    reserve0: string,
+    reserve1: string,
 }
 
-export const useQueryPool = () => {
-    const [poolData, setPoolData] = useState<Data[]>()
-    const APIURL = 'https://api.thegraph.com/subgraphs/name/anvospace/s-subajaswap'
+const APIURL = 'https://api.thegraph.com/subgraphs/name/anvospace/s-subajaswap'
 
-    // Initialize the Apollo Client
-    const client = new ApolloClient({
-        uri: APIURL,
-        cache: new InMemoryCache(),
-    });
+// Initialize the Apollo Client
+const client = new ApolloClient({
+    uri: APIURL,
+    cache: new InMemoryCache(),
+});
 
-    // consider to use trackedReserveETH instead of reserveUSD
-    const GetTVL = gql`
-    query GetTopPairs($orderDirection: OrderDirection) {
-        pairs(first: 100, orderBy: reserveUSD, orderDirection: $orderDirection) {
+const getTotalPair = gql`
+    query GetPairs {
+        pairs {
+        id
+    }
+    }
+`;
+
+const getTransactions = gql`
+    query GetTransactions {
+        transactions {
+            swaps {
+            amount0In
+            amount0Out
+            amount1In
+            amount1Out
+            pair {
+                token0 {
+                symbol
+                id
+                }
+                token1 {
+                symbol
+                id
+                }
+                createdAtTimestamp
+            }
+            from
+            }
+            mints {
+            amount0
+            amount1
+            pair {
+                id
+                token0 {
+                symbol
+                id
+                }
+                token1 {
+                symbol
+                id
+                }
+                createdAtTimestamp
+            }
+            }
+        }
+    }
+`;
+
+// consider to use trackedReserveETH instead of reserveUSD
+const GetTVL = gql`
+    query GetTopPairs($orderDirection: OrderDirection, $skip: Int) {
+        pairs(first: 10, skip: $skip, orderBy: reserveUSD, orderDirection: $orderDirection) {
             id
             reserveUSD
+            reserve0
+            reserve1
             token0 {
                 symbol
                 id
@@ -43,7 +94,7 @@ export const useQueryPool = () => {
     }
 `;
 
-    const GetDailyVolOfPair = gql`
+const GetDailyVolOfPair = gql`
     query GetDailyVolume($pairAddress: ID!) {
         pairDayDatas(first: 2, orderBy: date, orderDirection: desc, where: { pairAddress: $pairAddress }) {
             dailyVolumeUSD
@@ -51,13 +102,17 @@ export const useQueryPool = () => {
     }
 `;
 
-    async function fetchTVL(ascOrDesc: String) {
+export const useQueryPool = (skipValue: number) => {
+    const [poolData, setPoolData] = useState<Data[]>()
+
+    async function fetchTVL(ascOrDesc: String, skip: Number) {
         try {
             // Fetch the top 10 pairs
             const pairsResponse = await client.query({
                 query: GetTVL,
                 variables: {
                     orderDirection: ascOrDesc,
+                    skip: skip
                 },
             });
 
@@ -131,7 +186,9 @@ export const useQueryPool = () => {
         aprValue: number,
         fee: string,
         addresses: string[],
-        symbols: string[]
+        symbols: string[],
+        reserve0: string,
+        reserve1: string,
     ): Data {
         return {
             network,
@@ -144,14 +201,17 @@ export const useQueryPool = () => {
             aprValue,
             fee,
             addresses,
-            symbols
+            symbols,
+            reserve0,
+            reserve1
+
         }
     }
-    async function fetchData() {
+    const fetchData = async (skip: number) => {
         let tempRowsData: any[] = [];
-        let dailyTVL = await fetchTVL('desc');
+        let dailyTVL = await fetchTVL('desc', skip);
 
-        const promises = dailyTVL.pairs.map(async (pair: { id: string; token0: { symbol: string, id: string }; token1: { symbol: string, id: string }; reserveUSD: string }) => {
+        const promises = dailyTVL.pairs.map(async (pair: { id: string; token0: { symbol: string, id: string }; token1: { symbol: string, id: string }; reserveUSD: string, reserve0: string, reserve1: string }) => {
             const pairId = pair.id;
             const protocol = 'Ethereum';
             const pairSymbol = `${pair.token0.symbol}/${pair.token1.symbol}`;
@@ -159,6 +219,9 @@ export const useQueryPool = () => {
             // TVL
             const reserveUSDValue = parseFloat(pair.reserveUSD);
             const reserveUSD = formatPriceValue(reserveUSDValue);
+
+            const reserve0 = (pair.reserve0);
+            const reserve1 = (pair.reserve1);
 
             // Daily Volume
             const volumeRespond = await fetch24hVolOfPair(pairId);
@@ -171,7 +234,7 @@ export const useQueryPool = () => {
             const apr = `${aprValue.toFixed(2)}%`; // Replace with actual data
             const addresses = [pair.id, pair.token0.id, pair.token1.id]
             const symbols = ['SBJ-LP', pair.token0.symbol, pair.token1.symbol]
-            let data = createData(protocol, pairSymbol, reserveUSD, reserveUSDValue, volume, volumeValue, apr, aprValue, fee, addresses, symbols);
+            let data = createData(protocol, pairSymbol, reserveUSD, reserveUSDValue, volume, volumeValue, apr, aprValue, fee, addresses, symbols, reserve0, reserve1);
             tempRowsData.push(data);
         });
 
@@ -181,11 +244,108 @@ export const useQueryPool = () => {
         setPoolData(tempRowsData);
     }
 
-
     useEffect(() => {
-        fetchData();
-    }, [])
+        fetchData(skipValue);
+    }, [skipValue])
 
     return poolData || []
 }
 
+export const useGetTotalPools = (): number => {
+    const query = useQuery(getTotalPair, {
+        client
+    })
+
+    return useMemo(() => {
+        const d = query.data?.pairs?.length
+        return d || 0
+    }, [query])
+}
+
+export interface ISwap {
+    amount0In: string,
+    amount0Out: string,
+    amount1In: string,
+    amount1Out: string,
+    pair: {
+        token0: {
+            symbol: string,
+            id: string
+        },
+        token1: {
+            symbol: string,
+            id: string
+        },
+        createdAtTimestamp: string
+        from: string
+        id: string
+    },
+    type?: string,
+    date?: string
+}
+
+export interface IMint {
+    amount0: string,
+    amount1: string,
+    pair: {
+        id: string,
+        token0: {
+            symbol: string,
+            id: string,
+        },
+        token1: {
+            symbol: string,
+            id: string,
+        },
+        createdAtTimestamp: string,
+    },
+    type?: string,
+    date?: string
+
+}
+
+export interface IDataTransaction {
+    swaps: Array<ISwap>
+    mints: Array<IMint>
+}
+
+const handleDate = (now: number, txTime: number) => {
+    const ts = (now - txTime)
+    if (ts >= 60 * 60 * 24) {
+        return `${Math.round(ts / (60 * 60 * 24))} days ago`
+    } else if (ts > 60 * 60) {
+        return `${Math.round(ts / (60 * 60))} hours ago`
+    } else if (ts > 60) {
+        return `${Math.round(ts / 60)} minutes ago`
+    }
+
+    return 'Recently'
+}
+
+const handleTransaction = (data: Array<IDataTransaction>) => {
+    const result: Array<ISwap | IMint> = []
+    const currentTimestamp = new Date().getTime() / 1000
+
+    data?.map(d => {
+        if (d.swaps?.[0]) {
+            result.push({ ...d.swaps?.[0], type: 'Swap', date: handleDate(currentTimestamp, Number(d.swaps?.[0]?.pair?.createdAtTimestamp)) })
+        }
+        if (d.mints?.[0]) {
+            result.push({ ...d.mints?.[0], type: 'Add', date: handleDate(currentTimestamp, Number(d.mints?.[0]?.pair?.createdAtTimestamp)) })
+        }
+    })
+
+    return result
+}
+
+export const useGetPoolsTransactions = (): Array<ISwap | IMint> => {
+    const query = useQuery(getTransactions, {
+        client
+    })
+
+    return useMemo(() => {
+        const d: Array<IDataTransaction> = query.data?.transactions
+
+        return handleTransaction(d)
+    }, [query])
+}

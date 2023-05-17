@@ -67,7 +67,7 @@ const Swap = () => {
     const balanceIn = useCurrencyBalance(account, tokenIn)
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
-    
+
     const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
     const loca = useLocation()
@@ -100,9 +100,6 @@ const Swap = () => {
     )
 
     const handleCopyAddress = () => {
-        console.log({ href: window.location.href })
-        console.log({ hostname: window.location.hostname })
-
         if (account) {
             navigator.clipboard
                 .writeText(
@@ -130,7 +127,7 @@ const Swap = () => {
             else return 'swapTokensForExactTokens'
         }
     }
-    console.log(pair);
+    console.log(pair)
 
     const getSwapArguments = () => {
         if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
@@ -149,7 +146,10 @@ const Swap = () => {
             if (isNativeCoin(tokenIn))
                 return {
                     args: [
-                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), // amountOutMin
+                        mulNumberWithDecimal(
+                            calcSlippageAmount(outputAmount, slippage)[0],
+                            tokenOut.decimals,
+                        ), // amountOutMin
                         amountOutMin, //amountOutMin
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
@@ -161,7 +161,10 @@ const Swap = () => {
                 return {
                     args: [
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), //amountOutMin
+                        mulNumberWithDecimal(
+                            calcSlippageAmount(outputAmount, slippage)[0],
+                            tokenOut.decimals,
+                        ), //amountOutMin
                         amountIn, //amountIn
                         amountOutMin, //amountOutMin
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
@@ -174,7 +177,10 @@ const Swap = () => {
                 return {
                     args: [
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), //amountOutMin
+                        mulNumberWithDecimal(
+                            calcSlippageAmount(outputAmount, slippage)[0],
+                            tokenOut.decimals,
+                        ), //amountOutMin
                         amountIn, //amountIn
                         amountOutMin, //amountOutMin
                         [tokenIn.address, tokenOut.address],
@@ -188,7 +194,10 @@ const Swap = () => {
                 return {
                     args: [
                         mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
-                        mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals), //amountInMax
+                        mulNumberWithDecimal(
+                            calcSlippageAmount(inputAmount, slippage)[1],
+                            tokenIn.decimals,
+                        ), //amountInMax
                         amountOut, //amountOut
                         amountInMax, //amountInMax
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
@@ -205,14 +214,20 @@ const Swap = () => {
                         account,
                         calcTransactionDeadline(deadline),
                     ],
-                    value: mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals) //amountInMax
+                    value: mulNumberWithDecimal(
+                        calcSlippageAmount(inputAmount, slippage)[1],
+                        tokenIn.decimals,
+                    ), //amountInMax
                     // value: amountInMax, //amountInMax
                 }
             else
                 return {
                     args: [
                         mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
-                        mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals), //amountInMax
+                        mulNumberWithDecimal(
+                            calcSlippageAmount(inputAmount, slippage)[1],
+                            tokenIn.decimals,
+                        ), //amountInMax
                         amountOut, //amountOut
                         amountInMax, //amountInMax
                         [tokenIn.address, tokenOut.address],
@@ -521,12 +536,18 @@ const Swap = () => {
                 )}
                 <Row jus="space-between">
                     <Nav gap="20px">
-                        <Link to="/swap" className="active-link" style={{fontWeight: 700}}>
+                        <Link
+                            to="/swap"
+                            className="active-link"
+                            style={{ fontWeight: 700 }}
+                        >
                             Swap
                         </Link>
                         {/* <Link to="/add">Add</Link> */}
                         {/* <Link to="/pools">Pool</Link> */}
-                        <Link to="/limit" style={{fontWeight: 700}}>Limit</Link>
+                        <Link to="/limit" style={{ fontWeight: 700 }}>
+                            Limit
+                        </Link>
                     </Nav>
                     <Setting />
                 </Row>

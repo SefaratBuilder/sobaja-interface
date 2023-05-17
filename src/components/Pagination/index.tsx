@@ -9,36 +9,54 @@ import { Data } from 'hooks/useQueryPool'
 export interface Paginations {
     page: number
     setPage: any
-    isSorted: boolean
+    setLoadingChangePage: any
     totalPage: number
 }
 
-const Pagination = ({ page, setPage, isSorted, totalPage }: Paginations) => {
-    useEffect(() => {
-        setPage(1)
-    }, [isSorted])
+const Pagination = ({
+    page,
+    setPage,
+    setLoadingChangePage,
+    totalPage,
+}: Paginations) => {
+    // useEffect(() => {
+    //     // isSorted && setPage(1)
+    // }, [isSorted])
+    const handleLoading = () => {
+        setLoadingChangePage(true)
+
+        let time = setTimeout(() => {
+            setLoadingChangePage(false)
+        }, 1000)
+
+        return () => {
+            clearTimeout(time)
+        }
+    }
+
+    const handleOnClick = (currentPage: number, action: 'next' | 'back') => {
+        if (action === 'next') {
+            if (currentPage > 1) {
+                setPage(currentPage - 1)
+                handleLoading()
+            }
+        } else {
+            if (currentPage < totalPage) {
+                setPage(currentPage + 1)
+                handleLoading()
+            }
+        }
+    }
 
     return (
         <Container>
-            <div
-                onClick={() => {
-                    if (page > 1) {
-                        setPage(page - 1)
-                    }
-                }}
-            >
+            <div onClick={() => handleOnClick(page, 'next')}>
                 <img src={ArrowLeft} alt="" />
             </div>
             <p>
                 Page {page} of {totalPage}
             </p>
-            <div
-                onClick={() => {
-                    if (page < totalPage) {
-                        setPage(page + 1)
-                    }
-                }}
-            >
+            <div onClick={() => handleOnClick(page, 'back')}>
                 <img src={ArrowRight} alt="" />
             </div>
         </Container>
