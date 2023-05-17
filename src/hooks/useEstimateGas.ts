@@ -9,20 +9,20 @@ type SwapArgs = {
     args: (string | string[] | null | undefined)[]
     value: string
 }
+type AddArgs = {
+    args: (string | string[] | null | undefined)[]
+    value: string
+}
 
 export function useEstimateGas(
     contract: Contract | null,
     method: string | undefined | any,
     args: () => SwapArgs | undefined | void,
-    delay: 500, // debounce delay 500ms
 ) {
     const [gasUsed, setGasUsed] = useState<BigNumber | undefined>(undefined)
     const [latestArgs, setLatestArgs] = useState<SwapArgs | undefined>()
 
-    // create debounce version
-    const debouncedContract = useDebounce(contract, delay)
-    const debouncedMethod = useDebounce(method, delay)
-    const debouncedArgs = useDebounce(latestArgs, delay)
+    const delay = 2000 // debounce delay 3s
 
     useEffect(() => {
         const currentArgs = args()
@@ -30,6 +30,11 @@ export function useEstimateGas(
             setLatestArgs(currentArgs)
         }
     }, [args])
+
+    // create debounce version
+    const debouncedContract = useDebounce(contract, delay)
+    const debouncedMethod = useDebounce(method, delay)
+    const debouncedArgs = useDebounce(latestArgs, delay)
 
     useEffect(() => {
         const getGasEstimate = async () => {
@@ -43,7 +48,7 @@ export function useEstimateGas(
 
                 const gasEstimate = await debouncedContract?.estimateGas?.[
                     med
-                ]?.(...argsObj.args, ZERO_ADDRESS, {
+                ]?.(...argsObj.args, {
                     value: argsObj.value,
                 })
                 if (!gasEstimate) {

@@ -157,6 +157,7 @@ const Swap = () => {
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
+                        refAddress || ZeroAddress,
                     ],
                     value: amountIn, //amountIn
                 }
@@ -168,6 +169,7 @@ const Swap = () => {
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline),
+                        refAddress || ZeroAddress,
                     ],
                     value: '0x00',
                 }
@@ -179,6 +181,7 @@ const Swap = () => {
                         [tokenIn.address, tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
+                        refAddress || ZeroAddress,
                     ],
                     value: '0x00',
                 }
@@ -191,6 +194,7 @@ const Swap = () => {
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline),
+                        refAddress || ZeroAddress,
                     ],
                     value: '0x00',
                 }
@@ -201,6 +205,7 @@ const Swap = () => {
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
+                        refAddress || ZeroAddress,
                     ],
                     value: amountInMax, //amountInMax
                 }
@@ -212,6 +217,7 @@ const Swap = () => {
                         [tokenIn.address, tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
+                        refAddress || ZeroAddress,
                     ],
                     value: '0x00',
                 }
@@ -298,8 +304,7 @@ const Swap = () => {
             }
             const { args, value } = swapArguments
 
-            const referralAddress = refAddress || ZeroAddress
-            const newArgs = [...args, referralAddress]
+            const newArgs = args
             console.log('🤦‍♂️ ⟹ args:', newArgs)
 
             const gasLimit = await routerContract?.estimateGas[method](
@@ -492,10 +497,10 @@ const Swap = () => {
                         name={'Swap'}
                     />
                 )}
-                Gas Estimate:{' '}
+                {/* Gas Estimate:{' '}
                 {gasEstimate
                     ? divNumberWithDecimal(gasEstimate.toString(), 18)
-                    : 'Calculating...'}
+                    : 'Calculating...'} */}
             </Row>
         )
     }
