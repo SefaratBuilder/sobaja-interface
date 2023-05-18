@@ -9,6 +9,7 @@ import { shortenAddress } from 'utils'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import ETH from 'assets/token-logos/eth.svg'
 import { uniqByKeepFirst } from 'utils/handleArray'
+import PrimaryButton from 'components/Buttons/PrimaryButton'
 
 const Overview = ({
     pool,
@@ -82,39 +83,48 @@ const Overview = ({
     return (
         <Container>
             <WrapData gap="20px">
-                <LabelContract>
-                    <Row gap="20px">
-                        <p>Contract</p>
-                        <Row gap="5px">
-                            <p>
-                                {pool?.addresses?.[0] &&
-                                    shortenAddress(pool?.addresses?.[0], 6)}
-                            </p>
-                            <>
-                                {isCopied ? (
-                                    <CopyBtn>
-                                        <CopyAccountAddress
-                                            src={imgCheckMark}
-                                        />
-                                        <Tooltip className="tooltip">
-                                            Copied
-                                        </Tooltip>
-                                    </CopyBtn>
-                                ) : (
-                                    <CopyBtn>
-                                        <CopyAccountAddress
-                                            onClick={() => handleCopyAddress()}
-                                            src={imgCopy}
-                                        />
-                                        <Tooltip className="tooltip">
-                                            Click to copy address
-                                        </Tooltip>
-                                    </CopyBtn>
-                                )}
-                            </>
+                <LabelX>
+                    <LabelContract>
+                        <Row gap="20px">
+                            <p>Contract</p>
+                            <Row gap="5px">
+                                <p>
+                                    {pool?.addresses?.[0] &&
+                                        shortenAddress(pool?.addresses?.[0], 6)}
+                                </p>
+                                <>
+                                    {isCopied ? (
+                                        <CopyBtn>
+                                            <CopyAccountAddress
+                                                src={imgCheckMark}
+                                            />
+                                            <Tooltip className="tooltip">
+                                                Copied
+                                            </Tooltip>
+                                        </CopyBtn>
+                                    ) : (
+                                        <CopyBtn>
+                                            <CopyAccountAddress
+                                                onClick={() =>
+                                                    handleCopyAddress()
+                                                }
+                                                src={imgCopy}
+                                            />
+                                            <Tooltip className="tooltip">
+                                                Click to copy address
+                                            </Tooltip>
+                                        </CopyBtn>
+                                    )}
+                                </>
+                            </Row>
                         </Row>
+                    </LabelContract>
+                    <Row gap="10px">
+                        <PrimaryButton name="Add" />
+                        <PrimaryButton name="Remove" />
                     </Row>
-                </LabelContract>
+                </LabelX>
+
                 <LabelAssets gap="25px">
                     <p>Assets in pool</p>
                     <Row gap="10px">
@@ -435,5 +445,15 @@ const LabelAmount = styled.div`
         @media screen and (max-width: 800px) {
             max-width: 60px;
         }
+    }
+`
+
+const LabelX = styled.div`
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    button {
+        width: 120px;
     }
 `

@@ -16,7 +16,7 @@ import SearchIcon from 'assets/icons/search.svg'
 import PairTokens from 'components/LogoToken/PairTokens'
 import arrowDown from 'assets/icons/arrowDown.svg'
 import { useNavigate } from 'react-router-dom'
-import MyPools from 'components/MyPools'
+import Positions from './Components/Positions'
 import ToastMessage from 'components/ToastMessage'
 import Pagination from 'components/Pagination'
 import { useWindowDimensions } from 'hooks/useWindowSize'
@@ -410,11 +410,7 @@ export default function Pools() {
                                             />
 
                                             {poolsAdminInCurrentPag.map(
-                                                (
-                                                    row: Data,
-
-                                                    index,
-                                                ) => {
+                                                (row: Data, index) => {
                                                     const isItemSelected =
                                                         isSelected(row.name)
                                                     const labelId = `enhanced-table-checkbox-${index}`
@@ -470,7 +466,7 @@ export default function Pools() {
                                                                         />
                                                                     </CellTable>
                                                                     <CellTable
-                                                                        align="center"
+                                                                        align="left"
                                                                         sx={{
                                                                             width: '500px',
                                                                         }}
@@ -628,7 +624,7 @@ export default function Pools() {
                     )}
 
                     {currentPage === 'Position' && (
-                        <MyPools position={position} tokenList={tokenList} />
+                        <Positions position={position} tokenList={tokenList} />
                     )}
                     {currentPage === 'Details' && (
                         <Overview
@@ -834,10 +830,10 @@ const CellTable = styled(TableCell)`
         justify-content: center;
         align-items: center;
 
-        /* @media screen and (max-width: 1920px) {
+        @media screen and (max-width: 1920px) {
             justify-content: flex-start;
-            padding-left: 160px;
-        } */
+            padding-left: 140px;
+        }
 
         @media screen and (max-width: 1540px) {
             justify-content: flex-start;

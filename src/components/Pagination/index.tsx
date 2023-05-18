@@ -19,19 +19,15 @@ const Pagination = ({
     setLoadingChangePage,
     totalPage,
 }: Paginations) => {
-    // useEffect(() => {
-    //     // isSorted && setPage(1)
-    // }, [isSorted])
     const handleLoading = () => {
-        setLoadingChangePage(true)
-
-        let time = setTimeout(() => {
-            setLoadingChangePage(false)
-        }, 1000)
-
-        return () => {
-            clearTimeout(time)
-        }
+        // if (!setLoadingChangePage) return
+        // setLoadingChangePage(true)
+        // let time = setTimeout(() => {
+        //     setLoadingChangePage(false)
+        // }, 1000)
+        // return () => {
+        //     clearTimeout(time)
+        // }
     }
 
     const handleOnClick = (currentPage: number, action: 'next' | 'back') => {
