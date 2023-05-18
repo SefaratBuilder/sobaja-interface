@@ -217,7 +217,7 @@ const Overview = ({
                                     {width && width > 692 ? (
                                         <>
                                             <LabelAmount>
-                                                {/* <div className="to">
+                                                <div className="to">
                                                     {tx?.amount0
                                                         ? Number(
                                                               tx?.amount0,
@@ -229,9 +229,6 @@ const Overview = ({
                                                         : Number(
                                                               tx?.amount0In,
                                                           )?.toFixed(6)}
-                                                </div> */}
-                                                <div className="to">
-                                                    8214719827489127489127
                                                 </div>
                                                 <div>
                                                     {tx?.pair?.token0?.symbol}
