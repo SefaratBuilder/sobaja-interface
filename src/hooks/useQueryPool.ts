@@ -69,6 +69,7 @@ const getTransactions = gql`
                 }
                 createdAtTimestamp
             }
+            sender
             }
         }
     }
@@ -299,6 +300,7 @@ export interface IMint {
         },
         createdAtTimestamp: string,
     },
+    sender: string
     type?: string,
     date?: string
 

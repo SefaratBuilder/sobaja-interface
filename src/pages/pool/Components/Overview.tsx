@@ -19,22 +19,55 @@ const Overview = ({
     transaction?: (ISwap | IMint)[]
     width?: number
 }) => {
+    const [isCopied, setIsCopied] = useState(false)
+    const [indexFieldActive, setIndexFieldActive] = useState(0)
+
+    /**
+     * @dev dataShow: titles in transactions
+     */
+    const dataShow = useMemo(() => {
+        if (width && width > 692) {
+            return {
+                title: ['Token Amount', 'Token Amount', 'Sender', 'Time'],
+                fields: ['All', 'Swap', 'Add'],
+            }
+        }
+
+        return {
+            title: ['Sender', 'Time'],
+            fields: ['All', 'Swap', 'Add'],
+        }
+    }, [width])
+
+    /**
+     * @dev dTransactions: handle transactions
+     */
     const dTransactions = useMemo(() => {
         if (transaction?.[0]) {
-            return uniqByKeepFirst(
-                transaction.filter(
-                    (tx) =>
-                        tx.pair.token0.id === pool?.addresses?.[1] &&
-                        tx.pair.token1.id === pool?.addresses?.[2],
-                ),
-                (t: ISwap | IMint) => t.pair.id,
-            )
+            return indexFieldActive === 0
+                ? uniqByKeepFirst(
+                      transaction.filter(
+                          (tx) =>
+                              tx.pair.token0.id === pool?.addresses?.[1] &&
+                              tx.pair.token1.id === pool?.addresses?.[2],
+                      ),
+                      (t: ISwap | IMint) => t.pair.id,
+                  )
+                : uniqByKeepFirst(
+                      transaction.filter(
+                          (tx) =>
+                              tx.pair.token0.id === pool?.addresses?.[1] &&
+                              tx.pair.token1.id === pool?.addresses?.[2],
+                      ),
+                      (t: ISwap | IMint) => t.pair.id,
+                  ).filter(
+                      (t: any) =>
+                          t?.type === dataShow.fields?.[indexFieldActive],
+                  )
         }
         return []
-    }, [transaction])
-    console.log('🤦‍♂️ ⟹ transactions ⟹ transactions:', dTransactions)
+    }, [transaction, indexFieldActive])
 
-    const [isCopied, setIsCopied] = useState(false)
     const handleCopyAddress = () => {
         if (pool?.addresses?.[0]) {
             navigator.clipboard.writeText(pool?.addresses?.[0]).then(() => {
@@ -45,18 +78,6 @@ const Overview = ({
             })
         }
     }
-
-    const dataShow = useMemo(() => {
-        if (width && width > 576) {
-            return {
-                title: ['Token Amount', 'Token Amount', 'Sender', 'Time'],
-            }
-        }
-
-        return {
-            title: ['Sender', 'Time'],
-        }
-    }, [width])
 
     return (
         <Container>
@@ -160,47 +181,97 @@ const Overview = ({
                 </LabelDetails>
                 <h2>Transactions</h2>
                 <LabelTransactions gap="20px">
-                    <Transactions isMobile={width ? width <= 576 : false}>
+                    <Transactions isMobile={width ? width <= 692 : false}>
                         <Row gap="10px">
-                            <p>All</p>
-                            <p>Swap</p>
-                            <p>Add</p>
+                            {dataShow?.fields?.map((field, index) => {
+                                return (
+                                    <div
+                                        key={index}
+                                        className={`field ${
+                                            index === indexFieldActive &&
+                                            'active'
+                                        }`}
+                                        onClick={() =>
+                                            setIndexFieldActive(index)
+                                        }
+                                    >
+                                        {field}
+                                    </div>
+                                )
+                            })}
                         </Row>
                         {dataShow?.title?.map((t, index) => {
                             return <span key={index}>{t}</span>
                         })}
                     </Transactions>
                     {dTransactions &&
-                        dTransactions?.map((tx: any) => {
+                        dTransactions?.map((tx: any, index: number) => {
                             return (
                                 <Transactions
-                                    isMobile={width ? width <= 576 : false}
+                                    isMobile={width ? width <= 692 : false}
+                                    key={index}
                                 >
                                     <Row gap="10px">
                                         <span>{tx.type}</span>
                                     </Row>
-                                    {width && width > 576 ? (
+                                    {width && width > 692 ? (
                                         <>
+                                            <LabelAmount>
+                                                {/* <div className="to">
+                                                    {tx?.amount0
+                                                        ? Number(
+                                                              tx?.amount0,
+                                                          )?.toFixed(6)
+                                                        : tx?.amount0In === '0'
+                                                        ? Number(
+                                                              tx?.amount0Out,
+                                                          )?.toFixed(6)
+                                                        : Number(
+                                                              tx?.amount0In,
+                                                          )?.toFixed(6)}
+                                                </div> */}
+                                                <div className="to">
+                                                    8214719827489127489127
+                                                </div>
+                                                <div>
+                                                    {tx?.pair?.token0?.symbol}
+                                                </div>
+                                            </LabelAmount>
+                                            <LabelAmount>
+                                                <div className="to">
+                                                    {tx?.amount1
+                                                        ? Number(
+                                                              tx?.amount1,
+                                                          )?.toFixed(6)
+                                                        : tx?.amount1In === '0'
+                                                        ? Number(
+                                                              tx?.amount1Out,
+                                                          )?.toFixed(6)
+                                                        : Number(
+                                                              tx?.amount1In,
+                                                          )?.toFixed(6)}
+                                                </div>
+                                                <div>
+                                                    {tx?.pair?.token1?.symbol}
+                                                </div>
+                                            </LabelAmount>
+
                                             <span>
-                                                {tx?.amount0
-                                                    ? tx?.amount0
-                                                    : tx?.amount0In === '0'
-                                                    ? tx?.amount0Out
-                                                    : tx?.amount0In}
+                                                {shortenAddress(
+                                                    tx.from || tx.sender,
+                                                    4,
+                                                )}
                                             </span>
-                                            <span>
-                                                {tx?.amount1
-                                                    ? tx?.amount1
-                                                    : tx?.amount1In === '0'
-                                                    ? tx?.amount1Out
-                                                    : tx?.amount1In}
-                                            </span>
-                                            <span>0x</span>
                                             <span>{tx.date}</span>
                                         </>
                                     ) : (
                                         <>
-                                            <span>0x</span>
+                                            <span>
+                                                {shortenAddress(
+                                                    tx.from || tx.sender,
+                                                    4,
+                                                )}
+                                            </span>
                                             <span>{tx.date}</span>
                                         </>
                                     )}
@@ -343,5 +414,29 @@ const Transactions = styled.div<{ isMobile?: boolean }>`
     span {
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+
+    .field {
+        cursor: pointer;
+        color: #7d7979;
+    }
+    .active {
+        color: #fff;
+        /* padding: 5px; */
+    }
+`
+
+const LabelAmount = styled.div`
+    display: flex;
+    gap: 5px;
+    justify-content: flex-end;
+    div {
+        max-width: 100px;
+        @media screen and (max-width: 990px) {
+            max-width: 70px;
+        }
+        @media screen and (max-width: 800px) {
+            max-width: 60px;
+        }
     }
 `
