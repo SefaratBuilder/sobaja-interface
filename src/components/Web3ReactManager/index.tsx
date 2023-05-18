@@ -1,87 +1,123 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useWeb3React } from '@web3-react/core'
-import styled from 'styled-components'
+import {
+    networkConnection,
+    web3Injected,
+    web3Network,
+    web3NetworkHooks,
+} from 'components/connection'
+import { useAppDispatch } from 'states/hook'
+import { updateSelectedWallet } from 'states/user/reducer'
+import { ALL_SUPPORTED_CHAIN_IDS } from './../../constants/index'
+import { ChainId } from 'interfaces'
+// import styled from 'styled-components'
 
-import { network } from 'connectors'
-import { useEagerConnect, useInactiveListener } from 'hooks'
-// import Loader from '../Loader'
+// import { network } from 'connectors'
+// import { useEagerConnect, useInactiveListener } from 'hooks'
+// // import Loader from '../Loader'
 
-const MessageWrapper = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 20rem;
-`
+// const MessageWrapper = styled.div`
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+//     height: 20rem;
+// `
 
-const Message = styled.h2`
-    color: ${({ theme }) => theme.secondary1};
-`
+// const Message = styled.h2`
+//     color: ${({ theme }) => theme.secondary1};
+// `
+
+// export default function Web3ReactManager({
+//     children,
+// }: {
+//     children: JSX.Element
+// }) {
+//     const { active } = useWeb3React()
+
+//     const {
+//         active: networkActive,
+//         error: networkError,
+//         activate: activateNetwork,
+//     } = useWeb3React('NETWORK')
+
+//     // try to eagerly connect to an injected provider, if it exists and has granted access already
+//     const triedEager = useEagerConnect()
+
+//     // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
+//     useEffect(() => {
+//         if (triedEager && !networkActive && !networkError && !active) {
+//             activateNetwork(network)
+//         }
+//     }, [triedEager, networkActive, networkError, activateNetwork, active])
+
+//     // when there's no account connected, react to logins (broadly speaking) on the injected provider, if it exists
+//     useInactiveListener(!triedEager)
+
+//     // handle delayed loader state
+//     const [showLoader, setShowLoader] = useState(false)
+//     useEffect(() => {
+//         const timeout = setTimeout(() => {
+//             setShowLoader(true)
+//         }, 600)
+
+//         return () => {
+//             clearTimeout(timeout)
+//         }
+//     }, [])
+
+//     // on page load, do nothing until we've tried to connect to the injected connector
+//     if (!triedEager) {
+//         return null
+//     }
+
+//     // if the account context isn't active, and there's an error on the network context, it's an irrecoverable error
+//     if (!active && networkError) {
+//         return (
+//             <MessageWrapper>
+//                 <Message>
+//                     <span>
+//                         Oops! An unknown error occurred. Please refresh the
+//                         page, or visit from another browser or device.
+//                     </span>
+//                 </Message>
+//             </MessageWrapper>
+//         )
+//     }
+
+//     // if neither context is active, spin
+//     if (!active && !networkActive) {
+//         return showLoader ? (
+//             <MessageWrapper>
+//                 <span>Loading...</span>
+//             </MessageWrapper>
+//         ) : null
+//     }
+
+//     return children
+// }
 
 export default function Web3ReactManager({
     children,
 }: {
     children: JSX.Element
 }) {
-    const { active } = useWeb3React()
-
-    const {
-        active: networkActive,
-        error: networkError,
-        activate: activateNetwork,
-    } = useWeb3React('NETWORK')
-
-    // try to eagerly connect to an injected provider, if it exists and has granted access already
-    const triedEager = useEagerConnect()
-
-    // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
-    useEffect(() => {
-        if (triedEager && !networkActive && !networkError && !active) {
-            activateNetwork(network)
+    const { account, chainId, connector } = useWeb3React()
+    const dispatch = useAppDispatch()
+    const disconnect = useCallback(() => {
+        if (connector && connector.deactivate) {
+            connector.deactivate()
         }
-    }, [triedEager, networkActive, networkError, activateNetwork, active])
-
-    // when there's no account connected, react to logins (broadly speaking) on the injected provider, if it exists
-    useInactiveListener(!triedEager)
-
-    // handle delayed loader state
-    const [showLoader, setShowLoader] = useState(false)
+        connector.resetState()
+        dispatch(updateSelectedWallet({ wallet: undefined }))
+    }, [connector, dispatch])
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            setShowLoader(true)
-        }, 600)
-
-        return () => {
-            clearTimeout(timeout)
+        if (
+            account &&
+            chainId &&
+            !ALL_SUPPORTED_CHAIN_IDS.includes(chainId as ChainId)
+        ) {
+            disconnect()
         }
-    }, [])
-
-    // on page load, do nothing until we've tried to connect to the injected connector
-    if (!triedEager) {
-        return null
-    }
-
-    // if the account context isn't active, and there's an error on the network context, it's an irrecoverable error
-    if (!active && networkError) {
-        return (
-            <MessageWrapper>
-                <Message>
-                    <span>
-                        Oops! An unknown error occurred. Please refresh the
-                        page, or visit from another browser or device.
-                    </span>
-                </Message>
-            </MessageWrapper>
-        )
-    }
-
-    // if neither context is active, spin
-    if (!active && !networkActive) {
-        return showLoader ? (
-            <MessageWrapper>
-                <span>Loading...</span>
-            </MessageWrapper>
-        ) : null
-    }
-
+    }, [account, chainId])
     return children
 }

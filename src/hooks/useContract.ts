@@ -33,21 +33,21 @@ export const useContract = (
     ABI: any,
     withSignerIfPossible = true,
 ): Contract | null => {
-    const { library, account } = useActiveWeb3React()
+    const { connector, account, provider } = useActiveWeb3React()
 
     return useMemo(() => {
-        if (!address || !ABI || !library) return null
+        if (!address || !ABI || !provider) return null
         try {
             return getContract(
                 address,
                 ABI,
-                library,
+                provider,
                 withSignerIfPossible && account ? account : undefined,
             )
         } catch (error) {
             return null
         }
-    }, [address, ABI, library, withSignerIfPossible, account])
+    }, [address, ABI, provider, withSignerIfPossible, account])
 }
 
 export function useMulticallContract(): Contract | null {

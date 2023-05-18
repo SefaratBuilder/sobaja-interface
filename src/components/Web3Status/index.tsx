@@ -4,15 +4,17 @@ import PrimaryButton, { Button } from 'components/Buttons/PrimaryButton'
 import WalletModal from 'components/WalletModal'
 import { Activity } from 'react-feather'
 import { shortenAddress } from 'utils'
-import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
+// import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
+import { useWeb3React } from '@web3-react/core'
 import arrowDown from 'assets/icons/arrow-down.svg'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Web3Status = () => {
-    const { account, error } = useWeb3React()
+    const { account, chainId } = useWeb3React()
     const [toggleWalletModal, setToggleWalletModal] = useState<boolean>(false)
     const { wallet } = useSmartAccountContext()
 
+    console.log('chainId', chainId)
     function formatConnectorName(account: any) {
         return (
             <Fragment>
@@ -24,31 +26,35 @@ const Web3Status = () => {
             </Fragment>
         )
     }
-    const Web3StatusInner = (account: any, error: any) => {
+    const Web3StatusInner = (account: any) => {
         if (account) {
             return (
                 <Web3StatusConnect
                     height={undefined}
                     id="web3-status-connected"
-                    onClick={() => setToggleWalletModal(!toggleWalletModal)}
+                    onClick={() => {
+                        setToggleWalletModal(!toggleWalletModal)
+                    }}
                 >
                     {formatConnectorName(account)}
                 </Web3StatusConnect>
             )
-        } else if (error) {
-            return (
-                <Web3StatusConnect height={undefined}>
-                    <NetworkIcon></NetworkIcon>
-                    <span>
-                        {error instanceof UnsupportedChainIdError ? (
-                            <p>Wrong Network</p>
-                        ) : (
-                            <p>Error</p>
-                        )}
-                    </span>
-                </Web3StatusConnect>
-            )
-        } else {
+        }
+        // else if (error) {
+        //     return (
+        //         <Web3StatusConnect height={undefined}>
+        //             <NetworkIcon></NetworkIcon>
+        //             <span>
+        //                 {error  ? (
+        //                     <p>Wrong Network</p>
+        //                 ) : (
+        //                     <p>Error</p>
+        //                 )}
+        //             </span>
+        //         </Web3StatusConnect>
+        //     )
+        // }
+        else {
             return (
                 <Web3StatusConnect
                     height={undefined}
@@ -64,7 +70,7 @@ const Web3Status = () => {
     return (
         <Fragment>
             <Web3StatusWrapper>
-                {Web3StatusInner(wallet?.address || account, error)}
+                {Web3StatusInner(wallet?.address || account)}
             </Web3StatusWrapper>
             {toggleWalletModal ? (
                 <WalletModal setToggleWalletModal={setToggleWalletModal} />

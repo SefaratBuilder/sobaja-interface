@@ -9,7 +9,7 @@ export const ListNetwork = [
         logo: LogoERA,
         switchNetwork: [
             {
-                chainId: '0x144',
+                chainId: 324,
                 chainName: 'ZkSync',
                 nativeCurrency: {
                     name: 'ETH',
@@ -27,7 +27,7 @@ export const ListNetwork = [
         logo: LogoERA,
         switchNetwork: [
             {
-                chainId: '0x118',
+                chainId: 280,
                 chainName: 'ZkSync Testnet',
                 nativeCurrency: {
                     name: 'ETH',
@@ -45,7 +45,7 @@ export const ListNetwork = [
         logo: LogoMatic,
         switchNetwork: [
             {
-                chainId: '0x13881',
+                chainId: 80001,
                 chainName: 'Mumbai',
                 nativeCurrency: {
                     name: 'MATIC',

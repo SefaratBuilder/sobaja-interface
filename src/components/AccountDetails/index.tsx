@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import styled from 'styled-components'
 import { useActiveWeb3React } from 'hooks'
 import { shortenAddress } from 'utils'
@@ -15,6 +15,8 @@ import { Row } from 'components/Layouts'
 import DepositModal from './DepositModal'
 import SendModal from './SendModal'
 import GasSetting from './GasSetting'
+import { useAppDispatch } from 'states/hook'
+import { updateSelectedWallet } from 'states/user/reducer'
 
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -24,11 +26,25 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account, chainId, library } = useActiveWeb3React()
+    const { account, chainId, connector } = useActiveWeb3React()
     const [isCopied, setIsCopied] = useState<boolean>(false)
-    const { connect, disconnect, web3Provider } = useWeb3AuthContext()
+    const {
+        connect,
+        web3Provider,
+        disconnect: disconnectWeb3Auth,
+    } = useWeb3AuthContext()
     const { wallet, state, loading } = useSmartAccountContext()
-    const balance = useETHBalances([wallet?.address || account])?.[wallet?.address || account || '']
+    const balance = useETHBalances([wallet?.address || account])?.[
+        wallet?.address || account || ''
+    ]
+    const dispatch = useAppDispatch()
+    const disconnect = useCallback(() => {
+        if (connector && connector.deactivate) {
+            connector.deactivate()
+        }
+        connector.resetState()
+        dispatch(updateSelectedWallet({ wallet: undefined }))
+    }, [connector, dispatch])
 
     const handleCopyAddress = () => {
         if (wallet?.address) {
@@ -53,8 +69,7 @@ const AccountDetails = ({
     const handleOnConnectSmartAccount = async () => {
         try {
             connect()
-        }
-        catch(err) {
+        } catch (err) {
             console.log('failed to connect to smart account: ', err)
         }
     }
@@ -66,16 +81,16 @@ const AccountDetails = ({
                     <Row al="center" gap="10px">
                         <WrapAccountInfo>
                             <ImgAccount src="https://picsum.photos/50/50" />
-                            <IdAccount>{wallet?.address && shortenAddress(wallet.address) || account && shortenAddress(account)}</IdAccount>
+                            <IdAccount>
+                                {(wallet?.address &&
+                                    shortenAddress(wallet.address)) ||
+                                    (account && shortenAddress(account))}
+                            </IdAccount>
                         </WrapAccountInfo>
-                        {
-                            wallet && <AAMarker>Smart account</AAMarker>
-                        }
+                        {wallet && <AAMarker>Smart account</AAMarker>}
                     </Row>
                     <WrapBtnHeader>
-                        {
-                            wallet && <GasSetting />
-                        }
+                        {wallet && <GasSetting />}
                         {isCopied ? (
                             <CopyBtn>
                                 <CopyAccountAddress src={imgCheckMark} />
@@ -98,10 +113,10 @@ const AccountDetails = ({
                         </button> */}
                         <button
                             onClick={() => {
-                                if(wallet?.address) {
-                                    disconnect()
+                                if (wallet?.address) {
+                                    disconnectWeb3Auth()
                                 } else {
-                                    openOptions()
+                                    disconnect()
                                 }
                             }}
                         >
@@ -121,23 +136,23 @@ const AccountDetails = ({
                     {(chainId && NATIVE_COIN[chainId].symbol) || 'ETH'}
                 </Balance>
                 <WrapButton>
-                    {
-                        !wallet && 
+                    {!wallet && (
                         <>
                             <PrimaryButton
-                                name={loading ? "Connecting" : "Use smart account"}
+                                name={
+                                    loading ? 'Connecting' : 'Use smart account'
+                                }
                                 onClick={handleOnConnectSmartAccount}
                                 isLoading={loading}
                             />
                         </>
-                    }
-                    {
-                        wallet &&
+                    )}
+                    {wallet && (
                         <>
                             <DepositModal />
                             <SendModal />
                         </>
-                    }
+                    )}
                 </WrapButton>
             </WrapContent>
             <Footer className="isLogged">

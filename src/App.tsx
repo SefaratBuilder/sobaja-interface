@@ -47,30 +47,24 @@ const App = () => {
     return (
         <Web3ReactManager>
             <HashRouter>
-                <Updater />
+                {/* <Updater /> */}
                 <Header />
-
-                <AppContainer>
-                    <ToastMessage />
-                    {/* <TestTransaction /> */}
-                    <Routes>
-                        <Route path="/swap" element={<Swap />} />
-                        <Route path="/pools" element={<Pools />} />
-                        <Route path="/add" element={<AddLiquidity />} />
-                        <Route
-                            path="/test-launchpad"
-                            element={
-                                    <Launchpad />
-                            }
-                        />
-                        <Route path="/staking" element={<StakeDetails />} />
-                        <Route path="/bridge" element={<Bridge />} />
-                        <Route path="/nfts" element={<NFTs />} />
-                        <Route path="/account-abstraction" element={<AA />} />
-                        <Route path="*" element={<Navigate to="/swap" />} />
-                    </Routes>
-                    <Polling />
-                </AppContainer>
+                {/* 
+            <AppContainer>
+                <ToastMessage />
+                <Routes>
+                    <Route path="/swap" element={<Swap />} />
+                    <Route path="/pools" element={<Pools />} />
+                    <Route path="/add" element={<AddLiquidity />} />
+                    <Route path="/test-launchpad" element={<Launchpad />} />
+                    <Route path="/staking" element={<StakeDetails />} />
+                    <Route path="/bridge" element={<Bridge />} />
+                    <Route path="/nfts" element={<NFTs />} />
+                    <Route path="/account-abstraction" element={<AA />} />
+                    <Route path="*" element={<Navigate to="/swap" />} />
+                </Routes>
+                <Polling />
+            </AppContainer> */}
             </HashRouter>
         </Web3ReactManager>
     )

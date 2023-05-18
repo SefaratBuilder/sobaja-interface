@@ -1,7 +1,7 @@
 import React, { useState, Fragment } from 'react'
 import NetworkSelectorMobile from 'components/NetworkSelectorMobile'
 import WalletModal from 'components/WalletModal'
-import Web3StatusMobile from 'components/Web3StatusMobile'
+// import Web3StatusMobile from 'components/Web3StatusMobile'
 import styled from 'styled-components'
 
 const ConnectorMobile = () => {
@@ -10,10 +10,10 @@ const ConnectorMobile = () => {
         <Fragment>
             <WrapConnectorMobile>
                 <NetworkSelectorMobile />
-                <Web3StatusMobile
+                {/* <Web3StatusMobile
                     toggleWalletModal={toggleWalletModal}
                     setToggleWalletModal={setToggleWalletModal}
-                />
+                /> */}
             </WrapConnectorMobile>
 
             {toggleWalletModal ? (
