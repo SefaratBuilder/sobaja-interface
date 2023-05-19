@@ -65,18 +65,20 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
     // const [file, setFile] = useState<File>()
     const { chainId, account } = useActiveWeb3React()
     const [err, setErr] = useState('')
-    const [launchpadState, setLaunchpadState] = useState<ILaunchpadState>({
-        addressTokenSale: '0xdEfd221072dD078d11590D58128399C2fe8cCa7e',
-        addressTokenPayment: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-        softCap: '',
-        hardCap: '',
-        tokenSalePrice: '',
-        individualCap: '',
-        overflowTokenReward: '',
-        totalToken: '',
-        startTime: '',
-        endTime: '',
-    })
+    const [launchpadState, setLaunchpadState] = useState<ILaunchpadState | any>(
+        {
+            addressTokenSale: '0xdEfd221072dD078d11590D58128399C2fe8cCa7e',
+            addressTokenPayment: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+            softCap: '',
+            hardCap: '',
+            tokenSalePrice: '',
+            individualCap: '',
+            overflowTokenReward: '',
+            totalToken: '',
+            startTime: '',
+            endTime: '',
+        },
+    )
 
     const [indexType, setIndexType] = useState(0)
     const types = ['Normal', 'FairLaunch', 'WhiteList']

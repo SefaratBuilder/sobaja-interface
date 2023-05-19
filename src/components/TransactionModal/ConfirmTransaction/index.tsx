@@ -129,6 +129,7 @@ const ConfirmTransactionModal = ({
                     </div>
                 </Header>
                 {payload?.method === 'swap' ||
+                payload?.method === 'remove' ||
                 payload?.method === 'add liquidity' ? (
                     <EstimatedNotice>
                         <TitleEstimate style={{ gap: '5px' }}>

@@ -17,6 +17,7 @@ import { useToken, useTokenApproval } from 'hooks/useToken'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import WalletModal from 'components/WalletModal'
 import { shortenAddress } from 'utils'
+import useDebounce from 'hooks/useDebounce'
 
 import {
     ALL_SUPPORTED_CHAIN_IDS,
@@ -24,9 +25,9 @@ import {
     WRAPPED_NATIVE_COIN,
 } from 'constants/index'
 import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
-import { ZeroAddress } from 'ethers'
-import { mulNumberWithDecimal } from 'utils/math'
-import { useRouterContract } from 'hooks/useContract'
+import { Contract, ZeroAddress } from 'ethers'
+import { divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math'
+import { useRouterContract, useStakingContract } from 'hooks/useContract'
 import {
     calcSlippageAmount,
     calcTransactionDeadline,
@@ -50,6 +51,8 @@ import { sendEvent } from 'utils/analytics'
 import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
+import { useEstimateGas } from 'hooks/useEstimateGas'
+import { BigNumber } from '@ethersproject/bignumber'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -67,7 +70,8 @@ const Swap = () => {
     const balanceIn = useCurrencyBalance(account, tokenIn)
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
-    
+    const [gasCost, setGasCost] = useState<BigNumber>()
+
     const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
     const loca = useLocation()
@@ -100,9 +104,6 @@ const Swap = () => {
     )
 
     const handleCopyAddress = () => {
-        console.log({ href: window.location.href })
-        console.log({ hostname: window.location.hostname })
-
         if (account) {
             navigator.clipboard
                 .writeText(
@@ -119,7 +120,7 @@ const Swap = () => {
         }
     }
 
-    const getSwapMethod = () => {
+    const getSwapMethod = useCallback(() => {
         if (swapType === Field.INPUT) {
             if (isNativeCoin(tokenIn)) return 'swapExactETHForTokens'
             else if (isNativeCoin(tokenOut)) return 'swapExactTokensForETH'
@@ -129,10 +130,10 @@ const Swap = () => {
             else if (isNativeCoin(tokenIn)) return 'swapETHForExactTokens'
             else return 'swapTokensForExactTokens'
         }
-    }
-    console.log(pair);
+    }, [swapType, tokenIn, tokenOut])
+    // console.log('PAIR:', pair)
 
-    const getSwapArguments = () => {
+    const getSwapArguments = useCallback(() => {
         if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
             return
         const amountIn = mulNumberWithDecimal(inputAmount, tokenIn.decimals)
@@ -149,37 +150,35 @@ const Swap = () => {
             if (isNativeCoin(tokenIn))
                 return {
                     args: [
-                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), // amountOutMin
                         amountOutMin, //amountOutMin
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
+                        refAddress || ZeroAddress,
                     ],
                     value: amountIn, //amountIn
                 }
             else if (isNativeCoin(tokenOut))
                 return {
                     args: [
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), //amountOutMin
                         amountIn, //amountIn
                         amountOutMin, //amountOutMin
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline),
+                        refAddress || ZeroAddress,
                     ],
                     value: '0x00',
                 }
             else
                 return {
                     args: [
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals), //amountIn
-                        mulNumberWithDecimal(calcSlippageAmount(outputAmount,slippage)[0], tokenOut.decimals), //amountOutMin
                         amountIn, //amountIn
                         amountOutMin, //amountOutMin
                         [tokenIn.address, tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
+                        refAddress || ZeroAddress,
                     ],
                     value: '0x00',
                 }
@@ -187,13 +186,12 @@ const Swap = () => {
             if (isNativeCoin(tokenOut))
                 return {
                     args: [
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
-                        mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals), //amountInMax
                         amountOut, //amountOut
                         amountInMax, //amountInMax
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
                         account,
                         calcTransactionDeadline(deadline),
+                        refAddress || ZeroAddress,
                     ],
                     value: '0x00',
                 }
@@ -204,26 +202,37 @@ const Swap = () => {
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
+                        refAddress || ZeroAddress,
                     ],
-                    value: mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals) //amountInMax
-                    // value: amountInMax, //amountInMax
+                    value: amountInMax, //amountInMax
                 }
             else
                 return {
                     args: [
-                        mulNumberWithDecimal(outputAmount, tokenOut.decimals), //amountOut
-                        mulNumberWithDecimal(calcSlippageAmount(inputAmount,slippage)[1], tokenIn.decimals), //amountInMax
                         amountOut, //amountOut
                         amountInMax, //amountInMax
                         [tokenIn.address, tokenOut.address],
                         account,
                         calcTransactionDeadline(deadline),
+                        refAddress || ZeroAddress,
                     ],
                     value: '0x00',
                 }
         }
-    }
+    }, [inputAmount, outputAmount, tokenIn, tokenOut, chainId])
 
+    const gasEstimate = useEstimateGas(
+        routerContract,
+        getSwapMethod,
+        getSwapArguments,
+    )
+    // console.log('Gas Estimation', gasEstimate)
+    // console.log('Router contract', routerContract)
+
+    // console.log('Swap Arguments', getSwapArguments)
+    // console.log('Swap Method', getSwapMethod)
+
+    useEffect(() => {})
     const handleOnSwap = async () => {
         try {
             if (inputAmount && outputAmount && tokenIn && tokenOut) {
@@ -292,8 +301,7 @@ const Swap = () => {
             }
             const { args, value } = swapArguments
 
-            const referralAddress = refAddress || ZeroAddress
-            const newArgs = [...args, referralAddress]
+            const newArgs = args
             console.log('🤦‍♂️ ⟹ args:', newArgs)
 
             const gasLimit = await routerContract?.estimateGas[method](
@@ -486,6 +494,10 @@ const Swap = () => {
                         name={'Swap'}
                     />
                 )}
+                {/* Gas Estimate:{' '}
+                {gasEstimate
+                    ? divNumberWithDecimal(gasEstimate.toString(), 18)
+                    : 'Calculating...'} */}
             </Row>
         )
     }
@@ -521,12 +533,18 @@ const Swap = () => {
                 )}
                 <Row jus="space-between">
                     <Nav gap="20px">
-                        <Link to="/swap" className="active-link" style={{fontWeight: 700}}>
+                        <Link
+                            to="/swap"
+                            className="active-link"
+                            style={{ fontWeight: 700 }}
+                        >
                             Swap
                         </Link>
                         {/* <Link to="/add">Add</Link> */}
                         {/* <Link to="/pools">Pool</Link> */}
-                        <Link to="/limit" style={{fontWeight: 700}}>Limit</Link>
+                        <Link to="/limit" style={{ fontWeight: 700 }}>
+                            Limit
+                        </Link>
                     </Nav>
                     <Setting />
                 </Row>

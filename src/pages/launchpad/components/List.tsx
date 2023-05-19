@@ -8,7 +8,7 @@ import { ILaunchpadDetails, adminAddress } from '..'
 import { useQueryLaunchpad } from 'hooks/useQueryLaunchpad'
 import { useToken, useTokens } from 'hooks/useToken'
 import { divNumberWithDecimal } from 'utils/math'
-import { Token } from 'interfaces'
+import { ChainId, Token } from 'interfaces'
 import { badgeColors, getCurrentTimeLines } from 'utils/launchpad'
 import UnknowToken from 'assets/token-logos/dai.svg'
 import {
@@ -158,6 +158,12 @@ const ListLaunchpad = ({
         <Container>
             {!account ? (
                 <div className="notice">Please connect wallet</div>
+            ) : chainId !== ChainId.MUMBAI ? (
+                <>
+                    <div className="notice">
+                        Only support for Polygon Mumbai
+                    </div>
+                </>
             ) : (
                 <>
                     <Title>
@@ -260,7 +266,11 @@ const ListLaunchpad = ({
                                                             launchpad.price,
                                                             18,
                                                         )}{' '}
-                                                        USDC
+                                                        {
+                                                            paymentCurrencies?.[
+                                                                index
+                                                            ]?.symbol
+                                                        }
                                                     </div>
                                                     <div>
                                                         Start Time:{' '}

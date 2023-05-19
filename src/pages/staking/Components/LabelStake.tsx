@@ -10,7 +10,7 @@ import { useSwapActionHandlers } from 'states/swap/hooks'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import styled from 'styled-components'
 import { isNativeCoin } from 'utils'
-import { mulNumberWithDecimal } from 'utils/math'
+import { divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math'
 import ArrowUp from 'assets/icons/arrow-up.svg'
 import { Link } from 'react-router-dom'
 import Setting from 'components/HeaderLiquidity'
@@ -18,6 +18,7 @@ import Lock from 'assets/icons/lock.svg'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import BGSoba from 'assets/icons/soba2.jpg'
 import Soba from '/favicon.ico'
+import { useAllPosition } from 'hooks/useStakingData'
 
 interface IStakeToken {
     data: {
@@ -37,6 +38,15 @@ interface IStakeToken {
         setIsShowHistory: React.Dispatch<React.SetStateAction<boolean>>
         balanceIn: string | undefined
         initDataTransaction: CompTransaction
+        setUnstakeData: React.Dispatch<
+            React.SetStateAction<{
+                stake: string
+                reward: string
+                stakingId: string | undefined
+                token: Token | undefined
+                position: any
+            }>
+        >
     }
     onApprove: () => void
 }
@@ -53,13 +63,15 @@ const StakeToken = ({ data, onApprove }: IStakeToken) => {
         setIsShowHistory,
         balanceIn,
         initDataTransaction,
+        setUnstakeData,
     } = data
 
     const { account, chainId } = useActiveWeb3React()
     const stakingContract = useStakingContract()
     // const tokenTest = useToken('0xdEfd221072dD078d11590D58128399C2fe8cCa7e')
     const { addTxn } = useTransactionHandler()
-    const { onUserInput } = useSwapActionHandlers()
+    const { currentStake } = useAllPosition(account)
+    console.log('🤦‍♂️ ⟹ StakeToken ⟹ currentStake:', currentStake?.[0])
 
     const [isOpenEdit, setIsOpenEdit] = useState(false)
     const selection = [
@@ -167,44 +179,29 @@ const StakeToken = ({ data, onApprove }: IStakeToken) => {
         }
     }
 
-    const handleOnDeposit = async () => {
-        console.log('..........Testing')
-
-        try {
-            if (!inputStakeValue || !selection || !stakingToken) return
-            console.log('Staking .........')
-
-            const inputStakingValue = mulNumberWithDecimal(
-                inputStakeValue,
-                stakingToken?.decimals,
-            )
-
-            const args = [inputStakingValue, selection[tiers].name]
-            const method = 'deposit'
-            const gasLimit = await stakingContract?.estimateGas?.[method]?.(
-                ...args,
-            )
-            const callResult = await stakingContract?.[method]?.(...args, {
-                gasLimit: gasLimit && gasLimit.add(1000),
-            })
-            console.log('🤦‍♂️ ⟹ handleOnDeposit ⟹ callResult:', { callResult })
-
-            const txn = await callResult.wait()
-            addTxn({
-                hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx${
-                    callResult.hash || ''
-                }`,
-                msg: `Staking ${inputStakeValue} for ${selection}`,
-                status: txn.status === 1 ? true : false,
-            })
-
-            // reset user input
-            // onUserInput(Field.INPUT, '')
-        } catch (error) {
-            console.log('====================================')
-            console.log('Error with cause:', error)
-            console.log('====================================')
-        }
+    const handleOnClick = () => {
+        setIsStakeToken(false)
+        currentStake?.[0]
+            ? setUnstakeData((i) => {
+                  return {
+                      ...i,
+                      stakingId: currentStake?.[0]?.positionIndex,
+                      stake: currentStake?.[0]?.stakedAmount || '0',
+                      reward:
+                          divNumberWithDecimal(
+                              currentStake?.[0]?.claimableReward,
+                              i.token?.decimals || 18,
+                          ) || '0',
+                      position: currentStake?.[0],
+                  }
+              })
+            : setUnstakeData({
+                  stake: '0',
+                  reward: '0',
+                  stakingId: undefined,
+                  token: stakingToken,
+                  position: '',
+              })
     }
 
     const isInsufficientAllowance = inputStakeValue
@@ -218,7 +215,6 @@ const StakeToken = ({ data, onApprove }: IStakeToken) => {
         const isNotConnected = !account
         const minimumRequired =
             Number(inputStakeValue) < 100 || !inputStakeValue
-        console.log('🤦‍♂️ ⟹ StakeButton ⟹ minimumRequired:', minimumRequired)
 
         return (
             <LabelButtonStake>
@@ -265,7 +261,7 @@ const StakeToken = ({ data, onApprove }: IStakeToken) => {
                         <Link
                             className={!isStakeToken ? 'active-link' : ''}
                             to=""
-                            onClick={() => setIsStakeToken(false)}
+                            onClick={() => handleOnClick()}
                         >
                             Unstake Token
                         </Link>
@@ -329,9 +325,12 @@ const StakeToken = ({ data, onApprove }: IStakeToken) => {
                         </LabelRight>
                     </Row>
                     <LabelPercent>
-                        {percents.map((item) => {
+                        {percents.map((item, index) => {
                             return (
-                                <div onClick={() => handleChangeBalance(item)}>
+                                <div
+                                    key={index}
+                                    onClick={() => handleChangeBalance(item)}
+                                >
                                     {item}%
                                 </div>
                             )
@@ -375,6 +374,7 @@ const StakeToken = ({ data, onApprove }: IStakeToken) => {
                             {selection.map((item, index) => {
                                 return (
                                     <div
+                                        key={index}
                                         className="days"
                                         onClick={() => setTiers(index)}
                                     >

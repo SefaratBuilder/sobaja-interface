@@ -191,6 +191,16 @@
                         "internalType": "uint256",
                         "name": "totalReward",
                         "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "withdraw",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "rewardClaimed",
+                        "type": "bool"
                     }
                 ],
                 "internalType": "struct Staking.Position",
@@ -329,6 +339,16 @@
                         "internalType": "uint256",
                         "name": "totalReward",
                         "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "withdraw",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "rewardClaimed",
+                        "type": "bool"
                     }
                 ],
                 "internalType": "struct Staking.Position[]",
@@ -453,7 +473,7 @@
         "inputs": [
             {
                 "internalType": "uint256",
-                "name": "value",
+                "name": "num",
                 "type": "uint256"
             }
         ],
@@ -495,19 +515,6 @@
             }
         ],
         "name": "transferOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_positionIndex",
-                "type": "uint256"
-            }
-        ],
-        "name": "updateTotalReward",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

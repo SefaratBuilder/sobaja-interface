@@ -12,6 +12,7 @@ import { useStakingContract } from 'hooks/useContract'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import { useActiveWeb3React } from 'hooks'
 import { URLSCAN_BY_CHAINID } from 'constants/index'
+import { useMemo } from 'react'
 
 interface IUnstakeToken {
     isStakeToken: boolean
@@ -22,6 +23,7 @@ interface IUnstakeToken {
         reward: string
         stakingId: string | undefined
         token: Token | undefined
+        position: any
     }
     // inputUnstakeValue: string | number
     // setInputUnstakeValue: React.Dispatch<React.SetStateAction<string | number>>
@@ -145,6 +147,22 @@ const LabelUnStake = ({
         }
     }
 
+    const labelButtons = useMemo(() => {
+        if (!unstakeData.stakingId)
+            return [
+                { name: 'Harvest', disabled: true },
+                { name: 'Withdraw', disabled: true },
+            ]
+
+        const currentTimestamp = new Date().getTime() / 1000
+        return currentTimestamp > unstakeData.position?.timestampEnd
+            ? [{ name: 'Withdraw', disabled: false }]
+            : [
+                  { name: 'Harvest', disabled: false },
+                  { name: 'Withdraw', disabled: false },
+              ]
+    }, [unstakeData])
+
     return (
         <>
             <WrapContent image={BGSoba}>
@@ -173,9 +191,9 @@ const LabelUnStake = ({
                     </Nav>
                     <Setting />
                 </Row>
-                <Row jus="space-between">
+                <Row jus="space-between" gap="20px">
                     <div>Reward</div>
-                    <div>
+                    <div className="to">
                         Balance:
                         {balanceIn ? ` ≈${Number(balanceIn).toFixed(8)}` : ' 0'}
                     </div>
@@ -190,40 +208,21 @@ const LabelUnStake = ({
                     </div>
                 </Row> */}
                 <LabelData>
-                    <Row jus="space-between">
-                        <WrapCustom>
-                            <div className="title">
-                                {stakingToken?.symbol} Token
-                            </div>
-                            <div className="group">
-                                <img src={Soba} alt="logo-eth" />
-                                <div className="value">
-                                    {stakingToken?.symbol}
-                                </div>
-                            </div>
-                        </WrapCustom>
-                        <LabelRight>
-                            <WrapCustom>
-                                <div className="title price">≈$ 1,869.76</div>
-                                <span className="label-unstake">
-                                    {unstakeData?.reward}
-                                </span>
-                                {/* <CustomInput
-                                        value={unstakeData?.stake}
-                                        placeholder={
-                                            unstakeData?.stake?.toString() ||
-                                            '0'
-                                        }
-                                        onChange={(e) =>
-                                            validateInputNumber(
-                                                e?.target?.value,
-                                            )
-                                        }
-                                    /> */}
+                    <Row gap="20px" jus="space-between">
+                        <div className="title">
+                            {stakingToken?.symbol} Token
+                        </div>
+                        <div className="title price">≈$ 1,869.76</div>
+                    </Row>
 
-                                {/* <div className="value">25</div> */}
-                            </WrapCustom>
-                        </LabelRight>
+                    <Row gap="20px" jus="space-between">
+                        <div className="group">
+                            <img src={Soba} alt="logo-eth" />
+                            <div className="value">{stakingToken?.symbol}</div>
+                        </div>
+                        <div className="label-value to">
+                            {unstakeData?.reward}
+                        </div>
                     </Row>
                 </LabelData>
                 <CustomRow jus="space-between">
@@ -237,7 +236,7 @@ const LabelUnStake = ({
                     </Details>
                     <Details>
                         <p className="value">
-                            {unstakeData.stake} {stakingToken?.symbol}
+                            {unstakeData?.stake} {stakingToken?.symbol}
                         </p>
                         <Row gap="5px">
                             <p>Edit</p>
@@ -248,16 +247,18 @@ const LabelUnStake = ({
                 </WrapDetailsUnstake>
                 {/* <PrimaryButton name="Unstake" /> */}
                 <LabelButton>
-                    <PrimaryButton
-                        onClick={harvest}
-                        name={'Harvest'}
-                        disabled={!unstakeData?.stakingId}
-                    />
-                    <PrimaryButton
-                        onClick={withdraw}
-                        name={'Withdraw'}
-                        disabled={!unstakeData?.stakingId}
-                    />
+                    {labelButtons.map((btn, index) => {
+                        return (
+                            <PrimaryButton
+                                key={index}
+                                onClick={
+                                    btn.name === 'harvest' ? harvest : withdraw
+                                }
+                                name={btn.name}
+                                disabled={btn.disabled}
+                            />
+                        )
+                    })}
                 </LabelButton>
             </WrapContent>
         </>
@@ -266,50 +267,51 @@ const LabelUnStake = ({
 
 export default LabelUnStake
 
-const WrapCustom = styled(Columns)`
-    gap: 10px;
+// const WrapCustom = styled(Columns)`
+//     gap: 10px;
 
-    .label-unstake {
-        width: 100%;
-        font-size: 30px;
-        font-weight: 500;
-        background: none;
-        border: none;
-        outline: none;
-        color: white;
-        text-align: end;
-        cursor: default;
-    }
+//     .label-unstake {
+//         width: 100%;
+//         font-size: 18px;
+//         font-weight: 500;
+//         background: none;
+//         border: none;
+//         outline: none;
+//         color: white;
+//         /* text-align: end; */
+//         cursor: default;
+//         max-width: 150px;
+//     }
 
-    .details-token {
-        min-width: 100px;
-        width: 100%;
-    }
+//     .details-token {
+//         min-width: 100px;
+//         width: 100%;
+//     }
 
-    .price {
-        text-align: end;
-    }
+//     .price {
+//         text-align: end;
+//     }
 
-    .group {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        height: 32px;
-        img {
-            width: 32px;
-        }
-    }
+//     .group {
+//         display: flex;
+//         align-items: center;
+//         gap: 5px;
+//         height: 32px;
+//         img {
+//             width: 32px;
+//         }
+//     }
 
-    .value {
-        display: flex;
-        align-items: center;
+//     .value {
+//         display: flex;
+//         align-items: center;
 
-        height: 32px;
-        justify-content: flex-end;
-        font-size: 22px;
-        font-weight: 400;
-    }
-`
+//         height: 32px;
+//         justify-content: flex-end;
+//         font-size: 22px;
+//         font-weight: 400;
+//     }
+// `
 
 const LabelData = styled.div`
     display: flex;
@@ -321,8 +323,23 @@ const LabelData = styled.div`
     border-radius: 10px;
     padding: 12px;
 
+    .group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        height: 32px;
+        img {
+            width: 32px;
+        }
+    }
+
+    .label-value {
+        margin: auto 0;
+        font-size: 18px;
+    }
+
     @media screen and (max-width: 576px) {
-        min-width: unset;
+        min-width: 100px;
     }
 `
 const LabelRight = styled(Row)`

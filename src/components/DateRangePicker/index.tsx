@@ -4,7 +4,7 @@ import 'react-date-range/dist/styles.css'
 import 'react-date-range/dist/theme/default.css'
 import styled from 'styled-components'
 
-function DateRangePickerWithButton(props) {
+function DateRangePickerWithButton(props: any) {
     const { type, closeModal } = props
     const [dateRange, setDateRange] = useState({
         startDate: new Date(),
@@ -12,7 +12,7 @@ function DateRangePickerWithButton(props) {
         key: 'selection',
     })
 
-    const handleSelect = (ranges) => {
+    const handleSelect = (ranges: any) => {
         setDateRange(ranges.selection)
     }
 
