@@ -1,45 +1,26 @@
 
 import {
-    useWeb3React,
-    Web3ReactHooks,
-    Web3ReactProvider,
     initializeConnector,
 } from '@web3-react/core'
 import { Connector } from '@web3-react/types'
-import { MetaMask } from '@web3-react/metamask'
+// import { MetaMask } from '@web3-react/metamask'
 import { useCallback, useMemo } from 'react'
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
-import { GnosisSafe } from '@web3-react/gnosis-safe'
 import store from 'states'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import METAMASK_ICON_URL from 'assets/icons/metamask.svg'
 import COINBASE_ICON_URL from 'assets/icons/coinbase.svg'
-import BINANCECONNECT_ICON_URL from 'assets/icons/binance.svg'
 import WALLETCONNECT_ICON_URL from 'assets/icons/wallet-connect.svg'
 import BITKEEP_ICON from 'assets/icons/BitKeep.jpeg';
 import OKEX_ICON from 'assets/token-logos/okex.png'
 import { Network } from '@web3-react/network';
 import { WalletConnect } from '@web3-react/walletconnect'
+import { Connection, ConnectionType } from './types';
+import { MetaMask } from './metamask/src';
+import { BitKeep } from './bitkeep/src';
+import { Okex } from './okex/src';
 export const useAppSelector: TypedUseSelectorHook<ReturnType<typeof store.getState>> = useSelector
-export enum ConnectionType {
-    INJECTED = 'INJECTED',
-    NETWORK = 'NETWORK',
-    GNOSIS_SAFE = 'GNOSIS_SAFE',
-    COINBASE_WALLET = 'COINBASE_WALLET',
-    WALLET_CONNECT = 'WALLET_CONNECT',
-}
 
-
-export interface Connection {
-    getName(): string
-    connector: Connector
-    hooks: Web3ReactHooks
-    type: string
-    getIcon?: string
-    shouldDisplay(): boolean
-    overrideActivate?: () => boolean
-    isNew?: boolean
-}
 
 
 export function onError(error: Error) {
@@ -75,22 +56,11 @@ const URLS: { [chainId: number]: string[] } = Object.keys(CHAINS).reduce<{ [chai
     {}
 )
 
+
+
 export const [web3Network, web3NetworkHooks] = initializeConnector<Network>(
     (actions) => new Network({ actions, urlMap: URLS, defaultChainId: 324 })
 )
-
-
-
-// export const [network, hooks] = initializeConnector<Network>((actions) => new Network({ actions, urlMap: URLS }))
-export const networkConnection: Connection = {
-    getName: () => 'Network',
-    connector: web3Network,
-    hooks: web3NetworkHooks,
-    type: ConnectionType.NETWORK,
-    shouldDisplay: () => false,
-}
-
-
 const [web3CoinbaseWallet, web3CoinbaseWalletHooks] = initializeConnector<CoinbaseWallet>(
     (actions) =>
         new CoinbaseWallet({
@@ -104,45 +74,72 @@ const [web3CoinbaseWallet, web3CoinbaseWalletHooks] = initializeConnector<Coinba
             onError,
         })
 )
+const [web3WalletConnect, web3WalletConnectHooks] = initializeConnector<WalletConnect>(
+    (actions) => new WalletConnect({ actions, options: { qrcode: true, rpc: URLS }, onError })
+)
 
+export const [web3Injected, web3InjectedHooks] = initializeConnector<MetaMask>(
+    (actions) => new MetaMask({ actions, onError }),
+)
+
+export const [web3Bitkeep, web3BitkeepHooks] = initializeConnector<BitKeep>(
+    (actions) => new BitKeep({ actions, onError }),
+)
+export const [web3WalletOkex, web3WalletOkexHooks] = initializeConnector<Okex>(
+    (actions) => new Okex({ actions, onError }),
+)
+export const okexConnection: Connection = {
+    // TODO(WEB-3131) re-add "Install MetaMask" string when no injector is present
+    getName: () => 'Okex Wallet',
+    connector: web3WalletOkex,
+    hooks: web3WalletOkexHooks,
+    type: ConnectionType.OKEX,
+    getIcon: () => OKEX_ICON,
+    shouldDisplay: () => true,
+    overrideActivate: () => false,
+    href: 'https://www.okx.com/vi/download',
+}
+
+export const bitkeepConnection: Connection = {
+    // TODO(WEB-3131) re-add "Install MetaMask" string when no injector is present
+    getName: () => 'BitKeep Wallet',
+    connector: web3Bitkeep,
+    hooks: web3BitkeepHooks,
+    type: ConnectionType.BITKEEP,
+    getIcon: () => BITKEEP_ICON,
+    shouldDisplay: () => true,
+    overrideActivate: () => false,
+    href: 'https://bitkeep.com/',
+}
+
+
+export const networkConnection: Connection = {
+    getName: () => 'Network',
+    connector: web3Network,
+    hooks: web3NetworkHooks,
+    type: ConnectionType.NETWORK,
+    shouldDisplay: () => false,
+    href: null,
+}
 const coinbaseWalletConnection: Connection = {
     getName: () => 'Coinbase Wallet',
     connector: web3CoinbaseWallet,
     hooks: web3CoinbaseWalletHooks,
     type: ConnectionType.COINBASE_WALLET,
-    getIcon: COINBASE_ICON_URL,
-    shouldDisplay: () =>
-        false,
-    // If on a mobile browser that isn't the coinbase wallet browser, deeplink to the coinbase wallet app
+    getIcon: () => COINBASE_ICON_URL,
+    shouldDisplay: () => true,
     overrideActivate: () => false,
+    href: null,
 }
-
-const [web3WalletConnect, web3WalletConnectHooks] = initializeConnector<WalletConnect>(
-    (actions) => new WalletConnect({ actions, options: { qrcode: true, rpc: URLS }, onError })
-)
 export const walletConnectConnection: Connection = {
     getName: () => 'WalletConnect',
     connector: web3WalletConnect,
     hooks: web3WalletConnectHooks,
     type: ConnectionType.WALLET_CONNECT,
-    getIcon: WALLETCONNECT_ICON_URL,
-    shouldDisplay: () => false,
+    getIcon: () => WALLETCONNECT_ICON_URL,
+    shouldDisplay: () => true,
+    href: null,
 }
-
-
-const [web3GnosisSafe, web3GnosisSafeHooks] = initializeConnector<GnosisSafe>((actions) => new GnosisSafe({ actions }))
-export const gnosisSafeConnection: Connection = {
-    getName: () => 'Gnosis Safe',
-    connector: web3GnosisSafe,
-    hooks: web3GnosisSafeHooks,
-    type: ConnectionType.GNOSIS_SAFE,
-    getIcon: METAMASK_ICON_URL,
-    shouldDisplay: () => false,
-}
-
-export const [web3Injected, web3InjectedHooks] = initializeConnector<MetaMask>(
-    (actions) => new MetaMask({ actions, onError }),
-)
 
 export const injectedConnection: Connection = {
     // TODO(WEB-3131) re-add "Install MetaMask" string when no injector is present
@@ -150,13 +147,14 @@ export const injectedConnection: Connection = {
     connector: web3Injected,
     hooks: web3InjectedHooks,
     type: ConnectionType.INJECTED,
-    getIcon: METAMASK_ICON_URL,
+    getIcon: () => METAMASK_ICON_URL,
     shouldDisplay: () => true,
-    // If on non-injected, non-mobile browser, prompt user to install Metamask
-    overrideActivate: () => {
-        return false
-    },
+    overrideActivate: () => false,
+    href: 'https://metamask.io/',
 }
+
+
+
 
 
 export function getConnections() {
@@ -164,7 +162,9 @@ export function getConnections() {
         injectedConnection,
         networkConnection,
         coinbaseWalletConnection,
-        walletConnectConnection
+        walletConnectConnection,
+        bitkeepConnection,
+        okexConnection
     ]
 }
 
@@ -186,8 +186,10 @@ export function useGetConnection() {
                     return coinbaseWalletConnection
                 case ConnectionType.WALLET_CONNECT:
                     return walletConnectConnection
-                // case ConnectionType.GNOSIS_SAFE:
-                //     return gnosisSafeConnection
+                case ConnectionType.BITKEEP:
+                    return bitkeepConnection
+                case ConnectionType.OKEX:
+                    return okexConnection
             }
         }
     }, [])
@@ -195,15 +197,19 @@ export function useGetConnection() {
 
 
 
+
 export const SELECTABLE_WALLETS = [
     ConnectionType.INJECTED,
     ConnectionType.COINBASE_WALLET,
     ConnectionType.WALLET_CONNECT,
+    ConnectionType.BITKEEP,
+    ConnectionType.OKEX
 ]
+
+
 
 export function useOrderedConnections() {
     const selectedWallet = useAppSelector((state) => state.user.selectedWallet);
-    console.log("selectedWallet=>>>>>>>>>>>", selectedWallet)
     const getConnection = useGetConnection()
     return useMemo(() => {
         const orderedConnectionTypes: ConnectionType[] = []
@@ -223,3 +229,51 @@ export function useOrderedConnections() {
         return orderedConnectionTypes.map((connectionType) => getConnection(connectionType))
     }, [getConnection, selectedWallet])
 }
+
+
+// export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
+//     BitKeep: {
+//         connector: bitkeep,
+//         name: 'BitKeep Wallet',
+//         iconURL: BITKEEP_ICON,
+//         description: 'Login using BitKeep hosted wallet',
+//         href: 'https://bitkeep.com/',
+//         color: '#4A6C9B',
+//         mobile: true,
+//     },
+//     METAMASK: {
+//         connector: injected,
+//         name: 'MetaMask',
+//         iconURL: METAMASK_ICON_URL,
+//         description: 'Easy-to-use browser extension.',
+//         href: 'https://metamask.io/',
+//         color: '#E8831D',
+//     },
+//     WALLET_LINK: {
+//         connector: CoinbaseWallet,
+//         name: 'Coinbase Wallet',
+//         iconURL: COINBASE_ICON_URL,
+//         description: 'Use Coinbase Wallet app on mobile device',
+//         href: null,
+//         color: '#315CF5',
+//     },
+//     WALLET_CONNECT: {
+//         connector: walletconnect,
+//         name: 'WalletConnect',
+//         iconURL: WALLETCONNECT_ICON_URL,
+//         description: 'Connect to Trust Wallet, Rainbow Wallet and more...',
+//         href: null,
+//         color: '#4196FC',
+//         mobile: true,
+//     },
+
+//     OkexChain: {
+//         connector: okex,
+//         name: 'OKX Wallet',
+//         iconURL: OKEX_ICON,
+//         description: 'Login using OKX hosted wallet',
+//         href: 'https://www.okx.com/vi/download',
+//         color: '#4A6C9B',
+//         mobile: true,
+//     },
+// }

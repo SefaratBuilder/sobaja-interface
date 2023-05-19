@@ -8,7 +8,6 @@ import {
 } from 'react-router-dom'
 import styled from 'styled-components'
 import Header from 'components/Header'
-import Web3ReactManager from 'components/Web3ReactManager'
 import SwapUpdater from 'states/swap/updater'
 import MintUpdater from 'states/mint/updater'
 import AppUpdater from 'states/application/updater'
@@ -45,11 +44,10 @@ const App = () => {
     }
 
     return (
-        <Web3ReactManager>
-            <HashRouter>
-                {/* <Updater /> */}
-                <Header />
-                {/* 
+        <HashRouter>
+            <Updater />
+            <Header />
+
             <AppContainer>
                 <ToastMessage />
                 <Routes>
@@ -64,9 +62,8 @@ const App = () => {
                     <Route path="*" element={<Navigate to="/swap" />} />
                 </Routes>
                 <Polling />
-            </AppContainer> */}
-            </HashRouter>
-        </Web3ReactManager>
+            </AppContainer>
+        </HashRouter>
     )
 }
 
