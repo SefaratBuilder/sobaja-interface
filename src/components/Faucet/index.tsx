@@ -42,6 +42,36 @@ const Faucet = () => {
         initDataTransaction.setIsOpenResultModal(false)
     }, [isDislayFaucet])
 
+    const listFaucet = useMemo(() => {
+        return chainId === 280
+            ? [
+                  {
+                      address: ZERO_ADDRESS,
+                      symbol: 'ETH',
+                      type: 'faucet',
+                      logoURI: ETH,
+                      chainId: 280,
+                  },
+                  ...tokenList.filter(
+                      (token) =>
+                          token.chainId === 280 && token?.type === 'faucet',
+                  ),
+              ]
+                  .map((i) => i.symbol)
+                  .reduce((a: any, b: any) => {
+                      return a + ', ' + b
+                  })
+            : tokenList
+                  .filter(
+                      (token) =>
+                          token.chainId === 280 && token?.type === 'faucet',
+                  )
+                  .map((i) => i.symbol)
+                  .reduce((a: any, b: any) => {
+                      return a + ', ' + b
+                  })
+    }, [tokenList, chainId])
+
     const handleFaucetETH = async () => {
         setIsDisplayFaucet(false)
 
@@ -50,7 +80,7 @@ const Faucet = () => {
             initDataTransaction.setIsOpenWaitingModal(true)
             const dataFaucet = await axios({
                 method: 'GET',
-                url: 'http://192.168.0.244:3000/api/faucet',
+                url: 'https://sobajaswap.com/api/faucet',
                 params: {
                     to: account,
                 },
@@ -209,9 +239,9 @@ const Faucet = () => {
                         <BodyModalFaucet>
                             <ContentFaucet>
                                 <TextCoin>
-                                    Get BTC, USDT, USDC, DAI for testing zkSync
-                                    Testnet on Sobajaswap, test token can
-                                    nullify the reality of Mainnet.
+                                    Get {listFaucet} for testing zkSync Testnet
+                                    on Sobajaswap, test token can nullify the
+                                    reality of Mainnet.
                                 </TextCoin>
                             </ContentFaucet>
                             <CoinButton>
