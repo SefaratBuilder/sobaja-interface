@@ -65,18 +65,20 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
     // const [file, setFile] = useState<File>()
     const { chainId, account } = useActiveWeb3React()
     const [err, setErr] = useState('')
-    const [launchpadState, setLaunchpadState] = useState<ILaunchpadState>({
-        addressTokenSale: '0xdEfd221072dD078d11590D58128399C2fe8cCa7e',
-        addressTokenPayment: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-        softCap: '',
-        hardCap: '',
-        tokenSalePrice: '',
-        individualCap: '',
-        overflowTokenReward: '',
-        totalToken: '',
-        startTime: '',
-        endTime: '',
-    })
+    const [launchpadState, setLaunchpadState] = useState<ILaunchpadState | any>(
+        {
+            addressTokenSale: '0xdEfd221072dD078d11590D58128399C2fe8cCa7e',
+            addressTokenPayment: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+            softCap: '',
+            hardCap: '',
+            tokenSalePrice: '',
+            individualCap: '',
+            overflowTokenReward: '',
+            totalToken: '',
+            startTime: '',
+            endTime: '',
+        },
+    )
 
     const [indexType, setIndexType] = useState(0)
     const types = ['Normal', 'FairLaunch', 'WhiteList']
@@ -219,17 +221,6 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
             initDataTransaction.setIsOpenWaitingModal(false)
             initDataTransaction.setIsOpenResultModal(true)
 
-            // sendEvent({
-            //     category: 'Defi',
-            //     action: 'Swap',
-            //     label: [
-            //         tokenIn?.symbol,
-            //         tokenIn?.address,
-            //         tokenOut?.symbol,
-            //         tokenOut?.address,
-            //     ].join('/'),
-            // })
-
             const txn = await callResult.wait()
             initDataTransaction.setIsOpenResultModal(false)
 
@@ -240,8 +231,11 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
                 msg: `Create launchpad`,
                 status: txn.status === 1 ? true : false,
             })
-            refetch()
-            setCurrentPage('Infomation')
+
+            setTimeout(() => {
+                refetch()
+                setCurrentPage('Infomation')
+            }, 10000)
         } catch (error) {
             initDataTransaction.setError('Failed')
             initDataTransaction.setIsOpenResultModal(true)
@@ -417,6 +411,7 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
                                                     ? 'active'
                                                     : ''
                                             }
+                                            key={index}
                                         >
                                             {t}
                                         </div>
@@ -424,9 +419,9 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
                                 })}
                             </Select>
                         </WrapSelect>
-                        {listState.map((d) => {
+                        {listState.map((d, index) => {
                             return (
-                                <WrapInput>
+                                <WrapInput key={index}>
                                     <WrapLabel>
                                         <Label>{d.name}</Label>
                                     </WrapLabel>
@@ -522,7 +517,7 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
                                 <PrimaryButton
                                     type="transparent"
                                     name="Cancel"
-                                    onClick={() => {}}
+                                    onClick={() => setCurrentPage('Infomation')}
                                 />
                                 {Number(tokenApproval.allowance?._value) <
                                 Number(launchpadState.totalToken) ? (
@@ -537,10 +532,7 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
                                         disabled={!!err}
                                         type="blue"
                                         name="Continue"
-                                        onClick={() =>
-                                            // handleOnCreateLaunchpad()
-                                            handleOnCreate()
-                                        }
+                                        onClick={() => handleOnCreate()}
                                     />
                                 )}
                             </WrapSubmitBtn>
@@ -809,9 +801,14 @@ const WrapBody = styled.div``
 
 const NavTitle = styled.div`
     cursor: pointer;
-    padding: 0.5rem 0;
-    font-size: 24px;
-    max-width: 165px;
+    padding: 5px 8px;
+    /* padding: 0 0 3.5rem; */
+    margin-bottom: 1.5rem;
+    font-size: 20px;
+    border: 2px solid white;
+    border-radius: 12px;
+    /* width: 22%; */
+    max-width: 150px;
 `
 const WrapSelect = styled.div`
     display: flex;

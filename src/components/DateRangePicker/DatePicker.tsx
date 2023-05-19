@@ -1,8 +1,8 @@
 import styled from 'styled-components'
 import { DateRangePicker } from 'react-date-range'
 
-const DatePicker = ({ dateRange, setDateRange }) => {
-    const handleSelect = (ranges) => {
+const DatePicker = ({ dateRange, setDateRange }: any) => {
+    const handleSelect = (ranges: any) => {
         setDateRange(ranges.selection)
     }
     return (

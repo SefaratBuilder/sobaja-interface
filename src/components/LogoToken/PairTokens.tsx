@@ -2,10 +2,19 @@ import React from 'react'
 import styled from 'styled-components'
 import UNKNOWN from 'assets/icons/question-mark-button-dark.svg'
 import tokenList from 'constants/jsons/tokenList.json'
+import ETH from 'assets/token-logos/eth.svg'
 
-const PairTokens = ({ tokenA, tokenB }: { tokenA: string, tokenB: string}) => {
-    const logoA = tokenList.find(t => t.address == tokenA || t.symbol == tokenA)?.logoURI || UNKNOWN
-    const logoB = tokenList.find(t => t.address == tokenB || t.symbol == tokenB)?.logoURI || UNKNOWN
+const PairTokens = ({ tokenA, tokenB }: { tokenA: string; tokenB: string }) => {
+    const logoA =
+        tokenA === 'WETH'
+            ? ETH
+            : tokenList.find((t) => t.address == tokenA || t.symbol == tokenA)
+                  ?.logoURI || UNKNOWN
+    const logoB =
+        tokenB === 'WETH'
+            ? ETH
+            : tokenList.find((t) => t.address == tokenB || t.symbol == tokenB)
+                  ?.logoURI || UNKNOWN
 
     return (
         <LabelToken>

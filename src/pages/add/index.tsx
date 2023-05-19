@@ -42,7 +42,7 @@ import { useMintActionHandlers, useMintState } from 'states/mint/hooks'
 import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
-import { useEstimateGas, useEstimateGasForAdd } from 'hooks/useEstimateGas'
+import { useEstimateGas } from 'hooks/useEstimateGas'
 
 const Add = () => {
     const mintState = useMintState()
@@ -216,18 +216,16 @@ const Add = () => {
     const onConfirms = useCallback(async () => {
         try {
             if (inputAmount && outputAmount && tokenIn && tokenOut) {
-                initDataTransaction.setIsOpenConfirmModal(false)
-                initDataTransaction.setIsOpenConfirmModal(true)
-
                 const method = getAddMethod()
                 const argument = getAddArguments()
 
                 if (!argument) {
                     initDataTransaction.setError('Failed')
-                    initDataTransaction.setIsOpenConfirmModal(false)
-                    initDataTransaction.setIsOpenConfirmModal(true)
                     return initDataTransaction.setIsOpenResultModal(true)
                 }
+                initDataTransaction.setIsOpenConfirmModal(false)
+                initDataTransaction.setIsOpenWaitingModal(true)
+
                 const { args, value } = argument
                 const gasLimit = await routerContract?.estimateGas?.[method]?.(
                     ...args,

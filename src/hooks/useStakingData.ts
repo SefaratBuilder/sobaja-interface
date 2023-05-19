@@ -99,13 +99,19 @@ export function useAllPosition(address: string | undefined | null) {
     )
     const ids = AllPositionResult?.result?.[0]
         ? AllPositionResult?.result?.[0]?.map((pos: any) => {
-              return [address, pos?.positionId?.toString()]
-          })
+            return [address, pos?.positionId?.toString()]
+        })
         : undefined
 
     const ClaimableRewards = useSingleContractMultipleData(
         stakingContract,
         'displayClaimableReward',
+        ids,
+    )
+
+    const positionById = useSingleContractMultipleData(
+        stakingContract,
+        'getPositionsByIndex',
         ids,
     )
 
@@ -140,7 +146,7 @@ export function useAllPosition(address: string | undefined | null) {
                         const totalReward =
                             TotalRewards?.[positionIndex]?.result?.[0]
 
-                        console.log('Total Reward:', totalReward)
+                        const isAlreadyWithdraw = positionById?.[positionIndex]?.result?.[0]?.withdraw
 
                         return {
                             positionIndex,
@@ -152,7 +158,10 @@ export function useAllPosition(address: string | undefined | null) {
                             claimableReward:
                                 claimableReward && Number(claimableReward),
                             totalReward: totalReward && Number(totalReward),
-                            // SetStakingRates
+                            timestampStart: Number(position.timeStart),
+                            timestampEnd: Number(position.timeEnd),
+                            timestampLastReward: Number(position.lastTimeReward),
+                            isAlreadyWithdraw
                         }
                     } catch (error) {
                         console.log(error)
@@ -163,5 +172,20 @@ export function useAllPosition(address: string | undefined | null) {
             return []
         }
     }, [address, AllPositionResult.result])
-    return AllPosition
+
+    // const currentStake = useMemo(() => {
+    //     return AllPosition && AllPosition?.length > 0 ? AllPosition.filter((position: any) => Number(position?.timestampEnd) !== Number(position?.timestampLastReward)) : []
+    // }, [AllPosition])
+    // const history = useMemo(() => {
+    //     return AllPosition && AllPosition?.length > 0 ? AllPosition.filter((position: any) => Number(position?.timestampEnd) === Number(position?.timestampLastReward)) : []
+    // }, [AllPosition])
+    const currentStake = useMemo(() => {
+        return AllPosition && AllPosition?.length > 0 ? AllPosition.filter((position: any) => !position?.isAlreadyWithdraw) : []
+    }, [AllPosition])
+
+    const history = useMemo(() => {
+        return AllPosition && AllPosition?.length > 0 ? AllPosition.filter((position: any) => position?.isAlreadyWithdraw) : []
+    }, [AllPosition])
+
+    return { currentStake, history }
 }

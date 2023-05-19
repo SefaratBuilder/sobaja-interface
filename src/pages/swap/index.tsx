@@ -104,9 +104,6 @@ const Swap = () => {
     )
 
     const handleCopyAddress = () => {
-        console.log({ href: window.location.href })
-        console.log({ hostname: window.location.hostname })
-
         if (account) {
             navigator.clipboard
                 .writeText(

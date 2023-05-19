@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import styled from 'styled-components'
 
 interface TimePickerProps {
-    onChange: (number) => void
+    onChange: (number: any) => void
     idx: number
 }
 
@@ -22,11 +22,11 @@ function TimePicker({ onChange, idx }: TimePickerProps) {
     useOnClickOutside(hourRef, () => setHourList(false))
     useOnClickOutside(minuteRef, () => setMinutesList(false))
 
-    const handleHourClick = (hour) => {
+    const handleHourClick = (hour: any) => {
         setSelectedHour(hour)
     }
 
-    const handleMinuteClick = (minute) => {
+    const handleMinuteClick = (minute: any) => {
         setSelectedMinute(minute)
     }
 
