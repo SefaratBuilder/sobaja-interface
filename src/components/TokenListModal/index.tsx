@@ -31,7 +31,6 @@ const TokenListModal = ({
     const allTokenBalances = useAllTokenBalances()
     const tokens = useTokenList()
     const { chainId } = useActiveWeb3React()
-    console.log({ tokens })
     const queriedToken = useToken(searchQuery)
 
     const handleSearchToken = async (
