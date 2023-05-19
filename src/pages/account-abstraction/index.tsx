@@ -15,6 +15,7 @@ import { useActiveWeb3React } from 'hooks';
 import { useAAFactory } from 'hooks/useAAFactory';
 import { AAEntryPoints, AAFactory } from 'constants/addresses';
 import { mulNumberWithDecimal } from 'utils/math';
+import { ethers } from 'ethers';
 
 const newSmartAccount = '0xCB7c527e22307529F803A5A3CB73BFe5E60b39d9';
 
@@ -31,8 +32,9 @@ const AA = () => {
     const [signedUserOp, setSignedUserOp] = useState<any>()
     const { data } = useSmartAccount(newSmartAccount)
     const entryPointContract = useAAEntryPointContract()
-    const { contract } = useAAFactory()
-
+    const { contract, smartAccountAtZero } = useAAFactory()
+    console.log('smartAccount at zero index', smartAccountAtZero)
+    console.log('addresssssss', contract?.address)
     const onDeployAccount = async () => {
         try {
             if(!contract || !account) return
@@ -81,16 +83,19 @@ const AA = () => {
     }
     
     const signUserOp = async () => {
-        if(!chainId || !library || !account) return 
+        if(!chainId || !library || !account || !web3Provider) return 
         const owner = library.getSigner(account)
+        const provider = new ethers.providers.JsonRpcProvider('https://testnet.era.zksync.dev', {name: 'eratest', chainId: 280})
+        console.log('provider', provider)
         const walletAPI = new SimpleAccountAPI({
-            provider: library,
+            provider: provider,
             entryPointAddress: AAEntryPoints[chainId],
             owner,
             factoryAddress: AAFactory[chainId],
             index: 0,
             accountAddress: newSmartAccount
         })
+
         //transfer 0.001ETH from smart account to this eoa account
         const txn = {
             target: account,

@@ -77,7 +77,7 @@ const Swap = () => {
     const { slippage } = useSlippageTolerance()
     const updateRef = useUpdateRefAddress()
     const ref = useRef<any>()
-    const { sendUserPaidTransaction, signAndSendUserOps, data: { nonce } } = useSmartAccount()
+    const { sendUserPaidTransaction, signAndSendUserOps, data: { nonce } } = useSmartAccount(wallet?.address)
 
     const isInsufficientAllowance =
     Number(tokenApproval?.allowance) < Number(inputAmount) &&
