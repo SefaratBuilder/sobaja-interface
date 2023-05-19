@@ -10,15 +10,18 @@ import { useAppState } from 'states/application/hooks'
 import { Pair } from 'utils/pair'
 import { convertNativeToWrappedToken } from 'utils'
 import { useWeb3React } from '@web3-react/core'
+import imageGas from 'assets/icons/gas-station.png'
 
 const PoolPriceBar = ({
     pair,
     dropDown,
     setDropDown,
+    gasFee,
 }: {
     pair: Pair | undefined
     dropDown: boolean
     setDropDown: React.Dispatch<React.SetStateAction<boolean>>
+    gasFee?: string
 }) => {
     const { chainId } = useWeb3React()
     const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } =
@@ -44,8 +47,13 @@ const PoolPriceBar = ({
         return (amount / (reservesA + amount)) * 100
     }
     const reserveIn =
-        pair && tokenIn && chainId &&
-        (convertNativeToWrappedToken(tokenIn, chainId).address == pair.token0.address ? pair.reserve0 : pair.reserve1)
+        pair &&
+        tokenIn &&
+        chainId &&
+        (convertNativeToWrappedToken(tokenIn, chainId).address ==
+        pair.token0.address
+            ? pair.reserve0
+            : pair.reserve1)
     const priceImpact =
         tokenIn && inputAmount && pair
             ? getPriceImpact(
@@ -58,6 +66,8 @@ const PoolPriceBar = ({
     return (
         <>
             <PoolPriceWrapper>
+                {/* <div>0.01</div> */}
+
                 <WrapFee
                     dropDown={dropDown}
                     onClick={() => setDropDown(!dropDown)}
@@ -65,15 +75,21 @@ const PoolPriceBar = ({
                     <Row al="center" gap="2px">
                         <img src={NotiIcon} alt="notification icon" />
                         <span>
-                            1 {tokenOut?.symbol} = {rate} {tokenIn?.symbol}{' '}
-                            (including fee)
+                            1 {tokenOut?.symbol} ≈ {Number(rate).toFixed(6)}{' '}
+                            {tokenIn?.symbol} (including fee)
                         </span>
                     </Row>
-                    <img
-                        className={dropDown ? 'active' : ''}
-                        src={imgDownArrowDark}
-                        alt="chevron down"
-                    />
+                    <Row gap="5px">
+                        <Row gap="3px">
+                            <img src={imageGas} alt="" />
+                            <span>≈${gasFee || '--'} </span>
+                        </Row>
+                        <img
+                            className={dropDown ? 'active' : ''}
+                            src={imgDownArrowDark}
+                            alt="chevron down"
+                        />
+                    </Row>
                 </WrapFee>
                 <WrapExpectedOutput
                     className={dropDown ? 'active' : 'chevron down'}
@@ -136,7 +152,9 @@ const PoolPriceBar = ({
                                 <span>Fee</span>
                             </div>
                             <div>
-                                <span>{pair ? Number(pair.fee) * 100 : 0} %</span>
+                                <span>
+                                    {pair ? Number(pair.fee) * 100 : 0} %
+                                </span>
                             </div>
                         </ItemOutput>
                     </ContentOutput>
@@ -152,7 +170,8 @@ const WrapFee = styled.div<{ dropDown: boolean }>`
     padding: 0 10px;
     display: flex;
     justify-content: space-between;
-    font-size: 16px;
+    gap: 5px;
+    font-size: 14px;
     align-items: center;
     border-radius: 8px;
     cursor: pointer;

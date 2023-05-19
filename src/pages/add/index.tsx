@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Link, useLocation } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
@@ -18,7 +18,11 @@ import {
 } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { ZeroAddress } from 'ethers'
-import { useFactoryContract, useRouterContract } from 'hooks/useContract'
+import {
+    useFactoryContract,
+    useRouterContract,
+    useTokenContract,
+} from 'hooks/useContract'
 import { useActiveWeb3React } from 'hooks'
 import { divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math'
 import { usePair } from 'hooks/useAllPairs'
@@ -58,6 +62,9 @@ const Add = () => {
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenInApproval = useTokenApproval(account, routerAddress, tokenIn)
     const tokenOutApproval = useTokenApproval(account, routerAddress, tokenOut)
+    const contractApproveTokenIn = useTokenContract(tokenIn?.address)
+    const contractApproveTokenOut = useTokenContract(tokenOut?.address)
+
     const { slippage } = useSlippageTolerance()
     const { refAddress } = useAppState()
     const initDataTransaction = InitCompTransaction()
@@ -392,11 +399,51 @@ const Add = () => {
         pair?.tokenLp.address,
     ])
 
+    const argsEstimate = useMemo(() => {
+        if (isInsufficientAllowance) {
+            return {
+                contract: isInsufficientAllowanceTokenIn
+                    ? contractApproveTokenIn
+                    : contractApproveTokenOut,
+                method: () => {
+                    return 'approve'
+                },
+                args: () => {
+                    return {
+                        args: [
+                            routerAddress,
+                            mulNumberWithDecimal(
+                                inputAmount || '0',
+                                tokenIn?.decimals || 18,
+                            ),
+                        ],
+                        value: '0x',
+                    }
+                },
+            }
+        }
+
+        return {
+            contract: routerContract,
+            method: getAddMethod,
+            args: getAddArguments,
+        }
+    }, [
+        isInsufficientAllowance,
+        swapType,
+        inputAmount,
+        outputAmount,
+        tokenIn,
+        tokenOut,
+        chainId,
+        contractApproveTokenIn,
+        contractApproveTokenOut,
+    ])
     // contract - method - argument
     const gasEstimate = useEstimateGas(
-        routerContract,
-        getAddMethod,
-        getAddArguments,
+        argsEstimate.contract,
+        argsEstimate.method,
+        argsEstimate.args,
     )
 
     const AddButton = () => {
@@ -527,6 +574,11 @@ const Add = () => {
                         dropDown={poolPriceBarOpen}
                         setDropDown={setPoolPriceBarOpen}
                         pair={pair}
+                        gasFee={
+                            gasEstimate
+                                ? Number(gasEstimate)?.toFixed(5)
+                                : gasEstimate
+                        }
                     />
                 )}
                 <AddButton />

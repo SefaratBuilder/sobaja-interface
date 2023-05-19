@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Link, useLocation } from 'react-router-dom'
 import { Row, Columns } from 'components/Layouts'
@@ -27,7 +27,11 @@ import {
 import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
 import { Contract, ZeroAddress } from 'ethers'
 import { divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math'
-import { useRouterContract, useStakingContract } from 'hooks/useContract'
+import {
+    useRouterContract,
+    useStakingContract,
+    useTokenContract,
+} from 'hooks/useContract'
 import {
     calcSlippageAmount,
     calcTransactionDeadline,
@@ -67,6 +71,8 @@ const Swap = () => {
     const pair = usePair(chainId, tokenIn, tokenOut)
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, tokenIn)
+    const contractApprove = useTokenContract(tokenIn?.address)
+
     const balanceIn = useCurrencyBalance(account, tokenIn)
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
@@ -78,6 +84,10 @@ const Swap = () => {
     const { slippage } = useSlippageTolerance()
     const updateRef = useUpdateRefAddress()
     const ref = useRef<any>()
+
+    const isInsufficientAllowance =
+        Number(tokenApproval?.allowance) < Number(inputAmount) &&
+        !isNativeCoin(tokenIn)
 
     useOnClickOutside(ref, () => {
         setIsOpenWalletModal(false)
@@ -221,16 +231,49 @@ const Swap = () => {
         }
     }, [inputAmount, outputAmount, tokenIn, tokenOut, chainId])
 
-    const gasEstimate = useEstimateGas(
-        routerContract,
-        getSwapMethod,
-        getSwapArguments,
-    )
-    // console.log('Gas Estimation', gasEstimate)
-    // console.log('Router contract', routerContract)
+    const argsEstimate = useMemo(() => {
+        if (isInsufficientAllowance) {
+            return {
+                contract: contractApprove,
+                method: () => {
+                    return 'approve'
+                },
+                args: () => {
+                    return {
+                        args: [
+                            routerAddress,
+                            mulNumberWithDecimal(
+                                inputAmount || '0',
+                                tokenIn?.decimals || 18,
+                            ),
+                        ],
+                        value: '0x',
+                    }
+                },
+            }
+        }
 
-    // console.log('Swap Arguments', getSwapArguments)
-    // console.log('Swap Method', getSwapMethod)
+        return {
+            contract: routerContract,
+            method: getSwapMethod,
+            args: getSwapArguments,
+        }
+    }, [
+        isInsufficientAllowance,
+        swapType,
+        inputAmount,
+        outputAmount,
+        tokenIn,
+        tokenOut,
+        chainId,
+        contractApprove,
+    ])
+
+    const gasEstimate = useEstimateGas(
+        argsEstimate.contract,
+        argsEstimate.method,
+        argsEstimate.args,
+    )
 
     useEffect(() => {})
     const handleOnSwap = async () => {
@@ -462,9 +505,6 @@ const Swap = () => {
         const isUndefinedCurrencies = !tokenIn || !tokenOut
         const isInsufficientBalance =
             inputAmount && balanceIn && Number(balanceIn) < Number(inputAmount)
-        const isInsufficientAllowance =
-            Number(tokenApproval?.allowance) < Number(inputAmount) &&
-            !isNativeCoin(tokenIn)
 
         return (
             <Row>
@@ -578,6 +618,11 @@ const Swap = () => {
                         pair={pair}
                         dropDown={poolPriceBarOpen}
                         setDropDown={setPoolPriceBarOpen}
+                        gasFee={
+                            gasEstimate
+                                ? Number(gasEstimate)?.toFixed(5)
+                                : gasEstimate
+                        }
                     />
                 )}
                 <SwapButton />

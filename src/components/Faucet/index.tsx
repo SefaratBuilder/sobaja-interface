@@ -80,13 +80,12 @@ const Faucet = () => {
             initDataTransaction.setIsOpenWaitingModal(true)
             const dataFaucet = await axios({
                 method: 'GET',
+                // url: 'http://localhost:3000/api/faucet',
                 url: 'https://sobajaswap.com/api/faucet',
                 params: {
                     to: account,
                 },
             })
-            console.log({ dataFaucet })
-
             if (dataFaucet.status === 200) {
                 const { hash } = dataFaucet.data
                 console.log(dataFaucet.data)
@@ -152,8 +151,6 @@ const Faucet = () => {
     }
 
     const showMintCoins = () => {
-        console.log({ isDisable })
-
         if (tokenList && tokenList.length > 0) {
             const tokens =
                 chainId === 280
