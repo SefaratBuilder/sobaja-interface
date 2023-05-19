@@ -13,9 +13,13 @@ import { SimpleAccountAPI } from 'pantinho-aa'
 import { useSmartAccount } from 'hooks/useSmartAccount';
 import { useActiveWeb3React } from 'hooks';
 import { useAAFactory } from 'hooks/useAAFactory';
+import { AAEntryPoints, AAFactory } from 'constants/addresses';
+import { mulNumberWithDecimal } from 'utils/math';
+
+const newSmartAccount = '0xCB7c527e22307529F803A5A3CB73BFe5E60b39d9';
 
 const AA = () => {
-    const { account, library } = useActiveWeb3React()
+    const { account, library, chainId } = useActiveWeb3React()
     const { connect, address, loading: eoaWalletLding, disconnect, web3Provider } = useWeb3AuthContext()
     const { loading, wallet, state: walletState } = useSmartAccountContext()
     const [txnLoading, setTxnLoading] = useState(false)
@@ -25,7 +29,7 @@ const AA = () => {
     const {addTxn} = useTransactionHandler()
     const [paidTxn, setPaidTxn] = useState<any>()
     const [signedUserOp, setSignedUserOp] = useState<any>()
-    const { data } = useSmartAccount()
+    const { data } = useSmartAccount(newSmartAccount)
     const entryPointContract = useAAEntryPointContract()
     const { contract } = useAAFactory()
 
@@ -77,35 +81,30 @@ const AA = () => {
     }
     
     const signUserOp = async () => {
-        if(!wallet || !web3Provider || !walletState || !nftContract) return 
-        const safeMintTx = await nftContract.populateTransaction.safeMint(
-            wallet.address
-          )
-        const owner = wallet.signer
-        const smartAccountState: any = walletState
-        console.log({walletState: walletState.isDeployed})
+        if(!chainId || !library || !account) return 
+        const owner = library.getSigner(account)
         const walletAPI = new SimpleAccountAPI({
-            provider: web3Provider, 
-            entryPointAddress: smartAccountState.entryPointAddress,
+            provider: library,
+            entryPointAddress: AAEntryPoints[chainId],
             owner,
-            factoryAddress: smartAccountState.factoryAddress,
+            factoryAddress: AAFactory[chainId],
             index: 0,
-            accountAddress: walletState.isDeployed ? wallet.address : undefined
+            accountAddress: newSmartAccount
         })
-        console.log({walletAPI})
-        console.log(safeMintTx?.data)
-        if(!safeMintTx?.data) return
-        // console.log('aaaa')
-        const op = await walletAPI.createSignedUserOp({
-            target: nftContract.address,
-            data: safeMintTx.data,
-            nonce: data.nonce
-        })
+        //transfer 0.001ETH from smart account to this eoa account
+        const txn = {
+            target: account,
+            data: '0x',
+            nonce: data.nonce,
+            value: mulNumberWithDecimal('0.001', 18)
+        }
+
+        const op = await walletAPI.createSignedUserOp(txn)
         op.signature = await op.signature
         op.nonce = await op.nonce
         op.sender = await op.sender
         op.preVerificationGas = await op.preVerificationGas
-        console.log({op})
+        op.initCode = '0x'
         setSignedUserOp(op)
     }
 

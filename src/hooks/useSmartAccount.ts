@@ -11,10 +11,10 @@ import { AAEntryPoints, AAFactory } from "constants/addresses"
 import { ethers } from "ethers"
 import { useAAEntryPointContract } from "./useContract"
 
-export const useSmartAccount = () => {
+export const useSmartAccount = (address: string | undefined) => {
     const { web3Provider } = useWeb3AuthContext()
     const { wallet, state } = useSmartAccountContext()
-    const contract = useSmartAccountContract('0xCB7c527e22307529F803A5A3CB73BFe5E60b39d9')
+    const contract = useSmartAccountContract(address)
     const { gasToken } = useAppState()
     const { library, chainId, account } = useActiveWeb3React()
     const entryPointContract = useAAEntryPointContract()

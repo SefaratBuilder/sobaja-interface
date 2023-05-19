@@ -34,12 +34,6 @@ export const useAAFactory = () => {
         checkIsDeployed()
     }, [smartAccountAtZero, library, contract])
 
-    console.log({
-        basicImplementation: basicImplementation.result?.[0],
-        smartAccountAtZero: smartAccountAtZero.result?.[0],
-        isDeployed
-    })
-
     return useMemo(() => {
         return {
             contract,
