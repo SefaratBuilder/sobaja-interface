@@ -77,7 +77,7 @@ const Swap = () => {
     const { slippage } = useSlippageTolerance()
     const updateRef = useUpdateRefAddress()
     const ref = useRef<any>()
-    const { sendUserPaidTransaction } = useSmartAccount()
+    const { sendUserPaidTransaction, signAndSendUserOps, data: { nonce } } = useSmartAccount()
 
     const isInsufficientAllowance =
     Number(tokenApproval?.allowance) < Number(inputAmount) &&
@@ -316,17 +316,22 @@ const Swap = () => {
                 if(!swapData || !tokenIn || !routerAddress || !inputAmount) return
                 const txApprove = {
                     to: tokenIn.address,
-                    data: tokenApproval.approveEncodeData(routerAddress, mulNumberWithDecimal(inputAmount, tokenIn.decimals))
+                    data: tokenApproval.approveEncodeData(routerAddress, mulNumberWithDecimal(inputAmount, tokenIn.decimals)),
+                    nonce
                 }
                 const txSwap = {
                     to: routerAddress,
                     data: swapData,
-                    value: value
+                    value: value,
+                    nonce
                 }
                 if(isInsufficientAllowance) {
+                    console.log('aaaa')
                     callResult = await sendUserPaidTransaction([txApprove, txSwap])
                 } else {
-                    callResult = await sendUserPaidTransaction([txSwap])
+                    console.log('bbbb', txSwap)
+                    callResult = await signAndSendUserOps(txSwap)
+                    // callResult = await sendUserPaidTransaction([txSwap])
                 }
             }
 

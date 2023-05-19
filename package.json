@@ -94,6 +94,7 @@
         "vite-plugin-require": "^1.1.10",
         "vite-tsconfig-paths": "^4.0.7",
         "vitest": "^0.29.8",
-        "webpack": "^5.82.0"
+        "webpack": "^5.82.0",
+        "zksync-web3": "^0.14.3"
     }
 }

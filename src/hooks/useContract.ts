@@ -13,7 +13,8 @@ import {
     Faucet,
     LAUNCHPADS,
     STAKING_ABI,
-    AAEntryPoints
+    AAEntryPoints,
+    AAFactory
 } from 'constants/addresses'
 import ERC20 from 'constants/jsons/erc20.json'
 import { PAIR_ABI } from 'constants/jsons/pair'
@@ -26,6 +27,7 @@ import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
 import { ethers } from 'ethers'
 import NFT_ABI from 'constants/jsons/nft.json'
 import AA_ABI from 'constants/jsons/aa.json'
+import AAFACTORY_ABI from 'constants/jsons/aaFactory.json'
 
 // returns null on errors
 export const useContract = (
@@ -99,6 +101,11 @@ export function useAccessManagerContract(): Contract | null {
 export function useAAEntryPointContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
     return useContract(AAEntryPoints[chainId || 80001], AAEntryPoint_ABI)
+}
+
+export function useAAFactoryContract(): Contract | null {
+    const { chainId } = useActiveWeb3React()
+    return useContract(AAFactory[chainId || 80001], AAFACTORY_ABI)
 }
 
 export function useNftSmartAccountContract() {

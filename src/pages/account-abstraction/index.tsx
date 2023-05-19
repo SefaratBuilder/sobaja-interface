@@ -12,9 +12,10 @@ import { useTransactionHandler } from 'states/transactions/hooks';
 import { SimpleAccountAPI } from 'pantinho-aa'
 import { useSmartAccount } from 'hooks/useSmartAccount';
 import { useActiveWeb3React } from 'hooks';
+import { useAAFactory } from 'hooks/useAAFactory';
 
 const AA = () => {
-    const { account } = useActiveWeb3React()
+    const { account, library } = useActiveWeb3React()
     const { connect, address, loading: eoaWalletLding, disconnect, web3Provider } = useWeb3AuthContext()
     const { loading, wallet, state: walletState } = useSmartAccountContext()
     const [txnLoading, setTxnLoading] = useState(false)
@@ -26,6 +27,19 @@ const AA = () => {
     const [signedUserOp, setSignedUserOp] = useState<any>()
     const { data } = useSmartAccount()
     const entryPointContract = useAAEntryPointContract()
+    const { contract } = useAAFactory()
+
+    const onDeployAccount = async () => {
+        try {
+            if(!contract || !account) return
+            const deployResult = await contract.deployCounterFactualAccount(account, '0')
+            await deployResult.wait()
+            console.log('txn hash', deployResult)
+        }
+        catch(err) {
+            console.log('failed to deploy: ', err)
+        }
+    }
 
     const onMint = async () => {
         if (!wallet || !walletState || !web3Provider || !nftContract) return;
@@ -176,6 +190,9 @@ const AA = () => {
             <Row gap="10px">
                 <PrimaryButton onClick={signUserOp} name={'Sign userOp'} isLoading={txnLoading} />
                 <PrimaryButton onClick={sendSignedUserOp} name={'Send signed userOp'} isLoading={txnLoading} />
+            </Row>
+            <Row gap="10px">
+                <PrimaryButton onClick={onDeployAccount} name={'Deploy new account'} isLoading={txnLoading} />
             </Row>
             <Row gap="10px">
                 <PrimaryButton onClick={connect} name={'Connect AA'} />

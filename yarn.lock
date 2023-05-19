@@ -17643,6 +17643,11 @@
   "resolved" "https://registry.npmjs.org/zen-observable/-/zen-observable-0.8.15.tgz"
   "version" "0.8.15"
 
+"zksync-web3@^0.14.3":
+  "integrity" "sha512-hT72th4AnqyLW1d5Jlv8N2B/qhEnl2NePK2A3org7tAa24niem/UAaHMkEvmWI3SF9waYUPtqAtjpf+yvQ9zvQ=="
+  "resolved" "https://registry.npmjs.org/zksync-web3/-/zksync-web3-0.14.3.tgz"
+  "version" "0.14.3"
+
 "zustand@^4.3.1":
   "integrity" "sha512-4h28KCkHg5ii/wcFFJ5Fp+k1J3gJoasaIbppdgZFO4BPJnsNxL0mQXBSFgOgAdCdBj35aDTPvdAJReTMntFPGg=="
   "resolved" "https://registry.npmjs.org/zustand/-/zustand-4.3.8.tgz"
