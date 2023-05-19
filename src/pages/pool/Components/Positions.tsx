@@ -64,8 +64,6 @@ const Positions = ({ position, tokenList }: IPositions) => {
     }, [position])
 
     const handleOnAdd = (item: (typeof position)[0]) => {
-        console.log({ item })
-
         onTokenSelection(Field.INPUT, item?.token0)
         onTokenSelection(Field.OUTPUT, item?.token1)
 

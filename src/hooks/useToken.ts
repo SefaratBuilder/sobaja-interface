@@ -38,6 +38,7 @@ export function useToken(address: string | undefined): Token | undefined {
         const symbol = symbolResult?.[0]?.result?.[0]
         const name = nameResult?.[0]?.result?.[0]
         const decimals = decimalsResult?.[0]?.result?.[0]
+
         if (!chainId) return
         if (address == ETHER_ADDRESS || address == ZERO_ADDRESS) return NATIVE_COIN[chainId]
         if (!symbol || !name || !decimals || !address) return

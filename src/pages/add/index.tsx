@@ -42,7 +42,7 @@ import { useMintActionHandlers, useMintState } from 'states/mint/hooks'
 import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
-import { useEstimateGas, useEstimateGasForAdd } from 'hooks/useEstimateGas'
+import { useEstimateGas } from 'hooks/useEstimateGas'
 
 const Add = () => {
     const mintState = useMintState()

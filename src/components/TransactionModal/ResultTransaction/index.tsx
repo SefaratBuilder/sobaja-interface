@@ -118,7 +118,7 @@ const WrapInfoLoad = styled.div`
     } */
     div {
         color: #34dc81;
-        font-size: 20px;
+        font-size: 18px;
     }
 
     .error {

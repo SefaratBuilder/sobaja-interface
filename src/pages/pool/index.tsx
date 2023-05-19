@@ -631,6 +631,7 @@ export default function Pools() {
                             pool={overviewPool}
                             transaction={transactions}
                             width={width}
+                            tokenList={tokenList}
                         />
                     )}
                 </CustomizeBox>

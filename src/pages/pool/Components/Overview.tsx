@@ -4,25 +4,38 @@ import React, { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import imgCopy from 'assets/icons/copy.svg'
 import UNKNOWN from 'assets/icons/question-mark-button-dark.svg'
-import tokenList from 'constants/jsons/tokenList.json'
-import { shortenAddress } from 'utils'
+import ListTokens from 'constants/jsons/tokenList.json'
+import { isAddress, shortenAddress } from 'utils'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import ETH from 'assets/token-logos/eth.svg'
 import { uniqByKeepFirst } from 'utils/handleArray'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
+import { useNavigate } from 'react-router-dom'
+import { useMintActionHandlers } from 'states/mint/hooks'
+import { Field } from 'interfaces'
+import { useTokens } from 'hooks/useToken'
+import { useToken } from 'hooks/useToken'
 
 const Overview = ({
     pool,
     transaction,
     width,
+    tokenList,
 }: {
     pool?: Data
     transaction?: (ISwap | IMint)[]
     width?: number
+    tokenList?: string[]
 }) => {
     const [isCopied, setIsCopied] = useState(false)
     const [indexFieldActive, setIndexFieldActive] = useState(0)
+    const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
+    const navigate = useNavigate()
+    const { onTokenSelection } = useMintActionHandlers()
 
+    const poolRemoveTokens = useTokens(
+        pool?.addresses ? pool?.addresses?.map((p) => p) : [],
+    )
     /**
      * @dev dataShow: titles in transactions
      */
@@ -80,6 +93,16 @@ const Overview = ({
         }
     }
 
+    /**
+     *@handleOnAdd wrong data subgraph so navigate page add first, not set tokens
+     */
+    const handleOnAdd = () => {
+        // onTokenSelection(Field.INPUT, poolRemoveTokens?.[1])
+        // onTokenSelection(Field.OUTPUT, poolRemoveTokens?.[2])
+
+        navigate('/add')
+    }
+
     return (
         <Container>
             <WrapData gap="20px">
@@ -120,8 +143,14 @@ const Overview = ({
                         </Row>
                     </LabelContract>
                     <Row gap="10px">
-                        <PrimaryButton name="Add" />
-                        <PrimaryButton name="Remove" />
+                        <PrimaryButton
+                            name="Add"
+                            onClick={() => handleOnAdd()}
+                        />
+                        <PrimaryButton
+                            name="Remove"
+                            onClick={() => setModalRemovePool(true)}
+                        />
                     </Row>
                 </LabelX>
 
@@ -134,7 +163,7 @@ const Overview = ({
                                 src={
                                     pool?.symbols?.[1] === 'WETH'
                                         ? ETH
-                                        : tokenList.find(
+                                        : ListTokens.find(
                                               (t) =>
                                                   t.address ==
                                                       pool?.addresses?.[1] ||
@@ -155,7 +184,7 @@ const Overview = ({
                                 src={
                                     pool?.symbols?.[2] === 'WETH'
                                         ? ETH
-                                        : tokenList.find(
+                                        : ListTokens.find(
                                               (t) =>
                                                   t.address ==
                                                       pool?.addresses?.[2] ||

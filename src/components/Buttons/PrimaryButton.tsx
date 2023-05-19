@@ -62,7 +62,7 @@ export const Button = styled.button<{
     opacity: ${({ disabled }) => (disabled ? 0.7 : 1)};
     color: var(--text1);
     font-family: Inter, sans-serif;
-    span{
+    span {
         font-weight: 700;
     }
     :hover {
@@ -94,5 +94,16 @@ export const Button = styled.button<{
         span {
             font-size: 14px !important;
         }
+    }
+
+    &.faucet {
+        img {
+            height: 25px;
+            width: 25px;
+            border-radius: 50%;
+        }
+        justify-content: flex-start;
+        gap: 5px;
+        padding: 5px 10px;
     }
 `
