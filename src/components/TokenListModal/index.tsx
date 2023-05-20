@@ -3,8 +3,12 @@ import styled from 'styled-components'
 import Modal from 'components/Modal'
 import { Columns, Row } from 'components/Layouts'
 import SearchInput from 'components/Input/SearchInput'
-import { CommonBaseTokens, NATIVE_COIN } from 'constants/index'
-import { Field, Token, TokenList } from 'interfaces'
+import {
+    ALL_SUPPORTED_CHAIN_IDS,
+    CommonBaseTokens,
+    NATIVE_COIN,
+} from 'constants/index'
+import { ChainId, Field, Token, TokenList } from 'interfaces'
 import CommonBase from './CommonBase'
 import { useTokenList, useAddTokenToCurrentList } from 'states/lists/hooks'
 import TokenSelection from './TokenSelection'
@@ -72,8 +76,10 @@ const TokenListModal = ({
             const token = tokens.find((t) => t.address === k && Number(v) > 0)
             return token && sortedTokenList.push(token)
         })
-
-        const newTokens = tokens.filter((t) => !sortedTokenList.includes(t))
+        const newTokens =
+            tokens && tokens.length > 0
+                ? tokens.filter((t) => !sortedTokenList.includes(t))
+                : []
 
         const filteredByChainIdTokens = [...sortedTokenList, ...newTokens]
 
@@ -109,6 +115,7 @@ const TokenListModal = ({
                 />
                 <Row gap="10px" wrap="wrap">
                     {chainId &&
+                        ALL_SUPPORTED_CHAIN_IDS.includes(chainId as ChainId) &&
                         CommonBaseTokens[chainId].map(
                             (token: Token, index: number) => {
                                 return (

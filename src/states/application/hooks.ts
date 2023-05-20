@@ -1,4 +1,5 @@
 import { useActiveWeb3React } from 'hooks'
+import { Token } from 'interfaces'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppState } from '../index'
 import {
@@ -8,6 +9,7 @@ import {
     updateApplicationState,
     toggleDarkMode,
     updateRefAddress,
+    updateGasToken
 } from './actions'
 import { ApplicationState } from './reducer'
 
@@ -61,6 +63,10 @@ export function useBlockNumber(): number | undefined {
 
 export const useUpdateRefAddress = () => {
     const dispatch = useDispatch()
-    // const { refAddress } = useAppState();
     return (ref: string | undefined) => dispatch(updateRefAddress(ref))
+}
+
+export const useUpdateGasToken = () => {
+    const dispatch = useDispatch()
+    return (token: Token) => dispatch(updateGasToken(token))
 }

@@ -3,7 +3,7 @@ import NetworkSelectorMobile from 'components/NetworkSelectorMobile'
 import WalletModal from 'components/WalletModal'
 import Web3StatusMobile from 'components/Web3StatusMobile'
 import styled from 'styled-components'
-
+import Web3Status from 'components/Web3Status'
 const ConnectorMobile = () => {
     const [toggleWalletModal, setToggleWalletModal] = useState<boolean>(false)
     return (
@@ -21,10 +21,33 @@ const ConnectorMobile = () => {
             ) : (
                 ''
             )}
+
+            {toggleWalletModal ? (
+                <OpacityModal
+                    onClick={() => setToggleWalletModal(!toggleWalletModal)}
+                ></OpacityModal>
+            ) : (
+                ''
+            )}
         </Fragment>
     )
 }
 
+const OpacityModal = styled.div`
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    background-color: #00000073;
+    right: 0;
+    top: 0;
+
+    @media screen and (max-width: 1100px) {
+        top: unset;
+        height: 3000px;
+        bottom: 0px;
+    }
+`
 const WrapConnectorMobile = styled.div`
     display: none;
     @media screen and (max-width: 1100px) {

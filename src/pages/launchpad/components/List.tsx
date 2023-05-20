@@ -46,7 +46,7 @@ const ListLaunchpad = ({
     const { launchpads } = data
     // const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
-    const { account, chainId, library } = useActiveWeb3React()
+    const { account, chainId, provider } = useActiveWeb3React()
     // const [launchpadId, setLaunchpadId] = useState(undefined)
 
     // const fairlaunchContract = useFairLaunchContract(launchpadId)
@@ -88,7 +88,7 @@ const ListLaunchpad = ({
     const handleOnSetTime = async (id: string) => {
         try {
             initDataTransaction.setError('')
-            if (launchpads && library) {
+            if (launchpads && provider) {
                 console.log('on claim....')
                 initDataTransaction.setIsOpenWaitingModal(true)
 
@@ -98,7 +98,7 @@ const ListLaunchpad = ({
                 const fairlaunchContract = getContract(
                     id,
                     FAIRLAUNCH_ABI,
-                    library,
+                    provider,
                     account ? account : undefined,
                 )
 

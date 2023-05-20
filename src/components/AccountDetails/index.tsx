@@ -1,19 +1,23 @@
-import React, { useRef, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import styled from 'styled-components'
 import { useActiveWeb3React } from 'hooks'
 import { shortenAddress } from 'utils'
-import { NavLink } from 'react-router-dom'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import imgPower from 'assets/icons/power.svg'
 import imgCopy from 'assets/icons/copy.svg'
 import imgDownArrow from 'assets/icons/arrow-down.svg'
-import imgPlusWallet from 'assets/icons/plus-wallet.svg'
-import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
-import iconSetting from 'assets/icons/setting.svg'
 import { NATIVE_COIN } from 'constants/index'
-
+import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import { Row } from 'components/Layouts'
+import DepositModal from './DepositModal'
+import SendModal from './SendModal'
+import GasSetting from './GasSetting'
+import { useAppDispatch } from 'states/hook'
+import { updateSelectedWallet } from 'states/user/reducer'
+import BgWallet from 'assets/brand/bg-connect-wallet.png'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
     openOptions: React.Dispatch<React.SetStateAction<void>>
@@ -22,13 +26,36 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account, deactivate, chainId } = useActiveWeb3React()
-
+    const { account, chainId, connector } = useActiveWeb3React()
     const [isCopied, setIsCopied] = useState<boolean>(false)
-
-    const balance = account && useETHBalances([account])?.[account]
+    const {
+        connect,
+        web3Provider,
+        disconnect: disconnectWeb3Auth,
+    } = useWeb3AuthContext()
+    const { wallet, state, loading } = useSmartAccountContext()
+    const balance = useETHBalances([wallet?.address || account])?.[
+        wallet?.address || account || ''
+    ]
+    const dispatch = useAppDispatch()
+    const disconnect = useCallback(() => {
+        if (connector && connector.deactivate) {
+            connector.deactivate()
+        }
+        connector.resetState()
+        dispatch(updateSelectedWallet({ wallet: undefined }))
+    }, [connector, dispatch])
 
     const handleCopyAddress = () => {
+        if (wallet?.address) {
+            navigator.clipboard.writeText(wallet.address).then(() => {
+                setIsCopied(true)
+                setTimeout(() => {
+                    setIsCopied(false)
+                }, 1000)
+            })
+            return
+        }
         if (account) {
             navigator.clipboard.writeText(account.toString()).then(() => {
                 setIsCopied(true)
@@ -39,92 +66,122 @@ const AccountDetails = ({
         }
     }
 
+    const handleOnConnectSmartAccount = async () => {
+        try {
+            connect()
+        } catch (err) {
+            console.log('failed to connect to smart account: ', err)
+        }
+    }
+
     return (
-        <WrapConnectModal isConnected={true}>
-            <Header>
-                <WrapAccountInfo>
-                    <ImgAccount src="https://picsum.photos/50/50" />
-                    <IdAccount>{account && shortenAddress(account)}</IdAccount>
-                </WrapAccountInfo>
-                <WrapBtnHeader>
-                    {isCopied ? (
-                        <CopyBtn>
-                            <CopyAccountAddress src={imgCheckMark} />
-                            <Tooltip className="tooltip">Copied</Tooltip>
-                        </CopyBtn>
-                    ) : (
-                        <CopyBtn>
-                            <CopyAccountAddress
-                                onClick={handleCopyAddress}
-                                src={imgCopy}
-                            />
-                            <Tooltip className="tooltip">
-                                Click to copy address
-                            </Tooltip>
-                        </CopyBtn>
-                    )}
+        <LabelRight>
+            <WrapConnectModal isConnected={true}>
+                <Header>
+                    <Row jus="space-between">
+                        <Row al="center" gap="10px">
+                            <WrapAccountInfo>
+                                <ImgAccount src="https://picsum.photos/50/50" />
+                                <IdAccount>
+                                    {(wallet?.address &&
+                                        shortenAddress(wallet.address)) ||
+                                        (account && shortenAddress(account))}
+                                </IdAccount>
+                            </WrapAccountInfo>
+                            {wallet && <AAMarker>Smart account</AAMarker>}
+                        </Row>
+                        <WrapBtnHeader>
+                            {wallet && <GasSetting />}
+                            {isCopied ? (
+                                <CopyBtn>
+                                    <CopyAccountAddress src={imgCheckMark} />
+                                    <Tooltip className="tooltip">
+                                        Copied
+                                    </Tooltip>
+                                </CopyBtn>
+                            ) : (
+                                <CopyBtn>
+                                    <CopyAccountAddress
+                                        onClick={handleCopyAddress}
+                                        src={imgCopy}
+                                    />
+                                    <Tooltip className="tooltip">
+                                        Click to copy address
+                                    </Tooltip>
+                                </CopyBtn>
+                            )}
 
-                    <button onClick={() => openOptions()}>
-                        <img src={iconSetting} alt="#" />
-                    </button>
-                    <button
-                        onClick={() => {
-                            deactivate()
-                            setToggleWalletModal(false)
-                        }}
-                    >
-                        <img src={imgPower} alt="#" />
-                    </button>
-                </WrapBtnHeader>
-            </Header>
-            <WrapContent>
-                <NameBalance>
-                    {(chainId && NATIVE_COIN[chainId].symbol) || 'ETH'} Balance
-                </NameBalance>
-                <Balance className={'to'}>
-                    {balance ? balance.toString() : 0}
-                </Balance>
-                <Balance>
-                    {(chainId && NATIVE_COIN[chainId].symbol) || 'ETH'}
-                </Balance>
-                <WrapButton>
-                    <NavLink to="">
-                        <PrimaryButton
-                            type="transparent"
-                            name="View and sell NFTs"
-                        />
-                    </NavLink>
-
-                    <NavLink to="">
-                        <PrimaryButton
-                            type="transparent"
-                            img={imgPlusWallet}
-                            name="Buy crypto"
-                        />
-                    </NavLink>
-                </WrapButton>
-            </WrapContent>
-            <Footer className="isLogged">
-                <WrapFooterBtn>
-                    <WrapItemFooter
-                    //  onClick={() => setShowTrans(!showTrans)}
-                    >
-                        <p>Transactions</p>
-                        <WrapFooterImg>
-                            <p></p>
-                            <img src={imgDownArrow} alt="" />
-                        </WrapFooterImg>
-                    </WrapItemFooter>
-                    <WrapModalTransaction
-                        showTrans={false}
-                        // showTrans={showTrans}
-                    >
-                        {/* <p>
+                            {/* <button onClick={() => openOptions()}>
+                            <img src={iconSetting} alt="#" />
+                        </button> */}
+                            <button
+                                onClick={() => {
+                                    if (wallet?.address) {
+                                        disconnectWeb3Auth()
+                                    } else {
+                                        disconnect()
+                                    }
+                                }}
+                            >
+                                <img src={imgPower} alt="#" />
+                            </button>
+                        </WrapBtnHeader>
+                    </Row>
+                </Header>
+                <WrapContent>
+                    <NameBalance>
+                        {(chainId && NATIVE_COIN[chainId]?.symbol) || 'ETH'}{' '}
+                        Balance
+                    </NameBalance>
+                    <Balance className={'to'}>
+                        {balance ? balance.toString() : 0}
+                    </Balance>
+                    <Balance>
+                        {(chainId && NATIVE_COIN[chainId]?.symbol) || 'ETH'}
+                    </Balance>
+                    <WrapButton>
+                        {!wallet && (
+                            <>
+                                <PrimaryButton
+                                    name={
+                                        loading
+                                            ? 'Connecting'
+                                            : 'Use smart account'
+                                    }
+                                    onClick={handleOnConnectSmartAccount}
+                                    isLoading={loading}
+                                />
+                            </>
+                        )}
+                        {wallet && (
+                            <>
+                                <DepositModal />
+                                <SendModal />
+                            </>
+                        )}
+                    </WrapButton>
+                </WrapContent>
+                <Footer className="isLogged">
+                    <WrapFooterBtn>
+                        <WrapItemFooter
+                        //  onClick={() => setShowTrans(!showTrans)}
+                        >
+                            <p>Transactions</p>
+                            <WrapFooterImg>
+                                <p></p>
+                                <img src={imgDownArrow} alt="" />
+                            </WrapFooterImg>
+                        </WrapItemFooter>
+                        <WrapModalTransaction
+                            showTrans={false}
+                            // showTrans={showTrans}
+                        >
+                            {/* <p>
                             {transactions && transactions.length > 0
                                 ? 'Your recent transactions:'
                                 : 'You have no transactions'}
                         </p> */}
-                        {/* {transactions?.map((i) => {
+                            {/* {transactions?.map((i) => {
                             return (
                                 <RowTransaction
                                     onClick={() =>
@@ -142,19 +199,50 @@ const AccountDetails = ({
                                 </RowTransaction>
                             )
                         })} */}
-                    </WrapModalTransaction>
-                    <WrapItemFooter className="fade">
-                        <p>Language</p>
-                        <WrapFooterImg>
-                            <p>EN</p>
-                            <img src={imgDownArrow} alt="" />
-                        </WrapFooterImg>
-                    </WrapItemFooter>
-                </WrapFooterBtn>
-            </Footer>
-        </WrapConnectModal>
+                        </WrapModalTransaction>
+                        <WrapItemFooter className="fade">
+                            <p>Language</p>
+                            <WrapFooterImg>
+                                <p>EN</p>
+                                <img src={imgDownArrow} alt="" />
+                            </WrapFooterImg>
+                        </WrapItemFooter>
+                    </WrapFooterBtn>
+                </Footer>
+            </WrapConnectModal>
+        </LabelRight>
     )
 }
+
+const LabelRight = styled.div`
+    position: fixed;
+    right: 0;
+
+    top: 9%;
+    height: 100vh;
+    /* width: 400px; */
+    max-width: 400px;
+    width: 100%;
+    background: url(${BgWallet});
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: 999;
+
+    @media screen and (max-width: 1100px) {
+        top: unset;
+        bottom: 0;
+        /* min-height: 600px; */
+        height: 600px;
+    }
+`
+
+const AAMarker = styled.div`
+    padding: 4px;
+    border: 1px solid #14e986;
+    color: #14e986;
+    border-radius: 4px;
+    font-size: 10px;
+`
 
 const WrapModalTransaction = styled.div<{ showTrans: boolean }>`
     overflow: hidden scroll;
@@ -265,7 +353,7 @@ const Container = styled.div<{ isConnected: boolean }>`
     transform: translateY(-50%);
     margin: auto;
     transition: all 0.1s ease-in-out;
-    z-index: 999999;
+    z-index: 10;
     opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
     color: ${({ theme }) => theme.text1};
@@ -294,8 +382,6 @@ const BtnClose = styled.img`
 `
 
 const Header = styled.div`
-    display: flex;
-    justify-content: space-between;
     padding: 1rem 1.5rem;
     border-bottom: 1px solid #918f8f;
 
@@ -497,18 +583,24 @@ const RowTransaction = styled.div`
 `
 
 const WrapConnectModal = styled(Container)`
+    position: absolute;
+    right: 0;
+    top: 2%;
+    left: 0;
+    margin: auto;
+
     max-width: 350px;
-    left: unset;
-    right: 20px;
-    top: 90px;
+    /* left: unset; */
+    /* right: 20px; */
+    /* top: 90px; */
     transform: unset;
-    margin: unset;
-    overflow: unset;
+    /* margin: unset; */
+    /* overflow: unset; */
 
     @media screen and (max-width: 1100px) {
-        right: 10px;
+        /* right: 10px;
         top: unset;
-        bottom: 60px;
+        bottom: 60px; */
     }
     @media screen and (max-width: 391px) {
         width: 90%;

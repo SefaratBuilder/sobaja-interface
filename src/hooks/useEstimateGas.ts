@@ -4,6 +4,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { formatUnits } from '@ethersproject/units'
 import useDebounce from './useDebounce'
 import { ZERO_ADDRESS } from 'constants/index'
+import { useTokenContract } from './useContract'
 
 type SwapArgs = {
     args: (string | string[] | null | undefined)[]
@@ -12,46 +13,34 @@ type SwapArgs = {
 
 export function useEstimateGas(
     contract: Contract | null,
-    method: string | undefined | any,
+    method: () => string | undefined | any,
     args: () => SwapArgs | undefined | void,
 ) {
-    const [gasUsed, setGasUsed] = useState<BigNumber | undefined>(undefined)
-    const [latestArgs, setLatestArgs] = useState<SwapArgs | undefined>()
 
-    const delay = 2000 // debounce delay 3s
+    const [gasUsed, setGasUsed] = useState<string | undefined>(undefined)
 
-    useEffect(() => {
-        const currentArgs = args()
-        if (currentArgs) {
-            setLatestArgs(currentArgs)
-        }
-    }, [args])
+
+    const delay = 2000 // debounce delay 2s
 
     // create debounce version
-    const debouncedContract = useDebounce(contract, delay)
-    const debouncedMethod = useDebounce(method, delay)
-    const debouncedArgs = useDebounce(latestArgs, delay)
+    // const debouncedContract = useDebounce(contract, delay)
+    const debouncedMethod = useDebounce(method(), delay)
+    const debouncedArgs = useDebounce(args(), delay)
 
-    useEffect(() => {
-        const getGasEstimate = async () => {
-            try {
-                const argsObj = debouncedArgs
-                const med = debouncedMethod
-
-                if (!argsObj) {
-                    throw new Error('Invalid args parameter')
-                }
-
-                const gasEstimate = await debouncedContract?.estimateGas?.[
-                    med
-                ]?.(...argsObj.args, {
-                    value: argsObj.value,
-                })
+    const getGasEstimate = async () => {
+        try {
+            if (!debouncedArgs || !debouncedMethod || !contract) {
+                throw new Error('Invalid args parameter')
+            }
+            if (debouncedMethod === 'approve') {
+                const gasEstimate = await contract?.estimateGas?.[
+                    debouncedMethod
+                ]?.(...debouncedArgs.args)
                 if (!gasEstimate) {
                     throw new Error('Gas estimate not found')
                 }
                 const gasPrice =
-                    await debouncedContract?.provider?.getGasPrice()
+                    await contract?.provider?.getGasPrice()
                 if (!gasPrice) {
                     throw new Error('Gas price not found')
                 }
@@ -60,14 +49,36 @@ export function useEstimateGas(
                 const gasUsed = gasEstimate.mul(gasPrice)
                 console.log('Actual gas used:', formatUnits(gasUsed))
 
-                setGasUsed(gasUsed)
-            } catch (e) {
-                console.log(e)
-                setGasUsed(undefined)
+                return setGasUsed(formatUnits(gasUsed))
             }
+
+            const gasEstimate = await contract?.estimateGas?.[
+                debouncedMethod
+            ]?.(...debouncedArgs.args, {
+                value: debouncedArgs.value,
+            })
+            if (!gasEstimate) {
+                throw new Error('Gas estimate not found')
+            }
+            const gasPrice =
+                await contract?.provider?.getGasPrice()
+            if (!gasPrice) {
+                throw new Error('Gas price not found')
+            }
+            console.log('Real gas', formatUnits(gasPrice))
+
+            const gasUsed = gasEstimate.mul(gasPrice)
+            console.log('Actual gas used:', formatUnits(gasUsed))
+
+            return setGasUsed(formatUnits(gasUsed))
+        } catch (e) {
+            // console.log(e)
+            setGasUsed(undefined)
         }
+    }
+    useEffect(() => {
         getGasEstimate()
-    }, [debouncedContract, debouncedMethod, debouncedArgs])
+    }, [contract, debouncedMethod, debouncedArgs])
     return gasUsed
 }
 
