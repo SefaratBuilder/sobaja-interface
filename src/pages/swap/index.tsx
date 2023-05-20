@@ -326,12 +326,10 @@ const Swap = () => {
                     nonce
                 }
                 if(isInsufficientAllowance) {
-                    console.log('aaaa')
                     callResult = await sendUserPaidTransaction([txApprove, txSwap])
                 } else {
-                    console.log('bbbb', txSwap)
-                    callResult = await signAndSendUserOps(txSwap)
-                    // callResult = await sendUserPaidTransaction([txSwap])
+                    // callResult = await signAndSendUserOps(txSwap)
+                    callResult = await sendUserPaidTransaction([txSwap])
                 }
             }
 
