@@ -1,4 +1,5 @@
 import { createAction } from '@reduxjs/toolkit'
+import { Token } from 'interfaces'
 
 export const updateBlockNumber = createAction<{
     chainId: number
@@ -28,3 +29,8 @@ export const toggleDarkMode = createAction<boolean>(
 export const updateRefAddress = createAction<string | undefined>(
     'application/updateRefAddress',
 )
+
+export const updateGasToken = createAction<Token>(
+    'application/updateGasToken',
+)
+

@@ -9,6 +9,7 @@ interface PrimaryButtonProps {
     disabled?: boolean
     type?: string
     color?: string
+    isLoading?: boolean
 }
 
 const PrimaryButton = ({
@@ -19,6 +20,7 @@ const PrimaryButton = ({
     disabled,
     type,
     color,
+    isLoading,
 }: PrimaryButtonProps) => {
     return (
         <Button
@@ -27,6 +29,7 @@ const PrimaryButton = ({
             disabled={disabled}
             className={type}
             color={color}
+            isLoading={isLoading}
         >
             {img && <img src={img} alt="button image" />} <span>{name}</span>
         </Button>
@@ -39,6 +42,7 @@ export const Button = styled.button<{
     height?: any
     color?: any
     disabled?: boolean
+    isLoading?: boolean
 }>`
     display: flex;
     align-items: center;
@@ -106,4 +110,23 @@ export const Button = styled.button<{
         gap: 5px;
         padding: 5px 10px;
     }
+    ${({ isLoading }) =>
+        isLoading &&
+        `
+        :after {
+            content: '.';
+            animation: loading linear 3s infinite;
+            @keyframes loading {
+                0% {
+                    content: '.';
+                }
+                50% {
+                    content: '..';
+                }
+                100% {
+                    content: '...';
+                }
+            }
+        }
+    `}
 `

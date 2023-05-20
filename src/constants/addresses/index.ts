@@ -9,7 +9,7 @@ const MULTICALL_NETWORKS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441',
     [ChainId.ZKTESTNET]: '0xb6d65a6e0AA575e2280427D58375Ee5cED42A764',
     [ChainId.GOERLI]: '0x77dca2c955b15e9de4dbbcf1246b4b85b651e50e',
-    [ChainId.MUMBAI]: '0x08411ADd0b5AA8ee47563b146743C13b3556c9Cc',
+    [ChainId.MUMBAI]: '0xB151dC6839fD13aefE69593FD12327d4F459E6eB',
 }
 
 const FACTORIES: { [chainId: number]: string } = {
@@ -77,10 +77,17 @@ const Faucet: { [chainId: number]: string } = {
 }
 
 const AAEntryPoints: { [chainId: number]: string } = {
-    [ChainId.ZKTESTNET]: '0x512f8823C8541e371c6eAB6eee22d5CaB9945a7E',
+    [ChainId.ZKTESTNET]: '0x79bB68F405b3960f21EE21762aDE78c80eDfF933',
     [ChainId.GOERLI]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
     [ChainId.MUMBAI]: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
     [ChainId.ZKMAINNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+}
+
+const AAFactory: { [chainId: number]: string } = {
+    [ChainId.ZKTESTNET]: '0xaFE356E9409C3d7623F53D681D8F800301411D67',
+    [ChainId.GOERLI]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+    [ChainId.MUMBAI]: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+    [ChainId.ZKMAINNET]: '0xAAC689E7b679F03CD5ef2b8A888e7a709966cF84',
 }
 
 export {
@@ -97,5 +104,7 @@ export {
     LAUNCHPAD_ACCESS_MANAGERS,
     STAKING,
     STAKING_TOKEN,
-    STAKING_ABI
+    STAKING_ABI,
+    AAEntryPoints,
+    AAFactory
 }

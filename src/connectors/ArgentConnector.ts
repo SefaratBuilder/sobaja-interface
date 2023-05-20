@@ -3,7 +3,6 @@
 
 import { AbstractConnector } from "@web3-react/abstract-connector";
 import { ethers } from "ethers";
-import { AbstractConnectorArguments, ConnectorUpdate } from '@web3-react/types';
 import { getEthereumProvider } from "@argent/login";
 import warning from 'tiny-warning'
 import { Web3Provider } from '@ethersproject/providers'
@@ -14,7 +13,7 @@ export class ArgentConnector extends AbstractConnector {
     provider: Web3Provider | null = null;
     chainId: number | null = null;
 
-    constructor(kwargs: AbstractConnectorArguments) {
+    constructor(kwargs: any) {
         super(kwargs)
         this.handleAccountsChanged = this.handleAccountsChanged.bind(this)
     }
@@ -27,7 +26,7 @@ export class ArgentConnector extends AbstractConnector {
             this.emitUpdate({ account: accounts[0] })
         }
     }
-    async activate(): Promise<ConnectorUpdate<string | number>> {
+    async activate(): Promise<any> {
         console.log("activate")
         try {
             const ethereumProvider = await getEthereumProvider({

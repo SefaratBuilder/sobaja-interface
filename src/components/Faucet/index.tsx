@@ -24,7 +24,7 @@ const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
-    const { account, chainId, library } = useActiveWeb3React()
+    const { account, chainId, provider } = useActiveWeb3React()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
 
@@ -80,19 +80,18 @@ const Faucet = () => {
             initDataTransaction.setIsOpenWaitingModal(true)
             const dataFaucet = await axios({
                 method: 'GET',
+                // url: 'http://localhost:3000/api/faucet',
                 url: 'https://sobajaswap.com/api/faucet',
                 params: {
                     to: account,
                 },
             })
-            console.log({ dataFaucet })
-
             if (dataFaucet.status === 200) {
                 const { hash } = dataFaucet.data
                 console.log(dataFaucet.data)
                 initDataTransaction.setIsOpenWaitingModal(false)
                 initDataTransaction.setIsOpenResultModal(true)
-                const wait = await library?.waitForTransaction(hash)
+                const wait = await provider?.waitForTransaction(hash)
                 console.log({ wait })
                 initDataTransaction.setIsOpenResultModal(false)
 
@@ -152,8 +151,6 @@ const Faucet = () => {
     }
 
     const showMintCoins = () => {
-        console.log({ isDisable })
-
         if (tokenList && tokenList.length > 0) {
             const tokens =
                 chainId === 280
