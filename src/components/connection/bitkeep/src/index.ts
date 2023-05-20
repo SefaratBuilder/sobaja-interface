@@ -52,15 +52,12 @@ export class BitKeep extends Connector {
   constructor({ actions, options, onError }: MetaMaskConstructorArgs) {
     super(actions, onError)
     this.options = options
-    console.log("this.options", this.actions)
-    console.log("this.options", this.options)
   }
 
   private async isomorphicInitialize(): Promise<void> {
     if (this.eagerConnection) return
 
     return (this.eagerConnection = import('./BitkeepEthereumProvider').then(async (m) => {
-      console.log("m", m)
       const provider = await m.default(this.options)
       if (provider) {
         this.provider = provider as any

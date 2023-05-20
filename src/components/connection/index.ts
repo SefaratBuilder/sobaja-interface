@@ -3,7 +3,7 @@ import {
     initializeConnector,
 } from '@web3-react/core'
 import { Connector } from '@web3-react/types'
-// import { MetaMask } from '@web3-react/metamask'
+import { MetaMask } from '@web3-react/metamask'
 import { useCallback, useMemo } from 'react'
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
 import store from 'states'
@@ -13,12 +13,13 @@ import COINBASE_ICON_URL from 'assets/icons/coinbase.svg'
 import WALLETCONNECT_ICON_URL from 'assets/icons/wallet-connect.svg'
 import BITKEEP_ICON from 'assets/icons/BitKeep.jpeg';
 import OKEX_ICON from 'assets/token-logos/okex.png'
+import ARGENT_ICON from 'assets/icons/argent.svg'
 import { Network } from '@web3-react/network';
 import { WalletConnect } from '@web3-react/walletconnect'
 import { Connection, ConnectionType } from './types';
-import { MetaMask } from './metamask/src';
 import { BitKeep } from './bitkeep/src';
 import { Okex } from './okex/src';
+
 export const useAppSelector: TypedUseSelectorHook<ReturnType<typeof store.getState>> = useSelector
 
 
@@ -88,6 +89,21 @@ export const [web3Bitkeep, web3BitkeepHooks] = initializeConnector<BitKeep>(
 export const [web3WalletOkex, web3WalletOkexHooks] = initializeConnector<Okex>(
     (actions) => new Okex({ actions, onError }),
 )
+
+
+
+export const argentConnection: Connection = {
+    // TODO(WEB-3131) re-add "Install MetaMask" string when no injector is present
+    getName: () => 'Argent',
+    connector: web3Network,
+    hooks: web3NetworkHooks,
+    type: ConnectionType.ARGENT,
+    getIcon: () => ARGENT_ICON,
+    shouldDisplay: () => true,
+    overrideActivate: () => false,
+    href: null,
+}
+
 export const okexConnection: Connection = {
     // TODO(WEB-3131) re-add "Install MetaMask" string when no injector is present
     getName: () => 'Okex Wallet',
@@ -160,11 +176,12 @@ export const injectedConnection: Connection = {
 export function getConnections() {
     return [
         injectedConnection,
+        argentConnection,
         networkConnection,
         coinbaseWalletConnection,
         walletConnectConnection,
+        okexConnection,
         bitkeepConnection,
-        okexConnection
     ]
 }
 
@@ -190,6 +207,8 @@ export function useGetConnection() {
                     return bitkeepConnection
                 case ConnectionType.OKEX:
                     return okexConnection
+                case ConnectionType.ARGENT:
+                    return argentConnection
             }
         }
     }, [])
@@ -203,7 +222,8 @@ export const SELECTABLE_WALLETS = [
     ConnectionType.COINBASE_WALLET,
     ConnectionType.WALLET_CONNECT,
     ConnectionType.BITKEEP,
-    ConnectionType.OKEX
+    ConnectionType.OKEX,
+    ConnectionType.ARGENT
 ]
 
 
@@ -230,50 +250,3 @@ export function useOrderedConnections() {
     }, [getConnection, selectedWallet])
 }
 
-
-// export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
-//     BitKeep: {
-//         connector: bitkeep,
-//         name: 'BitKeep Wallet',
-//         iconURL: BITKEEP_ICON,
-//         description: 'Login using BitKeep hosted wallet',
-//         href: 'https://bitkeep.com/',
-//         color: '#4A6C9B',
-//         mobile: true,
-//     },
-//     METAMASK: {
-//         connector: injected,
-//         name: 'MetaMask',
-//         iconURL: METAMASK_ICON_URL,
-//         description: 'Easy-to-use browser extension.',
-//         href: 'https://metamask.io/',
-//         color: '#E8831D',
-//     },
-//     WALLET_LINK: {
-//         connector: CoinbaseWallet,
-//         name: 'Coinbase Wallet',
-//         iconURL: COINBASE_ICON_URL,
-//         description: 'Use Coinbase Wallet app on mobile device',
-//         href: null,
-//         color: '#315CF5',
-//     },
-//     WALLET_CONNECT: {
-//         connector: walletconnect,
-//         name: 'WalletConnect',
-//         iconURL: WALLETCONNECT_ICON_URL,
-//         description: 'Connect to Trust Wallet, Rainbow Wallet and more...',
-//         href: null,
-//         color: '#4196FC',
-//         mobile: true,
-//     },
-
-//     OkexChain: {
-//         connector: okex,
-//         name: 'OKX Wallet',
-//         iconURL: OKEX_ICON,
-//         description: 'Login using OKX hosted wallet',
-//         href: 'https://www.okx.com/vi/download',
-//         color: '#4A6C9B',
-//         mobile: true,
-//     },
-// }

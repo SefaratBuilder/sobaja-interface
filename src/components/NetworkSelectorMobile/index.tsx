@@ -12,8 +12,7 @@ import { OpacityModal } from 'components/Web3Status'
 const NetworkSelectorMobile = () => {
     const [networkModal, setNetworkModal] = useState(false)
     const [networkModalMobile, setNetworkModalMobile] = useState(false)
-    const { chainId, connector, account } = useActiveWeb3React()
-    console.log('chainId', chainId, account)
+    const { chainId, connector } = useActiveWeb3React()
     const networkRef = useRef<any>()
     useOnClickOutside(networkRef, () => {
         setNetworkModal(false)
