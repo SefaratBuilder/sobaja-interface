@@ -64,7 +64,7 @@ const Add = () => {
     const loca = useLocation()
     const pair = usePair(chainId, tokenIn, tokenOut)
     const ref = useRef<any>()
-    const { sendUserPaidTransaction } = useSmartAccount()
+    const { sendUserPaidTransaction } = useSmartAccount(wallet?.address)
 
     useOnClickOutside(ref, () => {
         setIsOpenWalletModal(false)

@@ -61,6 +61,8 @@
         "ts-jest": "^29.1.0",
         "userop": "^0.2.0",
         "vite-plugin-babel-macros": "^1.0.6",
+        "web3": "^1.10.0",
+        "web3-eth-contract": "^1.10.0",
         "web3-react-okexchain-connector": "^6.0.10"
     },
     "devDependencies": {
@@ -100,6 +102,7 @@
         "vite-plugin-require": "^1.1.10",
         "vite-tsconfig-paths": "^4.0.7",
         "vitest": "^0.29.8",
-        "webpack": "^5.82.0"
+        "webpack": "^5.82.0",
+        "zksync-web3": "^0.14.3"
     }
 }

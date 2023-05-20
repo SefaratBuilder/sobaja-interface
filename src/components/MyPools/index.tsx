@@ -224,7 +224,7 @@ const MyPools = ({ position, tokenList }: Positions) => {
                           ),
                           account,
                           calcTransactionDeadline(deadline),
-                          ZeroAddress,
+                          ZERO_ADDRESS,
                       ]
                     : [
                           poolRemove.token0.address,
@@ -255,7 +255,7 @@ const MyPools = ({ position, tokenList }: Positions) => {
                           ),
                           account,
                           calcTransactionDeadline(deadline),
-                          ZeroAddress,
+                          ZERO_ADDRESS,
                       ]
                 console.log(...args)
                 const gasLimit = await routerContract?.estimateGas?.[method]?.(

@@ -1,8 +1,7 @@
-import { Contract } from '@ethersproject/contracts'
 import { useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useActiveWeb3React } from '../../hooks'
-import { useMulticallContract } from '../../hooks/useContract'
+import { useMulticallContract, useMulticallWeb3Contract } from '../../hooks/useContract'
 import useDebounce from '../../hooks/useDebounce'
 import chunkArray from '../../utils/chunkArray'
 import { CancelledError, retry } from '../../utils/retry'
@@ -15,6 +14,7 @@ import {
     parseCallKey,
     updateMulticallResults,
 } from './actions'
+import { Contract } from 'web3-eth-contract';
 
 // chunk calls so we do not exceed the gas limit
 const CALL_CHUNK_SIZE = 500
@@ -33,10 +33,12 @@ async function fetchChunk(
     let resultsBlockNumber, returnData
 
     try {
-        ;[resultsBlockNumber, returnData] = await multicallContract.aggregate(
-            chunk.map((obj) => [obj.address, obj.callData]),
-        )
+        [resultsBlockNumber, returnData] = await multicallContract.methods.aggregate(
+            chunk.map((obj) => [obj.address, obj.callData])
+        ).call()
+
     } catch (error) {
+        console.log('failedddddd', error)
         throw error
     }
 
@@ -127,7 +129,7 @@ export default function Updater(): null {
     const debouncedListeners = useDebounce(state.callListeners, 100)
     const latestBlockNumber = useBlockNumber()
     const { chainId } = useActiveWeb3React()
-    const multicallContract = useMulticallContract()
+    const multicallContract = useMulticallWeb3Contract()
     const cancellations = useRef<{
         blockNumber: number
         cancellations: (() => void)[]

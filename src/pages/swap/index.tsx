@@ -25,7 +25,10 @@ import {
 } from 'constants/index'
 import { ROUTERS, WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
 import { mulNumberWithDecimal } from 'utils/math'
-import { useRouterContract, useRouterSmartAccountContract } from 'hooks/useContract'
+import {
+    useRouterContract,
+    useRouterSmartAccountContract,
+} from 'hooks/useContract'
 import {
     calcSlippageAmount,
     calcTransactionDeadline,
@@ -61,13 +64,17 @@ const Swap = () => {
     const { inputAmount, outputAmount, swapType, tokenIn, tokenOut } = swapState
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
-    const { chainId, library, account } = useActiveWeb3React()
+    const { chainId, account } = useActiveWeb3React()
     const { wallet } = useSmartAccountContext()
     const { refAddress } = useAppState()
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
     const pair = usePair(chainId, tokenIn, tokenOut)
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
-    const tokenApproval = useTokenApproval(wallet?.address || account, routerAddress, tokenIn)
+    const tokenApproval = useTokenApproval(
+        wallet?.address || account,
+        routerAddress,
+        tokenIn,
+    )
     const balanceIn = useCurrencyBalance(wallet?.address || account, tokenIn)
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
@@ -77,11 +84,15 @@ const Swap = () => {
     const { slippage } = useSlippageTolerance()
     const updateRef = useUpdateRefAddress()
     const ref = useRef<any>()
-    const { sendUserPaidTransaction } = useSmartAccount()
+    const {
+        sendUserPaidTransaction,
+        signAndSendUserOps,
+        data: { nonce },
+    } = useSmartAccount(wallet?.address)
 
     const isInsufficientAllowance =
-    Number(tokenApproval?.allowance) < Number(inputAmount) &&
-    !isNativeCoin(tokenIn)
+        Number(tokenApproval?.allowance) < Number(inputAmount) &&
+        !isNativeCoin(tokenIn)
 
     useOnClickOutside(ref, () => {
         setIsOpenWalletModal(false)
@@ -298,7 +309,7 @@ const Swap = () => {
             const referralAddress = refAddress || ZERO_ADDRESS
             const newArgs = [...args, referralAddress]
             let callResult: any
-            if(!wallet) {
+            if (!wallet) {
                 const gasLimit = await routerContract?.estimateGas[method](
                     ...newArgs,
                     {
@@ -311,21 +322,34 @@ const Swap = () => {
                     gasLimit: computeGasLimit(gasLimit),
                 })
             } else {
-                if(!routerContract) return
-                const swapData = await routerContract.interface.encodeFunctionData(method, [...newArgs])
-                if(!swapData || !tokenIn || !routerAddress || !inputAmount) return
+                if (!routerContract) return
+                const swapData =
+                    await routerContract.interface.encodeFunctionData(method, [
+                        ...newArgs,
+                    ])
+                if (!swapData || !tokenIn || !routerAddress || !inputAmount)
+                    return
                 const txApprove = {
                     to: tokenIn.address,
-                    data: tokenApproval.approveEncodeData(routerAddress, mulNumberWithDecimal(inputAmount, tokenIn.decimals))
+                    data: tokenApproval.approveEncodeData(
+                        routerAddress,
+                        mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                    ),
+                    nonce,
                 }
                 const txSwap = {
                     to: routerAddress,
                     data: swapData,
-                    value: value
+                    value: value,
+                    nonce,
                 }
-                if(isInsufficientAllowance) {
-                    callResult = await sendUserPaidTransaction([txApprove, txSwap])
+                if (isInsufficientAllowance) {
+                    callResult = await sendUserPaidTransaction([
+                        txApprove,
+                        txSwap,
+                    ])
                 } else {
+                    // callResult = await signAndSendUserOps(txSwap)
                     callResult = await sendUserPaidTransaction([txSwap])
                 }
             }
@@ -346,7 +370,7 @@ const Swap = () => {
 
             const txn = await callResult?.wait?.()
             initDataTransaction.setIsOpenResultModal(false)
-            if(!txn) return
+            if (!txn) return
             addTxn({
                 hash: txn.transactionHash || callResult.hash,
                 msg: `Swap ${tokenIn?.symbol} to ${tokenOut?.symbol}`,
@@ -513,7 +537,9 @@ const Swap = () => {
                     data={initDataTransaction}
                     onConfirm={
                         Number(tokenApproval?.allowance) <
-                            Number(inputAmount) && !isNativeCoin(tokenIn) && !wallet
+                            Number(inputAmount) &&
+                        !isNativeCoin(tokenIn) &&
+                        !wallet
                             ? handleOnApprove
                             : onConfirm
                     }
@@ -536,12 +562,18 @@ const Swap = () => {
                 )}
                 <Row jus="space-between">
                     <Nav gap="20px">
-                        <Link to="/swap" className="active-link" style={{fontWeight: 700}}>
+                        <Link
+                            to="/swap"
+                            className="active-link"
+                            style={{ fontWeight: 700 }}
+                        >
                             Swap
                         </Link>
                         {/* <Link to="/add">Add</Link> */}
                         {/* <Link to="/pools">Pool</Link> */}
-                        <Link to="/limit" style={{fontWeight: 700}}>Limit</Link>
+                        <Link to="/limit" style={{ fontWeight: 700 }}>
+                            Limit
+                        </Link>
                     </Nav>
                     <Setting />
                 </Row>
@@ -583,7 +615,8 @@ const Swap = () => {
                         <span>Referral:</span>
                         <p>
                             https://app.sobajaswap.com/#/swap?
-                            {(wallet || account) && shortenAddress(wallet?.address || account, 5)}
+                            {(wallet || account) &&
+                                shortenAddress(wallet?.address || account, 5)}
                         </p>
                         <span>
                             {isCopied ? (

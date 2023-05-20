@@ -12,9 +12,15 @@ import { useTransactionHandler } from 'states/transactions/hooks';
 import { SimpleAccountAPI } from 'pantinho-aa'
 import { useSmartAccount } from 'hooks/useSmartAccount';
 import { useActiveWeb3React } from 'hooks';
+import { useAAFactory } from 'hooks/useAAFactory';
+import { AAEntryPoints, AAFactory } from 'constants/addresses';
+import { mulNumberWithDecimal } from 'utils/math';
+import { ethers } from 'ethers';
+
+const newSmartAccount = '0xCB7c527e22307529F803A5A3CB73BFe5E60b39d9';
 
 const AA = () => {
-    const { account } = useActiveWeb3React()
+    const { account, library, chainId } = useActiveWeb3React()
     const { connect, address, loading: eoaWalletLding, disconnect, web3Provider } = useWeb3AuthContext()
     const { loading, wallet, state: walletState } = useSmartAccountContext()
     const [txnLoading, setTxnLoading] = useState(false)
@@ -24,8 +30,22 @@ const AA = () => {
     const {addTxn} = useTransactionHandler()
     const [paidTxn, setPaidTxn] = useState<any>()
     const [signedUserOp, setSignedUserOp] = useState<any>()
-    const { data } = useSmartAccount()
+    const { data } = useSmartAccount(newSmartAccount)
     const entryPointContract = useAAEntryPointContract()
+    const { contract, smartAccountAtZero } = useAAFactory()
+    console.log('smartAccount at zero index', smartAccountAtZero)
+    console.log('addresssssss', contract?.address)
+    const onDeployAccount = async () => {
+        try {
+            if(!contract || !account) return
+            const deployResult = await contract.deployCounterFactualAccount(account, '0')
+            await deployResult.wait()
+            console.log('txn hash', deployResult)
+        }
+        catch(err) {
+            console.log('failed to deploy: ', err)
+        }
+    }
 
     const onMint = async () => {
         if (!wallet || !walletState || !web3Provider || !nftContract) return;
@@ -63,35 +83,33 @@ const AA = () => {
     }
     
     const signUserOp = async () => {
-        if(!wallet || !web3Provider || !walletState || !nftContract) return 
-        const safeMintTx = await nftContract.populateTransaction.safeMint(
-            wallet.address
-          )
-        const owner = wallet.signer
-        const smartAccountState: any = walletState
-        console.log({walletState: walletState.isDeployed})
+        if(!chainId || !library || !account || !web3Provider) return 
+        const owner = library.getSigner(account)
+        const provider = new ethers.providers.JsonRpcProvider('https://testnet.era.zksync.dev', {name: 'eratest', chainId: 280})
+        console.log('provider', provider)
         const walletAPI = new SimpleAccountAPI({
-            provider: web3Provider, 
-            entryPointAddress: smartAccountState.entryPointAddress,
+            provider: provider,
+            entryPointAddress: AAEntryPoints[chainId],
             owner,
-            factoryAddress: smartAccountState.factoryAddress,
+            factoryAddress: AAFactory[chainId],
             index: 0,
-            accountAddress: walletState.isDeployed ? wallet.address : undefined
+            accountAddress: newSmartAccount
         })
-        console.log({walletAPI})
-        console.log(safeMintTx?.data)
-        if(!safeMintTx?.data) return
-        // console.log('aaaa')
-        const op = await walletAPI.createSignedUserOp({
-            target: nftContract.address,
-            data: safeMintTx.data,
-            nonce: data.nonce
-        })
+
+        //transfer 0.001ETH from smart account to this eoa account
+        const txn = {
+            target: account,
+            data: '0x',
+            nonce: data.nonce,
+            value: mulNumberWithDecimal('0.001', 18)
+        }
+
+        const op = await walletAPI.createSignedUserOp(txn)
         op.signature = await op.signature
         op.nonce = await op.nonce
         op.sender = await op.sender
         op.preVerificationGas = await op.preVerificationGas
-        console.log({op})
+        op.initCode = '0x'
         setSignedUserOp(op)
     }
 
@@ -176,6 +194,9 @@ const AA = () => {
             <Row gap="10px">
                 <PrimaryButton onClick={signUserOp} name={'Sign userOp'} isLoading={txnLoading} />
                 <PrimaryButton onClick={sendSignedUserOp} name={'Send signed userOp'} isLoading={txnLoading} />
+            </Row>
+            <Row gap="10px">
+                <PrimaryButton onClick={onDeployAccount} name={'Deploy new account'} isLoading={txnLoading} />
             </Row>
             <Row gap="10px">
                 <PrimaryButton onClick={connect} name={'Connect AA'} />

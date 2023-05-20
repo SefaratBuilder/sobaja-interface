@@ -68,10 +68,17 @@ const Faucet: { [chainId: number]: string } = {
 }
 
 const AAEntryPoints: { [chainId: number]: string } = {
-    [ChainId.ZKTESTNET]: '0x512f8823C8541e371c6eAB6eee22d5CaB9945a7E',
+    [ChainId.ZKTESTNET]: '0x79bB68F405b3960f21EE21762aDE78c80eDfF933',
     [ChainId.GOERLI]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
     [ChainId.MUMBAI]: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
     [ChainId.ZKMAINNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+}
+
+const AAFactory: { [chainId: number]: string } = {
+    [ChainId.ZKTESTNET]: '0xaFE356E9409C3d7623F53D681D8F800301411D67',
+    [ChainId.GOERLI]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+    [ChainId.MUMBAI]: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+    [ChainId.ZKMAINNET]: '0xAAC689E7b679F03CD5ef2b8A888e7a709966cF84',
 }
 
 export {
@@ -87,5 +94,6 @@ export {
     LAUNCHPADS,
     LAUNCHPAD_ACCESS_MANAGERS,
     STAKING_ABI,
-    AAEntryPoints
+    AAEntryPoints,
+    AAFactory
 }
