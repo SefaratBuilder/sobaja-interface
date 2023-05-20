@@ -17,11 +17,11 @@ import {
     ZERO_ADDRESS,
 } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
-import { ZeroAddress } from 'ethers'
 import {
     useFactoryContract,
     useRouterContract,
     useTokenContract,
+    useRouterSmartAccountContract,
 } from 'hooks/useContract'
 import { useActiveWeb3React } from 'hooks'
 import { divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math'
@@ -30,7 +30,6 @@ import { calcSlippageAmount, isNativeCoin, shortenAddress } from 'utils'
 import WalletModal from 'components/WalletModal'
 import { InitCompTransaction } from 'components/TransactionModal'
 import ComponentsTransaction from 'components/TransactionModal'
-import ToastMessage from 'components/ToastMessage'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import PoolPriceBar from './PoolPriceBar'
 import BackArrow from 'assets/icons/arrow-left.svg'
@@ -47,32 +46,42 @@ import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
 import { useEstimateGas } from 'hooks/useEstimateGas'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import { useSmartAccount } from 'hooks/useSmartAccount'
 
 const Add = () => {
     const mintState = useMintState()
     const [poolPriceBarOpen, setPoolPriceBarOpen] = useState(true)
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
     const [isCopied, setIsCopied] = useState(false)
-
     const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } = mintState
     const { onUserInput, onTokenSelection, onChangeMintState } =
         useMintActionHandlers()
     const { account, chainId } = useActiveWeb3React()
+    const { wallet } = useSmartAccountContext()
     const routerContract = useRouterContract()
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
-    const tokenInApproval = useTokenApproval(account, routerAddress, tokenIn)
-    const tokenOutApproval = useTokenApproval(account, routerAddress, tokenOut)
     const contractApproveTokenIn = useTokenContract(tokenIn?.address)
     const contractApproveTokenOut = useTokenContract(tokenOut?.address)
 
+    const tokenInApproval = useTokenApproval(
+        wallet?.address || account,
+        routerAddress,
+        tokenIn,
+    )
+    const tokenOutApproval = useTokenApproval(
+        wallet?.address || account,
+        routerAddress,
+        tokenOut,
+    )
     const { slippage } = useSlippageTolerance()
     const { refAddress } = useAppState()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
     const loca = useLocation()
     const pair = usePair(chainId, tokenIn, tokenOut)
-
     const ref = useRef<any>()
+    const { sendUserPaidTransaction } = useSmartAccount(wallet?.address)
 
     useOnClickOutside(ref, () => {
         setIsOpenWalletModal(false)
@@ -192,7 +201,7 @@ const Add = () => {
                     valueMin,
                     account,
                     (new Date().getTime() / 1000 + 1000).toFixed(0),
-                    refAddress || ZeroAddress,
+                    refAddress || ZERO_ADDRESS,
                 ],
                 value,
             }
@@ -213,7 +222,7 @@ const Add = () => {
                     ),
                     account,
                     (new Date().getTime() / 1000 + 1000).toFixed(0),
-                    refAddress || ZeroAddress,
+                    refAddress || ZERO_ADDRESS,
                 ],
                 value,
             }
@@ -233,15 +242,125 @@ const Add = () => {
                 initDataTransaction.setIsOpenConfirmModal(false)
                 initDataTransaction.setIsOpenWaitingModal(true)
 
-                const { args, value } = argument
-                const gasLimit = await routerContract?.estimateGas?.[method]?.(
-                    ...args,
-                    { value },
-                )
-                const callResult = await routerContract?.[method]?.(...args, {
-                    value,
-                    gasLimit: gasLimit && gasLimit.add(1000),
-                })
+                const isEthTxn = isNativeCoin(tokenIn) || isNativeCoin(tokenOut)
+                // const method = isEthTxn ? 'addLiquidityETH' : 'addLiquidity'
+                const token = isNativeCoin(tokenIn) ? tokenOut : tokenIn
+                const amountToken = isNativeCoin(tokenOut)
+                    ? inputAmount
+                    : outputAmount
+                const amountTokenMin = isNativeCoin(tokenIn)
+                    ? mulNumberWithDecimal(
+                          calcSlippageAmount(outputAmount, slippage)[0],
+                          tokenOut.decimals,
+                      )
+                    : mulNumberWithDecimal(
+                          calcSlippageAmount(inputAmount, slippage)[0],
+                          tokenIn.decimals,
+                      )
+                let value = isNativeCoin(tokenIn)
+                    ? mulNumberWithDecimal(inputAmount, tokenIn.decimals)
+                    : mulNumberWithDecimal(outputAmount, tokenOut.decimals)
+                value = isEthTxn ? value : '0'
+
+                let valueMin = isNativeCoin(tokenIn)
+                    ? mulNumberWithDecimal(
+                          calcSlippageAmount(inputAmount, slippage)[0],
+                          tokenIn.decimals,
+                      )
+                    : mulNumberWithDecimal(
+                          calcSlippageAmount(outputAmount, slippage)[0],
+                          tokenOut.decimals,
+                      )
+
+                const args = isEthTxn
+                    ? [
+                          token.address,
+                          mulNumberWithDecimal(amountToken, token.decimals),
+                          amountTokenMin, //
+                          valueMin,
+                          account,
+                          (new Date().getTime() / 1000 + 1000).toFixed(0),
+                          refAddress || ZERO_ADDRESS,
+                      ]
+                    : [
+                          tokenIn.address,
+                          tokenOut.address,
+                          mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                          mulNumberWithDecimal(outputAmount, tokenOut.decimals),
+                          mulNumberWithDecimal(
+                              calcSlippageAmount(inputAmount, slippage)[0],
+                              tokenIn.decimals,
+                          ), //
+                          mulNumberWithDecimal(
+                              calcSlippageAmount(outputAmount, slippage)[0],
+                              tokenOut.decimals,
+                          ), //
+                          account,
+                          (new Date().getTime() / 1000 + 1000).toFixed(0),
+                          refAddress || ZERO_ADDRESS,
+                      ]
+                let callResult: any
+                if (!wallet) {
+                    const gasLimit = await routerContract?.estimateGas?.[
+                        method
+                    ]?.(...args, { value })
+                    callResult = await routerContract?.[method]?.(...args, {
+                        value,
+                        gasLimit: gasLimit && gasLimit.add(1000),
+                    })
+                } else {
+                    // addliquidity using account abstraction
+                    if (!routerContract || !routerAddress) return
+                    const addData =
+                        await routerContract.interface.encodeFunctionData(
+                            method,
+                            [...args],
+                        )
+                    if (!addData) return
+
+                    const txApproveIn = {
+                        to: tokenIn.address,
+                        data: tokenInApproval.approveEncodeData(
+                            routerAddress,
+                            mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                        ),
+                    }
+                    const txApproveOut = {
+                        to: tokenOut.address,
+                        data: tokenOutApproval.approveEncodeData(
+                            routerAddress,
+                            mulNumberWithDecimal(
+                                outputAmount,
+                                tokenOut.decimals,
+                            ),
+                        ),
+                    }
+                    const txAddliqudity = {
+                        to: routerAddress,
+                        data: addData,
+                        value,
+                    }
+                    const txns =
+                        isInsufficientAllowanceTokenIn &&
+                        isInsufficientAllowanceTokenOut
+                            ? [txApproveIn, txApproveOut, txAddliqudity]
+                            : isInsufficientAllowanceTokenIn
+                            ? [txApproveIn, txAddliqudity]
+                            : isInsufficientAllowanceTokenOut
+                            ? [txApproveOut, txAddliqudity]
+                            : [txAddliqudity]
+                    callResult = await sendUserPaidTransaction(txns)
+                }
+                const txn = await callResult?.wait?.()
+                initDataTransaction.setIsOpenResultModal(false)
+
+                if (txn) {
+                    addTxn({
+                        hash: txn?.transactionHash || callResult.hash,
+                        msg: `Add liquidity ${tokenIn?.symbol} and ${tokenOut?.symbol}`,
+                        status: txn?.status === 1 ? true : false,
+                    })
+                }
                 initDataTransaction.setIsOpenWaitingModal(false)
                 initDataTransaction.setIsOpenResultModal(true)
                 sendEvent({
@@ -254,23 +373,24 @@ const Add = () => {
                         tokenOut?.address,
                     ].join('/'),
                 })
-                const txn = await callResult.wait()
-                initDataTransaction.setIsOpenResultModal(false)
-                addTxn({
-                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
-                        callResult.hash || ''
-                    }`,
-                    msg: `Add liquidity ${tokenIn?.symbol} and ${tokenOut?.symbol}`,
-                    status: txn.status === 1 ? true : false,
-                })
+
+                /**
+                 * @dev reset input && output state when transaction success
+                 */
                 onUserInput(Field.INPUT, '')
                 onUserInput(Field.OUTPUT, '')
             }
         } catch (error) {
+            console.log('error', error)
             initDataTransaction.setError('Failed')
             initDataTransaction.setIsOpenResultModal(true)
         }
-    }, [initDataTransaction])
+    }, [
+        initDataTransaction,
+        isInsufficientAllowance,
+        isInsufficientAllowanceTokenIn,
+        isInsufficientAllowanceTokenOut,
+    ])
 
     const handleOnApprove = async (
         approve: (to: string, amount: string) => void,
@@ -384,7 +504,7 @@ const Add = () => {
                 tO,
                 Field.OUTPUT,
             )
-            console.log({ addRate })
+
             onChangeMintState({
                 ...mintState,
                 inputAmount: addRate,
@@ -447,9 +567,15 @@ const Add = () => {
     )
 
     const AddButton = () => {
-        const balanceIn = useCurrencyBalance(account, tokenIn)
-        const balanceOut = useCurrencyBalance(account, tokenOut)
-        const isNotConnected = !account
+        const balanceIn = useCurrencyBalance(
+            wallet?.address || account,
+            tokenIn,
+        )
+        const balanceOut = useCurrencyBalance(
+            wallet?.address || account,
+            tokenOut,
+        )
+        const isNotConnected = !wallet?.address && !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
         const isUndefinedAmount = !inputAmount || !outputAmount
@@ -465,7 +591,6 @@ const Add = () => {
             <Row>
                 {isNotConnected ? (
                     <PrimaryButton
-                        // onClick={() => setIsConnected(!isConnected)}
                         onClick={() => {
                             openWalletModal()
                         }}
@@ -479,7 +604,7 @@ const Add = () => {
                     <LabelButton name="Enter an amount" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
-                ) : isInsufficientAllowance ? (
+                ) : isInsufficientAllowance && !wallet ? (
                     <ButtonGroup>
                         {isInsufficientAllowanceTokenIn && (
                             <PrimaryButton
@@ -531,7 +656,6 @@ const Add = () => {
             {(initDataTransaction.isOpenConfirmModal ||
                 initDataTransaction.isOpenResultModal ||
                 initDataTransaction.isOpenWaitingModal) && <Blur />}
-            <ToastMessage />
             <SwapContainer ref={ref}>
                 {!account && isOpenWalletModal && (
                     <>

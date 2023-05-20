@@ -11,6 +11,16 @@ import Loader from 'components/Loader'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { sendEvent } from 'utils/analytics'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
+import {
+    getConnections,
+    injectedConnection,
+    networkConnection,
+} from 'components/connection'
+import { Connector } from '@web3-react/types'
+import { useAppDispatch } from 'states/hook'
+import { updateSelectedWallet } from 'states/user/reducer'
+import { Connection } from 'components/connection/types'
+
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -25,22 +35,18 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
     const [isAgreePolicy, setIsAgreePolicy] = useState<boolean>(true)
     const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT)
     const {
-        activate,
-        deactivate,
+        // activate,
+        // deactivate,
         connector,
-        error,
+        // error,
         account,
         chainId,
-        library,
+        // library,
     } = useWeb3React()
-    console.log('account11', account)
-    console.log('chainId11', chainId)
-    console.log('library11', library)
-
+    const connections = getConnections()
     const [pendingError, setPendingError] = useState<boolean>(false)
-    const [pendingWallet, setPendingWallet] = useState<
-        AbstractConnector | undefined
-    >()
+    const [pendingWallet, setPendingWallet] = useState<Connection | undefined>()
+    const dispatch = useAppDispatch()
     const [pendingNameWallet, setPendingNameWallet] = useState<
         string | undefined
     >()
@@ -55,134 +61,147 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
         }
     }, [account])
 
-    const tryActivation = async (connector: AbstractConnector | undefined) => {
-        let name = ''
-        Object.keys(SUPPORTED_WALLETS).map((key) => {
-            if (connector === SUPPORTED_WALLETS[key].connector) {
-                return (name = SUPPORTED_WALLETS[key].name)
-            }
-            return true
-        })
+    const tryActivation = async (connector: Connection | undefined) => {
+        // let name = ''
+        // Object.keys(SUPPORTED_WALLETS).map((key) => {
+        //     if (connector === SUPPORTED_WALLETS[key].connector) {
+        //         return (name = SUPPORTED_WALLETS[key].name)
+        //     }
+        //     return true
+        // })
+
         setPendingWallet(connector)
         setWalletView(WALLET_VIEWS.PENDING)
-        connector &&
-            activate(connector, undefined, true).catch((error) => {
-                if (error instanceof UnsupportedChainIdError) {
-                    activate(connector)
-                } else {
-                    setPendingError(true)
-                }
-            })
+        console.log('connector', connector)
+        dispatch(updateSelectedWallet({ wallet: connector?.type }))
+        connector?.connector?.activate()
+
+        // &&
+        //     activate(connector, undefined, true).catch((error) => {
+        //         if (error instanceof UnsupportedChainIdError) {
+        //             activate(connector)
+        //         } else {
+        //             setPendingError(true)
+        //         }
+        //     })
     }
 
     const getOptions = () => {
         const isMetamask = window.ethereum && window.ethereum.isMetaMask
-        return Object.keys(SUPPORTED_WALLETS).map((key) => {
-            const option = SUPPORTED_WALLETS[key]
-            if (option.connector === injected) {
-                // don't show injected if there's no injected provider
-                if (!(window.web3 || window.ethereum)) {
-                    if (option.name === 'MetaMask') {
-                        return (
-                            <Item
-                                isChecked={isAgreePolicy}
-                                key={key + option.name}
-                            >
-                                <ItemContent
-                                    onClick={() =>
-                                        isAgreePolicy &&
-                                        option.href &&
-                                        option.href !== null &&
-                                        window.open(option.href)
-                                    }
+        return connections
+            .filter((item) => item.shouldDisplay())
+            .map((key) => {
+                const option = key
+                if (option.connector === injectedConnection.connector) {
+                    // don't show injected if there's no injected provider
+                    if (!(window.web3 || window.ethereum)) {
+                        if (option.getName() === 'MetaMask') {
+                            return (
+                                <Item
+                                    isChecked={isAgreePolicy}
+                                    key={key + option.getName()}
                                 >
-                                    <img src={option.iconURL}></img>
-                                    <span>Install MetaMask</span>
-                                </ItemContent>
-                            </Item>
-                        )
-                    } else {
-                        return null //dont want to return install twice
+                                    <ItemContent
+                                        onClick={() => {
+                                            isAgreePolicy &&
+                                                option.href &&
+                                                option.href !== null &&
+                                                window.open(option.href)
+                                        }}
+                                    >
+                                        <img src={option.getIcon?.(true)}></img>
+                                        <span>Install MetaMask</span>
+                                    </ItemContent>
+                                </Item>
+                            )
+                        } else {
+                            return null //dont want to return install twice
+                        }
+                    }
+                    // don't return metamask if injected provider isn't metamask
+                    else if (option.getName() === 'MetaMask' && !isMetamask) {
+                        return null
                     }
                 }
-                // don't return metamask if injected provider isn't metamask
-                else if (option.name === 'MetaMask' && !isMetamask) {
-                    return null
-                }
-            }
-            if (option.connector == bitkeep) {
-                //don't show injected if there's no injected provider
-                if (!window.bitkeep) {
-                    if (option.name === 'BitKeep Wallet') {
-                        return (
-                            <Item
-                                isChecked={isAgreePolicy}
-                                key={key + option.name}
-                            >
-                                <ItemContent
-                                    onClick={() =>
-                                        isAgreePolicy &&
-                                        option.href &&
-                                        option.href !== null &&
-                                        window.open(option.href)
-                                    }
-                                >
-                                    <img src={option.iconURL}></img>
-                                    <span>Install BitKeep</span>
-                                </ItemContent>
-                            </Item>
-                        )
-                    } else {
-                        return null //dont want to return install twice
-                    }
-                }
-            }
-            if (option.connector == okex) {
-                //don't show injected if there's no injected provider
-                if (!window.okexchain) {
-                    if (option.name === 'OKX Wallet') {
-                        return (
-                            <Item
-                                isChecked={isAgreePolicy}
-                                key={key + option.name}
-                            >
-                                <ItemContent
-                                    onClick={() =>
-                                        isAgreePolicy &&
-                                        option.href &&
-                                        option.href !== null &&
-                                        window.open(option.href)
-                                    }
-                                >
-                                    <img src={option.iconURL}></img>
-                                    <span>Install OKX</span>
-                                </ItemContent>
-                            </Item>
-                        )
-                    } else {
-                        return null //dont want to return install twice
-                    }
-                }
-            }
-            return (
-                <Item isChecked={isAgreePolicy} key={key + option.name}>
-                    <ItemContent
-                        onClick={() => {
-                            if (!isAgreePolicy) return
-                            if (option.connector != connector) {
-                                setPendingNameWallet(option.name)
-                                tryActivation(option.connector)
-                            } else {
-                                setWalletView(WALLET_VIEWS.ACCOUNT)
-                            }
-                        }}
+                // if (option.connector == bitkeep) {
+                //     //don't show injected if there's no injected provider
+                //     if (!window.bitkeep) {
+                //         if (option.name === 'BitKeep Wallet') {
+                //             return (
+                //                 <Item
+                //                     isChecked={isAgreePolicy}
+                //                     key={key + option.name}
+                //                 >
+                //                     <ItemContent
+                //                         onClick={() =>
+                //                             isAgreePolicy &&
+                //                             option.href &&
+                //                             option.href !== null &&
+                //                             window.open(option.href)
+                //                         }
+                //                     >
+                //                         <img src={option.iconURL}></img>
+                //                         <span>Install BitKeep</span>
+                //                     </ItemContent>
+                //                 </Item>
+                //             )
+                //         } else {
+                //             return null //dont want to return install twice
+                //         }
+                //     }
+                // }
+                // if (option.connector == okex) {
+                //     //don't show injected if there's no injected provider
+                //     if (!window.okexchain) {
+                //         if (option.name === 'OKX Wallet') {
+                //             return (
+                //                 <Item
+                //                     isChecked={isAgreePolicy}
+                //                     key={key + option.name}
+                //                 >
+                //                     <ItemContent
+                //                         onClick={() =>
+                //                             isAgreePolicy &&
+                //                             option.href &&
+                //                             option.href !== null &&
+                //                             window.open(option.href)
+                //                         }
+                //                     >
+                //                         <img src={option.iconURL}></img>
+                //                         <span>Install OKX</span>
+                //                     </ItemContent>
+                //                 </Item>
+                //             )
+                //         } else {
+                //             return null //dont want to return install twice
+                //         }
+                //     }
+                // }
+
+                return (
+                    <Item
+                        isChecked={isAgreePolicy}
+                        key={key + option.getName()}
                     >
-                        <img src={option.iconURL}></img>
-                        <span>{option.name}</span>
-                    </ItemContent>
-                </Item>
-            )
-        })
+                        <ItemContent
+                            onClick={() => {
+                                // console.log('wallet =>>>>>>>>>>>>>')
+                                // if (!isAgreePolicy) return
+                                // if (option.connector != connector) {
+                                //     console.log('wallet =>>>>>>>>>>>>>')
+                                setPendingNameWallet(option.getName())
+                                tryActivation(option)
+                                // } else {
+                                //     setWalletView(WALLET_VIEWS.ACCOUNT)
+                                // }
+                            }}
+                        >
+                            <img src={option.getIcon?.(true)}></img>
+                            <span>{option.getName()}</span>
+                        </ItemContent>
+                    </Item>
+                )
+            })
     }
 
     const getModalContent = () => {

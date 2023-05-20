@@ -6,6 +6,7 @@ import React, {
 } from 'react'
 import MuiModal from '@mui/material/Modal'
 import styled from 'styled-components'
+import BgWallet from 'assets/brand/bg-connect-wallet.png'
 
 interface ModalProps {
     children: (
@@ -28,7 +29,9 @@ const Modal = (props: ModalProps) => {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <Box>{props.children(handleClose)}</Box>
+                <WrapBox>
+                    <Box>{props.children(handleClose)}</Box>
+                </WrapBox>
             </MuiModal>
         </ModalWrapper>
     )
@@ -36,18 +39,31 @@ const Modal = (props: ModalProps) => {
 
 const ModalWrapper = styled.div``
 
-const Box = styled.div`
+const WrapBox = styled.div`
     position: fixed;
-    top: 0;
-    left: 0;
     right: 0;
-    bottom: 0;
+
+    top: 9%;
+    height: 100vh;
+    width: 450px;
+    background: url(${BgWallet});
+    background-size: cover;
+    background-repeat: no-repeat;
+`
+
+const Box = styled.div`
+    position: absolute;
+    right: 0;
+    top: 2%;
+
+    left: 0;
     margin: auto;
     background: var(--bg2);
     backdrop-filter: blur(4px);
     max-width: 400px;
     height: fit-content;
-    border: 1px solid #003b5c;
+    border: 12px solid #99999978;
+
     border-radius: 8px;
     padding: 10px;
 

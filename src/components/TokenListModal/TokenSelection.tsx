@@ -5,6 +5,7 @@ import { Row } from 'components/Layouts'
 import LogoToken from 'components/LogoToken'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { useActiveWeb3React } from 'hooks'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 interface TokenSelectionProps {
     token: Token
@@ -20,7 +21,8 @@ const TokenSelection = ({
     onAdd,
 }: TokenSelectionProps) => {
     const { account } = useActiveWeb3React()
-    const balance = useCurrencyBalance(account, token)
+    const { wallet } = useSmartAccountContext()
+    const balance = useCurrencyBalance(wallet?.address || account, token)
 
     return (
         <WrapperSelection onClick={() => onUserSelect(token)}>

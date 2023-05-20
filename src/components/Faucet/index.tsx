@@ -24,7 +24,7 @@ const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
-    const { account, chainId, library } = useActiveWeb3React()
+    const { account, chainId, provider } = useActiveWeb3React()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
 
@@ -91,7 +91,7 @@ const Faucet = () => {
                 console.log(dataFaucet.data)
                 initDataTransaction.setIsOpenWaitingModal(false)
                 initDataTransaction.setIsOpenResultModal(true)
-                const wait = await library?.waitForTransaction(hash)
+                const wait = await provider?.waitForTransaction(hash)
                 console.log({ wait })
                 initDataTransaction.setIsOpenResultModal(false)
 

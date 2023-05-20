@@ -66,6 +66,50 @@ const Launchpad = () => {
     )
     // const entryContract = useAAEntryPointContract()
 
+    // const handleOnCreateLaunchpad = async (e: any) => {
+    //     try {
+    //         e.preventDefault()
+    //         if(!token || !chainId) return
+    //         const args = [
+    //             LAUNCHPADS[chainId],
+    //             launchpadState.token,
+    //             account,
+    //             launchpadState.paymentCurrency,
+    //             add(launchpadState.startTime, 300), // start after 5m
+    //             add(launchpadState.endTime, 310), // end after 5m + 10s
+    //             mulNumberWithDecimal(launchpadState.softCap, 18),
+    //             mulNumberWithDecimal(launchpadState.hardCap, 18),
+    //             mulNumberWithDecimal(launchpadState.price, 18),
+    //             mulNumberWithDecimal(launchpadState.individualCap, 18),
+    //             mulNumberWithDecimal(launchpadState.overflow, token.decimals)
+    //         ]
+    //        const data = FAIRLAUNCH_INTERFACE._abiCoder.encode(
+    //             [
+    //                 'address',
+    //                 'address',
+    //                 'address',
+    //                 'address',
+    //                 'uint256',
+    //                 'uint256',
+    //                 'uint256',
+    //                 'uint256',
+    //                 'uint256',
+    //                 'uint256',
+    //                 'uint256',
+    //             ],
+    //             args
+    //        )
+    //         const amountToken = launchpadState.totalToken
+    //         console.log('Creating...')
+    //         const txn = await launchpadContract?.createLaunchpad(3, token.address, mulNumberWithDecimal(amountToken, token.decimals), data)
+    //         await txn.wait()
+    //         console.log('Create successful...', txn.hash)
+
+    //     } catch(err) {
+    //         console.log('failed to create', err)
+    //     }
+    // }
+
     /**
      * @dev
      * refresh data launchpad

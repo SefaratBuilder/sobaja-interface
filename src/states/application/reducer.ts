@@ -1,4 +1,5 @@
 import { createReducer } from '@reduxjs/toolkit'
+import { Token } from 'interfaces'
 import {
     updateBlockNumber,
     toggleAgreement,
@@ -7,7 +8,9 @@ import {
     updateApplicationState,
     toggleDarkMode,
     updateRefAddress,
+    updateGasToken
 } from './actions'
+import { GAS_TOKEN } from 'constants/index'
 
 export interface ApplicationState {
     blockNumber: { [chainId: number]: number }
@@ -20,6 +23,7 @@ export interface ApplicationState {
     isUpdateApplication: boolean
     userDarkMode: boolean
     refAddress: string | undefined
+    gasToken: Token
 }
 
 const initialState: ApplicationState = {
@@ -33,6 +37,7 @@ const initialState: ApplicationState = {
     isUpdateApplication: false,
     userDarkMode: false,
     refAddress: undefined,
+    gasToken: GAS_TOKEN[80001][0]
 }
 
 export default createReducer(initialState, (builder) => {
@@ -65,5 +70,8 @@ export default createReducer(initialState, (builder) => {
         })
         .addCase(updateRefAddress, (state, action) => {
             state.refAddress = action.payload
+        })
+        .addCase(updateGasToken, (state, action) => {
+            state.gasToken = action.payload
         })
 })

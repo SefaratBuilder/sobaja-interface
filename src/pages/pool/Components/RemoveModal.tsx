@@ -19,9 +19,9 @@ import {
     useAppState,
     useUpdateApplicationState,
 } from 'states/application/hooks'
-import { ZeroAddress } from 'ethers'
 import { useRouterContract } from 'hooks/useContract'
 import { sendEvent } from 'utils/analytics'
+import { ZERO_ADDRESS } from '../../../constants'
 
 const RemoveModal = ({
     poolRemove,
@@ -197,7 +197,7 @@ const RemoveModal = ({
                           ),
                           account,
                           calcTransactionDeadline(deadline),
-                          ZeroAddress,
+                          ZERO_ADDRESS,
                       ]
                     : [
                           poolRemove.token0.address,
@@ -228,7 +228,7 @@ const RemoveModal = ({
                           ),
                           account,
                           calcTransactionDeadline(deadline),
-                          ZeroAddress,
+                          ZERO_ADDRESS,
                       ]
                 console.log({ ...args })
                 const gasLimit = await routerContract?.estimateGas?.[method]?.(

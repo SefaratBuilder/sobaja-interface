@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useFairLaunchContract } from 'hooks/useContract'
 import { mulNumberWithDecimal } from 'utils/math'
 import { LaunchpadInfo } from 'interfaces'
-import { formatEther } from 'ethers'
+import { ethers } from 'ethers'
 
 const LaunchpadItem = (launchpadInfo: LaunchpadInfo) => {
     const [commit, setCommit] = useState('')
@@ -72,13 +72,13 @@ const LaunchpadItem = (launchpadInfo: LaunchpadInfo) => {
                     <div>launchpadOnwer: {shortenAddress(launchpadInfo.launchpadOwner)}</div>
                     <div>Start time: {launchpadInfo?.startTime}</div>
                     <div>End time: {launchpadInfo?.endTime}</div>
-                    <div>Hard cap: {formatEther(launchpadInfo?.hardcap)}</div>
-                    <div>Soft cap: {formatEther(launchpadInfo?.softcap)}</div>
+                    <div>Hard cap: {ethers.utils.formatEther(launchpadInfo?.hardcap)}</div>
+                    <div>Soft cap: {ethers.utils.formatEther(launchpadInfo?.softcap)}</div>
                 </div>
                 <div>
-                    <div>Total token sale: {formatEther(launchpadInfo?.totalTokenSale)}</div>
-                    <div>Total commitment: {formatEther(launchpadInfo?.totalCommitment)}</div>
-                    <div>Individual cap: {formatEther(launchpadInfo?.individualCap)}</div>
+                    <div>Total token sale: {ethers.utils.formatEther(launchpadInfo?.totalTokenSale)}</div>
+                    <div>Total commitment: {ethers.utils.formatEther(launchpadInfo?.totalCommitment)}</div>
+                    <div>Individual cap: {ethers.utils.formatEther(launchpadInfo?.individualCap)}</div>
                     <div>Result: {launchpadInfo.result}</div>
                     <div>Finalized: {launchpadInfo?.finalized ? 'true' : 'false'}</div>
                 </div>
