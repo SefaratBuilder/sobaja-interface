@@ -72,7 +72,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
 
         setPendingWallet(connector)
         setWalletView(WALLET_VIEWS.PENDING)
-        console.log('connector', connector)
+
         dispatch(updateSelectedWallet({ wallet: connector?.type }))
         connector?.connector?.activate()
 

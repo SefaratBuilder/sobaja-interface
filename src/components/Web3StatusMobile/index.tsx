@@ -15,7 +15,7 @@ const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
     const error = undefined
     const { wallet } = useSmartAccountContext()
 
-    function formatConnectorName(account: any) {
+    function formatConnectorName(account: any, error: any) {
         return (
             <Fragment>
                 <WalletName>

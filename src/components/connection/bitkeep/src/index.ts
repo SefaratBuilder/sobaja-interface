@@ -6,8 +6,8 @@ import type {
   ProviderConnectInfo,
   ProviderRpcError,
   WatchAssetParameters,
-} from '@web3-react/types'
-import { Connector } from '@web3-react/types'
+} from './types'
+import { Connector } from './types'
 import detectEthereumProvider from './BitkeepEthereumProvider'
 
 type MetaMaskProvider = Provider & {
@@ -41,6 +41,8 @@ export interface MetaMaskConstructorArgs {
   onError?: (error: Error) => void
 }
 
+
+
 // type CustomMetaMaskProvider = MetaMaskProvider;
 export class BitKeep extends Connector {
   /** {@inheritdoc Connector.provider} */
@@ -54,73 +56,77 @@ export class BitKeep extends Connector {
     this.options = options
   }
 
+
+  public BitkeepEthereumProvider() {
+    const provider = window.bitkeep.ethereum;
+    if (provider) {
+      this.provider = provider as any
+      if (!this.provider) return
+      // handle the case when e.g. metamask and coinbase wallet are both installed
+      // if (this.provider.providers?.length) {
+      //   this.provider = this.provider.providers.find((p) => p.isBitKeep) ?? this.provider.providers[0]
+      // }
+
+
+      // this.provider.on('connect', ({ chainId }: ProviderConnectInfo): void => {
+      //   this.actions.update({ chainId: parseChainId(chainId) })
+      // })
+
+      // this.provider.on('disconnect', (error: ProviderRpcError): void => {
+      //   // 1013 indicates that MetaMask is attempting to reestablish the connection
+      //   // https://github.com/MetaMask/providers/releases/tag/v8.0.0
+      //   if (error.code === 1013) {
+      //     console.debug('MetaMask logged connection error 1013: "Try again later"')
+      //     return
+      //   }
+      //   this.actions.resetState()
+      //   this.onError?.(error)
+      // })
+
+      // this.provider.on('chainChanged', (chainId: string): void => {
+      //   this.actions.update({ chainId: parseChainId(chainId) })
+      // })
+
+      // this.provider.on('accountsChanged', (accounts: string[]): void => {
+      //   if (accounts.length === 0) {
+      //     // handle this edge case by disconnecting
+      //     this.actions.resetState()
+      //   } else {
+      //     this.actions.update({ accounts })
+      //   }
+      // })
+      return provider
+    }
+  }
+
+
   private async isomorphicInitialize(): Promise<void> {
     if (this.eagerConnection) return
-
-    return (this.eagerConnection = import('./BitkeepEthereumProvider').then(async (m) => {
-      const provider = await m.default(this.options)
-      if (provider) {
-        this.provider = provider as any
-        if (!this.provider) return
-        // handle the case when e.g. metamask and coinbase wallet are both installed
-        if (this.provider.providers?.length) {
-          this.provider = this.provider.providers.find((p) => p.isBitKeep) ?? this.provider.providers[0]
-        }
-
-
-        this.provider.on('connect', ({ chainId }: ProviderConnectInfo): void => {
-          this.actions.update({ chainId: parseChainId(chainId) })
-        })
-
-        this.provider.on('disconnect', (error: ProviderRpcError): void => {
-          // 1013 indicates that MetaMask is attempting to reestablish the connection
-          // https://github.com/MetaMask/providers/releases/tag/v8.0.0
-          if (error.code === 1013) {
-            console.debug('MetaMask logged connection error 1013: "Try again later"')
-            return
-          }
-          this.actions.resetState()
-          this.onError?.(error)
-        })
-
-        this.provider.on('chainChanged', (chainId: string): void => {
-          this.actions.update({ chainId: parseChainId(chainId) })
-        })
-
-        this.provider.on('accountsChanged', (accounts: string[]): void => {
-          if (accounts.length === 0) {
-            // handle this edge case by disconnecting
-            this.actions.resetState()
-          } else {
-            this.actions.update({ accounts })
-          }
-        })
-      }
-    }))
+    return this.eagerConnection = await this.BitkeepEthereumProvider()
   }
 
   /** {@inheritdoc Connector.connectEagerly} */
-  public async connectEagerly(): Promise<void> {
-    const cancelActivation = this.actions.startActivation()
+  // public async connectEagerly(): Promise<void> {
+  //   const cancelActivation = this.actions.startActivation()
 
-    try {
-      await this.isomorphicInitialize()
-      if (!this.provider) return cancelActivation()
+  //   try {
+  //     await this.isomorphicInitialize()
+  //     if (!this.provider) return cancelActivation()
 
-      // Wallets may resolve eth_chainId and hang on eth_accounts pending user interaction, which may include changing
-      // chains; they should be requested serially, with accounts first, so that the chainId can settle.
-      const accounts = (await this.provider.request({ method: 'eth_accounts' })) as string[]
-      if (!accounts.length) throw new Error('No accounts returned')
-      const chainId = (await this.provider.request({ method: 'eth_chainId' })) as string
-      this.actions.update({ chainId: parseChainId(chainId), accounts })
-    } catch (error) {
-      console.debug('Could not connect eagerly', error)
-      // we should be able to use `cancelActivation` here, but on mobile, metamask emits a 'connect'
-      // event, meaning that chainId is updated, and cancelActivation doesn't work because an intermediary
-      // update has occurred, so we reset state instead
-      this.actions.resetState()
-    }
-  }
+  //     // Wallets may resolve eth_chainId and hang on eth_accounts pending user interaction, which may include changing
+  //     // chains; they should be requested serially, with accounts first, so that the chainId can settle.
+  //     const accounts = (await this.provider.request({ method: 'eth_accounts' })) as string[]
+  //     if (!accounts.length) throw new Error('No accounts returned')
+  //     const chainId = (await this.provider.request({ method: 'eth_chainId' })) as string
+  //     this.actions.update({ chainId: parseChainId(chainId), accounts })
+  //   } catch (error) {
+  //     console.debug('Could not connect eagerly', error)
+  //     // we should be able to use `cancelActivation` here, but on mobile, metamask emits a 'connect'
+  //     // event, meaning that chainId is updated, and cancelActivation doesn't work because an intermediary
+  //     // update has occurred, so we reset state instead
+  //     this.actions.resetState()
+  //   }
+  // }
 
   /**
    * Initiates a connection.
@@ -151,6 +157,8 @@ export class BitKeep extends Connector {
 
         // if there's no desired chain, or it's equal to the received, update
         if (!desiredChainId || receivedChainId === desiredChainId) {
+          const ss = this.actions.update({ chainId: receivedChainId, accounts })
+          console.log("ss=>>>>", ss)
           return this.actions.update({ chainId: receivedChainId, accounts });
         }
 
@@ -182,25 +190,25 @@ export class BitKeep extends Connector {
       })
   }
 
-  public async watchAsset({ address, symbol, decimals, image }: WatchAssetParameters): Promise<true> {
-    if (!this.provider) throw new Error('No provider')
+  // public async watchAsset({ address, symbol, decimals, image }: WatchAssetParameters): Promise<true> {
+  //   if (!this.provider) throw new Error('No provider')
 
-    return this.provider
-      .request({
-        method: 'wallet_watchAsset',
-        params: {
-          type: 'ERC20', // Initially only supports ERC20, but eventually more!
-          options: {
-            address, // The address that the token is at.
-            symbol, // A ticker symbol or shorthand, up to 5 chars.
-            decimals, // The number of decimals in the token
-            image, // A string url of the token logo
-          },
-        },
-      })
-      .then((success: any) => {
-        if (!success) throw new Error('Rejected')
-        return true
-      })
-  }
+  //   return this.provider
+  //     .request({
+  //       method: 'wallet_watchAsset',
+  //       params: {
+  //         type: 'ERC20', // Initially only supports ERC20, but eventually more!
+  //         options: {
+  //           address, // The address that the token is at.
+  //           symbol, // A ticker symbol or shorthand, up to 5 chars.
+  //           decimals, // The number of decimals in the token
+  //           image, // A string url of the token logo
+  //         },
+  //       },
+  //     })
+  //     .then((success: any) => {
+  //       if (!success) throw new Error('Rejected')
+  //       return true
+  //     })
+  // }
 }
