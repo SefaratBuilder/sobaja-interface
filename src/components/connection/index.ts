@@ -97,7 +97,7 @@ export const argentConnection: Connection = {
     getName: () => 'Argent',
     connector: web3Network,
     hooks: web3NetworkHooks,
-    type: ConnectionType.ARGENT,
+    type: ConnectionType.OKEX,
     getIcon: () => ARGENT_ICON,
     shouldDisplay: () => true,
     overrideActivate: () => false,
@@ -207,8 +207,8 @@ export function useGetConnection() {
                     return bitkeepConnection
                 case ConnectionType.OKEX:
                     return okexConnection
-                case ConnectionType.ARGENT:
-                    return argentConnection
+                // case ConnectionType.ARGENT:
+                //     return argentConnection
             }
         }
     }, [])
@@ -222,8 +222,7 @@ export const SELECTABLE_WALLETS = [
     ConnectionType.COINBASE_WALLET,
     ConnectionType.WALLET_CONNECT,
     ConnectionType.BITKEEP,
-    ConnectionType.OKEX,
-    ConnectionType.ARGENT
+    ConnectionType.OKEX
 ]
 
 

@@ -98,15 +98,15 @@ const AA = () => {
     }
 
     const signUserOp = async () => {
-        if (!chainId || !provider || !account || !web3Provider) return
-        const owner = provider.getSigner(account)
-        const provider = new ethers.providers.JsonRpcProvider(
+        if (!chainId || !account || !web3Provider || !provider) return
+        const owner = provider?.getSigner(account)
+        const pvd = new ethers.providers.JsonRpcProvider(
             'https://testnet.era.zksync.dev',
             { name: 'eratest', chainId: 280 },
         )
-        console.log('provider', provider)
+
         const walletAPI = new SimpleAccountAPI({
-            provider: provider,
+            provider: pvd,
             entryPointAddress: AAEntryPoints[chainId],
             owner,
             factoryAddress: AAFactory[chainId],

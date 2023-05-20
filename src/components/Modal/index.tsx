@@ -13,9 +13,11 @@ interface ModalProps {
         onClose: () => void,
     ) => ReactElement<any, string | JSXElementConstructor<any>>
     button: (onOpen: () => void) => ReactNode
+    isRight?: boolean
 }
 
 const Modal = (props: ModalProps) => {
+    console.log('🤦‍♂️ ⟹ Modal ⟹ props:', props)
     const [isOpen, setIsOpen] = useState(false)
     const handleOpen = () => setIsOpen(true)
     const handleClose = () => setIsOpen(false)
@@ -29,9 +31,13 @@ const Modal = (props: ModalProps) => {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <WrapBox>
-                    <Box>{props.children(handleClose)}</Box>
-                </WrapBox>
+                {!props?.isRight ? (
+                    <MiddleBox>{props.children(handleClose)}</MiddleBox>
+                ) : (
+                    <WrapBox>
+                        <Box>{props.children(handleClose)}</Box>
+                    </WrapBox>
+                )}
             </MuiModal>
         </ModalWrapper>
     )
@@ -45,19 +51,20 @@ const WrapBox = styled.div`
 
     top: 9%;
     height: 100vh;
-    width: 450px;
+    width: 400px;
     background: url(${BgWallet});
     background-size: cover;
     background-repeat: no-repeat;
+    padding: 20px;
+    @media screen and (max-width: 1100px) {
+        top: unset;
+        bottom: 0;
+        /* min-height: 600px; */
+        height: 600px;
+    }
 `
 
 const Box = styled.div`
-    position: absolute;
-    right: 0;
-    top: 2%;
-
-    left: 0;
-    margin: auto;
     background: var(--bg2);
     backdrop-filter: blur(4px);
     max-width: 400px;
@@ -68,7 +75,27 @@ const Box = styled.div`
     padding: 10px;
 
     @media (max-width: 576px) {
-        width: 90%;
+        /* width: 90%; */
+    }
+`
+
+const MiddleBox = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    background: var(--bg2);
+    backdrop-filter: blur(4px);
+    max-width: 400px;
+    height: fit-content;
+    border: 1px solid #003b5c;
+    border-radius: 8px;
+    padding: 10px;
+
+    @media (max-width: 576px) {
+        /* width: 90%; */
     }
 `
 

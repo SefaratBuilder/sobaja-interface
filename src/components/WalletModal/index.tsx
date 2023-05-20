@@ -2,21 +2,12 @@ import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import imgClose from 'assets/icons/icon-close.svg'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
-import { SUPPORTED_WALLETS } from 'constants/wallet'
-import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
-import { injected, bitkeep, okex } from 'connectors/index'
+import { useWeb3React } from '@web3-react/core'
 import AccountDetails from 'components/AccountDetails'
-import { AbstractConnector } from '@web3-react/abstract-connector'
 import Loader from 'components/Loader'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { sendEvent } from 'utils/analytics'
-import { useOnClickOutside } from 'hooks/useOnClickOutSide'
-import {
-    getConnections,
-    injectedConnection,
-    networkConnection,
-} from 'components/connection'
-import { Connector } from '@web3-react/types'
+import { getConnections, injectedConnection } from 'components/connection'
 import { useAppDispatch } from 'states/hook'
 import { updateSelectedWallet } from 'states/user/reducer'
 import { Connection } from 'components/connection/types'
@@ -483,17 +474,17 @@ const Header = styled.div`
         height: 35px;
         top: -62px;
     }
-    div{
+    div {
         display: none;
     }
     @media screen and (max-width: 390px) {
         padding: 0.5rem 1rem;
     }
     @media screen and (max-width: 640px) {
-        div{
+        div {
             display: block;
         }
-        span{
+        span {
             margin: auto;
         }
     }

@@ -40,7 +40,6 @@ export const useContract = (
     withSignerIfPossible = true,
 ): Contract | null => {
     const { connector, account, provider } = useActiveWeb3React()
-    console.log("🤦‍♂️ ⟹ provider:", { provider })
 
     return useMemo(() => {
         if (!address || !ABI || !provider) return null
@@ -144,5 +143,6 @@ export function useSmartAccountContract(address: string | undefined): Contract |
 export function useMulticallWeb3Contract() {
     const { chainId } = useActiveWeb3React()
     const web3 = new Web3(Web3.givenProvider || 'https://rpc-mumbai.maticvigil.com')
-    return new web3.eth.Contract(MULTICALL_ABI, MULTICALL_NETWORKS[chainId || 80001])
+    const abi: any = MULTICALL_ABI
+    return new web3.eth.Contract(abi, MULTICALL_NETWORKS[chainId || 80001])
 }

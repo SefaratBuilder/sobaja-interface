@@ -358,6 +358,7 @@ const Swap = () => {
 
             const method = getSwapMethod()
             const swapArguments = getSwapArguments()
+            console.log('🤦‍♂️ ⟹ onConfirm ⟹ swapArguments:', { swapArguments })
             if (!swapArguments) {
                 initDataTransaction.setError('Failed')
                 initDataTransaction.setIsOpenWaitingModal(false)
@@ -365,26 +366,27 @@ const Swap = () => {
             }
             const { args, value } = swapArguments
 
-            const referralAddress = refAddress || ZERO_ADDRESS
-            const newArgs = [...args, referralAddress]
+            // const referralAddress = refAddress || ZERO_ADDRESS
+            // const newArgs = [...args, referralAddress]
+            // console.log('🤦‍♂️ ⟹ onConfirm ⟹ newArgs:', newArgs)
             let callResult: any
             if (!wallet) {
                 const gasLimit = await routerContract?.estimateGas[method](
-                    ...newArgs,
+                    ...args,
                     {
                         value,
                     },
                 )
-                console.log('🤦‍♂️ ⟹ onConfirm ⟹ gasLimit:', gasLimit)
-                callResult = await routerContract?.[method](...newArgs, {
+                callResult = await routerContract?.[method](...args, {
                     value,
                     gasLimit: computeGasLimit(gasLimit),
                 })
+                console.log('🤦‍♂️ ⟹ onConfirm ⟹ callResult:', callResult)
             } else {
                 if (!routerContract) return
                 const swapData =
                     await routerContract.interface.encodeFunctionData(method, [
-                        ...newArgs,
+                        ...args,
                     ])
                 if (!swapData || !tokenIn || !routerAddress || !inputAmount)
                     return

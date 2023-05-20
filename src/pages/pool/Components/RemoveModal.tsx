@@ -282,7 +282,7 @@ const RemoveModal = ({
         <ModalRemovePool>
             <WrapRemovePool>
                 <WrapTitle>
-                    <Title>Removeeeee</Title>
+                    <Title>Remove</Title>
                     <BtnClose
                         src={imgClose}
                         onClick={() => setModalRemovePool(false)}

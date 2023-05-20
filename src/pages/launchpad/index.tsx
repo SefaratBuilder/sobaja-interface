@@ -50,7 +50,7 @@ const Launchpad = () => {
         totalToken: '40',
     })
     const { error, loading, data, refetch } = useQueryLaunchpad()
-    const { account, chainId, library } = useActiveWeb3React()
+    const { account, chainId } = useActiveWeb3React()
     const token = useToken(
         launchpadState.token ? launchpadState.token : undefined,
     )

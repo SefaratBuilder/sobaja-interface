@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { ConnectionType } from 'connection/types'
+import { ConnectionType } from 'components/connection/types'
 
 interface ConnectionState {
   errorByConnectionType: Record<ConnectionType, string | undefined>
@@ -7,12 +7,12 @@ interface ConnectionState {
 
 const initialState: ConnectionState = {
   errorByConnectionType: {
-    [ConnectionType.UNIWALLET]: undefined,
     [ConnectionType.INJECTED]: undefined,
     [ConnectionType.WALLET_CONNECT]: undefined,
     [ConnectionType.COINBASE_WALLET]: undefined,
     [ConnectionType.NETWORK]: undefined,
-    [ConnectionType.GNOSIS_SAFE]: undefined,
+    [ConnectionType.BITKEEP]: undefined,
+    [ConnectionType.OKEX]: undefined,
   },
 }
 

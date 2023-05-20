@@ -77,9 +77,9 @@ const DepositModal = () => {
             <ModalWrapper>
                 <ModalHeader>
                     <div>Deposit</div>
-                    <div className="close-btn" onClick={onClose}>
+                    {/* <div className="close-btn" onClick={onClose}>
                         X
-                    </div>
+                    </div> */}
                 </ModalHeader>
                 <ModalBody>
                     <div className="subtitle">
@@ -112,7 +112,7 @@ const DepositModal = () => {
         )
     }
 
-    return <Modal button={Button} children={ModalContent} />
+    return <Modal button={Button} children={ModalContent} isRight={true} />
 }
 
 const ModalWrapper = styled.div``

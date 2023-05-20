@@ -29,10 +29,10 @@ export const useSmartAccount = (address: string | undefined) => {
         'owner',
         []
     )
-    console.log({ nonceResult, owner })
+    // console.log({ nonceResult, owner })
     const sendUserPaidTransaction = async (txns: Transaction[]) => {
         if (!wallet) throw ('Not connected')
-        console.log({ txns })
+        // console.log({ txns })
         const feeQuotes = await wallet.getFeeQuotesForBatch({
             transactions: txns
         })
@@ -77,10 +77,10 @@ export const useSmartAccount = (address: string | undefined) => {
     }
     // console.log({ wallet })
 
-    useEffect(() => {
-        if (provider)
-            console.log('signer =>>>>>>>>>', provider.getSigner())
-    }, [provider])
+    // useEffect(() => {
+    //     if (provider)
+    //         // console.log('signer =>>>>>>>>>', provider.getSigner())
+    // }, [provider])
     return useMemo(() => {
         return {
             contract,

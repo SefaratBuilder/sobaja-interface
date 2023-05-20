@@ -6,7 +6,7 @@ import { useSingleCallResult } from "states/multicall/hooks"
 import { useAAFactoryContract } from "./useContract"
 
 export const useAAFactory = () => {
-    const { chainId, account, library } = useActiveWeb3React()
+    const { chainId, account, provider } = useActiveWeb3React()
     const contract = useAAFactoryContract()
     const [isDeployed, setIsDeyloyed] = useState(false)
 
@@ -25,14 +25,14 @@ export const useAAFactory = () => {
     useEffect(() => {
         const checkIsDeployed = async () => {
             if (smartAccountAtZero.result?.[0]) {
-                const code = await library?.getCode(smartAccountAtZero.result?.[0])
+                const code = await provider?.getCode(smartAccountAtZero.result?.[0])
                 code && code.length > 2 ? setIsDeyloyed(true) : setIsDeyloyed(false)
             } else {
                 setIsDeyloyed(false)
             }
         }
         checkIsDeployed()
-    }, [smartAccountAtZero, library, contract])
+    }, [smartAccountAtZero, provider, contract])
 
     return useMemo(() => {
         return {
