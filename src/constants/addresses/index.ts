@@ -9,7 +9,7 @@ const MULTICALL_NETWORKS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441',
     [ChainId.ZKTESTNET]: '0xb6d65a6e0AA575e2280427D58375Ee5cED42A764',
     [ChainId.GOERLI]: '0x77dca2c955b15e9de4dbbcf1246b4b85b651e50e',
-    [ChainId.MUMBAI]: '0x08411ADd0b5AA8ee47563b146743C13b3556c9Cc',
+    [ChainId.MUMBAI]: '0xB151dC6839fD13aefE69593FD12327d4F459E6eB',
 }
 
 const FACTORIES: { [chainId: number]: string } = {

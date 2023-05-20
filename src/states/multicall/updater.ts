@@ -1,4 +1,5 @@
 import { Contract } from '@ethersproject/contracts'
+import { ZERO_ADDRESS } from 'constants'
 import { useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useActiveWeb3React } from '../../hooks'
@@ -36,7 +37,9 @@ async function fetchChunk(
         ;[resultsBlockNumber, returnData] = await multicallContract.aggregate(
             chunk.map((obj) => [obj.address, obj.callData]),
         )
+        console.log('chunk map', chunk.map((obj) => [obj.address, obj.callData]))
     } catch (error) {
+        console.log('asdaskdjasdh', error)
         throw error
     }
 
