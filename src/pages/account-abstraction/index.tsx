@@ -1,54 +1,43 @@
 import React, { useEffect, useState } from 'react'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
-import { Columns, Row } from 'components/Layouts'
-import { useSmartAccountContext } from 'contexts/SmartAccountContext'
-import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
+import { Columns, Row } from 'components/Layouts';
+import { useSmartAccountContext } from 'contexts/SmartAccountContext';
+import { useWeb3AuthContext } from 'contexts/SocialLoginContext';
 import styled from 'styled-components'
-import { shortenAddress } from 'utils'
-import {
-    useAAEntryPointContract,
-    useNftSmartAccountContract,
-} from 'hooks/useContract'
-import {
-    useCurrencyBalance,
-    useCurrencyBalances,
-    useETHBalances,
-} from 'hooks/useCurrencyBalance'
-import { NATIVE_COIN } from 'constants/index'
-import { useTransactionHandler } from 'states/transactions/hooks'
+import { shortenAddress } from 'utils';
+import { useAAEntryPointContract, useNftSmartAccountContract, useTokenContract } from 'hooks/useContract';
+import { useCurrencyBalance, useCurrencyBalances, useETHBalances } from 'hooks/useCurrencyBalance';
+import { NATIVE_COIN } from 'constants/index';
+import { useTransactionHandler } from 'states/transactions/hooks';
 import { SimpleAccountAPI } from 'pantinho-aa'
-import { useSmartAccount } from 'hooks/useSmartAccount'
-import { useActiveWeb3React } from 'hooks'
-import { useAAFactory } from 'hooks/useAAFactory'
-import { AAEntryPoints, AAFactory } from 'constants/addresses'
-import { mulNumberWithDecimal } from 'utils/math'
-import { ethers } from 'ethers'
+import { useSmartAccount } from 'hooks/useSmartAccount';
+import { useActiveWeb3React } from 'hooks';
+import { mulNumberWithDecimal } from 'utils/math';
+import { useAAFactory } from 'hooks/useAAFactory';
+import { AAEntryPoints, AAFactory } from 'constants/addresses';
+import { useToken } from 'hooks/useToken';
 
-const newSmartAccount = '0xCB7c527e22307529F803A5A3CB73BFe5E60b39d9'
+const smartAccountAddress = '0xa7A307a366B6056da5dcD16FefD918A75b404105'
 
 const AA = () => {
     const { account, provider, chainId } = useActiveWeb3React()
-    const {
-        connect,
-        address,
-        loading: eoaWalletLding,
-        disconnect,
-        web3Provider,
-    } = useWeb3AuthContext()
+    const { connect, address, loading: eoaWalletLding, disconnect, web3Provider } = useWeb3AuthContext()
     const { loading, wallet, state: walletState } = useSmartAccountContext()
     const [txnLoading, setTxnLoading] = useState(false)
     const nftContract = useNftSmartAccountContract()
-    const balances = useCurrencyBalances(wallet?.address?.toLowerCase(), [
-        NATIVE_COIN[80001],
-    ])
     const [nftBalance, setNftBalance] = useState('')
-    const { addTxn } = useTransactionHandler()
+    const {addTxn} = useTransactionHandler()
     const [paidTxn, setPaidTxn] = useState<any>()
     const [signedUserOp, setSignedUserOp] = useState<any>()
-    const { data } = useSmartAccount(newSmartAccount)
+    const { data } = useSmartAccount(smartAccountAddress || wallet?.address)
     const entryPointContract = useAAEntryPointContract()
+    const token = '0xDf9acc0a00Ae6Ec5eBc8D219d12A0157e7F18A68'
+    const tokenContract = useTokenContract(token)
+    const tokenType = useToken(token)
     const { contract, smartAccountAtZero } = useAAFactory()
-
+    const balanceToken = useCurrencyBalance(smartAccountAddress || wallet?.address?.toLowerCase(), tokenType)
+    const balances = useCurrencyBalances(smartAccountAddress || wallet?.address?.toLowerCase(), [NATIVE_COIN[80001]])
+    console.log({balanceToken})
     const onDeployAccount = async () => {
         try {
             if (!contract || !account) return
@@ -63,60 +52,60 @@ const AA = () => {
         }
     }
 
+
     const onMint = async () => {
-        if (!wallet || !walletState || !web3Provider || !nftContract) return
+        if (!wallet || !walletState || !web3Provider || !nftContract) return;
         try {
+
             setTxnLoading(true)
             const safeMintTx = await nftContract.populateTransaction.safeMint(
-                wallet.address,
-            )
+              wallet.address
+            );
 
             const tx1 = {
-                to: nftContract.address,
-                data: safeMintTx.data,
-            }
+              to: nftContract.address,
+              data: safeMintTx.data,
+            };
 
             const feeQuotes = await wallet.getFeeQuotesForBatch({
-                transactions: [tx1],
+                transactions: [tx1]
             })
-            console.log({ feeQuotes })
+            console.log({feeQuotes})
             const paidTransaction = await wallet.createUserPaidTransaction({
                 transaction: tx1,
-                feeQuote: feeQuotes[0],
+                feeQuote: feeQuotes[0]
             })
             setPaidTxn(paidTransaction)
-            console.log('signing...', { paidTransaction })
+            console.log('signing...', {paidTransaction})
             const txn = await wallet.sendUserPaidTransaction({
-                tx: paidTransaction,
+                tx: paidTransaction
             })
             setTxnLoading(false)
-        } catch (err) {
+        }
+        catch(err) {
             setTxnLoading(false)
             console.log('failed to mint nft', err)
         }
     }
 
     const signUserOp = async () => {
-
-        if(!chainId || !provider || !account) return console.log('aaaa', !chainId, !provider, !account)
+        if(!account || !tokenContract || !provider || !chainId) return 
+        const transferData = await tokenContract.interface.encodeFunctionData('transfer', [account, mulNumberWithDecimal('1', 18)])
         const owner = provider.getSigner(account)
-        const pvd = new ethers.providers.JsonRpcProvider('https://testnet.era.zksync.dev', {name: 'eratest', chainId: 280})
 
         const walletAPI = new SimpleAccountAPI({
-            provider: pvd,
+            provider: provider, 
             entryPointAddress: AAEntryPoints[chainId],
             owner,
             factoryAddress: AAFactory[chainId],
             index: 0,
-            accountAddress: newSmartAccount,
+            accountAddress: smartAccountAddress
         })
-
-        //transfer 0.001ETH from smart account to this eoa account
-        const txn = {
-            target: account,
-            data: '0x',
+        const txn: any = {
+            target: tokenContract.address,
+            data: transferData,
             nonce: data.nonce,
-            value: mulNumberWithDecimal('0.001', 18),
+            owner: account
         }
 
         const op = await walletAPI.createSignedUserOp(txn)
@@ -124,74 +113,75 @@ const AA = () => {
         op.nonce = await op.nonce
         op.sender = await op.sender
         op.preVerificationGas = await op.preVerificationGas
-        op.initCode = '0x'
+        console.log('userop =========>', op)
         setSignedUserOp(op)
     }
 
     const sendSignedUserOp = async () => {
-        if (!entryPointContract || !signedUserOp) return
+        if(!entryPointContract || !signedUserOp) return 
         setTxnLoading(true)
-        console.log('oppppppsssss', signedUserOp)
         const callResult = await entryPointContract.handleOps([signedUserOp], account)
         await callResult.wait()
         addTxn({
             hash: callResult.hash,
-            msg: 'Sent successfully',
-            status: true,
+            msg: "Sent successfully",
+            status: true
         })
         setTxnLoading(false)
         setSignedUserOp(undefined)
+
+        
     }
 
     const onBatchMint = async () => {
-        if (!wallet || !walletState || !web3Provider || !nftContract) return
+        if (!wallet || !walletState || !web3Provider || !nftContract) return;
         try {
             console.log('populating...')
             setTxnLoading(true)
             const safeMintTx = await nftContract.populateTransaction.safeMint(
-                wallet.address,
-            )
+              wallet.address
+            );
             const tx1 = {
                 to: nftContract.address,
                 data: safeMintTx.data,
-            }
-            const tx2 = {
+              };
+              const tx2 = {
                 to: nftContract.address,
                 data: safeMintTx.data,
-            }
+              };
             const txResponse = await wallet.sendTransactionBatch({
                 transactions: [tx1, tx2],
-            })
+            });
             const txHash = await txResponse.wait()
             setTxnLoading(false)
             addTxn({
                 hash: txHash.transactionHash,
                 msg: 'Mint batch nfts success',
-                status: true,
+                status: true
             })
             console.log('mint success with hash: ', txHash.transactionHash)
-        } catch (err) {
+        }
+        catch(err) {
             setTxnLoading(false)
             console.log('failed to mint nft', err)
         }
     }
 
     useEffect(() => {
-        if (wallet?.address)
-            nftContract
-                ?.balanceOf(wallet.address)
-                .then((res: any) => setNftBalance(res.toString()))
+        if(wallet?.address)
+            nftContract?.balanceOf(wallet.address)
+            .then((res: any) => setNftBalance(res.toString()))
     }, [wallet])
-    console.log({ signedUserOp })
-    return (
+
+    return(
         <AAWrapper gap="10px">
             <Row gap="10px">
                 <div>address: </div>
-                <div>{address}</div>
+                <div>{account}</div>
             </Row>
             <Row gap="10px">
                 <div>smart account: </div>
-                <div>{wallet?.address}</div>
+                <div>{smartAccountAddress || wallet?.address}</div>
             </Row>
             <Row gap="10px">
                 <div>balance matic: </div>
@@ -202,28 +192,16 @@ const AA = () => {
                 <div>{nftBalance || '0'}</div>
             </Row>
             <Row gap="10px">
-                <PrimaryButton
-                    onClick={onMint}
-                    name={'Mint nft'}
-                    isLoading={txnLoading}
-                />
-                <PrimaryButton
-                    onClick={onBatchMint}
-                    name={'Batch mint nfts'}
-                    isLoading={txnLoading}
-                />
+                <div>balance nft: </div>
+                <div>{balanceToken || '0'}</div>
             </Row>
             <Row gap="10px">
-                <PrimaryButton
-                    onClick={signUserOp}
-                    name={'Sign userOp'}
-                    isLoading={txnLoading}
-                />
-                <PrimaryButton
-                    onClick={sendSignedUserOp}
-                    name={'Send signed userOp'}
-                    isLoading={txnLoading}
-                />
+                <PrimaryButton onClick={onMint} name={'Mint nft'} isLoading={txnLoading} />
+                <PrimaryButton onClick={onBatchMint} name ={'Batch mint nfts'} isLoading={txnLoading} />
+            </Row>
+            <Row gap="10px">
+                <PrimaryButton onClick={signUserOp} name={'Sign userOp'} isLoading={txnLoading} />
+                <PrimaryButton onClick={sendSignedUserOp} name={'Send signed userOp'} isLoading={txnLoading} />
             </Row>
             <Row gap="10px">
                 <PrimaryButton
@@ -234,7 +212,7 @@ const AA = () => {
             </Row>
             <Row gap="10px">
                 <PrimaryButton onClick={connect} name={'Connect AA'} />
-                <PrimaryButton onClick={disconnect} name={'Disconnect AA'} />
+                <PrimaryButton onClick={disconnect} name ={'Disconnect AA'} />
             </Row>
         </AAWrapper>
     )

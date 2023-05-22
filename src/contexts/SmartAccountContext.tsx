@@ -76,9 +76,6 @@ export const SmartAccountProvider = ({ children }: any) => {
   const [loading, setLoading] = useState(false);
   const { addTxn } = useTransactionHandler()
 
-  useEffect(() => {
-    console.log({wallet})
-  }, [wallet])
   const resetState = useCallback(() => {
     setWallet(null)
     setState(null)

@@ -21,18 +21,25 @@ export const useSmartAccount = (address: string | undefined) => {
     const { gasToken } = useAppState()
     const { provider, chainId, account } = useActiveWeb3React()
     const entryPointContract = useAAEntryPointContract()
+    const gasBalance = useCurrencyBalance(address, gasToken)
 
     const nonceResult = useSingleCallResult(
         contract,
         'nonce',
         []
     )
-    const gasBalance = useCurrencyBalance(address, gasToken)
-    const owner = useSingleCallResult(
-        contract,
-        'owner',
-        []
-    )
+
+    // const chainid = useSingleCallResult(
+    //     contract,
+    //     'getChainId',
+    //     []
+    // )
+
+    // const owner = useSingleCallResult(
+    //     contract,
+    //     'owner',
+    //     []
+    // )
 
     const sendUserPaidTransaction = async (txns: Transaction[]) => {
         if (!wallet) throw ('Not connected')
