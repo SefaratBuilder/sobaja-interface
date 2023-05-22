@@ -2,16 +2,13 @@ import { mulNumberWithDecimal } from 'utils/math';
 import { useSmartAccountContext } from "contexts/SmartAccountContext"
 import { useWeb3AuthContext } from "contexts/SocialLoginContext"
 import { Transaction } from "interfaces/smartAccount"
-import { useEffect, useMemo } from "react"
 import { useAppState } from "states/application/hooks"
 import { useSingleCallResult } from "states/multicall/hooks"
 import { useSmartAccountContract } from "./useContract"
 import { SimpleAccountAPI } from 'pantinho-aa'
 import { useActiveWeb3React } from "hooks"
 import { AAEntryPoints, AAFactory } from "constants/addresses"
-import { ethers } from "ethers"
 import { useAAEntryPointContract } from "./useContract"
-import { useToken } from "./useToken"
 import { useCurrencyBalance } from "./useCurrencyBalance"
 
 export const useSmartAccount = (address: string | undefined) => {
@@ -52,6 +49,7 @@ export const useSmartAccount = (address: string | undefined) => {
             tx: paidTransaction
         })
     }
+
     const signAndSendUserOps = async (txns: Transaction) => {
         if (!provider || !chainId || !account || !web3Provider || !entryPointContract) return
         const owner = provider.getSigner(account)
