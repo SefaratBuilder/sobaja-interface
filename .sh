@@ -1,4 +1,3 @@
-npm run prettier
 git add .
-git commit -m 'added token approval feature'
+git commit -m 'build for production'
 git push

@@ -10,6 +10,7 @@ import { useActiveWeb3React } from "hooks"
 import { AAEntryPoints, AAFactory } from "constants/addresses"
 import { useAAEntryPointContract } from "./useContract"
 import { useCurrencyBalance } from "./useCurrencyBalance"
+import { useMemo } from 'react';
 
 export const useSmartAccount = (address: string | undefined) => {
     const { web3Provider } = useWeb3AuthContext()
