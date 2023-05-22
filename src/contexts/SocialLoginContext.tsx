@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import SocialLogin from '@biconomy/web3-auth'
 import { activeChainId } from '../utils/chainConfig'
+import { useActiveWeb3React } from 'hooks'
 
 interface web3AuthContextType {
     connect: () => Promise<SocialLogin | null | undefined>
@@ -53,13 +54,15 @@ export const Web3AuthProvider = ({ children }: any) => {
     const [socialLoginSDK, setSocialLoginSDK] = useState<SocialLogin | null>(
         null,
     )
+    const providerWeb3 = useActiveWeb3React()
 
     // create socialLoginSDK and call the init
     useEffect(() => {
         const initWallet = async () => {
+            if (!providerWeb3.chainId) return
             const sdk = new SocialLogin()
             await sdk.init({
-                chainId: ethers.utils.hexValue(activeChainId).toString(),
+                chainId: ethers.utils.hexValue(providerWeb3.chainId).toString(),
                 network: 'mainnet',
                 whitelistUrls: {
                     'https://sdk-staging.biconomy.io':
@@ -76,7 +79,7 @@ export const Web3AuthProvider = ({ children }: any) => {
             setSocialLoginSDK(sdk)
         }
         if (!socialLoginSDK) initWallet()
-    }, [socialLoginSDK])
+    }, [socialLoginSDK, providerWeb3.chainId])
 
     // if wallet already connected close widget
     useEffect(() => {
