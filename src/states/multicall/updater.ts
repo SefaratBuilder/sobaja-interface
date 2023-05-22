@@ -1,5 +1,5 @@
 import { Contract } from '@ethersproject/contracts'
-import { ZERO_ADDRESS } from 'constants'
+import { ZERO_ADDRESS } from 'constants/index'
 import { useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useActiveWeb3React } from '../../hooks'
