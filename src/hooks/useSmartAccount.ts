@@ -42,7 +42,7 @@ export const useSmartAccount = (address: string | undefined) => {
         let feeQuote = feeQuotes.find(fq => fq?.address == gasToken?.address)
 
         //fallback native coin for paying gas fee when user has no enough balance
-        if (!gasBalance || feeQuote?.payment >= mulNumberWithDecimal(gasBalance, gasToken.decimals)) feeQuote = feeQuotes[0]
+        if (!gasBalance || feeQuote?.payment && feeQuote?.payment >= Number(mulNumberWithDecimal(gasBalance, gasToken.decimals))) feeQuote = feeQuotes[0]
 
         const paidTransaction = await wallet.createUserPaidTransactionBatch({
             transactions: txns,
