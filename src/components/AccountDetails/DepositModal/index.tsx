@@ -1,49 +1,44 @@
-import { ReactNode, useState } from "react"
-import Modal from "components/Modal"
+import { ReactNode, useState } from 'react'
+import Modal from 'components/Modal'
 import styled from 'styled-components'
-import PrimaryButton from "components/Buttons/PrimaryButton"
-import { Columns, Row } from "components/Layouts"
-import { useActiveWeb3React } from "hooks"
-import { useSmartAccountContext } from "contexts/SmartAccountContext"
-import { computeGasLimit, shortenAddress } from "utils"
-import { mulNumberWithDecimal } from "utils/math"
-import { NATIVE_COIN, WRAPPED_NATIVE_COIN } from "constants/index"
-import { useETHBalances } from "hooks/useCurrencyBalance"
-import { Error } from "components/Text"
-import { useTransactionHandler } from "states/transactions/hooks"
+import PrimaryButton from 'components/Buttons/PrimaryButton'
+import { Columns, Row } from 'components/Layouts'
+import { useActiveWeb3React } from 'hooks'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import { computeGasLimit, shortenAddress } from 'utils'
+import { mulNumberWithDecimal } from 'utils/math'
+import { NATIVE_COIN, WRAPPED_NATIVE_COIN } from 'constants/index'
+import { useETHBalances } from 'hooks/useCurrencyBalance'
+import { Error } from 'components/Text'
+import { useTransactionHandler } from 'states/transactions/hooks'
 
-const DepositModal = () => {    
-    const { account, library, chainId } = useActiveWeb3React()
+const DepositModal = () => {
+    const { account, provider, chainId } = useActiveWeb3React()
     const { wallet } = useSmartAccountContext()
     const [value, setValue] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const balance = useETHBalances([account])?.[account || '']
     const [error, setError] = useState('')
     const { addTxn } = useTransactionHandler()
-    
+
     const onChangeValue = (val: string) => {
         const validValue = val
-        .replace(/[^0-9.,]/g, '')
-        .replace(' ', '')
-        .replace(',', '.')
-        .replace(/(\..*?)\..*/g, '$1')
+            .replace(/[^0-9.,]/g, '')
+            .replace(' ', '')
+            .replace(',', '.')
+            .replace(/(\..*?)\..*/g, '$1')
         setValue(validValue)
     }
 
     const Button = (onOpen: () => void) => {
-        return (
-            <PrimaryButton
-                name="Deposit"
-                onClick={onOpen}
-            />
-        )
+        return <PrimaryButton name="Deposit" onClick={onOpen} />
     }
 
     const ModalContent = (onClose: () => void) => {
         const onDeposit = async () => {
             try {
-                if(!account || !wallet) return
-                if(Number(balance) < Number(value)) {
+                if (!account || !wallet) return
+                if (Number(balance) < Number(value)) {
                     setError('You have no enough balance.')
                     return
                 }
@@ -55,45 +50,57 @@ const DepositModal = () => {
                     data: '0x',
                 }
                 setIsLoading(true)
-                const gasLimit = await library?.estimateGas(tx)
-                const signer = await library?.getSigner()
-                const txn = await signer?.sendTransaction({...tx, gasLimit: computeGasLimit(gasLimit)})
+                const gasLimit = await provider?.estimateGas(tx)
+                const signer = await provider?.getSigner()
+                const txn = await signer?.sendTransaction({
+                    ...tx,
+                    gasLimit: computeGasLimit(gasLimit),
+                })
                 const txnHash = await txn?.wait()
-                if(!txnHash || !chainId) return
+                if (!txnHash || !chainId) return
                 addTxn({
                     hash: txnHash.transactionHash,
                     msg: `Deposited ${value} ${NATIVE_COIN[chainId].symbol} into Smart account`,
-                    status: true
+                    status: true,
                 })
                 setIsLoading(false)
                 onClose()
-            }
-            catch(err) {
+            } catch (err) {
                 onClose()
                 setError('Transaction failed')
                 setIsLoading(false)
                 console.log('failed to deposit fund into smart account:', err)
             }
         }
-    
+
         return (
             <ModalWrapper>
                 <ModalHeader>
                     <div>Deposit</div>
-                    <div className="close-btn" onClick={onClose}>X</div>
+                    {/* <div className="close-btn" onClick={onClose}>
+                        X
+                    </div> */}
                 </ModalHeader>
                 <ModalBody>
                     <div className="subtitle">
-                        Deposit fund into this smart account to pay gas fee or make transaction
+                        Deposit fund into this smart account to pay gas fee or
+                        make transaction
                     </div>
                     <Row gap="10px">
                         <div>Smart account: </div>
-                        <div>{wallet?.address && shortenAddress(wallet?.address)}</div>
+                        <div>
+                            {wallet?.address && shortenAddress(wallet?.address)}
+                        </div>
                     </Row>
-                    <div>
-                        Input amount to deposit
-                    </div>
-                    <Input type='text' value={value} onChange={(e) => onChangeValue(e.target.value)} placeholder={chainId && NATIVE_COIN[chainId].symbol || 'ETH'} />
+                    <div>Input amount to deposit</div>
+                    <Input
+                        type="text"
+                        value={value}
+                        onChange={(e) => onChangeValue(e.target.value)}
+                        placeholder={
+                            (chainId && NATIVE_COIN[chainId].symbol) || 'ETH'
+                        }
+                    />
                     <PrimaryButton
                         name={'Deposit'}
                         onClick={onDeposit}
@@ -105,17 +112,10 @@ const DepositModal = () => {
         )
     }
 
-    return(
-        <Modal 
-            button={Button} 
-            children={ModalContent}
-        />   
-    )
+    return <Modal button={Button} children={ModalContent} isRight={true} />
 }
 
-const ModalWrapper = styled.div`
-
-`
+const ModalWrapper = styled.div``
 
 const ModalHeader = styled(Row)`
     justify-content: space-between;
@@ -124,7 +124,6 @@ const ModalHeader = styled(Row)`
     .close-btn {
         cursor: pointer;
     }
-
 `
 
 const ModalBody = styled(Columns)`
@@ -136,7 +135,6 @@ const ModalBody = styled(Columns)`
     .subtitle {
         font-style: italic;
         font-weight: 300;
-
     }
 `
 

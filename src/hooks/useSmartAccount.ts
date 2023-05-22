@@ -16,7 +16,7 @@ export const useSmartAccount = (address: string | undefined) => {
     const { wallet, state } = useSmartAccountContext()
     const contract = useSmartAccountContract(address)
     const { gasToken } = useAppState()
-    const { library, chainId, account } = useActiveWeb3React()
+    const { provider, chainId, account } = useActiveWeb3React()
     const entryPointContract = useAAEntryPointContract()
 
     const nonceResult = useSingleCallResult(
@@ -29,10 +29,10 @@ export const useSmartAccount = (address: string | undefined) => {
         'owner',
         []
     )
-    console.log({ nonceResult, owner })
+    // console.log({ nonceResult, owner })
     const sendUserPaidTransaction = async (txns: Transaction[]) => {
         if (!wallet) throw ('Not connected')
-        console.log({ txns })
+        // console.log({ txns })
         const feeQuotes = await wallet.getFeeQuotesForBatch({
             transactions: txns
         })
@@ -47,12 +47,12 @@ export const useSmartAccount = (address: string | undefined) => {
         })
     }
     const signAndSendUserOps = async (txns: Transaction) => {
-        if (!library || !chainId || !account || !web3Provider || !entryPointContract) return
-        const owner = library.getSigner(account)
-        console.log(library)
+        if (!provider || !chainId || !account || !web3Provider || !entryPointContract) return
+        const owner = provider.getSigner(account)
+        console.log(provider)
         console.log(web3Provider)
         const walletAPI = new SimpleAccountAPI({
-            provider: library,
+            provider: provider,
             entryPointAddress: AAEntryPoints[chainId],
             owner,
             factoryAddress: AAFactory[chainId],
@@ -77,10 +77,10 @@ export const useSmartAccount = (address: string | undefined) => {
     }
     // console.log({ wallet })
 
-    useEffect(() => {
-        if (library)
-            console.log('signer =>>>>>>>>>', library.getSigner())
-    }, [library])
+    // useEffect(() => {
+    //     if (provider)
+    //         // console.log('signer =>>>>>>>>>', provider.getSigner())
+    // }, [provider])
     return useMemo(() => {
         return {
             contract,

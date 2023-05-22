@@ -71,20 +71,6 @@ export const InitCompTransaction = (): CompTransaction => {
 }
 
 const ComponentsTransaction = ({ data, onConfirm }: Data) => {
-    // console.log('🤦‍♂️ ⟹ ComponentsTransaction ⟹ onConfirm:', onConfirm)
-    // const { addTxn } = useTransactionHandler()
-
-    // // useEffect(() => {
-    // //     console.log('🤦‍♂️ ⟹ ComponentsTransaction ⟹ data:', data)
-    // //     if (data.isOpenToastMessageModal) {
-    // //         addTxn({
-    // //             hash: data.payload?.hash || '',
-    // //             msg: data.payload?.msg || '',
-    // //             status: data.payload?.status || false,
-    // //         })
-    // //     }
-    // // }, [data])
-
     return (
         <Container>
             {data.isOpenConfirmModal && (
@@ -114,3 +100,34 @@ const ComponentsTransaction = ({ data, onConfirm }: Data) => {
 
 const Container = styled.div``
 export default ComponentsTransaction
+
+/**
+ * @dev example onConfirm
+ */
+
+// const onConfirm = useCallback(async () => {
+//     try {
+//         initDataTransaction.setIsOpenConfirmModal(false)
+//         initDataTransaction.setIsOpenWaitingModal(true)
+
+//         // handle data + call
+
+//         initDataTransaction.setIsOpenWaitingModal(false)
+//         initDataTransaction.setIsOpenResultModal(true)
+
+//         const txn = await callResult.wait()
+
+//         initDataTransaction.setIsOpenResultModal(false)
+
+//         addTxn({
+//             hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+//                 callResult.hash || ''
+//             }`,
+//             msg: `Example`,
+//             status: txn.status === 1 ? true : false,
+//         })
+//     } catch (error) {
+//         initDataTransaction.setError('Failed')
+//         initDataTransaction.setIsOpenResultModal(true)
+//     }
+// }, [initDataTransaction])

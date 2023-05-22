@@ -43,14 +43,23 @@ const LAUNCHPADS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
     [ChainId.ZKTESTNET]: '0x01C2d40418858562f8E5852895a48E2a8B3D01b5',
     [ChainId.GOERLI]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
-    [ChainId.MUMBAI]: '0x57A68Ea4a60723129D353eCB0b439A2c8B1FFAcD',
+    [ChainId.MUMBAI]: '0x3C7cEeD9CbfA02d5170eFA1f1D32DD5aEDAB5De9',
+}
+
+const STAKING: { [chainId: number]: string } = {
+    // [ChainId.MUMBAI]: '0xbb61B03fa28502599f398326B3Bffb07e8053C49',
+    [ChainId.MUMBAI]: '0x6b1d9BF7a17F80dAbf350FDFDa9087E342FBFAbA',
+}
+
+const STAKING_TOKEN: { [chainId: number]: string } = {
+    [ChainId.MUMBAI]: '0xdEfd221072dD078d11590D58128399C2fe8cCa7e',
 }
 
 const LAUNCHPAD_ACCESS_MANAGERS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
     [ChainId.ZKTESTNET]: '0x01C2d40418858562f8E5852895a48E2a8B3D01b5',
     [ChainId.GOERLI]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
-    [ChainId.MUMBAI]: '0x409a24051cC8aAB8a1717396B78f10be5ec860Cc',
+    [ChainId.MUMBAI]: '0x8C5F48F82cae6D6BC4a64E68AF62c8830394909B',
 }
 
 export const WRAPPED_NATIVE_ADDRESSES: { [chainId: number]: string } = {
@@ -93,6 +102,8 @@ export {
     INIT_CODE_HASHES,
     LAUNCHPADS,
     LAUNCHPAD_ACCESS_MANAGERS,
+    STAKING,
+    STAKING_TOKEN,
     STAKING_ABI,
     AAEntryPoints,
     AAFactory

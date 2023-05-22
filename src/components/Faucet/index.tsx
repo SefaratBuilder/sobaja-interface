@@ -6,6 +6,7 @@ import imgClose from 'assets/icons/icon-close.svg'
 import tokenList from 'constants/jsons/tokenList.json'
 import { useFaucetContract } from 'hooks/useContract'
 import usdt from 'assets/icons/usdt.jpeg'
+import ETH from 'assets/token-logos/eth.svg'
 import { OpacityModal } from 'components/Web3Status'
 import { useActiveWeb3React } from 'hooks'
 import { Error } from 'components/Text'
@@ -15,14 +16,15 @@ import Blur from 'components/Blur'
 import ComponentsTransaction, {
     InitCompTransaction,
 } from 'components/TransactionModal'
-import { URLSCAN_BY_CHAINID } from 'constants/index'
+import { URLSCAN_BY_CHAINID, ZERO_ADDRESS } from 'constants/index'
 import { useTransactionHandler } from 'states/transactions/hooks'
+import axios from 'axios'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
-    const { chainId } = useActiveWeb3React()
+    const { account, chainId, provider } = useActiveWeb3React()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
 
@@ -39,6 +41,79 @@ const Faucet = () => {
         initDataTransaction.setError('')
         initDataTransaction.setIsOpenResultModal(false)
     }, [isDislayFaucet])
+
+    const listFaucet = useMemo(() => {
+        return chainId === 280
+            ? [
+                  {
+                      address: ZERO_ADDRESS,
+                      symbol: 'ETH',
+                      type: 'faucet',
+                      logoURI: ETH,
+                      chainId: 280,
+                  },
+                  ...tokenList.filter(
+                      (token) =>
+                          token.chainId === 280 && token?.type === 'faucet',
+                  ),
+              ]
+                  .map((i) => i.symbol)
+                  .reduce((a: any, b: any) => {
+                      return a + ', ' + b
+                  })
+            : tokenList
+                  .filter(
+                      (token) =>
+                          token.chainId === 280 && token?.type === 'faucet',
+                  )
+                  .map((i) => i.symbol)
+                  .reduce((a: any, b: any) => {
+                      return a + ', ' + b
+                  })
+    }, [tokenList, chainId])
+
+    const handleFaucetETH = async () => {
+        setIsDisplayFaucet(false)
+
+        try {
+            console.log('Faucet....')
+            initDataTransaction.setIsOpenWaitingModal(true)
+            const dataFaucet = await axios({
+                method: 'GET',
+                // url: 'http://localhost:3000/api/faucet',
+                url: 'https://sobajaswap.com/api/faucet',
+                params: {
+                    to: account,
+                },
+            })
+            if (dataFaucet.status === 200) {
+                const { hash } = dataFaucet.data
+                console.log(dataFaucet.data)
+                initDataTransaction.setIsOpenWaitingModal(false)
+                initDataTransaction.setIsOpenResultModal(true)
+                const wait = await provider?.waitForTransaction(hash)
+                console.log({ wait })
+                initDataTransaction.setIsOpenResultModal(false)
+
+                addTxn({
+                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                        hash || ''
+                    }`,
+                    msg: 'Faucet',
+                    status: wait?.status === 1 ? true : false,
+                })
+            } else {
+                initDataTransaction.setError(dataFaucet.data?.error || 'Failed')
+                initDataTransaction.setIsOpenWaitingModal(false)
+                initDataTransaction.setIsOpenResultModal(true)
+            }
+        } catch (error: any) {
+            console.log({ error })
+            initDataTransaction.setError(error?.response?.data || 'Failed')
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
+        }
+    }
 
     const clickFaucetToken = async (erc20: string) => {
         try {
@@ -76,26 +151,60 @@ const Faucet = () => {
     }
 
     const showMintCoins = () => {
-        console.log({ isDisable })
-
         if (tokenList && tokenList.length > 0) {
-            return tokenList.map((item) => {
+            const tokens =
+                chainId === 280
+                    ? [
+                          {
+                              address: ZERO_ADDRESS,
+                              symbol: 'ETH',
+                              type: 'faucet',
+                              logoURI: ETH,
+                              chainId: 280,
+                          },
+                          ...tokenList.sort((a, b) => {
+                              const symbolA = a.symbol.toUpperCase() // ignore upper and lowercase
+                              const symbolB = b.symbol.toUpperCase() // ignore upper and lowercase
+                              if (symbolA < symbolB) {
+                                  return -1
+                              }
+                              if (symbolA > symbolB) {
+                                  return 1
+                              }
+
+                              return 0
+                          }),
+                      ]
+                    : tokenList
+            return tokens.map((item, index) => {
                 if (item.type == 'faucet' && item.chainId == 280) {
                     return (
-                        <MintCoinButton
-                            key={item.address}
-                            onClick={() => {
-                                chainId == 280 && clickFaucetToken(item.address)
-                            }}
-                            isDisable={isDisable}
-                        >
-                            <Icon
-                                src={
-                                    item.symbol == 'USDT' ? usdt : item.logoURI
-                                }
-                            ></Icon>
-                            <div>{item.symbol}</div>
-                        </MintCoinButton>
+                        <PrimaryButton
+                            key={index}
+                            name={item.symbol}
+                            onClick={() =>
+                                item.address === ZERO_ADDRESS
+                                    ? handleFaucetETH()
+                                    : clickFaucetToken(item.address)
+                            }
+                            disabled={isDisable}
+                            img={item.symbol == 'USDT' ? usdt : item.logoURI}
+                            type={'faucet'}
+                        />
+                        // <MintCoinButton
+                        //     key={item.address}
+                        //     onClick={() => {
+                        //         clickFaucetToken(item.address)
+                        //     }}
+                        //     isDisable={isDisable}
+                        // >
+                        //     <Icon
+                        //         src={
+                        //             item.symbol == 'USDT' ? usdt : item.logoURI
+                        //         }
+                        //     ></Icon>
+                        //     <div>{item.symbol}</div>
+                        // </MintCoinButton>
                     )
                 }
             })
@@ -127,9 +236,9 @@ const Faucet = () => {
                         <BodyModalFaucet>
                             <ContentFaucet>
                                 <TextCoin>
-                                    Get BTC, USDT, USDC, DAI for testing zkSync
-                                    Testnet on Sobajaswap, test token can
-                                    nullify the reality of Mainnet.
+                                    Get {listFaucet} for testing zkSync Testnet
+                                    on Sobajaswap, test token can nullify the
+                                    reality of Mainnet.
                                 </TextCoin>
                             </ContentFaucet>
                             <CoinButton>
@@ -233,7 +342,7 @@ const FaucetModalDiv = styled.div`
     right: 0;
     bottom: 0;
     margin: auto;
-    z-index: 9999;
+    z-index: 999;
     display: flex;
     @media (max-width: 576px) {
         width: 90%;

@@ -8,7 +8,6 @@ import {
 } from 'react-router-dom'
 import styled from 'styled-components'
 import Header from 'components/Header'
-import Web3ReactManager from 'components/Web3ReactManager'
 import SwapUpdater from 'states/swap/updater'
 import MintUpdater from 'states/mint/updater'
 import AppUpdater from 'states/application/updater'
@@ -21,7 +20,7 @@ import Pools from 'pages/pool'
 import NFTs from 'pages/nfts'
 import Bridge from 'pages/bridge'
 import ReactGA from 'react-ga4'
-import StakeDetails from 'pages/staking/staking'
+import StakeDetails from 'pages/staking'
 import Launchpad from 'pages/launchpad'
 import AA from 'pages/account-abstraction'
 import ToastMessage from 'components/ToastMessage'
@@ -45,34 +44,26 @@ const App = () => {
     }
 
     return (
-        <Web3ReactManager>
-            <HashRouter>
-                <Updater />
-                <Header />
+        <HashRouter>
+            <Updater />
+            <Header />
 
-                <AppContainer>
-                    <ToastMessage />
-                    {/* <TestTransaction /> */}
-                    <Routes>
-                        <Route path="/swap" element={<Swap />} />
-                        <Route path="/pools" element={<Pools />} />
-                        <Route path="/add" element={<AddLiquidity />} />
-                        <Route
-                            path="/test-launchpad"
-                            element={
-                                    <Launchpad />
-                            }
-                        />
-                        <Route path="/staking" element={<StakeDetails />} />
-                        <Route path="/bridge" element={<Bridge />} />
-                        <Route path="/nfts" element={<NFTs />} />
-                        <Route path="/account-abstraction" element={<AA />} />
-                        <Route path="*" element={<Navigate to="/swap" />} />
-                    </Routes>
-                    <Polling />
-                </AppContainer>
-            </HashRouter>
-        </Web3ReactManager>
+            <AppContainer>
+                <ToastMessage />
+                <Routes>
+                    <Route path="/swap" element={<Swap />} />
+                    <Route path="/pools" element={<Pools />} />
+                    <Route path="/add" element={<AddLiquidity />} />
+                    <Route path="/test-launchpad" element={<Launchpad />} />
+                    <Route path="/staking" element={<StakeDetails />} />
+                    <Route path="/bridge" element={<Bridge />} />
+                    <Route path="/nfts" element={<NFTs />} />
+                    <Route path="/account-abstraction" element={<AA />} />
+                    <Route path="*" element={<Navigate to="/swap" />} />
+                </Routes>
+                <Polling />
+            </AppContainer>
+        </HashRouter>
     )
 }
 

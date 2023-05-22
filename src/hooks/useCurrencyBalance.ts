@@ -143,7 +143,7 @@ export function useCurrencyBalances(
         () =>
             currencies?.map((currency) => {
                 if (!account || !currency || !chainId) return undefined
-                if (currency.address === NATIVE_COIN[chainId].address) {
+                if (NATIVE_COIN[chainId] && currency.address === NATIVE_COIN[chainId].address) {
 
                     return ethBalance[account]
                 }

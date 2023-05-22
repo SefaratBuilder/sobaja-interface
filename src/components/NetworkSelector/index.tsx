@@ -8,37 +8,15 @@ import imgCircleWhite from '../../assets/icons/circleWhite.png'
 import imgCircleGreen from '../../assets/icons/circleGreen.png'
 import { InfoNetwork, ListNetwork } from 'constants/networks/index'
 import { OpacityModal } from 'components/Web3Status'
+import { changeNetwork } from 'utils/network'
 
 const NetworkSelector = () => {
     const [networkModal, setNetworkModal] = useState(false)
-    const [networkModalMobile, setNetworkModalMobile] = useState(false)
-    const { chainId } = useActiveWeb3React()
-    const [activeDot, setActiveDot] = useState(0)
-    const ref = useRef<any>()
-
+    const { chainId, connector } = useActiveWeb3React()
     const networkRef = useRef<any>()
     useOnClickOutside(networkRef, () => {
         setNetworkModal(false)
     })
-    const networkMobileRef = useRef<any>()
-    useOnClickOutside(networkMobileRef, () => {
-        setNetworkModalMobile(false)
-    })
-
-    const changeNetwork = async (mainnet: any, mainnetString: string) => {
-        await detectEthereumProvider().then((res: any) => {
-            if (mainnetString !== 'ethereum') {
-                res.request({
-                    method: 'wallet_addEthereumChain',
-                    params: mainnet,
-                })
-            } else
-                res.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: mainnet,
-                })
-        })
-    }
 
     const showNameNetworkCurrent = (chainId: any) => {
         if (chainId && !InfoNetwork[chainId]) {
@@ -79,42 +57,33 @@ const NetworkSelector = () => {
                 <ul>
                     {ListNetwork.map((item, index) => {
                         return (
-                            <a
+                            <li
                                 key={index}
-                                // target="_blank"
-                                onClick={() =>
-                                    changeNetwork(item.switchNetwork, item.name)
+                                onClick={async () =>
+                                    await connector.activate(
+                                        item.switchNetwork[0],
+                                    )
                                 }
-                                // rel="noreferrer"
                             >
-                                <li
-                                    onClick={() =>
-                                        changeNetwork(
-                                            item.switchNetwork,
-                                            item.name,
-                                        )
+                                <span>
+                                    {item.logo && (
+                                        <img
+                                            src={item.logo}
+                                            alt=""
+                                            className="network-logo"
+                                        />
+                                    )}
+                                    <TextNetwork>{item.name}</TextNetwork>
+                                </span>
+                                <img
+                                    src={
+                                        item.chainId === chainId
+                                            ? imgCircleGreen
+                                            : imgCircleWhite
                                     }
-                                >
-                                    <span>
-                                        {item.logo && (
-                                            <img
-                                                src={item.logo}
-                                                alt=""
-                                                className="network-logo"
-                                            />
-                                        )}
-                                        <TextNetwork>{item.name}</TextNetwork>
-                                    </span>
-                                    <img
-                                        src={
-                                            item.chainId === chainId
-                                                ? imgCircleGreen
-                                                : imgCircleWhite
-                                        }
-                                        alt=""
-                                    />
-                                </li>
-                            </a>
+                                    alt=""
+                                />
+                            </li>
                         )
                     })}
                 </ul>

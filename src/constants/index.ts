@@ -133,6 +133,8 @@ export const LAUNCHPAD_SUBGRAPH_URL: { [chainId in number]: string } = {
     [ChainId.ZKMAINNET]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad'
 }
 
+export const githubAssetRepo =
+    'https://raw.githubusercontent.com/forbitswap/prediction-market-assets/main/'
 export const GAS_TOKEN: { [chainId in number]: Token[] } = {
     [ChainId.MUMBAI]: gasTokenMumbai,
     [ChainId.GOERLI]: gasTokenMumbai,

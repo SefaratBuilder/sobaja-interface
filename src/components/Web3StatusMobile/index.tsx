@@ -4,31 +4,24 @@ import PrimaryButton, { Button } from 'components/Buttons/PrimaryButton'
 import WalletModal from 'components/WalletModal'
 import { Activity } from 'react-feather'
 import { shortenAddress } from 'utils'
-import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
+import { useWeb3React } from '@web3-react/core'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { injected } from 'connectors'
 import arrowDown from 'assets/icons/arrow-down.svg'
+import { ListNetwork } from 'constants/networks/index'
+import { changeNetwork } from 'utils/network'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
-    const { account, connector, error } = useWeb3React()
+    const { account, connector, provider } = useWeb3React()
+    const error = undefined
     const { wallet } = useSmartAccountContext()
 
     function formatConnectorName(account: any) {
-        const { ethereum } = window
-        const isMetaMask = !!(ethereum && ethereum.isMetaMask)
-        const logo = Object.keys(SUPPORTED_WALLETS)
-            .filter(
-                (k) =>
-                    SUPPORTED_WALLETS[k].connector === connector &&
-                    (connector !== injected ||
-                        isMetaMask === (k === 'METAMASK')),
-            )
-            .map((k) => SUPPORTED_WALLETS[k].iconURL)[0]
         return (
             <Fragment>
                 <WalletName>
-                    <Icon src={logo}></Icon>
+                    <Icon src="https://picsum.photos/50/50"></Icon>
                     <span>{account && shortenAddress(account)}</span>
                 </WalletName>
                 <IconArrow src={arrowDown}></IconArrow>
@@ -50,13 +43,23 @@ const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
             return (
                 <Web3StatusConnect height={undefined}>
                     <NetworkIcon></NetworkIcon>
-                    <span>
+                    {/* <span>
                         {error instanceof UnsupportedChainIdError ? (
-                            <p>Wrong Network</p>
+                            <p
+                                onClick={() =>
+                                    changeNetwork(
+                                        ListNetwork[0].switchNetwork,
+                                        ListNetwork[0].name,
+                                    )
+                                }
+                            >
+                                Wrong Network
+                            </p>
                         ) : (
                             <p>Error</p>
                         )}
-                    </span>
+                    </span> */}
+                    <span>{error ? <p>Wrong Network</p> : <p>Error</p>}</span>
                 </Web3StatusConnect>
             )
         } else {

@@ -1,7 +1,7 @@
 import { Contract } from '@ethersproject/contracts'
 import { getAddress } from '@ethersproject/address'
 import { AddressZero } from '@ethersproject/constants'
-import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
+import { JsonRpcProvider, JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { ChainId, Token } from 'interfaces'
 import { add, div, divNumberWithDecimal, mul, sub } from './math'
@@ -43,39 +43,24 @@ export const shortenAddress = (address: string | null | undefined, chars = 4): s
     return `${parsed.substring(0, chars)}...${parsed.substring(42 - chars)}`
 }
 
-// account is not optional
-export function getSigner(
-    library: Web3Provider,
-    account: string,
-): JsonRpcSigner {
-    return library.getSigner(account).connectUnchecked()
+function getSigner(provider: JsonRpcProvider, account: string): JsonRpcSigner {
+    return provider.getSigner(account).connectUnchecked()
 }
 
 // account is optional
-export function getProviderOrSigner(
-    library: Web3Provider,
-    account?: string,
-): Web3Provider | JsonRpcSigner {
-    return account ? getSigner(library, account) : library
+function getProviderOrSigner(provider: JsonRpcProvider, account?: string): JsonRpcProvider | JsonRpcSigner {
+    return account ? getSigner(provider, account) : provider
 }
 
 // account is optional
-export function getContract(
-    address: string,
-    ABI: any,
-    library: Web3Provider,
-    account?: string,
-): Contract {
+export function getContract(address: string, ABI: any, provider: JsonRpcProvider, account?: string): Contract {
     if (!isAddress(address) || address === AddressZero) {
         throw Error(`Invalid 'address' parameter '${address}'.`)
     }
 
-    return new Contract(
-        address,
-        ABI,
-        getProviderOrSigner(library, account) as any,
-    )
+    return new Contract(address, ABI, getProviderOrSigner(provider, account) as any)
 }
+
 
 const ETHERSCAN_PREFIXES: { [chainId in ChainId]: string } = {
     [ChainId.GOERLI]: 'goerli.etherscan.io',
