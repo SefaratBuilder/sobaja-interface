@@ -101,7 +101,7 @@ const AA = () => {
             index: 0,
             accountAddress: smartAccountAddress
         })
-        const txn: any = {
+        const txn = {
             target: tokenContract.address,
             data: transferData,
             nonce: data.nonce,
