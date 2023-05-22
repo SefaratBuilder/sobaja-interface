@@ -48,8 +48,7 @@ const AA = () => {
     const { data } = useSmartAccount(newSmartAccount)
     const entryPointContract = useAAEntryPointContract()
     const { contract, smartAccountAtZero } = useAAFactory()
-    console.log('smartAccount at zero index', smartAccountAtZero)
-    console.log('addresssssss', contract?.address)
+
     const onDeployAccount = async () => {
         try {
             if (!contract || !account) return
@@ -98,12 +97,10 @@ const AA = () => {
     }
 
     const signUserOp = async () => {
-        if (!chainId || !account || !web3Provider || !provider) return
-        const owner = provider?.getSigner(account)
-        const pvd = new ethers.providers.JsonRpcProvider(
-            'https://testnet.era.zksync.dev',
-            { name: 'eratest', chainId: 280 },
-        )
+
+        if(!chainId || !provider || !account) return console.log('aaaa', !chainId, !provider, !account)
+        const owner = provider.getSigner(account)
+        const pvd = new ethers.providers.JsonRpcProvider('https://testnet.era.zksync.dev', {name: 'eratest', chainId: 280})
 
         const walletAPI = new SimpleAccountAPI({
             provider: pvd,
@@ -134,10 +131,8 @@ const AA = () => {
     const sendSignedUserOp = async () => {
         if (!entryPointContract || !signedUserOp) return
         setTxnLoading(true)
-        const callResult = await entryPointContract.handleOps(
-            [signedUserOp],
-            account,
-        )
+        console.log('oppppppsssss', signedUserOp)
+        const callResult = await entryPointContract.handleOps([signedUserOp], account)
         await callResult.wait()
         addTxn({
             hash: callResult.hash,

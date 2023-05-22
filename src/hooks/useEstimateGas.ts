@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Contract } from '@ethersproject/contracts'
 import { BigNumber } from '@ethersproject/bignumber'
 import { formatUnits } from '@ethersproject/units'
@@ -22,20 +22,20 @@ export function useEstimateGas(
 
     const delay = 2000 // debounce delay 2s
 
-    // create debounce version
-    // const debouncedContract = useDebounce(contract, delay)
-    const debouncedMethod = useDebounce(method(), delay)
-    const debouncedArgs = useDebounce(args(), delay)
+    const debouncedMethod: any = useDebounce(method, delay)
+    const debouncedArgs: any = useDebounce(args, delay)
 
     const getGasEstimate = async () => {
         try {
-            if (!debouncedArgs || !debouncedMethod || !contract) {
+            const method: any = debouncedMethod
+            const args: any = debouncedArgs
+            if (!args || !method || !contract) {
                 throw new Error('Invalid args parameter')
             }
-            if (debouncedMethod === 'approve') {
+            if (method === 'approve') {
                 const gasEstimate = await contract?.estimateGas?.[
-                    debouncedMethod
-                ]?.(...debouncedArgs.args)
+                    method
+                ]?.(...args.args)
                 if (!gasEstimate) {
                     throw new Error('Gas estimate not found')
                 }
@@ -53,9 +53,9 @@ export function useEstimateGas(
             }
 
             const gasEstimate = await contract?.estimateGas?.[
-                debouncedMethod
-            ]?.(...debouncedArgs.args, {
-                value: debouncedArgs.value,
+                method
+            ]?.(...args.args, {
+                value: args.value,
             })
             if (!gasEstimate) {
                 throw new Error('Gas estimate not found')
@@ -65,21 +65,20 @@ export function useEstimateGas(
             if (!gasPrice) {
                 throw new Error('Gas price not found')
             }
-            console.log('Real gas', formatUnits(gasPrice))
-
             const gasUsed = gasEstimate.mul(gasPrice)
-            console.log('Actual gas used:', formatUnits(gasUsed))
-
             return setGasUsed(formatUnits(gasUsed))
         } catch (e) {
-            // console.log(e)
             setGasUsed(undefined)
         }
     }
     useEffect(() => {
-        getGasEstimate()
+        if (contract && debouncedMethod && debouncedArgs)
+            getGasEstimate()
     }, [contract, debouncedMethod, debouncedArgs])
-    return gasUsed
+
+    return useMemo(() => {
+        return gasUsed
+    }, [gasUsed])
 }
 
 //The delay parameter determines how long to wait before treating rapid changes as "settled"
