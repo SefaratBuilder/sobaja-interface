@@ -1,3 +1,4 @@
+import { mulNumberWithDecimal } from 'utils/math';
 import { useSmartAccountContext } from "contexts/SmartAccountContext"
 import { useWeb3AuthContext } from "contexts/SocialLoginContext"
 import { Transaction } from "interfaces/smartAccount"
@@ -10,6 +11,8 @@ import { useActiveWeb3React } from "hooks"
 import { AAEntryPoints, AAFactory } from "constants/addresses"
 import { ethers } from "ethers"
 import { useAAEntryPointContract } from "./useContract"
+import { useToken } from "./useToken"
+import { useCurrencyBalance } from "./useCurrencyBalance"
 
 export const useSmartAccount = (address: string | undefined) => {
     const { web3Provider } = useWeb3AuthContext()
@@ -24,20 +27,23 @@ export const useSmartAccount = (address: string | undefined) => {
         'nonce',
         []
     )
+    const gasBalance = useCurrencyBalance(address, gasToken)
     const owner = useSingleCallResult(
         contract,
         'owner',
         []
     )
-    // console.log({ nonceResult, owner })
+
     const sendUserPaidTransaction = async (txns: Transaction[]) => {
         if (!wallet) throw ('Not connected')
-        // console.log({ txns })
         const feeQuotes = await wallet.getFeeQuotesForBatch({
             transactions: txns
         })
-        console.log(txns, feeQuotes)
-        const feeQuote = feeQuotes.find(fq => fq.address == gasToken.address)
+        let feeQuote = feeQuotes.find(fq => fq?.address == gasToken?.address)
+
+        //fallback native coin for paying gas fee when user has no enough balance
+        if (!gasBalance || feeQuote?.payment >= mulNumberWithDecimal(gasBalance, gasToken.decimals)) feeQuote = feeQuotes[0]
+
         const paidTransaction = await wallet.createUserPaidTransactionBatch({
             transactions: txns,
             feeQuote: feeQuote || feeQuotes[0]
@@ -49,8 +55,6 @@ export const useSmartAccount = (address: string | undefined) => {
     const signAndSendUserOps = async (txns: Transaction) => {
         if (!provider || !chainId || !account || !web3Provider || !entryPointContract) return
         const owner = provider.getSigner(account)
-        console.log(provider)
-        console.log(web3Provider)
         const walletAPI = new SimpleAccountAPI({
             provider: provider,
             entryPointAddress: AAEntryPoints[chainId],
@@ -59,7 +63,6 @@ export const useSmartAccount = (address: string | undefined) => {
             index: 0,
             accountAddress: '0xCB7c527e22307529F803A5A3CB73BFe5E60b39d9'
         })
-        console.log({ walletAPI, owner })
         const op = await walletAPI.createSignedUserOp({
             target: txns.to,
             data: txns.data ?? '0x',
@@ -75,12 +78,7 @@ export const useSmartAccount = (address: string | undefined) => {
         const callResult = await entryPointContract.handleOps([op], account)
         console.log('callResult', callResult)
     }
-    // console.log({ wallet })
 
-    // useEffect(() => {
-    //     if (provider)
-    //         // console.log('signer =>>>>>>>>>', provider.getSigner())
-    // }, [provider])
     return useMemo(() => {
         return {
             contract,

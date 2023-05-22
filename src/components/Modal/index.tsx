@@ -17,7 +17,6 @@ interface ModalProps {
 }
 
 const Modal = (props: ModalProps) => {
-    console.log('🤦‍♂️ ⟹ Modal ⟹ props:', props)
     const [isOpen, setIsOpen] = useState(false)
     const handleOpen = () => setIsOpen(true)
     const handleClose = () => setIsOpen(false)

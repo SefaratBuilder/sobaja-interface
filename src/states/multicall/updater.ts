@@ -37,9 +37,7 @@ async function fetchChunk(
         ;[resultsBlockNumber, returnData] = await multicallContract.aggregate(
             chunk.map((obj) => [obj.address, obj.callData]),
         )
-        console.log('chunk map', chunk.map((obj) => [obj.address, obj.callData]))
     } catch (error) {
-        console.log('asdaskdjasdh', error)
         throw error
     }
 
