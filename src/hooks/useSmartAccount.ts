@@ -28,6 +28,11 @@ export const useSmartAccount = (address: string | undefined) => {
         'nonce',
         []
     )
+    const domainSeparator = useSingleCallResult(
+        contract,
+        'domainSeparator',
+        []
+    )
 
     // const chainid = useSingleCallResult(
     //     contract,
@@ -35,11 +40,13 @@ export const useSmartAccount = (address: string | undefined) => {
     //     []
     // )
 
-    // const owner = useSingleCallResult(
-    //     contract,
-    //     'owner',
-    //     []
-    // )
+    // console.log('chainIddddd', chainid)
+
+    const owner = useSingleCallResult(
+        contract,
+        'owner',
+        []
+    )
 
     const sendUserPaidTransaction = async (txns: Transaction[]) => {
         if (!wallet) throw ('Not connected')
@@ -60,29 +67,30 @@ export const useSmartAccount = (address: string | undefined) => {
         })
     }
     const signAndSendUserOps = async (txns: Transaction) => {
-        if (!provider || !chainId || !account || !web3Provider || !entryPointContract) return
-        const owner = provider.getSigner(account)
+        if (!provider || !chainId || !account || !entryPointContract || !owner || !contract) return
+        const ownerSigner = provider.getSigner(owner.result?.[0])
+        console.log({ ownerSigner })
         const walletAPI = new SimpleAccountAPI({
             provider: provider,
             entryPointAddress: AAEntryPoints[chainId],
-            owner,
+            owner: ownerSigner,
             factoryAddress: AAFactory[chainId],
             index: 0,
-            accountAddress: '0xCB7c527e22307529F803A5A3CB73BFe5E60b39d9'
+            accountAddress: contract.address
         })
         const op = await walletAPI.createSignedUserOp({
             target: txns.to,
             data: txns.data ?? '0x',
             nonce: txns.nonce,
-            value: txns.value ?? '0'
+            value: txns.value ?? '0',
+            owner: ownerSigner._address
         })
         op.signature = await op.signature
         op.nonce = await op.nonce
         op.sender = await op.sender
         op.preVerificationGas = await op.preVerificationGas
-        op.initCode = '0x'
         console.log({ op })
-        const callResult = await entryPointContract.handleOps([op], account)
+        const callResult = await entryPointContract.handleOps([op], account, { value: '40' })
         console.log('callResult', callResult)
     }
 

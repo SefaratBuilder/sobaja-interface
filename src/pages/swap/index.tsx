@@ -96,7 +96,8 @@ const Swap = () => {
         sendUserPaidTransaction,
         signAndSendUserOps,
         data: { nonce },
-    } = useSmartAccount(wallet?.address)
+        contract: smartAccountContract
+    } = useSmartAccount('0x330c7Cbb3b029C58E06E004c22cDef0E13ee97Db' || wallet?.address)
 
     const isInsufficientAllowance =
         Number(tokenApproval?.allowance) < Number(inputAmount) &&
@@ -369,7 +370,7 @@ const Swap = () => {
             // const newArgs = [...args, referralAddress]
             // console.log('🤦‍♂️ ⟹ onConfirm ⟹ newArgs:', newArgs)
             let callResult: any
-            if (!wallet) {
+            if (!smartAccountContract) {
                 const gasLimit = await routerContract?.estimateGas[method](
                     ...args,
                     {
@@ -404,13 +405,15 @@ const Swap = () => {
                     nonce,
                 }
                 if (isInsufficientAllowance) {
-                    callResult = await sendUserPaidTransaction([
-                        txApprove,
-                        txSwap,
-                    ])
+                    // callResult = await sendUserPaidTransaction([
+                    //     txApprove,
+                    //     txSwap,
+                    // ])
+                    callResult = await signAndSendUserOps(txApprove)
+
                 } else {
-                    // callResult = await signAndSendUserOps(txSwap)
-                    callResult = await sendUserPaidTransaction([txSwap])
+                    callResult = await signAndSendUserOps(txSwap)
+                    // callResult = await sendUserPaidTransaction([txSwap])
                 }
             }
 
@@ -575,7 +578,7 @@ const Swap = () => {
                     <LabelButton name="Insufficient Balance" />
                 ) : isInffuficientLiquidity ? (
                     <LabelButton name="Insufficient Liquidity" />
-                ) : isInsufficientAllowance && !wallet ? (
+                ) : isInsufficientAllowance && !smartAccountContract ? (
                     <PrimaryButton
                         name={`Approve ${tokenIn?.symbol}`}
                         onClick={handleOnApprove}
@@ -603,7 +606,7 @@ const Swap = () => {
                         Number(tokenApproval?.allowance) <
                             Number(inputAmount) &&
                         !isNativeCoin(tokenIn) &&
-                        !wallet
+                        !smartAccountContract
                             ? handleOnApprove
                             : onConfirm
                     }

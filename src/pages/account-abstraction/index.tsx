@@ -17,7 +17,7 @@ import { useAAFactory } from 'hooks/useAAFactory';
 import { AAEntryPoints, AAFactory } from 'constants/addresses';
 import { useToken } from 'hooks/useToken';
 
-const smartAccountAddress = '0xa7A307a366B6056da5dcD16FefD918A75b404105'
+const smartAccountAddress = '0x330c7Cbb3b029C58E06E004c22cDef0E13ee97Db'
 
 const AA = () => {
     const { account, provider, chainId } = useActiveWeb3React()
@@ -37,7 +37,7 @@ const AA = () => {
     const { contract, smartAccountAtZero } = useAAFactory()
     const balanceToken = useCurrencyBalance(smartAccountAddress || wallet?.address?.toLowerCase(), tokenType)
     const balances = useCurrencyBalances(smartAccountAddress || wallet?.address?.toLowerCase(), [NATIVE_COIN[80001]])
-    console.log({balanceToken})
+
     const onDeployAccount = async () => {
         try {
             if (!contract || !account) return
@@ -105,7 +105,8 @@ const AA = () => {
             target: tokenContract.address,
             data: transferData,
             nonce: data.nonce,
-            owner: account
+            owner: account,
+            value: 0
         }
 
         const op = await walletAPI.createSignedUserOp(txn)
@@ -120,7 +121,7 @@ const AA = () => {
     const sendSignedUserOp = async () => {
         if(!entryPointContract || !signedUserOp) return 
         setTxnLoading(true)
-        const callResult = await entryPointContract.handleOps([signedUserOp], account)
+        const callResult = await entryPointContract.handleOps([signedUserOp], account, { value: 11 })
         await callResult.wait()
         addTxn({
             hash: callResult.hash,
