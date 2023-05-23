@@ -382,11 +382,14 @@ const Container = styled.div<{ isConnected: boolean }>`
     top: 0px;
     height: 100vh;
     margin: auto;
-    animation: fadeIn 0.3s linear;
+    /* animation: fadeIn 0.3s linear; */
     z-index: 9999;
-    opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
+    /* opacity: ${({ isConnected }) => (isConnected ? 1 : 0)}; */
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
     color: ${({ theme }) => theme.text1};
+    animation: ${({ isConnected }) =>
+        isConnected ? ` fadeIn 0.3s linear` : ` fadeUp 0.3s linear`};
+
     @media screen and (max-width: 640px) {
         top: 10rem;
         max-width: unset;

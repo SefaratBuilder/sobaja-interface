@@ -157,7 +157,7 @@ const NetworkButton = styled.div`
     }
 `
 const DropDownMainNet = styled.div<{ networkModal: boolean }>`
-    display: ${({ networkModal }) => (networkModal ? 'block' : 'none')};
+    /* display: ${({ networkModal }) => (networkModal ? 'block' : 'none')}; */
     /* z-index: ${({ networkModal }) => (networkModal ? '2' : '0')}; */
     z-index: 3;
     height: fit-content;
@@ -212,6 +212,52 @@ const DropDownMainNet = styled.div<{ networkModal: boolean }>`
         img {
             height: 12px;
             width: 12px;
+        }
+    }
+
+    animation: ${({ networkModal }) =>
+        networkModal
+            ? `dropdown 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) both`
+            : `fadeOut 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) both`};
+
+    @keyframes dropdown {
+        0% {
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+        }
+        40% {
+            opacity: 0.2;
+            height: 20px;
+            overflow: hidden;
+        }
+        80% {
+            opacity: 0.8;
+            height: 100px;
+            overflow: hidden;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+    @keyframes fadeOut {
+        0% {
+            opacity: 1;
+        }
+        40% {
+            opacity: 0.4;
+            height: 60px;
+            overflow: hidden;
+        }
+        80% {
+            opacity: 0.1;
+            height: 20px;
+            overflow: hidden;
+        }
+        100% {
+            height: 0px;
+            opacity: 0;
+            overflow: hidden;
         }
     }
 `

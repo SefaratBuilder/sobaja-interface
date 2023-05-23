@@ -154,22 +154,50 @@ export const GlobalStyle = createGlobalStyle`
         position: fixed!important;
         right: 0!important;
 
-        top: 9%!important;
+        top: 121.49px!important;
         height: 100vh!important;
         /* width: 400px!important; */
         max-width: 400px!important;
-    width: 100%!important;
+        width: 100%!important;
         background: url(${BgWallet})!important;
         background-size: cover;
         background-repeat: no-repeat;
         z-index: 1000!important;
         padding: 20px !important;
+        border-top: 1px solid #003b5c;
+        border-left: 1px solid #003b5c;
+        /* border: 1px solid #003b5c; */
 
+        
+        animation: fadeIn 0.4s ease-in-out;
         @media screen and (max-width: 1100px) {
-        top: unset!important;
-        bottom: 0!important;
-        /* min-height: 600px; */
-        height: 600px!important;
+            top: unset!important;
+            bottom: 0!important;
+            /* min-height: 600px; */
+            height: 600px!important;
+            animation: fadeUp 0.3s linear;
+        }
+
+    @keyframes fadeIn {
+        from {
+            transform: translateX(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(0px);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeUp {
+        from {
+            transform: translateY(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(0px);
+            opacity: 1;
+        }
     }
     }
 

@@ -18,6 +18,7 @@ import GasSetting from './GasSetting'
 import { useAppDispatch } from 'states/hook'
 import { updateSelectedWallet } from 'states/user/reducer'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
+import { ChainId } from 'utils/chainConfig'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
     openOptions: React.Dispatch<React.SetStateAction<void>>
@@ -68,7 +69,9 @@ const AccountDetails = ({
 
     const handleOnConnectSmartAccount = async () => {
         try {
-            connect()
+            setToggleWalletModal(false)
+            await connect()
+            setToggleWalletModal(true)
         } catch (err) {
             console.log('failed to connect to smart account: ', err)
         }
@@ -216,23 +219,70 @@ const AccountDetails = ({
 
 const LabelRight = styled.div`
     position: fixed;
-    right: 0;
+    /* top: 9%; */
+    /* right: 0;
 
-    top: 9%;
     height: 100vh;
-    /* width: 400px; */
     max-width: 400px;
     width: 100%;
+    z-index: 999;
     background: url(${BgWallet});
     background-size: cover;
     background-repeat: no-repeat;
-    z-index: 999;
-
+    
     @media screen and (max-width: 1100px) {
         top: unset;
         bottom: 0;
-        /* min-height: 600px; */
         height: 600px;
+    } */
+    background: url(${BgWallet});
+    background-size: cover;
+    background-repeat: no-repeat;
+    opacity: 1;
+    /* border: 1px solid #003b5c; */
+    border-top: 1px solid #003b5c;
+    border-left: 1px solid #003b5c;
+    box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
+    overflow: auto;
+    max-width: 400px;
+    width: 100%;
+    right: 0px;
+    bottom: 0px;
+    top: 121.49px;
+
+    height: 100vh;
+    animation: fadeIn 0.4s ease-in-out;
+    z-index: 999;
+
+    @media screen and (max-width: 1100px) {
+        animation: fadeUp 0.3s linear;
+        height: 600px;
+        bottom: 0;
+        top: unset;
+    }
+    @media screen and (max-width: 432px) {
+        width: 90%;
+    }
+    @keyframes fadeIn {
+        from {
+            transform: translateX(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(0px);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeUp {
+        from {
+            transform: translateY(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(0px);
+            opacity: 1;
+        }
     }
 `
 
@@ -605,8 +655,8 @@ const WrapConnectModal = styled(Container)`
     @media screen and (max-width: 391px) {
         width: 90%;
         margin: auto;
-        right: 10px;
-        max-width: 300px;
+        /* right: 10px; */
+        /* max-width: 300px; */
     }
 `
 

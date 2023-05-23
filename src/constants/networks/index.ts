@@ -1,5 +1,6 @@
 import LogoERA from 'assets/token-logos/era.svg'
 import LogoMatic from 'assets/token-logos/matic.svg'
+import LogoETH from 'assets/token-logos/eth.svg'
 import { Token, TokenList, ChainId } from 'interfaces/index'
 
 export const ListNetwork = [
@@ -57,6 +58,24 @@ export const ListNetwork = [
             },
         ],
     },
+    {
+        name: 'Goerli',
+        chainId: ChainId.GOERLI,
+        logo: LogoETH,
+        switchNetwork: [
+            {
+                chainId: ChainId.GOERLI,
+                chainName: 'Goerli',
+                nativeCurrency: {
+                    name: 'ETH',
+                    symbol: 'ETH',
+                    decimals: 18,
+                },
+                rpcUrls: ['https://goerli.infura.io/v3/'],
+                blockExplorerUrls: ['https://goerli.etherscan.io'],
+            },
+        ],
+    },
     // { name: 'Mainet', logo: LogoERA, className: 'button-era', url: '' },
     // { name: 'Testnet', logo: LogoERA, className: 'button-era', url: '' },
 ]
@@ -75,5 +94,9 @@ export const InfoNetwork: {
     [ChainId.MUMBAI]: {
         name: 'Mumbai',
         logo: LogoMatic,
+    },
+    [ChainId.GOERLI]: {
+        name: 'Goerli',
+        logo: LogoETH,
     },
 }
