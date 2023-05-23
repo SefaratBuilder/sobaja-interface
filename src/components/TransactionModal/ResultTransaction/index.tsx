@@ -7,6 +7,7 @@ import imgError from 'assets/icons/error.svg'
 import { useAppState } from 'states/application/hooks'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { useEffect, useRef } from 'react'
+import Blur from 'components/Blur'
 
 interface ResultModal {
     isSuccess: boolean
@@ -28,36 +29,42 @@ const ResultTransactionModal = ({
     })
 
     return (
-        <Container
-        // ref={ref}
-        >
-            {/* <Header>
+        <>
+            <Container
+            // ref={ref}
+            >
+                {/* <Header>
                 <ImgClose
                     src={imgClose}
                     alt=""
                     onClick={() => setOpenModal(false)}
                 />
             </Header> */}
-            <WrapContent>
-                <WrapInfoLoad>
-                    <div className={isSuccess ? '' : 'error'}>
-                        {isSuccess
-                            ? 'Transaction Submitted'
-                            : error?.data
-                            ? error?.data
-                            : error}
-                    </div>
-                </WrapInfoLoad>
-                <WrapImgResult>
-                    <img src={`${isSuccess ? imgSuccess : imgError}`} alt="" />
-                </WrapImgResult>
-            </WrapContent>
-            <PrimaryButton
-                type="modal"
-                name="Close"
-                onClick={() => setOpenModal(false)}
-            />
-        </Container>
+                <WrapContent>
+                    <WrapInfoLoad>
+                        <div className={isSuccess ? '' : 'error'}>
+                            {isSuccess
+                                ? 'Transaction Submitted'
+                                : error?.data
+                                ? error?.data
+                                : error}
+                        </div>
+                    </WrapInfoLoad>
+                    <WrapImgResult>
+                        <img
+                            src={`${isSuccess ? imgSuccess : imgError}`}
+                            alt=""
+                        />
+                    </WrapImgResult>
+                </WrapContent>
+                <PrimaryButton
+                    type="modal"
+                    name="Close"
+                    onClick={() => setOpenModal(false)}
+                />
+            </Container>
+            <Blur />
+        </>
     )
 }
 

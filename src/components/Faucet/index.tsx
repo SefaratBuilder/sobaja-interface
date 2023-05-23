@@ -19,6 +19,8 @@ import ComponentsTransaction, {
 import { URLSCAN_BY_CHAINID, ZERO_ADDRESS } from 'constants/index'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import axios from 'axios'
+import { FaucetTokens } from 'constants/addresses'
+import { ChainId } from 'interfaces'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
@@ -29,7 +31,11 @@ const Faucet = () => {
     const { addTxn } = useTransactionHandler()
 
     const isDisable = useMemo(
-        () => (chainId && chainId != 280) || false,
+        () =>
+            (chainId &&
+                chainId !== ChainId.ZKTESTNET &&
+                chainId !== ChainId.GOERLI) ||
+            false,
         [chainId],
     )
 
@@ -43,39 +49,18 @@ const Faucet = () => {
     }, [isDislayFaucet])
 
     const listFaucet = useMemo(() => {
-        return chainId === 280
-            ? [
-                  {
-                      address: ZERO_ADDRESS,
-                      symbol: 'ETH',
-                      type: 'faucet',
-                      logoURI: ETH,
-                      chainId: 280,
-                  },
-                  ...tokenList.filter(
-                      (token) =>
-                          token.chainId === 280 && token?.type === 'faucet',
-                  ),
-              ]
-                  .map((i) => i.symbol)
-                  .reduce((a: any, b: any) => {
-                      return a + ', ' + b
-                  })
-            : tokenList
-                  .filter(
-                      (token) =>
-                          token.chainId === 280 && token?.type === 'faucet',
-                  )
-                  .map((i) => i.symbol)
-                  .reduce((a: any, b: any) => {
-                      return a + ', ' + b
-                  })
+        return chainId &&
+            FaucetTokens?.[chainId] &&
+            FaucetTokens?.[chainId].length > 0
+            ? FaucetTokens?.[chainId].map((i) => i.symbol)
+            : []
     }, [tokenList, chainId])
 
     const handleFaucetETH = async () => {
         setIsDisplayFaucet(false)
 
         try {
+            if (!chainId) return
             console.log('Faucet....')
             initDataTransaction.setIsOpenWaitingModal(true)
             const dataFaucet = await axios({
@@ -84,6 +69,7 @@ const Faucet = () => {
                 url: 'https://sobajaswap.com/api/faucet',
                 params: {
                     to: account,
+                    chainId,
                 },
             })
             if (dataFaucet.status === 200) {
@@ -151,71 +137,91 @@ const Faucet = () => {
     }
 
     const showMintCoins = () => {
-        if (tokenList && tokenList.length > 0) {
-            const tokens =
-                chainId === 280
-                    ? [
-                          {
-                              address: ZERO_ADDRESS,
-                              symbol: 'ETH',
-                              type: 'faucet',
-                              logoURI: ETH,
-                              chainId: 280,
-                          },
-                          ...tokenList.sort((a, b) => {
-                              const symbolA = a.symbol.toUpperCase() // ignore upper and lowercase
-                              const symbolB = b.symbol.toUpperCase() // ignore upper and lowercase
-                              if (symbolA < symbolB) {
-                                  return -1
-                              }
-                              if (symbolA > symbolB) {
-                                  return 1
-                              }
+        if (chainId && FaucetTokens?.[chainId].length > 0) {
+            const sortList = FaucetTokens?.[chainId]
+            // .sort((a, b) => {
+            //     const symbolA = a.symbol.toUpperCase() // ignore upper and lowercase
+            //     const symbolB = b.symbol.toUpperCase() // ignore upper and lowercase
+            //     if (symbolA < symbolB) {
+            //         return -1
+            //     }
+            //     if (symbolA > symbolB) {
+            //         return 1
+            //     }
 
-                              return 0
-                          }),
-                      ]
-                    : tokenList
-            return tokens.map((item, index) => {
-                if (item.type == 'faucet' && item.chainId == 280) {
-                    return (
-                        <PrimaryButton
-                            key={index}
-                            name={item.symbol}
-                            onClick={() =>
-                                item.address === ZERO_ADDRESS
-                                    ? handleFaucetETH()
-                                    : clickFaucetToken(item.address)
-                            }
-                            disabled={isDisable}
-                            img={item.symbol == 'USDT' ? usdt : item.logoURI}
-                            type={'faucet'}
-                        />
-                        // <MintCoinButton
-                        //     key={item.address}
-                        //     onClick={() => {
-                        //         clickFaucetToken(item.address)
-                        //     }}
-                        //     isDisable={isDisable}
-                        // >
-                        //     <Icon
-                        //         src={
-                        //             item.symbol == 'USDT' ? usdt : item.logoURI
-                        //         }
-                        //     ></Icon>
-                        //     <div>{item.symbol}</div>
-                        // </MintCoinButton>
-                    )
-                }
+            //     return 0
+            // })
+            return sortList.map((item, index) => {
+                return (
+                    <PrimaryButton
+                        key={index}
+                        name={item.symbol}
+                        onClick={() =>
+                            item.address === ZERO_ADDRESS
+                                ? handleFaucetETH()
+                                : clickFaucetToken(item.address)
+                        }
+                        disabled={isDisable}
+                        img={item.symbol == 'USDT' ? usdt : item.logoURI}
+                        type={'faucet'}
+                    />
+                )
             })
         }
+
+        // if (tokenList && tokenList.length > 0) {
+        //     const tokens =
+        //         chainId === 280
+        //             ? [
+        //                   {
+        //                       address: ZERO_ADDRESS,
+        //                       symbol: 'ETH',
+        //                       type: 'faucet',
+        //                       logoURI: ETH,
+        //                       chainId: 280,
+        //                   },
+        //                   ...tokenList.sort((a, b) => {
+        //                       const symbolA = a.symbol.toUpperCase() // ignore upper and lowercase
+        //                       const symbolB = b.symbol.toUpperCase() // ignore upper and lowercase
+        //                       if (symbolA < symbolB) {
+        //                           return -1
+        //                       }
+        //                       if (symbolA > symbolB) {
+        //                           return 1
+        //                       }
+
+        //                       return 0
+        //                   }),
+        //               ]
+        //             : tokenList
+        //     return tokens.map((item, index) => {
+        //         if (item.type == 'faucet' && item.chainId == 280) {
+        //             return (
+        //                 <PrimaryButton
+        //                     key={index}
+        //                     name={item.symbol}
+        //                     onClick={() =>
+        //                         item.address === ZERO_ADDRESS
+        //                             ? handleFaucetETH()
+        //                             : clickFaucetToken(item.address)
+        //                     }
+        //                     disabled={isDisable}
+        //                     img={item.symbol == 'USDT' ? usdt : item.logoURI}
+        //                     type={'faucet'}
+        //                 />
+        //             )
+        //         }
+        //     })
+        // }
     }
 
     return (
         <>
-            <BtnFaucet onClick={() => setIsDisplayFaucet(!isDislayFaucet)}>
-                Faucet
-            </BtnFaucet>
+            {(chainId === ChainId.GOERLI || chainId === ChainId.ZKTESTNET) && (
+                <BtnFaucet onClick={() => setIsDisplayFaucet(!isDislayFaucet)}>
+                    Faucet
+                </BtnFaucet>
+            )}
             <ComponentsTransaction
                 data={initDataTransaction}
                 onConfirm={() => {}}
@@ -243,7 +249,7 @@ const Faucet = () => {
                             </ContentFaucet>
                             <CoinButton>
                                 {showMintCoins()}
-                                {chainId !== 280 && (
+                                {/* {chainId !== 280 && (
                                     <Row>
                                         <Error fontSize="14px">
                                             Wrong network! Please switch to
@@ -251,7 +257,7 @@ const Faucet = () => {
                                             tokens.
                                         </Error>
                                     </Row>
-                                )}
+                                )} */}
                             </CoinButton>
                         </BodyModalFaucet>
                     </ContainerFaucetModal>

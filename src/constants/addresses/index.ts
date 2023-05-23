@@ -3,7 +3,9 @@ import FACTORY_ABI from '../jsons/factory.json'
 import ROUTER_ABI from '../jsons/router.json'
 import FAUCET_ABI from '../jsons/faucet.json'
 import STAKING_ABI from '../jsons/staking.json'
-import { ChainId } from 'interfaces'
+import { ChainId, Token } from 'interfaces'
+import ETH from 'assets/token-logos/eth.svg'
+
 
 const MULTICALL_NETWORKS: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441',
@@ -71,7 +73,7 @@ export const WRAPPED_NATIVE_ADDRESSES: { [chainId: number]: string } = {
 
 const Faucet: { [chainId: number]: string } = {
     [ChainId.ZKTESTNET]: '0x512f8823C8541e371c6eAB6eee22d5CaB9945a7E',
-    [ChainId.GOERLI]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+    [ChainId.GOERLI]: '0x433468E86fFb24b79df22E0b11d14517f967aabe',
     [ChainId.MUMBAI]: '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
     [ChainId.ZKMAINNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
 }
@@ -90,6 +92,97 @@ const AAFactory: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0xAAC689E7b679F03CD5ef2b8A888e7a709966cF84',
 }
 
+const FaucetTokens: { [chainId: number]: Array<Token> } = {
+    [ChainId.ZKTESTNET]: [
+        {
+            "address": '0x0000000000000000000000000000000000000000',
+            "symbol": "ETH",
+            "decimals": 18,
+            "logoURI": ETH,
+            "name": "Ethereum",
+            "chainId": ChainId.ZKTESTNET,
+        },
+        {
+            "address": "0x9CB9f4b656C81De33378E34A58fd78889Cb54d52",
+            "symbol": "BTC",
+            "decimals": 18,
+            "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/wbtc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+            "name": "Bitcoin",
+            "chainId": ChainId.ZKTESTNET,
+        },
+        {
+            "address": "0x14b92edf57277eBd00c3B7C3C3C714f7F7aa45AB",
+            "symbol": "DAI",
+            "decimals": 18,
+            "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/dai.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+            "name": "DAI",
+            "chainId": ChainId.ZKTESTNET,
+        },
+        {
+            "address": "0x400de4eC1f3B697aAb2f60dFEb089859c85db58d",
+            "symbol": "USDC",
+            "decimals": 18,
+            "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/usdc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+            "name": "USD Coin",
+            "chainId": ChainId.ZKTESTNET,
+        },
+        {
+            "address": "0xDf9acc0a00Ae6Ec5eBc8D219d12A0157e7F18A68",
+            "symbol": "USDT",
+            "decimals": 18,
+            "logoURI": "https://raw.githubusercontent.com/forbitspace/icons/main/token/usdt.jpg",
+            "name": "USDT Coin",
+            "chainId": ChainId.ZKTESTNET,
+        },
+
+    ],
+    [ChainId.ZKMAINNET]: [],
+    [ChainId.GOERLI]: [
+        {
+            "address": '0x0000000000000000000000000000000000000000',
+            "symbol": "ETH",
+            "decimals": 18,
+            "logoURI": ETH,
+            "name": "Ethereum",
+            "chainId": ChainId.GOERLI,
+        },
+        {
+            "address": "0xeb456fBD8ED9ad79F4F72B13514Aa7fD37Ea2f91",
+            "symbol": "BTC",
+            "decimals": 18,
+            "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/wbtc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+            "name": "Bitcoin",
+            "chainId": ChainId.GOERLI,
+        }, {
+            "address": "0x161d04115afA19Ce3eEe85cca184E7e07811Ce8b",
+            "symbol": "DAI",
+            "decimals": 18,
+            "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/dai.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+            "name": "DAI",
+            "chainId": ChainId.GOERLI,
+        },
+        {
+            "address": "0xC4a71a882D95B97d4356B0FA1169f9d262A0396b",
+            "symbol": "USDC",
+            "decimals": 18,
+            "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/usdc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+            "name": "USD Coin",
+            "chainId": ChainId.GOERLI,
+        },
+        {
+            "address": "0xA6fB84257E1Abf6903d9d8d8c5CA4ce8bE9B2920",
+            "symbol": "USDT",
+            "decimals": 18,
+            "logoURI": "https://raw.githubusercontent.com/forbitspace/icons/main/token/usdt.jpg",
+            "name": "USDT Coin",
+            "chainId": ChainId.GOERLI,
+        },
+    ],
+    [ChainId.MUMBAI]: []
+}
+
+
+
 export {
     MULTICALL_ABI,
     MULTICALL_NETWORKS,
@@ -106,5 +199,6 @@ export {
     STAKING_TOKEN,
     STAKING_ABI,
     AAEntryPoints,
-    AAFactory
+    AAFactory,
+    FaucetTokens
 }

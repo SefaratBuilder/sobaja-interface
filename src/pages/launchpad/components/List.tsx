@@ -43,6 +43,7 @@ const ListLaunchpad = ({
     initDataTransaction,
 }: IListLaunchpad) => {
     const { data, refetch } = useQueryLaunchpad()
+    console.log('🤦‍♂️ ⟹ data:', data)
     const { launchpads } = data
     // const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()

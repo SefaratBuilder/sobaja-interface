@@ -122,5 +122,37 @@
         "logoURI": "/images/sbj.svg",
         "name": "Sobaja Coin",
         "chainId": 280
+    },
+    {
+        "address": "0xeb456fBD8ED9ad79F4F72B13514Aa7fD37Ea2f91",
+        "symbol": "BTC",
+        "decimals": 18,
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/wbtc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "name": "Bitcoin",
+        "chainId": 5
+    },
+    {
+        "address": "0x161d04115afA19Ce3eEe85cca184E7e07811Ce8b",
+        "symbol": "DAI",
+        "decimals": 18,
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/dai.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "name": "DAI",
+        "chainId": 5
+    },
+    {
+        "address": "0xC4a71a882D95B97d4356B0FA1169f9d262A0396b",
+        "symbol": "USDC",
+        "decimals": 18,
+        "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/usdc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
+        "name": "USD Coin",
+        "chainId": 5
+    },
+    {
+        "address": "0xA6fB84257E1Abf6903d9d8d8c5CA4ce8bE9B2920",
+        "symbol": "USDT",
+        "decimals": 18,
+        "logoURI": "https://raw.githubusercontent.com/forbitspace/icons/main/token/usdt.jpg",
+        "name": "USDT Coin",
+        "chainId": 5
     }
 ]
