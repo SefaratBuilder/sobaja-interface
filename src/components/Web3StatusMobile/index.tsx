@@ -128,6 +128,7 @@ const WalletName = styled.div`
 const Icon = styled.img`
     height: 20px;
     width: 20px;
+    border-radius: 50%;
 `
 
 const Web3StatusConnect = styled(Button)`
