@@ -10,15 +10,9 @@ const Updater = () => {
 
     useEffect(() => {
         if (chainId) {
-            // const newSwapState = swapState.tokenIn?.address === "0x0000000000000000000000000000000000000000" ?
-            //     { ...swapState, tokenIn: NATIVE_COIN[chainId] } :
-            //     swapState.tokenOut?.address === "0x0000000000000000000000000000000000000000" ?
-            //         { ...swapState, tokenIn: NATIVE_COIN[chainId] }
-            //         : swapState
             const newSwapState = { ...swapState, tokenIn: NATIVE_COIN[chainId], tokenOut: undefined }
             onChangeSwapState(newSwapState)
         }
-        console.log('updating swap state...')
     }, [chainId])
 
     return null

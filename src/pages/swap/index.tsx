@@ -168,7 +168,6 @@ const Swap = () => {
             else return 'swapTokensForExactTokens'
         }
     }, [swapType, tokenIn, tokenOut])
-    // console.log('PAIR:', pair)
 
     const getSwapArguments = useCallback(() => {
         if (!inputAmount || !outputAmount || !tokenIn || !tokenOut || !chainId)
