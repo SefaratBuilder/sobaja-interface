@@ -263,7 +263,13 @@ const Faucet = () => {
                         <BodyModalFaucet>
                             <ContentFaucet>
                                 <TextCoin>
-                                    Get {listFaucet} for testing zkSync Testnet
+                                    Get {listFaucet} for testing{' '}
+                                    {
+                                        listFaucetETH.find(
+                                            (network) =>
+                                                network.chainId === chainId,
+                                        )?.name
+                                    }{' '}
                                     on Sobajaswap, test token can nullify the
                                     reality of Mainnet.
                                 </TextCoin>
@@ -316,7 +322,13 @@ const Faucet = () => {
                         })}
                     </SelectNetwork>
                     <p className="details">
-                        Fast and reliable. 0.05 Goerli ETH/day.
+                        Fast and reliable. 0.05{' '}
+                        {
+                            listFaucetETH.find(
+                                (network) => network.chainId === chainId,
+                            )?.name
+                        }{' '}
+                        ETH/day.
                     </p>
                     <p className="details-step">
                         Step {stepFaucet ? stepFaucet + 1 : 1}:{' '}
