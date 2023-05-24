@@ -206,6 +206,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                 />
             )
         }
+
         return (
             <Container isConnected={true}>
                 <Header>

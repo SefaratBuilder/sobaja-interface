@@ -34,3 +34,7 @@ export const updateGasToken = createAction<Token>(
     'application/updateGasToken',
 )
 
+export const updateStepFaucet = createAction<number>(
+    'application/updateStepFaucet'
+)
+

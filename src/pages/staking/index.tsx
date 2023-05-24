@@ -120,7 +120,7 @@ const Stake = () => {
                     initDataTransaction.isOpenResultModal ||
                     initDataTransaction.isOpenWaitingModal) && <Blur />}
             </>
-            <ToastMessage />
+            {/* <ToastMessage /> */}
             <WrapContainer>
                 <StakingContainer ref={ref}>
                     {!account && isOpenWalletModal && (

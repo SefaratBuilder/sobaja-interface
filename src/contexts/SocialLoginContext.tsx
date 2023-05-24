@@ -3,6 +3,7 @@ import { ethers } from 'ethers'
 import SocialLogin from '@biconomy/web3-auth'
 import { activeChainId } from '../utils/chainConfig'
 import { useActiveWeb3React } from 'hooks'
+import { ChainId } from 'interfaces'
 
 interface web3AuthContextType {
     connect: () => Promise<SocialLogin | null | undefined>
@@ -54,15 +55,21 @@ export const Web3AuthProvider = ({ children }: any) => {
     const [socialLoginSDK, setSocialLoginSDK] = useState<SocialLogin | null>(
         null,
     )
-    const providerWeb3 = useActiveWeb3React()
+
+    // const providerWeb3 = useActiveWeb3React()
+    // useEffect(() => {
+    //     if (providerWeb3.chainId !== ChainId.GOERLI) {
+    //         // setSocialLoginSDK(null)
+    //         setWeb3State(initialState)
+    //     }
+    // }, [providerWeb3.chainId])
 
     // create socialLoginSDK and call the init
     useEffect(() => {
         const initWallet = async () => {
-            if (!providerWeb3.chainId) return
             const sdk = new SocialLogin()
             await sdk.init({
-                chainId: ethers.utils.hexValue(providerWeb3.chainId).toString(),
+                chainId: ethers.utils.hexValue(activeChainId).toString(),
                 network: 'mainnet',
                 whitelistUrls: {
                     'https://sdk-staging.biconomy.io':
@@ -76,10 +83,17 @@ export const Web3AuthProvider = ({ children }: any) => {
                 },
             })
             // sdk.showConnectModal();
+            // providerWeb3.chainId === ChainId.GOERLI
+            //     ? setSocialLoginSDK(sdk)
+            //     : setSocialLoginSDK(null)
+            // providerWeb3.chainId === ChainId.GOERLI && setSocialLoginSDK(sdk)
             setSocialLoginSDK(sdk)
         }
         if (!socialLoginSDK) initWallet()
-    }, [socialLoginSDK, providerWeb3.chainId])
+    }, [
+        socialLoginSDK,
+        // , providerWeb3.chainId
+    ])
 
     // if wallet already connected close widget
     useEffect(() => {
@@ -159,19 +173,24 @@ export const Web3AuthProvider = ({ children }: any) => {
     }, [address, connect, socialLoginSDK])
 
     const disconnect = useCallback(async () => {
-        if (!socialLoginSDK || !socialLoginSDK.web3auth) {
-            console.error('Web3Modal not initialized.')
-            return
+        try {
+            if (!socialLoginSDK || !socialLoginSDK.web3auth) {
+                console.error('Web3Modal not initialized.')
+                return
+            }
+            await socialLoginSDK.logout()
+            setWeb3State({
+                provider: null,
+                web3Provider: null,
+                ethersProvider: null,
+                address: '',
+                chainId: activeChainId,
+            })
+            socialLoginSDK.hideWallet()
+        } catch (error) {
+            setSocialLoginSDK(null)
+            setWeb3State(initialState)
         }
-        await socialLoginSDK.logout()
-        setWeb3State({
-            provider: null,
-            web3Provider: null,
-            ethersProvider: null,
-            address: '',
-            chainId: activeChainId,
-        })
-        socialLoginSDK.hideWallet()
     }, [socialLoginSDK])
 
     return (

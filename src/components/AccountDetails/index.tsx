@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useActiveWeb3React } from 'hooks'
 import { shortenAddress } from 'utils'
@@ -19,6 +19,7 @@ import { useAppDispatch } from 'states/hook'
 import { updateSelectedWallet } from 'states/user/reducer'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
 import { ChainId } from 'utils/chainConfig'
+import { ListNetwork } from 'constants/networks'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
     openOptions: React.Dispatch<React.SetStateAction<void>>
@@ -47,6 +48,12 @@ const AccountDetails = ({
         dispatch(updateSelectedWallet({ wallet: undefined }))
     }, [connector, dispatch])
 
+    useEffect(() => {
+        if (chainId !== ChainId.GOERLI) {
+            disconnectWeb3Auth()
+        }
+    }, [chainId])
+
     const handleCopyAddress = () => {
         if (wallet?.address) {
             navigator.clipboard.writeText(wallet.address).then(() => {
@@ -69,9 +76,24 @@ const AccountDetails = ({
 
     const handleOnConnectSmartAccount = async () => {
         try {
-            setToggleWalletModal(false)
-            await connect()
-            setToggleWalletModal(true)
+            if (chainId !== ChainId.GOERLI) {
+                return connector
+                    .activate(
+                        ListNetwork.find(
+                            (network) => network.chainId === ChainId.GOERLI,
+                        )?.switchNetwork[0],
+                    )
+                    ?.then(async (r) => {
+                        console.log('🤦‍♂️ ⟹ )?.then ⟹ r:', r)
+                        setToggleWalletModal(false)
+                        await connect()
+                        setToggleWalletModal(true)
+                    })
+            } else {
+                setToggleWalletModal(false)
+                await connect()
+                setToggleWalletModal(true)
+            }
         } catch (err) {
             console.log('failed to connect to smart account: ', err)
         }
