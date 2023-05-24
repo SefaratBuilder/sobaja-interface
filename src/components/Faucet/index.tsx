@@ -25,25 +25,78 @@ import BGSoba from 'assets/icons/soba2.jpg'
 import Twitter from 'assets/icons/twitter.svg'
 import Discord from 'assets/icons/discord.svg'
 import CloseButton from 'assets/icons/icon-close.svg'
+import { useAppState, useUpdateStepFaucet } from 'states/application/hooks'
+import { ListNetwork } from 'constants/networks'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import CustomLoader from 'components/CustomLoader'
+import Loader from 'components/Loader'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
     const [isFaucetETH, setIsFaucetETH] = useState<boolean>(false)
-    // const [indexFaucetETH, setIndexFaucetETH] = useState(0)
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
-    const { account, chainId, provider } = useActiveWeb3React()
+    const { account, chainId, provider, connector } = useActiveWeb3React()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
+    const { wallet } = useSmartAccountContext()
+    const { stepFaucet, setStepFaucet } = useUpdateStepFaucet()
 
-    const [currentStep, setCurrentStep] = useState(2)
+    const getAddress = useMemo(() => {
+        return chainId !== ChainId.GOERLI ? account : wallet?.address || account
+    }, [wallet, chainId, account])
+
+    const listNetworksSupported = ListNetwork.filter(
+        (i) => i.chainId === ChainId.GOERLI || i.chainId === ChainId.ZKTESTNET,
+    )
+
     const listFaucetETH = [
-        { name: 'Goerli', chainId: ChainId.GOERLI },
-        { name: 'zkSync Era', chainId: ChainId.ZKTESTNET },
+        {
+            name: 'Goerli',
+            chainId: ChainId.GOERLI,
+            onClick: async () => {
+                await connector.activate(
+                    listNetworksSupported.find(
+                        (list) => list.chainId === ChainId.GOERLI,
+                    )?.switchNetwork?.[0],
+                )
+            },
+        },
+        {
+            name: 'zkSync Era',
+            chainId: ChainId.ZKTESTNET,
+            onClick: async () => {
+                await connector.activate(
+                    listNetworksSupported.find(
+                        (list) => list.chainId === ChainId.ZKTESTNET,
+                    )?.switchNetwork?.[0],
+                )
+            },
+        },
     ]
     const listSocials = [
-        { name: 'Twitter', details: 'Follow & Tweet', img: Twitter },
-        { name: 'Discord', details: 'Join Discord', img: Discord },
+        {
+            name: 'Twitter',
+            details: 'Follow & Tweet',
+            img: Twitter,
+            onClick: (allowClick: boolean) => {
+                if (allowClick) {
+                    setStepFaucet(1)
+                    window.open('https://twitter.com/Sobajaswap')
+                }
+            },
+        },
+        {
+            name: 'Discord',
+            details: 'Join Discord',
+            img: Discord,
+            onClick: (allowClick: boolean) => {
+                if (allowClick) {
+                    setStepFaucet(2)
+                    window.open('https://discord.com/invite/XmVFnezxsV')
+                }
+            },
+        },
     ]
 
     const isDisable = useMemo(
@@ -68,12 +121,15 @@ const Faucet = () => {
         return chainId &&
             FaucetTokens?.[chainId] &&
             FaucetTokens?.[chainId].length > 0
-            ? FaucetTokens?.[chainId].map((i) => i.symbol)
+            ? FaucetTokens?.[chainId]
+                  .map((i) => i.symbol)
+                  ?.reduce((a, b) => a + ', ' + b)
             : []
     }, [tokenList, chainId])
 
     const handleFaucetETH = async () => {
         setIsDisplayFaucet(false)
+        setIsFaucetETH(false)
 
         try {
             if (!chainId) return
@@ -84,7 +140,7 @@ const Faucet = () => {
                 // url: 'http://localhost:3000/api/faucet',
                 url: 'https://sobajaswap.com/api/faucet',
                 params: {
-                    to: account,
+                    to: getAddress,
                     chainId,
                 },
             })
@@ -115,6 +171,11 @@ const Faucet = () => {
             initDataTransaction.setIsOpenWaitingModal(false)
             initDataTransaction.setIsOpenResultModal(true)
         }
+    }
+
+    const onClickETH = () => {
+        setIsDisplayFaucet(false)
+        setIsFaucetETH(true)
     }
 
     const clickFaucetToken = async (erc20: string) => {
@@ -161,7 +222,7 @@ const Faucet = () => {
                         name={item.symbol}
                         onClick={() =>
                             item.address === ZERO_ADDRESS
-                                ? setIsFaucetETH(true)
+                                ? onClickETH()
                                 : clickFaucetToken(item.address)
                         }
                         disabled={isDisable}
@@ -224,6 +285,7 @@ const Faucet = () => {
                 ''
             )}
             {isDislayFaucet || isFaucetETH ? <Blur /> : ''}
+            {/* <div onClick={() => setStepFaucet(0)}>Reset</div> */}
 
             {isFaucetETH && (
                 <DetailFaucetETH image={BGSoba}>
@@ -233,16 +295,18 @@ const Faucet = () => {
                     >
                         <img src={CloseButton} alt="close-x" />
                     </div>
+
                     <SelectNetwork>
                         {listFaucetETH.map((list, index) => {
                             return (
                                 <div
+                                    key={index}
                                     className={`${
                                         chainId === list.chainId
                                             ? 'active cursor'
-                                            : 'cursor'
+                                            : ' cursor'
                                     }`}
-                                    // onClick={() => setIndexFaucetETH(index)}
+                                    onClick={() => list.onClick()}
                                 >
                                     <p>{list.name}</p>
                                 </div>
@@ -252,34 +316,53 @@ const Faucet = () => {
                     <p className="details">
                         Fast and reliable. 0.05 Goerli ETH/day.
                     </p>
+                    <p className="details-step">
+                        Step {stepFaucet ? stepFaucet + 1 : 1}:{' '}
+                        {listSocials?.[stepFaucet || 0]?.details || 'Faucet'}
+                    </p>
                     <SelectSocials>
                         {listSocials.map((social, index) => {
                             return (
                                 <span
+                                    key={index}
                                     className={
-                                        index === currentStep
+                                        index === stepFaucet ||
+                                        (!stepFaucet && index === 0)
                                             ? 'active-step'
+                                            : stepFaucet >= index
+                                            ? 'passed-step'
                                             : ''
                                     }
+                                    onClick={() =>
+                                        social.onClick(
+                                            index === stepFaucet ||
+                                                (!stepFaucet && index === 0) ||
+                                                stepFaucet >= index,
+                                        )
+                                    }
                                 >
-                                    <div className="cursor">
+                                    <div>
                                         <img src={social.img} alt="" />
                                     </div>
-                                    <p className="cursor">{social.details}</p>
+                                    <p>{social.details}</p>
                                 </span>
                             )
                         })}
                     </SelectSocials>
-                    <LabelAddress>
+                    <LabelAddress isActive={stepFaucet === 2}>
                         <span>
                             <p>Get ETH</p>
                         </span>
-                        <span>{account}</span>
+                        <span>
+                            {!getAddress && <Loader />}
+                            {getAddress}
+                        </span>
                     </LabelAddress>
-                    <LabelButton>
+                    <LabelButton isActive={stepFaucet === 2}>
                         <PrimaryButton
                             name="Faucet"
                             onClick={() => handleFaucetETH()}
+                            disabled={stepFaucet !== 2}
                         />
                     </LabelButton>
                 </DetailFaucetETH>
@@ -288,21 +371,32 @@ const Faucet = () => {
     )
 }
 
-const LabelButton = styled.div`
+const LabelButton = styled.div<{ isActive: boolean }>`
     width: 35%;
     margin: 0 auto;
+    opacity: ${({ isActive }) => (isActive ? '1' : ' 0.5')};
 `
 
-const LabelAddress = styled.div`
-    width: 90%;
+const LabelAddress = styled.div<{ isActive: boolean }>`
+    /* width: 90%; */
+    width: fit-content;
+    max-width: 90%;
+    /* max-width: calc(100% - 100px); */
     display: flex;
     background: rgba(0, 178, 255, 0.3);
     border-radius: 6px;
     margin: 35px auto;
+    opacity: ${({ isActive }) => (isActive ? '1' : ' 0.5')};
 
     span {
         padding: 11px;
-        overflow: hidden;
+        overflow: scroll;
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        /* overflow: hidden; */
+        /* text-overflow: ellipsis; */
+        /* max-width: calc(100% - 50px); */
     }
     span:nth-child(1) {
         background: #00b2ff;
@@ -320,10 +414,13 @@ const SelectSocials = styled.div`
     text-align: center;
 
     span {
-        margin: 0 auto;
+        margin: auto;
         display: flex;
         flex-direction: column;
         align-items: center;
+        opacity: 0.5;
+        gap: 5px;
+        cursor: not-allowed;
     }
 
     div {
@@ -335,8 +432,22 @@ const SelectSocials = styled.div`
         height: 100%;
     }
     .active-step {
-        border: 1px solid #22c2a4;
-        padding: 5px;
+        /* border: 2px solid; */
+        background: #ffffff1f;
+        padding: 10px;
+        border-radius: 12px;
+        opacity: 1;
+        cursor: pointer;
+    }
+    .passed-step {
+        opacity: 1;
+        cursor: pointer;
+    }
+    @media screen and (max-width: 432px) {
+        div {
+            width: 36px;
+            height: 36px;
+        }
     }
 `
 
@@ -357,6 +468,7 @@ const SelectNetwork = styled.div`
     div {
         min-width: 50%;
         padding: 10px 0;
+        /* user-select: none; */
         /* padding: 10px 20px; */
     }
 
@@ -367,7 +479,12 @@ const SelectNetwork = styled.div`
 
     @media screen and (max-width: 572px) {
         p {
-            font-size: 16px;
+            font-size: 14px;
+        }
+    }
+    @media screen and (max-width: 432px) {
+        p {
+            font-size: 11px;
         }
     }
 `
@@ -381,7 +498,7 @@ const DetailFaucetETH = styled.div<{ image: string }>`
     width: 100%;
     max-width: 600px;
     height: 100%;
-    max-height: 420px;
+    max-height: 440px;
     top: 0;
     left: 0;
     right: 0;
@@ -407,7 +524,11 @@ const DetailFaucetETH = styled.div<{ image: string }>`
         }
     }
     .details {
-        padding: 20px 0 45px;
+        padding: 20px 0 0;
+        text-align: center;
+    }
+    .details-step {
+        padding: 10px 0 25px;
         text-align: center;
     }
 
@@ -420,6 +541,13 @@ const DetailFaucetETH = styled.div<{ image: string }>`
     }
     @media screen and (max-width: 572px) {
         font-size: 14px;
+        height: fit-content;
+        padding: 0 0 16px;
+    }
+    @media screen and (max-width: 432px) {
+        font-size: 12px;
+        height: fit-content;
+        padding: 0 0 16px;
     }
 `
 
