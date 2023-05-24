@@ -106,7 +106,7 @@ export const argentConnection: Connection = {
 
 export const okexConnection: Connection = {
     // TODO(WEB-3131) re-add "Install MetaMask" string when no injector is present
-    getName: () => 'Okex Wallet',
+    getName: () => 'OKX Wallet',
     connector: web3WalletOkex,
     hooks: web3WalletOkexHooks,
     type: ConnectionType.OKEX,
