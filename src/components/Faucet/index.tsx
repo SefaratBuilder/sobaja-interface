@@ -28,8 +28,9 @@ import CloseButton from 'assets/icons/icon-close.svg'
 import { useAppState, useUpdateStepFaucet } from 'states/application/hooks'
 import { ListNetwork } from 'constants/networks'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
-import CustomLoader from 'components/CustomLoader'
 import Loader from 'components/Loader'
+import Arrow from 'assets/icons/arrow-link.svg'
+import { useWindowDimensions } from 'hooks/useWindowSize'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
@@ -41,6 +42,7 @@ const Faucet = () => {
     const { addTxn } = useTransactionHandler()
     const { wallet } = useSmartAccountContext()
     const { stepFaucet, setStepFaucet } = useUpdateStepFaucet()
+    const { width } = useWindowDimensions()
 
     const getAddress = useMemo(() => {
         return chainId !== ChainId.GOERLI ? account : wallet?.address || account
@@ -341,10 +343,17 @@ const Faucet = () => {
                                         )
                                     }
                                 >
-                                    <div>
+                                    <div className="label-img">
                                         <img src={social.img} alt="" />
                                     </div>
-                                    <p>{social.details}</p>
+                                    <div className="label-details">
+                                        <p>{social.details}</p>
+                                        {width > 432 && (
+                                            <div>
+                                                <img src={Arrow} alt="" />
+                                            </div>
+                                        )}
+                                    </div>
                                 </span>
                             )
                         })}
@@ -423,7 +432,7 @@ const SelectSocials = styled.div`
         cursor: not-allowed;
     }
 
-    div {
+    .label-img {
         width: 50px;
         height: 50px;
     }
@@ -443,8 +452,18 @@ const SelectSocials = styled.div`
         opacity: 1;
         cursor: pointer;
     }
-    @media screen and (max-width: 432px) {
+    .label-details {
+        display: flex;
+        align-items: center;
+        gap: 4px;
         div {
+            width: 12px;
+            /* height: 12px; */
+        }
+    }
+
+    @media screen and (max-width: 432px) {
+        .label-img {
             width: 36px;
             height: 36px;
         }
