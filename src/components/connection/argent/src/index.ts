@@ -65,14 +65,13 @@ export class Argent extends Connector {
         return this.isomorphicInitialize()
             .then(async () => {
                 if (!this.provider) throw new Error('provider is not exits')
-                console.log("co vo Argent KOKOKOKOKOKOKOKOKOKOK")
+
                 // Wallets may resolve eth_chainId and hang on eth_accounts pending user interaction, which may include changing
                 // chains; they should be requested serially, with accounts first, so that the chainId can settle.
 
                 const accounts = await this.provider.enable();
-                console.log("accounts Argent", accounts)
                 if (!accounts) {
-                    console.log("vo ko ????????????????????????")
+                    console.log("Argent ?")
                 }
                 const chainId = (await this.provider.request({ method: 'eth_chainId' })) as string
                 const receivedChainId = parseChainId(chainId)
@@ -83,8 +82,6 @@ export class Argent extends Connector {
 
                 // if there's no desired chain, or it's equal to the received, update
                 if (!desiredChainId || receivedChainId === desiredChainId) {
-                    const ss = this.actions.update({ chainId: receivedChainId, accounts })
-                    console.log("ss=>>>>", ss)
                     return this.actions.update({ chainId: receivedChainId, accounts });
                 }
             })
