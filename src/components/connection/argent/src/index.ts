@@ -13,12 +13,13 @@ import type {
 } from '@web3-react/types'
 import detectEthereumProvider from "@metamask/detect-provider";
 
-
+export type ProviderAccounts = string[];
 type MetaMaskProvider = Provider & {
     isConnected?: () => boolean
     providers?: MetaMaskProvider
     get chainId(): string
-    get accounts(): string[]
+    get accounts(): string[],
+    enable(): Promise<ProviderAccounts>;
 }
 
 function parseChainId(chainId: string) {
@@ -40,11 +41,11 @@ export class Argent extends Connector {
             chainId: 1,
             rpcUrl: "https://ethereum.publicnode.com",
         });
-        const provider = new Web3Provider(ethereumProvider);
+        const provider = ethereumProvider as any;
         if (provider) {
-            this.provider = provider as any
+            this.provider = provider
             if (!this.provider) return
-            return this.provider
+            return provider
         }
     }
 
@@ -58,15 +59,21 @@ export class Argent extends Connector {
 
 
     public async activate(desiredChainIdOrChainParameters?: number | AddEthereumChainParameter): Promise<void> {
+        console.log()
         let cancelActivation: () => void
         if (!this.provider?.isConnected?.()) cancelActivation = this.actions.startActivation()
         return this.isomorphicInitialize()
             .then(async () => {
                 if (!this.provider) throw new Error('provider is not exits')
-
+                console.log("co vo Argent KOKOKOKOKOKOKOKOKOKOK")
                 // Wallets may resolve eth_chainId and hang on eth_accounts pending user interaction, which may include changing
                 // chains; they should be requested serially, with accounts first, so that the chainId can settle.
-                const accounts = (await this.provider.request({ method: 'eth_requestAccounts' })) as string[]
+
+                const accounts = await this.provider.enable();
+                console.log("accounts Argent", accounts)
+                if (!accounts) {
+                    console.log("vo ko ????????????????????????")
+                }
                 const chainId = (await this.provider.request({ method: 'eth_chainId' })) as string
                 const receivedChainId = parseChainId(chainId)
                 const desiredChainId =

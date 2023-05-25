@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import imgClose from 'assets/icons/icon-close.svg'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
-import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
+import { useWeb3React } from '@web3-react/core'
 import { injected, bitkeep, okex } from 'connectors/index'
 import AccountDetails from 'components/AccountDetails'
 import { AbstractConnector } from '@web3-react/abstract-connector'
@@ -12,9 +12,11 @@ import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { sendEvent } from 'utils/analytics'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import {
+    bitkeepConnection,
     getConnections,
     injectedConnection,
     networkConnection,
+    okexConnection,
 } from 'components/connection'
 import { Connector } from '@web3-react/types'
 import { useAppDispatch } from 'states/hook'
@@ -72,8 +74,12 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
 
         setPendingWallet(connector)
         setWalletView(WALLET_VIEWS.PENDING)
+        if (connector?.type == 'ARGENT') {
+            dispatch(updateSelectedWallet({ wallet: undefined }))
+        } else {
+            dispatch(updateSelectedWallet({ wallet: connector?.type }))
+        }
 
-        dispatch(updateSelectedWallet({ wallet: connector?.type }))
         connector?.connector?.activate()
 
         // &&
@@ -123,60 +129,60 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                         return null
                     }
                 }
-                // if (option.connector == bitkeep) {
-                //     //don't show injected if there's no injected provider
-                //     if (!window.bitkeep) {
-                //         if (option.name === 'BitKeep Wallet') {
-                //             return (
-                //                 <Item
-                //                     isChecked={isAgreePolicy}
-                //                     key={key + option.name}
-                //                 >
-                //                     <ItemContent
-                //                         onClick={() =>
-                //                             isAgreePolicy &&
-                //                             option.href &&
-                //                             option.href !== null &&
-                //                             window.open(option.href)
-                //                         }
-                //                     >
-                //                         <img src={option.iconURL}></img>
-                //                         <span>Install BitKeep</span>
-                //                     </ItemContent>
-                //                 </Item>
-                //             )
-                //         } else {
-                //             return null //dont want to return install twice
-                //         }
-                //     }
-                // }
-                // if (option.connector == okex) {
-                //     //don't show injected if there's no injected provider
-                //     if (!window.okexchain) {
-                //         if (option.name === 'OKX Wallet') {
-                //             return (
-                //                 <Item
-                //                     isChecked={isAgreePolicy}
-                //                     key={key + option.name}
-                //                 >
-                //                     <ItemContent
-                //                         onClick={() =>
-                //                             isAgreePolicy &&
-                //                             option.href &&
-                //                             option.href !== null &&
-                //                             window.open(option.href)
-                //                         }
-                //                     >
-                //                         <img src={option.iconURL}></img>
-                //                         <span>Install OKX</span>
-                //                     </ItemContent>
-                //                 </Item>
-                //             )
-                //         } else {
-                //             return null //dont want to return install twice
-                //         }
-                //     }
-                // }
+                if (option.connector == bitkeepConnection.connector) {
+                    //don't show injected if there's no injected provider
+                    if (!window.bitkeep) {
+                        if (option.getName() === 'BitKeep Wallet') {
+                            return (
+                                <Item
+                                    isChecked={isAgreePolicy}
+                                    key={key + option.getName()}
+                                >
+                                    <ItemContent
+                                        onClick={() =>
+                                            isAgreePolicy &&
+                                            option.href &&
+                                            option.href !== null &&
+                                            window.open(option.href)
+                                        }
+                                    >
+                                        <img src={option.getIcon?.(true)}></img>
+                                        <span>Install BitKeep</span>
+                                    </ItemContent>
+                                </Item>
+                            )
+                        } else {
+                            return null //dont want to return install twice
+                        }
+                    }
+                }
+                if (option.connector == okexConnection.connector) {
+                    //don't show injected if there's no injected provider
+                    if (!window.okexchain) {
+                        if (option.getName() === 'OKX Wallet') {
+                            return (
+                                <Item
+                                    isChecked={isAgreePolicy}
+                                    key={key + option.getName()}
+                                >
+                                    <ItemContent
+                                        onClick={() =>
+                                            isAgreePolicy &&
+                                            option.href &&
+                                            option.href !== null &&
+                                            window.open(option.href)
+                                        }
+                                    >
+                                        <img src={option.getIcon?.(true)}></img>
+                                        <span>Install OKX</span>
+                                    </ItemContent>
+                                </Item>
+                            )
+                        } else {
+                            return null //dont want to return install twice
+                        }
+                    }
+                }
 
                 return (
                     <Item

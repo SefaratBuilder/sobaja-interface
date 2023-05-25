@@ -19,6 +19,7 @@ import { WalletConnect } from '@web3-react/walletconnect'
 import { Connection, ConnectionType } from './types';
 import { BitKeep } from './bitkeep/src';
 import { Okex } from './okex/src';
+import { Argent } from './argent/src';
 
 export const useAppSelector: TypedUseSelectorHook<ReturnType<typeof store.getState>> = useSelector
 
@@ -89,14 +90,17 @@ export const [web3Bitkeep, web3BitkeepHooks] = initializeConnector<BitKeep>(
 export const [web3WalletOkex, web3WalletOkexHooks] = initializeConnector<Okex>(
     (actions) => new Okex({ actions, onError }),
 )
+export const [web3WalletArgent, web3WalletArgentHooks] = initializeConnector<Argent>(
+    (actions) => new Argent({ actions, onError }),
+)
 
 
 
 export const argentConnection: Connection = {
     // TODO(WEB-3131) re-add "Install MetaMask" string when no injector is present
     getName: () => 'Argent',
-    connector: web3Network,
-    hooks: web3NetworkHooks,
+    connector: web3WalletArgent,
+    hooks: web3WalletArgentHooks,
     type: ConnectionType.ARGENT,
     getIcon: () => ARGENT_ICON,
     shouldDisplay: () => true,
@@ -106,7 +110,7 @@ export const argentConnection: Connection = {
 
 export const okexConnection: Connection = {
     // TODO(WEB-3131) re-add "Install MetaMask" string when no injector is present
-    getName: () => 'Okex Wallet',
+    getName: () => 'OKX Wallet',
     connector: web3WalletOkex,
     hooks: web3WalletOkexHooks,
     type: ConnectionType.OKEX,
