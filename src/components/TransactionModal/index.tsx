@@ -5,6 +5,7 @@ import WaitingTransactionModal from './WaitingTransaction'
 import ResultTransactionModal from './ResultTransaction'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import styled from 'styled-components'
+import { WatchAssetParameters } from '@web3-react/types'
 
 export interface CompTransaction {
     payload: any
@@ -31,6 +32,11 @@ export interface CompTransaction {
     setIsTransactionSuccess: React.Dispatch<React.SetStateAction<boolean>>
     error: any
     setError: React.Dispatch<React.SetStateAction<string>>
+
+    addErc20: WatchAssetParameters | undefined
+    setAddErc20: React.Dispatch<
+        React.SetStateAction<WatchAssetParameters | undefined>
+    >
 }
 
 interface Data {
@@ -41,6 +47,7 @@ interface Data {
 export const InitCompTransaction = (): CompTransaction => {
     const [payload, setPayload] = useState<any>(undefined)
     const [TransactionHash, setTransactionHash] = useState<string>('')
+    const [addErc20, setAddErc20] = useState<WatchAssetParameters | undefined>()
     const [error, setError] = useState<string>('')
     const [isTransactionSuccess, setIsTransactionSuccess] =
         useState<boolean>(false)
@@ -67,6 +74,8 @@ export const InitCompTransaction = (): CompTransaction => {
         setTransactionHash,
         isTransactionSuccess,
         error,
+        addErc20,
+        setAddErc20,
     }
 }
 
@@ -92,6 +101,7 @@ const ComponentsTransaction = ({ data, onConfirm }: Data) => {
                     setOpenModal={data.setIsOpenResultModal}
                     error={data.error}
                     txnHash={data.TransactionHash}
+                    addErc20={data.addErc20}
                 />
             )}
         </Container>

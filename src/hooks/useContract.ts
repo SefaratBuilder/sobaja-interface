@@ -12,6 +12,9 @@ import {
     ROUTERS,
     FAUCET_ABI,
     Faucet,
+    FaucetSoba,
+    FAUCETSOBA_ABI,
+
     LAUNCHPADS,
     STAKING_ABI,
     STAKING,
@@ -85,6 +88,14 @@ export function useFaucetContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
     return useContract(Faucet[chainId || 80001], FAUCET_ABI)
 }
+
+
+
+export function useFaucetSobaContract(): Contract | null {
+    const { chainId } = useActiveWeb3React()
+    return useContract(FaucetSoba[chainId || 80001], FAUCETSOBA_ABI)
+}
+
 
 export function usePairContract(address: string | undefined): Contract | null {
     return useContract(address, PAIR_ABI)
