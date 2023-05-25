@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import imgClose from 'assets/icons/icon-close.svg'
 import tokenList from 'constants/jsons/tokenList.json'
-import { useFaucetContract } from 'hooks/useContract'
+import { useFaucetContract, useFaucetSobaContract } from 'hooks/useContract'
 import usdt from 'assets/icons/usdt.jpeg'
 import ETH from 'assets/token-logos/eth.svg'
 import { OpacityModal } from 'components/Web3Status'
@@ -37,6 +37,7 @@ const Faucet = () => {
     const [isFaucetETH, setIsFaucetETH] = useState<boolean>(false)
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
+    const faucetSobaContract = useFaucetSobaContract()
     const { account, chainId, provider, connector } = useActiveWeb3React()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
@@ -183,7 +184,7 @@ const Faucet = () => {
     const clickFaucetToken = async (item: Token) => {
         try {
             const { address, symbol, decimals, logoURI: image } = item
-            if (faucetContract == null) return
+            if (faucetContract == null || !faucetSobaContract == null) return
 
             setIsDisplayFaucet(false)
             initDataTransaction.setAddErc20({
@@ -193,9 +194,12 @@ const Faucet = () => {
                 image,
             })
             initDataTransaction.setIsOpenWaitingModal(true)
-
-            const tx = await faucetContract?.requestTokens(address)
-
+            let tx
+            if (item.symbol == 'Soba') {
+                tx = await faucetSobaContract?.requestTokens(address)
+            } else {
+                tx = await faucetContract?.requestTokens(address)
+            }
             initDataTransaction.setIsOpenWaitingModal(false)
 
             initDataTransaction.setIsOpenResultModal(true)

@@ -60,7 +60,7 @@ const ResultTransactionModal = ({
                                 : error}
                         </div>
                     </WrapInfoLoad>
-                    {token && token.address && token.symbol ? (
+                    {token && token.address && token.symbol && isSuccess ? (
                         <WrapAddErc20>
                             <AddErc20 onClick={() => addToken()}>
                                 Add {token && token.symbol}
