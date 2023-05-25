@@ -38,6 +38,7 @@ export function useToken(address: string | undefined): Token | undefined {
         const symbol = symbolResult?.[0]?.result?.[0]
         const name = nameResult?.[0]?.result?.[0]
         const decimals = decimalsResult?.[0]?.result?.[0]
+
         if (!chainId) return
         if (address == ETHER_ADDRESS || address == ZERO_ADDRESS) return NATIVE_COIN[chainId]
         if (!symbol || !name || !decimals || !address) return
@@ -83,7 +84,9 @@ export function useTokens(
             const name = nameResult?.[index]?.result?.[0]
             const decimals = decimalsResult?.[index]?.result?.[0]
 
-            if (!symbol || !name || !decimals || !chainId || !address) return
+            if (!chainId) return
+            if (address == ETHER_ADDRESS || address == ZERO_ADDRESS) return NATIVE_COIN[chainId]
+            if (!symbol || !name || !decimals || !address) return
             return {
                 address,
                 name,
@@ -110,14 +113,12 @@ export function useTokenApproval(
     const tokenContract = useTokenContract(token?.address)
     const approve = async (to: string, amount: number | string) => {
         try {
-            console.log('🤦‍♂️ ⟹ tokenContract:', tokenContract)
             console.log({ to, amount, tokenContract: tokenContract?.address })
             if (!isAddress(to)) return
             const gasLimit = await tokenContract?.estimateGas.approve(
                 to,
-                '1',
+                amount,
             )
-            console.log({ gasLimit: gasLimit && gasLimit.add(1000) })
             return tokenContract?.approve(to, amount, {
                 gasLimit: gasLimit && gasLimit.add(1000),
             })

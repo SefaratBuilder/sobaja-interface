@@ -1,3 +1,4 @@
+import { ChainId } from 'interfaces';
 import { useActiveWeb3React } from 'hooks'
 import { Contract } from '@ethersproject/contracts'
 import { useMemo } from 'react'
@@ -13,7 +14,10 @@ import {
     Faucet,
     LAUNCHPADS,
     STAKING_ABI,
-    AAEntryPoints
+    STAKING,
+    // AAEntryPoints
+    AAEntryPoints,
+    AAFactory
 } from 'constants/addresses'
 import ERC20 from 'constants/jsons/erc20.json'
 import { PAIR_ABI } from 'constants/jsons/pair'
@@ -26,6 +30,8 @@ import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
 import { ethers } from 'ethers'
 import NFT_ABI from 'constants/jsons/nft.json'
 import AA_ABI from 'constants/jsons/aa.json'
+import AAFACTORY_ABI from 'constants/jsons/aaFactory.json'
+import Web3 from 'web3'
 
 // returns null on errors
 export const useContract = (
@@ -52,7 +58,7 @@ export const useContract = (
 
 export function useMulticallContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
-    return useContract(MULTICALL_NETWORKS[chainId || 80001], MULTICALL_ABI)
+    return useContract(MULTICALL_NETWORKS[chainId || 80001], MULTICALL_ABI, false)
 }
 
 export function useFactoryContract(): Contract | null {
@@ -66,7 +72,9 @@ export function useRouterContract(): Contract | null {
 }
 
 export function useStakingContract(): Contract | null {
-    return useContract('0x6E7E86F3CE091C4a842b0D27d1c8c4059090eC65', STAKING_ABI)
+    const { chainId } = useActiveWeb3React()
+    if (!chainId) return null
+    return useContract(STAKING[chainId], STAKING_ABI)
 }
 
 export function useTokenContract(address: string | undefined): Contract | null {
@@ -87,6 +95,7 @@ export function useLaunchpadContract(): Contract | null {
     return useContract(LAUNCHPADS[chainId || 80001], LAUNCHPAD_ABI)
 }
 
+
 export function useFairLaunchContract(address: string | undefined): Contract | null {
     return useContract(address, FAIRLAUNCH_ABI)
 }
@@ -99,6 +108,11 @@ export function useAccessManagerContract(): Contract | null {
 export function useAAEntryPointContract(): Contract | null {
     const { chainId } = useActiveWeb3React()
     return useContract(AAEntryPoints[chainId || 80001], AAEntryPoint_ABI)
+}
+
+export function useAAFactoryContract(): Contract | null {
+    const { chainId } = useActiveWeb3React()
+    return useContract(AAFactory[chainId || 80001], AAFACTORY_ABI)
 }
 
 export function useNftSmartAccountContract() {
@@ -124,4 +138,11 @@ export function useRouterSmartAccountContract(): Contract | null {
 
 export function useSmartAccountContract(address: string | undefined): Contract | null {
     return useContract(address, AA_ABI)
+}
+
+export function useMulticallWeb3Contract() {
+    const { chainId } = useActiveWeb3React()
+    const web3 = new Web3(Web3.givenProvider || 'https://rpc-mumbai.maticvigil.com')
+    const abi: any = MULTICALL_ABI
+    return new web3.eth.Contract(abi, MULTICALL_NETWORKS[chainId || 80001])
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useActiveWeb3React } from 'hooks'
 import { shortenAddress } from 'utils'
@@ -17,7 +17,9 @@ import SendModal from './SendModal'
 import GasSetting from './GasSetting'
 import { useAppDispatch } from 'states/hook'
 import { updateSelectedWallet } from 'states/user/reducer'
-
+import BgWallet from 'assets/brand/bg-connect-wallet.png'
+import { ChainId } from 'utils/chainConfig'
+import { ListNetwork } from 'constants/networks'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
     openOptions: React.Dispatch<React.SetStateAction<void>>
@@ -46,6 +48,12 @@ const AccountDetails = ({
         dispatch(updateSelectedWallet({ wallet: undefined }))
     }, [connector, dispatch])
 
+    useEffect(() => {
+        if (chainId !== ChainId.GOERLI) {
+            disconnectWeb3Auth()
+        }
+    }, [chainId])
+
     const handleCopyAddress = () => {
         if (wallet?.address) {
             navigator.clipboard.writeText(wallet.address).then(() => {
@@ -68,114 +76,137 @@ const AccountDetails = ({
 
     const handleOnConnectSmartAccount = async () => {
         try {
-            connect()
+            if (chainId !== ChainId.GOERLI) {
+                return connector
+                    .activate(
+                        ListNetwork.find(
+                            (network) => network.chainId === ChainId.GOERLI,
+                        )?.switchNetwork[0],
+                    )
+                    ?.then(async (r) => {
+                        console.log('🤦‍♂️ ⟹ )?.then ⟹ r:', r)
+                        setToggleWalletModal(false)
+                        await connect()
+                        setToggleWalletModal(true)
+                    })
+            } else {
+                setToggleWalletModal(false)
+                await connect()
+                setToggleWalletModal(true)
+            }
         } catch (err) {
             console.log('failed to connect to smart account: ', err)
         }
     }
 
     return (
-        <WrapConnectModal isConnected={true}>
-            <Header>
-                <Row jus="space-between">
-                    <Row al="center" gap="10px">
-                        <WrapAccountInfo>
-                            <ImgAccount src="https://picsum.photos/50/50" />
-                            <IdAccount>
-                                {(wallet?.address &&
-                                    shortenAddress(wallet.address)) ||
-                                    (account && shortenAddress(account))}
-                            </IdAccount>
-                        </WrapAccountInfo>
-                        {wallet && <AAMarker>Smart account</AAMarker>}
-                    </Row>
-                    <WrapBtnHeader>
-                        {wallet && <GasSetting />}
-                        {isCopied ? (
-                            <CopyBtn>
-                                <CopyAccountAddress src={imgCheckMark} />
-                                <Tooltip className="tooltip">Copied</Tooltip>
-                            </CopyBtn>
-                        ) : (
-                            <CopyBtn>
-                                <CopyAccountAddress
-                                    onClick={handleCopyAddress}
-                                    src={imgCopy}
-                                />
-                                <Tooltip className="tooltip">
-                                    Click to copy address
-                                </Tooltip>
-                            </CopyBtn>
-                        )}
+        <LabelRight>
+            <WrapConnectModal isConnected={true}>
+                <Header>
+                    <Row jus="space-between">
+                        <Row al="center" gap="10px">
+                            <WrapAccountInfo>
+                                <ImgAccount src="https://picsum.photos/50/50" />
+                                <IdAccount>
+                                    {(wallet?.address &&
+                                        shortenAddress(wallet.address)) ||
+                                        (account && shortenAddress(account))}
+                                </IdAccount>
+                            </WrapAccountInfo>
+                            {wallet && <AAMarker>Smart account</AAMarker>}
+                        </Row>
+                        <WrapBtnHeader>
+                            {wallet && <GasSetting />}
+                            {isCopied ? (
+                                <CopyBtn>
+                                    <CopyAccountAddress src={imgCheckMark} />
+                                    <Tooltip className="tooltip">
+                                        Copied
+                                    </Tooltip>
+                                </CopyBtn>
+                            ) : (
+                                <CopyBtn>
+                                    <CopyAccountAddress
+                                        onClick={handleCopyAddress}
+                                        src={imgCopy}
+                                    />
+                                    <Tooltip className="tooltip">
+                                        Click to copy address
+                                    </Tooltip>
+                                </CopyBtn>
+                            )}
 
-                        {/* <button onClick={() => openOptions()}>
+                            {/* <button onClick={() => openOptions()}>
                             <img src={iconSetting} alt="#" />
                         </button> */}
-                        <button
-                            onClick={() => {
-                                if (wallet?.address) {
-                                    disconnectWeb3Auth()
-                                } else {
-                                    disconnect()
-                                }
-                            }}
+                            <button
+                                onClick={() => {
+                                    if (wallet?.address) {
+                                        disconnectWeb3Auth()
+                                    } else {
+                                        disconnect()
+                                    }
+                                }}
+                            >
+                                <img src={imgPower} alt="#" />
+                            </button>
+                        </WrapBtnHeader>
+                    </Row>
+                </Header>
+                <WrapContent>
+                    <NameBalance>
+                        {(chainId && NATIVE_COIN[chainId]?.symbol) || 'ETH'}{' '}
+                        Balance
+                    </NameBalance>
+                    <Balance className={'to'}>
+                        {balance ? balance.toString() : 0}
+                    </Balance>
+                    <Balance>
+                        {(chainId && NATIVE_COIN[chainId]?.symbol) || 'ETH'}
+                    </Balance>
+                    <WrapButton>
+                        {!wallet && (
+                            <>
+                                <PrimaryButton
+                                    name={
+                                        loading
+                                            ? 'Connecting'
+                                            : 'Use smart account'
+                                    }
+                                    onClick={handleOnConnectSmartAccount}
+                                    isLoading={loading}
+                                />
+                            </>
+                        )}
+                        {wallet && (
+                            <>
+                                <DepositModal />
+                                <SendModal />
+                            </>
+                        )}
+                    </WrapButton>
+                </WrapContent>
+                <Footer className="isLogged">
+                    <WrapFooterBtn>
+                        <WrapItemFooter
+                        //  onClick={() => setShowTrans(!showTrans)}
                         >
-                            <img src={imgPower} alt="#" />
-                        </button>
-                    </WrapBtnHeader>
-                </Row>
-            </Header>
-            <WrapContent>
-                <NameBalance>
-                    {(chainId && NATIVE_COIN[chainId]?.symbol) || 'ETH'} Balance
-                </NameBalance>
-                <Balance className={'to'}>
-                    {balance ? balance.toString() : 0}
-                </Balance>
-                <Balance>
-                    {(chainId && NATIVE_COIN[chainId]?.symbol) || 'ETH'}
-                </Balance>
-                <WrapButton>
-                    {!wallet && (
-                        <>
-                            <PrimaryButton
-                                name={
-                                    loading ? 'Connecting' : 'Use smart account'
-                                }
-                                onClick={handleOnConnectSmartAccount}
-                                isLoading={loading}
-                            />
-                        </>
-                    )}
-                    {wallet && (
-                        <>
-                            <DepositModal />
-                            <SendModal />
-                        </>
-                    )}
-                </WrapButton>
-            </WrapContent>
-            <Footer className="isLogged">
-                <WrapFooterBtn>
-                    <WrapItemFooter
-                    //  onClick={() => setShowTrans(!showTrans)}
-                    >
-                        <p>Transactions</p>
-                        <WrapFooterImg>
-                            <p></p>
-                            <img src={imgDownArrow} alt="" />
-                        </WrapFooterImg>
-                    </WrapItemFooter>
-                    <WrapModalTransaction
-                        showTrans={false}
-                        // showTrans={showTrans}
-                    >
-                        {/* <p>
+                            <p>Transactions</p>
+                            <WrapFooterImg>
+                                <p></p>
+                                <img src={imgDownArrow} alt="" />
+                            </WrapFooterImg>
+                        </WrapItemFooter>
+                        <WrapModalTransaction
+                            showTrans={false}
+                            // showTrans={showTrans}
+                        >
+                            {/* <p>
                             {transactions && transactions.length > 0
                                 ? 'Your recent transactions:'
                                 : 'You have no transactions'}
                         </p> */}
-                        {/* {transactions?.map((i) => {
+                            {/* {transactions?.map((i) => {
                             return (
                                 <RowTransaction
                                     onClick={() =>
@@ -193,19 +224,89 @@ const AccountDetails = ({
                                 </RowTransaction>
                             )
                         })} */}
-                    </WrapModalTransaction>
-                    <WrapItemFooter className="fade">
-                        <p>Language</p>
-                        <WrapFooterImg>
-                            <p>EN</p>
-                            <img src={imgDownArrow} alt="" />
-                        </WrapFooterImg>
-                    </WrapItemFooter>
-                </WrapFooterBtn>
-            </Footer>
-        </WrapConnectModal>
+                        </WrapModalTransaction>
+                        <WrapItemFooter className="fade">
+                            <p>Language</p>
+                            <WrapFooterImg>
+                                <p>EN</p>
+                                <img src={imgDownArrow} alt="" />
+                            </WrapFooterImg>
+                        </WrapItemFooter>
+                    </WrapFooterBtn>
+                </Footer>
+            </WrapConnectModal>
+        </LabelRight>
     )
 }
+
+const LabelRight = styled.div`
+    position: fixed;
+    /* top: 9%; */
+    /* right: 0;
+
+    height: 100vh;
+    max-width: 400px;
+    width: 100%;
+    z-index: 999;
+    background: url(${BgWallet});
+    background-size: cover;
+    background-repeat: no-repeat;
+    
+    @media screen and (max-width: 1100px) {
+        top: unset;
+        bottom: 0;
+        height: 600px;
+    } */
+    background: url(${BgWallet});
+    background-size: cover;
+    background-repeat: no-repeat;
+    opacity: 1;
+    /* border: 1px solid #003b5c; */
+    border-top: 1px solid #003b5c;
+    border-left: 1px solid #003b5c;
+    box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
+    overflow: auto;
+    max-width: 400px;
+    width: 100%;
+    right: 0px;
+    bottom: 0px;
+    top: 121.49px;
+
+    height: 100vh;
+    animation: fadeIn 0.4s ease-in-out;
+    z-index: 999;
+
+    @media screen and (max-width: 1100px) {
+        animation: fadeUp 0.3s linear;
+        height: 600px;
+        bottom: 0;
+        top: unset;
+    }
+    @media screen and (max-width: 432px) {
+        width: 90%;
+    }
+    @keyframes fadeIn {
+        from {
+            transform: translateX(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(0px);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeUp {
+        from {
+            transform: translateY(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(0px);
+            opacity: 1;
+        }
+    }
+`
 
 const AAMarker = styled.div`
     padding: 4px;
@@ -554,24 +655,30 @@ const RowTransaction = styled.div`
 `
 
 const WrapConnectModal = styled(Container)`
+    position: absolute;
+    right: 0;
+    top: 2%;
+    left: 0;
+    margin: auto;
+
     max-width: 350px;
-    left: unset;
-    right: 20px;
-    top: 90px;
+    /* left: unset; */
+    /* right: 20px; */
+    /* top: 90px; */
     transform: unset;
-    margin: unset;
-    overflow: unset;
+    /* margin: unset; */
+    /* overflow: unset; */
 
     @media screen and (max-width: 1100px) {
-        right: 10px;
+        /* right: 10px;
         top: unset;
-        bottom: 60px;
+        bottom: 60px; */
     }
     @media screen and (max-width: 391px) {
         width: 90%;
         margin: auto;
-        right: 10px;
-        max-width: 300px;
+        /* right: 10px; */
+        /* max-width: 300px; */
     }
 `
 

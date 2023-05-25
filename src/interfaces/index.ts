@@ -42,3 +42,29 @@ export interface LaunchpadInfo {
     result: string,
     launchpadOwner: string
 }
+
+export interface LaunchpadCommitment {
+    commitment: string
+}
+export interface LaunchpadInfoX {
+    claims: Array<{
+        address: string
+        amount: string
+        token: string
+    }>
+    endTime: string
+    finalized: boolean
+    hardcap: string
+    id: string
+    individualCap: string
+    launchpadOwner: string
+    overflow: string
+    price: string
+    result: string
+    softcap: string
+    startTime: string
+    totalCommitment: string
+    totalTokenSale: string
+    launchpadToken: string
+    paymentCurrency: string
+}

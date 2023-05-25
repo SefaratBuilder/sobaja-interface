@@ -107,9 +107,9 @@ const SendModal = () => {
             <ModalWrapper>
                 <ModalHeader>
                     <div>Withdraw</div>
-                    <div className="close-btn" onClick={onClose}>
+                    {/* <div className="close-btn" onClick={onClose}>
                         X
-                    </div>
+                    </div> */}
                 </ModalHeader>
                 <ModalBody>
                     <div className="subtitle">
@@ -154,7 +154,7 @@ const SendModal = () => {
         )
     }
 
-    return <Modal button={Button} children={ModalContent} />
+    return <Modal button={Button} children={ModalContent} isRight={true} />
 }
 
 const ModalWrapper = styled.div``

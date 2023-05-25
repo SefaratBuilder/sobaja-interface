@@ -27,6 +27,7 @@ const BurgerNav = ({ burgerNav, setBurgerNav }: BurgerNavProps) => {
                             key={index + 1}
                             className="nav-text"
                             to={item.path || loca.pathname}
+                            onClick={() => setBurgerNav(false)}
                         >
                             <span className="underline-name">{item.name}</span>
                         </StyledLink>

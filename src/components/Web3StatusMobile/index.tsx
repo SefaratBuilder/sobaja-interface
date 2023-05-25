@@ -8,6 +8,8 @@ import { useWeb3React } from '@web3-react/core'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { injected } from 'connectors'
 import arrowDown from 'assets/icons/arrow-down.svg'
+import { ListNetwork } from 'constants/networks/index'
+import { changeNetwork } from 'utils/network'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
@@ -41,6 +43,22 @@ const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
             return (
                 <Web3StatusConnect height={undefined}>
                     <NetworkIcon></NetworkIcon>
+                    {/* <span>
+                        {error instanceof UnsupportedChainIdError ? (
+                            <p
+                                onClick={() =>
+                                    changeNetwork(
+                                        ListNetwork[0].switchNetwork,
+                                        ListNetwork[0].name,
+                                    )
+                                }
+                            >
+                                Wrong Network
+                            </p>
+                        ) : (
+                            <p>Error</p>
+                        )}
+                    </span> */}
                     <span>{error ? <p>Wrong Network</p> : <p>Error</p>}</span>
                 </Web3StatusConnect>
             )
@@ -110,6 +128,7 @@ const WalletName = styled.div`
 const Icon = styled.img`
     height: 20px;
     width: 20px;
+    border-radius: 50%;
 `
 
 const Web3StatusConnect = styled(Button)`

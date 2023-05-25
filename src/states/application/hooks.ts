@@ -9,7 +9,8 @@ import {
     updateApplicationState,
     toggleDarkMode,
     updateRefAddress,
-    updateGasToken
+    updateGasToken,
+    updateStepFaucet
 } from './actions'
 import { ApplicationState } from './reducer'
 
@@ -70,3 +71,13 @@ export const useUpdateGasToken = () => {
     const dispatch = useDispatch()
     return (token: Token) => dispatch(updateGasToken(token))
 }
+
+export const useUpdateStepFaucet = () => {
+    const dispatch = useDispatch()
+    const { stepFaucet } = useAppState()
+    return {
+        stepFaucet,
+        setStepFaucet: (s: number) => dispatch(updateStepFaucet(s)),
+    }
+}
+

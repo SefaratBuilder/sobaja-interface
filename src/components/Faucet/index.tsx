@@ -6,6 +6,7 @@ import imgClose from 'assets/icons/icon-close.svg'
 import tokenList from 'constants/jsons/tokenList.json'
 import { useFaucetContract } from 'hooks/useContract'
 import usdt from 'assets/icons/usdt.jpeg'
+import ETH from 'assets/token-logos/eth.svg'
 import { OpacityModal } from 'components/Web3Status'
 import { useActiveWeb3React } from 'hooks'
 import { Error } from 'components/Text'
@@ -15,19 +16,97 @@ import Blur from 'components/Blur'
 import ComponentsTransaction, {
     InitCompTransaction,
 } from 'components/TransactionModal'
-import { URLSCAN_BY_CHAINID } from 'constants/index'
+import { URLSCAN_BY_CHAINID, ZERO_ADDRESS } from 'constants/index'
 import { useTransactionHandler } from 'states/transactions/hooks'
+import axios from 'axios'
+import { FaucetTokens } from 'constants/addresses'
+import { ChainId, Token } from 'interfaces'
+import BGSoba from 'assets/icons/soba2.jpg'
+import Twitter from 'assets/icons/twitter.svg'
+import Discord from 'assets/icons/discord.svg'
+import CloseButton from 'assets/icons/icon-close.svg'
+import { useAppState, useUpdateStepFaucet } from 'states/application/hooks'
+import { ListNetwork } from 'constants/networks'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import Loader from 'components/Loader'
+import Arrow from 'assets/icons/arrow-link.svg'
+import { useWindowDimensions } from 'hooks/useWindowSize'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
+    const [isFaucetETH, setIsFaucetETH] = useState<boolean>(false)
     const ref = useRef<any>()
     const faucetContract = useFaucetContract()
-    const { chainId } = useActiveWeb3React()
+    const { account, chainId, provider, connector } = useActiveWeb3React()
     const initDataTransaction = InitCompTransaction()
     const { addTxn } = useTransactionHandler()
+    const { wallet } = useSmartAccountContext()
+    const { stepFaucet, setStepFaucet } = useUpdateStepFaucet()
+    const { width } = useWindowDimensions()
+
+    const getAddress = useMemo(() => {
+        return chainId !== ChainId.GOERLI ? account : wallet?.address || account
+    }, [wallet, chainId, account])
+
+    const listNetworksSupported = ListNetwork.filter(
+        (i) => i.chainId === ChainId.GOERLI || i.chainId === ChainId.ZKTESTNET,
+    )
+
+    const listFaucetETH = [
+        {
+            name: 'Goerli',
+            chainId: ChainId.GOERLI,
+            onClick: async () => {
+                await connector.activate(
+                    listNetworksSupported.find(
+                        (list) => list.chainId === ChainId.GOERLI,
+                    )?.switchNetwork?.[0],
+                )
+            },
+        },
+        {
+            name: 'zkSync Era',
+            chainId: ChainId.ZKTESTNET,
+            onClick: async () => {
+                await connector.activate(
+                    listNetworksSupported.find(
+                        (list) => list.chainId === ChainId.ZKTESTNET,
+                    )?.switchNetwork?.[0],
+                )
+            },
+        },
+    ]
+    const listSocials = [
+        {
+            name: 'Twitter',
+            details: 'Follow & Tweet',
+            img: Twitter,
+            onClick: (allowClick: boolean) => {
+                if (allowClick) {
+                    setStepFaucet(1)
+                    window.open('https://twitter.com/Sobajaswap')
+                }
+            },
+        },
+        {
+            name: 'Discord',
+            details: 'Join Discord',
+            img: Discord,
+            onClick: (allowClick: boolean) => {
+                if (allowClick) {
+                    setStepFaucet(2)
+                    window.open('https://discord.com/invite/XmVFnezxsV')
+                }
+            },
+        },
+    ]
 
     const isDisable = useMemo(
-        () => (chainId && chainId != 280) || false,
+        () =>
+            (chainId &&
+                chainId !== ChainId.ZKTESTNET &&
+                chainId !== ChainId.GOERLI) ||
+            false,
         [chainId],
     )
 
@@ -40,19 +119,89 @@ const Faucet = () => {
         initDataTransaction.setIsOpenResultModal(false)
     }, [isDislayFaucet])
 
-    const clickFaucetToken = async (erc20: string) => {
+    const listFaucet = useMemo(() => {
+        return chainId &&
+            FaucetTokens?.[chainId] &&
+            FaucetTokens?.[chainId].length > 0
+            ? FaucetTokens?.[chainId]
+                  .map((i) => i.symbol)
+                  ?.reduce((a, b) => a + ', ' + b)
+            : []
+    }, [tokenList, chainId])
+
+    const handleFaucetETH = async () => {
+        setIsDisplayFaucet(false)
+        setIsFaucetETH(false)
+
         try {
+            if (!chainId) return
+            console.log('Faucet....')
+            initDataTransaction.setIsOpenWaitingModal(true)
+            const dataFaucet = await axios({
+                method: 'GET',
+                // url: 'http://localhost:3000/api/faucet',
+                url: 'https://sobajaswap.com/api/faucet',
+                params: {
+                    to: getAddress,
+                    chainId,
+                },
+            })
+            if (dataFaucet.status === 200) {
+                const { hash } = dataFaucet.data
+                console.log(dataFaucet.data)
+                initDataTransaction.setIsOpenWaitingModal(false)
+                initDataTransaction.setIsOpenResultModal(true)
+                const wait = await provider?.waitForTransaction(hash)
+                console.log({ wait })
+                initDataTransaction.setIsOpenResultModal(false)
+
+                addTxn({
+                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+                        hash || ''
+                    }`,
+                    msg: 'Faucet',
+                    status: wait?.status === 1 ? true : false,
+                })
+            } else {
+                initDataTransaction.setError(dataFaucet.data?.error || 'Failed')
+                initDataTransaction.setIsOpenWaitingModal(false)
+                initDataTransaction.setIsOpenResultModal(true)
+            }
+        } catch (error: any) {
+            console.log({ error })
+            initDataTransaction.setError(error?.response?.data || 'Failed')
+            initDataTransaction.setIsOpenWaitingModal(false)
+            initDataTransaction.setIsOpenResultModal(true)
+        }
+    }
+
+    const onClickETH = () => {
+        setIsDisplayFaucet(false)
+        setIsFaucetETH(true)
+    }
+
+    const clickFaucetToken = async (item: Token) => {
+        try {
+            const { address, symbol, decimals, logoURI: image } = item
             if (faucetContract == null) return
+
             setIsDisplayFaucet(false)
+            initDataTransaction.setAddErc20({
+                address,
+                symbol,
+                decimals,
+                image,
+            })
             initDataTransaction.setIsOpenWaitingModal(true)
 
-            const tx = await faucetContract?.requestTokens(erc20)
+            const tx = await faucetContract?.requestTokens(address)
 
             initDataTransaction.setIsOpenWaitingModal(false)
+
             initDataTransaction.setIsOpenResultModal(true)
             const result = await tx.wait()
 
-            initDataTransaction.setIsOpenResultModal(false)
+            // initDataTransaction.setIsOpenResultModal(false)
 
             addTxn({
                 hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
@@ -64,7 +213,7 @@ const Faucet = () => {
             sendEvent({
                 category: 'Defi',
                 action: 'Faucet',
-                label: erc20,
+                label: address,
             })
             setIsDisplayFaucet(false)
         } catch (err) {
@@ -76,37 +225,33 @@ const Faucet = () => {
     }
 
     const showMintCoins = () => {
-        console.log({ isDisable })
-
-        if (tokenList && tokenList.length > 0) {
-            return tokenList.map((item) => {
-                if (item.type == 'faucet' && item.chainId == 280) {
-                    return (
-                        <MintCoinButton
-                            key={item.address}
-                            onClick={() => {
-                                chainId == 280 && clickFaucetToken(item.address)
-                            }}
-                            isDisable={isDisable}
-                        >
-                            <Icon
-                                src={
-                                    item.symbol == 'USDT' ? usdt : item.logoURI
-                                }
-                            ></Icon>
-                            <div>{item.symbol}</div>
-                        </MintCoinButton>
-                    )
-                }
+        if (chainId && FaucetTokens?.[chainId].length > 0) {
+            return FaucetTokens?.[chainId].map((item, index) => {
+                return (
+                    <PrimaryButton
+                        key={index}
+                        name={item.symbol}
+                        onClick={() =>
+                            item.address === ZERO_ADDRESS
+                                ? onClickETH()
+                                : clickFaucetToken(item)
+                        }
+                        disabled={isDisable}
+                        img={item.symbol == 'USDT' ? usdt : item.logoURI}
+                        type={'faucet'}
+                    />
+                )
             })
         }
     }
 
     return (
         <>
-            <BtnFaucet onClick={() => setIsDisplayFaucet(!isDislayFaucet)}>
-                Faucet
-            </BtnFaucet>
+            {(chainId === ChainId.GOERLI || chainId === ChainId.ZKTESTNET) && (
+                <BtnFaucet onClick={() => setIsDisplayFaucet(!isDislayFaucet)}>
+                    Faucet
+                </BtnFaucet>
+            )}
             <ComponentsTransaction
                 data={initDataTransaction}
                 onConfirm={() => {}}
@@ -127,14 +272,20 @@ const Faucet = () => {
                         <BodyModalFaucet>
                             <ContentFaucet>
                                 <TextCoin>
-                                    Get BTC, USDT, USDC, DAI for testing zkSync
-                                    Testnet on Sobajaswap, test token can
-                                    nullify the reality of Mainnet.
+                                    Get {listFaucet} for testing{' '}
+                                    {
+                                        listFaucetETH.find(
+                                            (network) =>
+                                                network.chainId === chainId,
+                                        )?.name
+                                    }{' '}
+                                    on Sobajaswap, test token can nullify the
+                                    reality of Mainnet.
                                 </TextCoin>
                             </ContentFaucet>
                             <CoinButton>
                                 {showMintCoins()}
-                                {chainId !== 280 && (
+                                {/* {chainId !== 280 && (
                                     <Row>
                                         <Error fontSize="14px">
                                             Wrong network! Please switch to
@@ -142,7 +293,7 @@ const Faucet = () => {
                                             tokens.
                                         </Error>
                                     </Row>
-                                )}
+                                )} */}
                             </CoinButton>
                         </BodyModalFaucet>
                     </ContainerFaucetModal>
@@ -150,10 +301,295 @@ const Faucet = () => {
             ) : (
                 ''
             )}
-            {isDislayFaucet ? <Blur /> : ''}
+            {isDislayFaucet || isFaucetETH ? <Blur /> : ''}
+            {/* <div onClick={() => setStepFaucet(0)}>Reset</div> */}
+
+            {isFaucetETH && (
+                <DetailFaucetETH image={BGSoba}>
+                    <div
+                        className="close-button"
+                        onClick={() => setIsFaucetETH(false)}
+                    >
+                        <img src={CloseButton} alt="close-x" />
+                    </div>
+
+                    <SelectNetwork>
+                        {listFaucetETH.map((list, index) => {
+                            return (
+                                <div
+                                    key={index}
+                                    className={`${
+                                        chainId === list.chainId
+                                            ? 'active cursor'
+                                            : ' cursor'
+                                    }`}
+                                    onClick={() => list.onClick()}
+                                >
+                                    <p>{list.name}</p>
+                                </div>
+                            )
+                        })}
+                    </SelectNetwork>
+                    <p className="details">
+                        Fast and reliable. 0.05{' '}
+                        {
+                            listFaucetETH.find(
+                                (network) => network.chainId === chainId,
+                            )?.name
+                        }{' '}
+                        ETH/day.
+                    </p>
+                    <p className="details-step">
+                        Step {stepFaucet ? stepFaucet + 1 : 1}:{' '}
+                        {listSocials?.[stepFaucet || 0]?.details || 'Faucet'}
+                    </p>
+                    <SelectSocials>
+                        {listSocials.map((social, index) => {
+                            return (
+                                <span
+                                    key={index}
+                                    className={
+                                        index === stepFaucet ||
+                                        (!stepFaucet && index === 0)
+                                            ? 'active-step'
+                                            : stepFaucet >= index
+                                            ? 'passed-step'
+                                            : ''
+                                    }
+                                    onClick={() =>
+                                        social.onClick(
+                                            index === stepFaucet ||
+                                                (!stepFaucet && index === 0) ||
+                                                stepFaucet >= index,
+                                        )
+                                    }
+                                >
+                                    <div className="label-img">
+                                        <img src={social.img} alt="" />
+                                    </div>
+                                    <div className="label-details">
+                                        <p>{social.details}</p>
+                                        {width > 432 && (
+                                            <div>
+                                                <img src={Arrow} alt="" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </span>
+                            )
+                        })}
+                    </SelectSocials>
+                    <LabelAddress isActive={stepFaucet === 2}>
+                        <span>
+                            <p>Get ETH</p>
+                        </span>
+                        <span>
+                            {!getAddress && <Loader />}
+                            {getAddress}
+                        </span>
+                    </LabelAddress>
+                    <LabelButton isActive={stepFaucet === 2}>
+                        <PrimaryButton
+                            name="Faucet"
+                            onClick={() => handleFaucetETH()}
+                            disabled={stepFaucet !== 2}
+                        />
+                    </LabelButton>
+                </DetailFaucetETH>
+            )}
         </>
     )
 }
+
+const LabelButton = styled.div<{ isActive: boolean }>`
+    width: 35%;
+    margin: 0 auto;
+    opacity: ${({ isActive }) => (isActive ? '1' : ' 0.5')};
+`
+
+const LabelAddress = styled.div<{ isActive: boolean }>`
+    /* width: 90%; */
+    width: fit-content;
+    max-width: 90%;
+    /* max-width: calc(100% - 100px); */
+    display: flex;
+    background: rgba(0, 178, 255, 0.3);
+    border-radius: 6px;
+    margin: 35px auto;
+    opacity: ${({ isActive }) => (isActive ? '1' : ' 0.5')};
+
+    span {
+        padding: 11px;
+        overflow: scroll;
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        /* overflow: hidden; */
+        /* text-overflow: ellipsis; */
+        /* max-width: calc(100% - 50px); */
+    }
+    span:nth-child(1) {
+        background: #00b2ff;
+        border-radius: 6px 0px 0px 6px;
+        padding: 11px 16px;
+        min-width: 96px;
+    }
+`
+
+const SelectSocials = styled.div`
+    display: flex;
+    width: 70%;
+    margin: 0 auto;
+    gap: 10px;
+    text-align: center;
+
+    span {
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 0.5;
+        gap: 5px;
+        cursor: not-allowed;
+    }
+
+    .label-img {
+        width: 50px;
+        height: 50px;
+    }
+    img {
+        width: 100%;
+        height: 100%;
+    }
+    .active-step {
+        /* border: 2px solid; */
+        background: #ffffff1f;
+        padding: 10px;
+        border-radius: 12px;
+        opacity: 1;
+        cursor: pointer;
+    }
+    .passed-step {
+        opacity: 1;
+        cursor: pointer;
+    }
+    .label-details {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        div {
+            width: 12px;
+            /* height: 12px; */
+        }
+    }
+
+    @media screen and (max-width: 432px) {
+        .label-img {
+            width: 36px;
+            height: 36px;
+        }
+    }
+`
+
+const SelectNetwork = styled.div`
+    display: flex;
+    background: rgba(0, 178, 255, 0.3);
+    border-radius: 12px;
+    width: 50%;
+    margin: 0 auto;
+    /* justify-content: space-between; */
+    /* gap: 10px; */
+    p {
+        font-size: 20px;
+        font-weight: 600;
+        /* margin: auto; */
+        text-align: center;
+    }
+    div {
+        min-width: 50%;
+        padding: 10px 0;
+        /* user-select: none; */
+        /* padding: 10px 20px; */
+    }
+
+    .active {
+        background: #00b2ff;
+        border-radius: 12px;
+    }
+
+    @media screen and (max-width: 572px) {
+        p {
+            font-size: 14px;
+        }
+    }
+    @media screen and (max-width: 432px) {
+        p {
+            font-size: 11px;
+        }
+    }
+`
+
+const DetailFaucetETH = styled.div<{ image: string }>`
+    position: fixed;
+    /* padding: 38px 0; */
+
+    /* height: 100%; */
+    /* width: 100%; */
+    width: 100%;
+    max-width: 600px;
+    height: 100%;
+    max-height: 440px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    z-index: 999;
+
+    border: 1px solid rgba(0, 59, 92, 1);
+    background: url(${({ image }) => image});
+    background-size: 750px;
+    background-repeat: no-repeat;
+    background-position: top;
+    border-radius: 12px;
+
+    .close-button {
+        text-align: end;
+        padding: 10px 20px 0;
+
+        img {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+    }
+    .details {
+        padding: 20px 0 0;
+        text-align: center;
+    }
+    .details-step {
+        padding: 10px 0 25px;
+        text-align: center;
+    }
+
+    .cursor {
+        cursor: pointer;
+    }
+
+    @media screen and (max-width: 660px) {
+        width: 90% !important;
+    }
+    @media screen and (max-width: 572px) {
+        font-size: 14px;
+        height: fit-content;
+        padding: 0 0 16px;
+    }
+    @media screen and (max-width: 432px) {
+        font-size: 12px;
+        height: fit-content;
+        padding: 0 0 16px;
+    }
+`
 
 const Icon = styled.img`
     height: 25px;
@@ -233,7 +669,7 @@ const FaucetModalDiv = styled.div`
     right: 0;
     bottom: 0;
     margin: auto;
-    z-index: 9999;
+    z-index: 999;
     display: flex;
     @media (max-width: 576px) {
         width: 90%;

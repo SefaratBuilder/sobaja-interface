@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { SerializedPair, SerializedToken, SlippageTolerance } from './types'
-import { ConnectionType } from 'components/connection'
+import { ConnectionType } from 'components/connection/types'
 
 const currentTimestamp = () => new Date().getTime()
 

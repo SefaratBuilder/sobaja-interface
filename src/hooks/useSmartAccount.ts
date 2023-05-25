@@ -1,18 +1,34 @@
+import { mulNumberWithDecimal } from 'utils/math';
 import { useSmartAccountContext } from "contexts/SmartAccountContext"
-import { Transaction } from "interfaces/smartaccount"
-import { useMemo } from "react"
+import { useWeb3AuthContext } from "contexts/SocialLoginContext"
+import { Transaction } from "interfaces/smartAccount"
 import { useAppState } from "states/application/hooks"
 import { useSingleCallResult } from "states/multicall/hooks"
 import { useSmartAccountContract } from "./useContract"
+import { SimpleAccountAPI } from 'pantinho-aa'
+import { useActiveWeb3React } from "hooks"
+import { AAEntryPoints, AAFactory } from "constants/addresses"
+import { useAAEntryPointContract } from "./useContract"
+import { useCurrencyBalance } from "./useCurrencyBalance"
+import { useMemo } from 'react';
 
-export const useSmartAccount = () => {
-    const { wallet } = useSmartAccountContext()
-    const contract = useSmartAccountContract(wallet?.address)
+export const useSmartAccount = (address: string | undefined) => {
+    const { web3Provider } = useWeb3AuthContext()
+    const { wallet, state } = useSmartAccountContext()
+    const contract = useSmartAccountContract(address)
     const { gasToken } = useAppState()
+    const { provider, chainId, account } = useActiveWeb3React()
+    const entryPointContract = useAAEntryPointContract()
 
-    const nonce = useSingleCallResult(
+    const nonceResult = useSingleCallResult(
         contract,
         'nonce',
+        []
+    )
+    const gasBalance = useCurrencyBalance(address, gasToken)
+    const owner = useSingleCallResult(
+        contract,
+        'owner',
         []
     )
 
@@ -21,7 +37,11 @@ export const useSmartAccount = () => {
         const feeQuotes = await wallet.getFeeQuotesForBatch({
             transactions: txns
         })
-        const feeQuote = feeQuotes.find(fq => fq.address == gasToken.address)
+        let feeQuote = feeQuotes.find(fq => fq?.address == gasToken?.address)
+
+        //fallback native coin for paying gas fee when user has no enough balance
+        if (!gasBalance || feeQuote?.payment && feeQuote?.payment >= Number(mulNumberWithDecimal(gasBalance, gasToken.decimals))) feeQuote = feeQuotes[0]
+
         const paidTransaction = await wallet.createUserPaidTransactionBatch({
             transactions: txns,
             feeQuote: feeQuote || feeQuotes[0]
@@ -31,13 +51,41 @@ export const useSmartAccount = () => {
         })
     }
 
+    const signAndSendUserOps = async (txns: Transaction) => {
+        if (!provider || !chainId || !account || !web3Provider || !entryPointContract) return
+        const owner = provider.getSigner(account)
+        const walletAPI = new SimpleAccountAPI({
+            provider: provider,
+            entryPointAddress: AAEntryPoints[chainId],
+            owner,
+            factoryAddress: AAFactory[chainId],
+            index: 0,
+            accountAddress: '0xCB7c527e22307529F803A5A3CB73BFe5E60b39d9'
+        })
+        const op = await walletAPI.createSignedUserOp({
+            target: txns.to,
+            data: txns.data ?? '0x',
+            nonce: txns.nonce,
+            value: txns.value ?? '0'
+        })
+        op.signature = await op.signature
+        op.nonce = await op.nonce
+        op.sender = await op.sender
+        op.preVerificationGas = await op.preVerificationGas
+        op.initCode = '0x'
+        console.log({ op })
+        const callResult = await entryPointContract.handleOps([op], account)
+        console.log('callResult', callResult)
+    }
+
     return useMemo(() => {
         return {
             contract,
             data: {
-                nonce: nonce?.result?.[0]?.toString()
+                nonce: nonceResult?.result?.[0]?.toString() ?? '0'
             },
-            sendUserPaidTransaction
+            sendUserPaidTransaction,
+            signAndSendUserOps
         }
-    }, [nonce])
+    }, [nonceResult, contract, sendUserPaidTransaction, signAndSendUserOps])
 }

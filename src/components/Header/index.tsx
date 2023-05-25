@@ -9,11 +9,12 @@ import { useNavigate } from 'react-router-dom'
 import Faucet from 'components/Faucet'
 import { useActiveWeb3React } from 'hooks'
 import ConnectorMobile from 'components/ConnectorMobile'
+import { useWeb3React } from '@web3-react/core'
 
 const Header = () => {
     const [burgerNav, setBurgerNav] = useState(false)
     const navigate = useNavigate()
-
+    const { connector } = useWeb3React()
     return (
         <HeaderWrapper>
             <Logo onClick={() => navigate('/')}>
@@ -32,6 +33,20 @@ const Header = () => {
                 <ConnectorMobile />
 
                 <Connector>
+                    <button
+                        onClick={() => {
+                            if (!connector.watchAsset) return
+                            connector.watchAsset({
+                                address:
+                                    '0xC4a71a882D95B97d4356B0FA1169f9d262A0396b',
+                                symbol: 'USDC',
+                                decimals: 16,
+                                image: '',
+                            })
+                        }}
+                    >
+                        add Token
+                    </button>
                     <NetworkSelector />
                     <Web3Status />
                 </Connector>

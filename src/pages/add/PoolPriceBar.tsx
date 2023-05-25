@@ -9,27 +9,48 @@ import NotiIcon from 'assets/icons/notification.svg'
 import { Pair } from 'utils/pair'
 import { convertNativeToWrappedToken } from 'utils'
 import { useActiveWeb3React } from 'hooks'
+import imageGas from 'assets/icons/gas-station.png'
 
 const PoolPriceBar = ({
     dropDown,
     setDropDown,
-    pair
+    pair,
+    gasFee,
 }: {
     dropDown: boolean
     setDropDown: React.Dispatch<React.SetStateAction<boolean>>
     pair: Pair
+    gasFee?: string
 }) => {
-    const { inputAmount, outputAmount, tokenIn, tokenOut } =
-        useSwapState()
+    const { inputAmount, outputAmount, tokenIn, tokenOut } = useSwapState()
     const { chainId } = useActiveWeb3React()
-    const shareOfPool = chainId && inputAmount && outputAmount && tokenIn && tokenOut ? pair.calcShareOfPool(inputAmount, outputAmount, convertNativeToWrappedToken(tokenIn, chainId), convertNativeToWrappedToken(tokenOut, chainId)) : 0
-    const rate0 = pair.reserve0 && pair.reserve1 ? Number(pair.reserve0) / Number(pair.reserve1) : 0
-    const rate1 = pair.reserve0 && pair.reserve1 ? Number(pair.reserve1) / Number(pair.reserve0) : 0
-    console.log({pair})
+    const shareOfPool =
+        chainId && inputAmount && outputAmount && tokenIn && tokenOut
+            ? pair.calcShareOfPool(
+                  inputAmount,
+                  outputAmount,
+                  convertNativeToWrappedToken(tokenIn, chainId),
+                  convertNativeToWrappedToken(tokenOut, chainId),
+              )
+            : 0
+    const rate0 =
+        pair.reserve0 && pair.reserve1
+            ? Number(pair.reserve0) / Number(pair.reserve1)
+            : 0
+    const rate1 =
+        pair.reserve0 && pair.reserve1
+            ? Number(pair.reserve1) / Number(pair.reserve0)
+            : 0
 
     return (
         <>
             <PoolPriceWrapper>
+                <Row gap="5px" jus="flex-end">
+                    <Row gap="3px">
+                        <img src={imageGas} alt="" />
+                        <span>≈${gasFee || '--'} </span>
+                    </Row>
+                </Row>
                 <WrapExpectedOutput
                     className={dropDown ? 'active' : 'chevron down'}
                     dropDown={dropDown}
@@ -47,17 +68,21 @@ const PoolPriceBar = ({
                                 <div>{rate1.toFixed(5)}</div>
                             </Row>
                             <Row jus="center">
-                                <div>
-                                    {shareOfPool.toFixed(2)} %
-                                </div>
+                                <div>{shareOfPool.toFixed(2)} %</div>
                             </Row>
                         </ItemOutput>
                         <ItemOutput className={'nums'}>
                             <Row jus="center">
-                                <div>{pair.token0.symbol} per {pair.token1.symbol}</div>
+                                <div>
+                                    {pair.token0.symbol} per{' '}
+                                    {pair.token1.symbol}
+                                </div>
                             </Row>
                             <Row jus="center">
-                                <Row>{pair.token1.symbol} per {pair.token0.symbol}</Row>
+                                <Row>
+                                    {pair.token1.symbol} per{' '}
+                                    {pair.token0.symbol}
+                                </Row>
                             </Row>
                             <Row jus="center">
                                 <Row>Share of pool</Row>
@@ -70,7 +95,20 @@ const PoolPriceBar = ({
     )
 }
 
-const PoolPriceWrapper = styled.div``
+const PoolPriceWrapper = styled.div`
+    span {
+        font-size: 14px;
+    }
+    img {
+        height: 15px;
+        width: 15px;
+        transition: all 0.3s ease-in-out;
+        transform: rotate(0deg);
+        &.active {
+            transform: rotateX(180deg);
+        }
+    }
+`
 
 const WrapFee = styled.div<{ dropDown: boolean }>`
     padding: 0 10px;
@@ -103,9 +141,9 @@ const WrapExpectedOutput = styled.div<{ dropDown: boolean }>`
     margin: 10px 0;
 
     &.active {
-        height: 114px;
+        height: fit-content;
         @media (max-width: 576px) {
-            height: 130px;
+            /* height: 130px; */
         }
     }
 `

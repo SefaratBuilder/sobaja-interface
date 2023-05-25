@@ -1,5 +1,8 @@
 import { Columns } from 'components/Layouts'
-import React from 'react'
+import { useActiveWeb3React } from 'hooks'
+import { useStakingContract } from 'hooks/useContract'
+import { usePosition } from 'hooks/useStakingData'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 const History = () => {
@@ -10,85 +13,11 @@ const History = () => {
             package: '30 days',
             endDate: '30-05-2023',
         },
-        {
-            status: 'Success',
-            amount: '100',
-            package: '60 days',
-            endDate: '30-09-2023',
-        },
-        {
-            status: 'Failed',
-            amount: '123',
-            package: '365 days',
-            endDate: '05-07-2023',
-        },
-        {
-            status: 'Success',
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            status: 'Success',
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            status: 'Success',
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            status: 'Success',
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            status: 'Success',
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            status: 'Success',
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            status: 'Success',
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            status: 'Success',
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            status: 'Success',
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            status: 'Success',
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
-        {
-            status: 'Success',
-            amount: '200',
-            package: '90 days',
-            endDate: '14-05-2023',
-        },
     ]
+
+    const { account } = useActiveWeb3React()
+    const stakingContract = useStakingContract()
+    const getAllUserStaking = usePosition(account, 1)
 
     return (
         <SwapContainer>

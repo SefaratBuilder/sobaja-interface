@@ -129,10 +129,19 @@ export const ALL_SUPPORTED_CHAIN_IDS: ChainId[] = [
 export const LAUNCHPAD_SUBGRAPH_URL: { [chainId in number]: string } = {
     [ChainId.GOERLI]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad',
     [ChainId.MUMBAI]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad',
-    [ChainId.ZKMAINNET]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad',
+    [ChainId.ZKTESTNET]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad',
     [ChainId.ZKMAINNET]: 'https://api.thegraph.com/subgraphs/name/anvospace/launchpad'
 }
 
+export const POOLS_SUBGRAPH_URL: { [chainId in number]: string } = {
+    [ChainId.GOERLI]: 'https://api.thegraph.com/subgraphs/name/anvospace/sobajaswap-goerli',
+    [ChainId.MUMBAI]: 'https://api.thegraph.com/subgraphs/name/anvospace/s-subajaswap',
+    [ChainId.ZKTESTNET]: 'https://api.thegraph.com/subgraphs/name/anvospace/s-subajaswap',
+    [ChainId.ZKMAINNET]: 'https://api.thegraph.com/subgraphs/name/anvospace/s-subajaswap'
+}
+
+export const githubAssetRepo =
+    'https://raw.githubusercontent.com/forbitswap/prediction-market-assets/main/'
 export const GAS_TOKEN: { [chainId in number]: Token[] } = {
     [ChainId.MUMBAI]: gasTokenMumbai,
     [ChainId.GOERLI]: gasTokenMumbai,

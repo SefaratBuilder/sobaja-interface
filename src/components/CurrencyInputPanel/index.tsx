@@ -70,6 +70,7 @@ const Wrapper = styled(Columns)`
 const Row = styled.div`
     display: grid;
     grid-template-columns: 1fr max(150px);
+    grid-gap: 12px;
 
     .t2 {
         font-size: 14px;

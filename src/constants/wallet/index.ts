@@ -4,10 +4,11 @@ import COINBASE_ICON_URL from 'assets/icons/coinbase.svg'
 import BINANCECONNECT_ICON_URL from 'assets/icons/binance.svg'
 import WALLETCONNECT_ICON_URL from 'assets/icons/wallet-connect.svg'
 import BITKEEP_ICON from 'assets/icons/BitKeep.jpeg';
-import OKEX_ICON from 'assets/token-logos/okex.png'
+import OKEX_ICON from 'assets/token-logos/okex.png';
+import ARGENT_ICON from 'assets/icons/argent.svg'
 import { InjectedConnector } from '@web3-react/injected-connector';
 
-import { injected, CoinbaseWallet, walletconnect, bitkeep, okex } from 'connectors'
+import { injected, CoinbaseWallet, walletconnect, bitkeep, okex, argent } from 'connectors'
 interface WalletInfo {
     connector?: AbstractConnector
     name: string
@@ -21,15 +22,6 @@ interface WalletInfo {
 }
 
 export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
-    BitKeep: {
-        connector: bitkeep,
-        name: 'BitKeep Wallet',
-        iconURL: BITKEEP_ICON,
-        description: 'Login using BitKeep hosted wallet',
-        href: 'https://bitkeep.com/',
-        color: '#4A6C9B',
-        mobile: true,
-    },
     METAMASK: {
         connector: injected,
         name: 'MetaMask',
@@ -37,6 +29,15 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
         description: 'Easy-to-use browser extension.',
         href: 'https://metamask.io/',
         color: '#E8831D',
+    },
+    Argent: {
+        connector: argent,
+        name: 'Argent',
+        iconURL: ARGENT_ICON,
+        description: 'Login using Argent wallet',
+        href: null,
+        color: '#4A6C9B',
+        mobile: true,
     },
     WALLET_LINK: {
         connector: CoinbaseWallet,
@@ -65,4 +66,14 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
         color: '#4A6C9B',
         mobile: true,
     },
+    BitKeep: {
+        connector: bitkeep,
+        name: 'BitKeep Wallet',
+        iconURL: BITKEEP_ICON,
+        description: 'Login using BitKeep hosted wallet',
+        href: 'https://bitkeep.com/',
+        color: '#4A6C9B',
+        mobile: true,
+    },
+
 }

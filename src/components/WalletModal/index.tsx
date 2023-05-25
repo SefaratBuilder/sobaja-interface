@@ -2,23 +2,17 @@ import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import imgClose from 'assets/icons/icon-close.svg'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
-import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { useWeb3React } from '@web3-react/core'
-import { injected, bitkeep, okex } from 'connectors/index'
 import AccountDetails from 'components/AccountDetails'
-import { AbstractConnector } from '@web3-react/abstract-connector'
 import Loader from 'components/Loader'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { sendEvent } from 'utils/analytics'
-import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import {
-    bitkeepConnection,
     getConnections,
     injectedConnection,
-    networkConnection,
+    bitkeepConnection,
     okexConnection,
 } from 'components/connection'
-import { Connector } from '@web3-react/types'
 import { useAppDispatch } from 'states/hook'
 import { updateSelectedWallet } from 'states/user/reducer'
 import { Connection } from 'components/connection/types'
@@ -221,11 +215,12 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                 />
             )
         }
+
         return (
             <Container isConnected={true}>
                 <Header>
                     <span>Connect a wallet</span>
-                    {/* <div>
+                    <div>
                         {' '}
                         <BtnClose
                             onClick={() => {
@@ -234,7 +229,7 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
                             src={imgClose}
                             alt=""
                         />
-                    </div> */}
+                    </div>
                 </Header>
                 <WrapContent>
                     {/* <Title>
@@ -397,11 +392,14 @@ const Container = styled.div<{ isConnected: boolean }>`
     top: 0px;
     height: 100vh;
     margin: auto;
-    animation: fadeIn 0.3s linear;
-    z-index: 999999;
-    opacity: ${({ isConnected }) => (isConnected ? 1 : 0)};
+    /* animation: fadeIn 0.3s linear; */
+    z-index: 9999;
+    /* opacity: ${({ isConnected }) => (isConnected ? 1 : 0)}; */
     scale: ${({ isConnected }) => (isConnected ? 1 : 0.95)};
     color: ${({ theme }) => theme.text1};
+    animation: ${({ isConnected }) =>
+        isConnected ? ` fadeIn 0.3s linear` : ` fadeUp 0.3s linear`};
+
     @media screen and (max-width: 640px) {
         top: 10rem;
         max-width: unset;
@@ -489,8 +487,19 @@ const Header = styled.div`
         height: 35px;
         top: -62px;
     }
+    div {
+        display: none;
+    }
     @media screen and (max-width: 390px) {
         padding: 0.5rem 1rem;
+    }
+    @media screen and (max-width: 640px) {
+        div {
+            display: block;
+        }
+        span {
+            margin: auto;
+        }
     }
 `
 
@@ -582,7 +591,7 @@ const WrapItem = styled.div`
         opacity: 1;
     }
     @media screen and (max-width: 576px) {
-        padding: 1rem;
+        // padding: 1rem;
         grid-template-columns: 1fr;
         // max-height: 300px;
         // overflow: auto;

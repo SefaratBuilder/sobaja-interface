@@ -246,13 +246,11 @@ export const useTokensUrl = (tokens: Array<string>) => {
 export const useMyPosition = () => {
     const { account } = useActiveWeb3React()
     const allPairs = useAllPairs()
-    console.log("🤦‍♂️ ⟹ useMyPosition ⟹ allPairs:", allPairs)
     const { isUpdateApplication } = useAppState()
     const mapPairs: any = Object.values(allPairs)
     const lpTokens = mapPairs?.map((i: any) => i?.tokenLp)
     const tokenList: Array<string> = []
     const balances = useTokenBalances(account, lpTokens, isUpdateApplication)
-    console.log("🤦‍♂️ ⟹ useMyPosition ⟹ balances:", balances)
     const lpBalancesUser = Object.entries(balances)
         .map((i) => {
             if (i?.[1] && Number(i?.[1]) > 0) {

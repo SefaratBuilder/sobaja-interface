@@ -6,7 +6,7 @@ import { updateBlockNumber } from './actions'
 import { useDispatch } from 'react-redux'
 
 export default function Updater(): null {
-    const { library, chainId, account } = useActiveWeb3React()
+    const { provider, chainId, account } = useActiveWeb3React()
     const dispatch = useDispatch()
 
     const windowVisible = useIsWindowVisible()
@@ -38,11 +38,11 @@ export default function Updater(): null {
 
     // attach/detach listeners
     useEffect(() => {
-        if (!library || !chainId || !windowVisible) return undefined
+        if (!provider || !chainId || !windowVisible) return undefined
 
         setState({ chainId, blockNumber: null })
 
-        library
+        provider
             .getBlockNumber()
             .then((res) => {
                 blockNumberCallback(res)
@@ -54,16 +54,16 @@ export default function Updater(): null {
                 ),
             )
 
-        library.on('block', (res) => {
+        provider.on('block', (res) => {
             blockNumberCallback(res)
         })
         return () => {
-            library.removeListener('block', blockNumberCallback)
+            provider.removeListener('block', blockNumberCallback)
         }
     }, [
         dispatch,
         chainId,
-        library,
+        provider,
         blockNumberCallback,
         windowVisible,
         account,
