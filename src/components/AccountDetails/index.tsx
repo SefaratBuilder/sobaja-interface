@@ -85,14 +85,14 @@ const AccountDetails = ({
                     )
                     ?.then(async (r) => {
                         console.log('🤦‍♂️ ⟹ )?.then ⟹ r:', r)
-                        setToggleWalletModal(false)
+                        // setToggleWalletModal(false)
                         await connect()
-                        setToggleWalletModal(true)
+                        // setToggleWalletModal(true)
                     })
             } else {
-                setToggleWalletModal(false)
+                // setToggleWalletModal(false)
                 await connect()
-                setToggleWalletModal(true)
+                // setToggleWalletModal(true)
             }
         } catch (err) {
             console.log('failed to connect to smart account: ', err)

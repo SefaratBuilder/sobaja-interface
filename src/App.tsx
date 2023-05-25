@@ -25,8 +25,13 @@ import Launchpad from 'pages/launchpad'
 import AA from 'pages/account-abstraction'
 import ToastMessage from 'components/ToastMessage'
 import StakePools from 'pages/staking/listpoolstake'
+import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const App = () => {
+    const { loading } = useWeb3AuthContext()
+    const { loading: smartLoading } = useSmartAccountContext()
+    console.log({ loading, smartLoading })
     const Updater = () => {
         const { pathname, search } = useLocation()
         useEffect(() => {
@@ -51,6 +56,7 @@ const App = () => {
 
             <AppContainer>
                 <ToastMessage />
+                {/* {smartLoading && <HiddenWeb3Auth />} */}
                 <Routes>
                     <Route path="/swap" element={<Swap />} />
                     <Route path="/pools" element={<Pools />} />

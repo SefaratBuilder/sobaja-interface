@@ -68,19 +68,20 @@ export const GlobalStyle = createGlobalStyle`
     //style for biconomy connection modal
     .w3a-modal__header {
         /* background: white; */
+        display: none!important;
         button {
             width: 100%!important;
-    height: 100%!important;
-    position: fixed!important;
-    z-index: -1!important;
-    width: 100vw!important;
-    background: transparent!important;
-    height: 100vh!important;
-    left: 0!important;
-    right: 0!important;
-    top: 0!important;
-    border: none !important;
-    outline: none !important;
+        height: 100%!important;
+        position: fixed!important;
+        z-index: -1!important;
+        width: 100vw!important;
+        background: transparent!important;
+        height: 100vh!important;
+        left: 0!important;
+        right: 0!important;
+        top: 0!important;
+        border: none !important;
+        outline: none !important;
 
             svg {
                 display: none!important;
@@ -123,13 +124,14 @@ export const GlobalStyle = createGlobalStyle`
         font-size: 12px;
     }
 
-    .w3a-modal__content {
+    /* .w3a-modal__content {
         padding: 30px 34px;
         background: linear-gradient(180deg,#002033 0%,rgba(0,38,60,0.8) 100%) !important;
         color: #595857;
         border: 1px solid #003b5c;
         border-radius: 10px;
-    }
+    } */
+
 
     .w3a-group__title {
         color: #595857;
@@ -149,10 +151,11 @@ export const GlobalStyle = createGlobalStyle`
         content: ''
     }
 
-    .w3a-modal.w3a-modal--light:nth-child(1){
+    .w3a-modal.w3a-modal--light:nth-child(1), .w3a-parent-container #w3a-modal {
         /* display: block !important; */
         position: fixed!important;
         right: 0!important;
+        left:unset!important;
 
         top: 121.49px!important;
         height: 100vh!important;
@@ -204,7 +207,7 @@ export const GlobalStyle = createGlobalStyle`
     }
     }
 
-    .w3a-modal.w3a-modal--light:nth-child(1) > div:nth-child(1) {
+    .w3a-modal.w3a-modal--light:nth-child(1) > div:nth-child(1){
             position: unset!important;
             /* position: absolute!important;
             right: 0!important;
@@ -255,7 +258,7 @@ export const GlobalStyle = createGlobalStyle`
         margin-bottom: 16px;
     }
 
-    #w3a-modal.w3a-modal--light button.w3a-button {
+    #w3a-modal.w3a-modal--light button.w3a-button  {
         background-color: #ffffff;
         border: 1px solid #f3f3f4;
         box-shadow: none;
@@ -367,6 +370,7 @@ export const GlobalStyle = createGlobalStyle`
     }
 
     #w3a-modal .w3a-modal__footer {
+        display: none!important;
         /* padding: 16px 34px;
         background: white; */
     }
@@ -385,4 +389,52 @@ export const GlobalStyle = createGlobalStyle`
         color: #a2a5b5;
         text-decoration: none;
     }
+
+    
+    .w3a-parent-container #w3a-modal .w3a-modal__inner {
+        /* min-height: unset!important; */
+        max-width: 350px !important;
+        min-height: 300px!important;
+
+    }
+
+
+    .w3a-modal__inner.w3a-modal__inner--active {
+            position: absolute!important;
+
+            top: 20px!important;
+            /* width: 90%!important; */
+            
+            transition: opacity 400ms ease-in 0s!important;
+            border-radius: 10px!important;
+            overflow: hidden!important;
+            /* margin: auto!important; */
+            transform: unset!important;
+
+            background: linear-gradient(180deg,#002033 0%,rgba(0,38,60,0.8) 100%) !important;
+            color: #595857;
+            border: 1px solid #003b5c!important;
+
+    }
+
+    .w3a-parent-container #w3a-modal .w3a-button--login {
+        align-items: center;
+        display: inline-flex;
+        height: 2.75rem;
+        justify-content: center;
+        gap: 10px;
+    }
+    .w3a-parent-container img, .w3a-parent-container video {
+        width: 22px;
+    }
+    .w3a-parent-container .dark #w3a-modal .w3a-modal__loader {
+        background: linear-gradient(180deg,#002033 0%,rgba(0,38,60,0.8) 100%) !important;
+    }
+
 `
+
+// export const HiddenWeb3Auth = createGlobalStyle`
+//     .w3a-modal__content.w3ajs-content {
+//         /* display: none!important;; */
+//     }
+// `
