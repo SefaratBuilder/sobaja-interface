@@ -71,7 +71,7 @@ export class Argent extends Connector {
 
                 const accounts = await this.provider.enable();
                 if (!accounts) {
-                    console.log("Argent ?")
+                    console.log("Argent ??")
                 }
                 const chainId = (await this.provider.request({ method: 'eth_chainId' })) as string
                 const receivedChainId = parseChainId(chainId)
