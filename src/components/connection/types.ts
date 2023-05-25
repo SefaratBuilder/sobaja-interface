@@ -7,7 +7,8 @@ export enum ConnectionType {
   WALLET_CONNECT = 'WALLET_CONNECT',
   NETWORK = 'NETWORK',
   BITKEEP = 'BITKEEPXXXX',
-  OKEX = 'OKEX'
+  OKEX = 'OKEX',
+  ARGENT = 'ARGENT'
 }
 
 export interface Connection {
