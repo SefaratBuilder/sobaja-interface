@@ -14,25 +14,26 @@ import {
     useTokenBalance,
 } from 'hooks/useCurrencyBalance'
 import { Error } from 'components/Text'
-import { useTokenSmartAccountContract } from 'hooks/useContract'
+import { useTokenContract, useTokenSmartAccountContract } from 'hooks/useContract'
 import { useToken } from 'hooks/useToken'
 import TokenListModal from 'components/TokenListModal'
 import { Field, Token } from 'interfaces'
 import { useTransactionHandler } from 'states/transactions/hooks'
+import { useSmartAccount } from 'hooks/useSmartAccount'
 
 const SendModal = () => {
     const { account, chainId } = useActiveWeb3React()
-    const { wallet } = useSmartAccountContext()
+    const { smartAccountAddress, sendTransactions } = useSmartAccount()
     const [value, setValue] = useState('')
     const [toAddress, setToAddress] = useState('')
-    const [token, setToken] = useState<Token>(NATIVE_COIN[chainId || 80001])
+    const [token, setToken] = useState<Token>(NATIVE_COIN[280])
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
-    const tokenContract = useTokenSmartAccountContract(token.address)
+    const tokenContract = useTokenContract(token.address)
     const tokenStruct = useToken(token.address)
-    const balanceToken = useCurrencyBalance(wallet?.address, tokenStruct)
+    const balanceToken = useCurrencyBalance(smartAccountAddress, tokenStruct)
     const { addTxn } = useTransactionHandler()
-
+    console.log({token, tokenContract})
     const onChangeValue = (val: string) => {
         const validValue = val
             .replace(/[^0-9.,]/g, '')
@@ -49,7 +50,8 @@ const SendModal = () => {
     const ModalContent = (onClose: () => void) => {
         const onWithdraw = async () => {
             try {
-                if (!account || !wallet || !chainId || !tokenContract) return
+                if (!account || !smartAccountAddress || !chainId) return
+
                 if (Number(balanceToken) < Number(value)) {
                     setError('You have no enough balance.')
                     return
@@ -60,11 +62,11 @@ const SendModal = () => {
                 }
                 setError('')
                 let tx = {
-                    to: toAddress,
+                    target: toAddress,
                     value: mulNumberWithDecimal(value, token.decimals),
                     data: '0x',
                 }
-                if (token.address !== ZERO_ADDRESS) {
+                if (token.address !== ZERO_ADDRESS && tokenContract) {
                     const transferData =
                         await tokenContract.populateTransaction.transfer(
                             toAddress,
@@ -72,15 +74,13 @@ const SendModal = () => {
                         )
                     if (!transferData?.data) return
                     tx = {
-                        to: tokenContract.address,
+                        target: tokenContract.address,
                         data: transferData.data,
                         value: '0x00',
                     }
                 }
                 setIsLoading(true)
-                const txn = await wallet.sendTransaction({
-                    transaction: tx,
-                })
+                const txn = await sendTransactions([tx])
                 const hash = await txn.wait()
                 setIsLoading(false)
                 addTxn({
@@ -126,7 +126,7 @@ const SendModal = () => {
                     <Row gap="10px">
                         <div>From: </div>
                         <div>
-                            {wallet?.address && shortenAddress(wallet?.address)}
+                            {smartAccountAddress && shortenAddress(smartAccountAddress)}
                         </div>
                     </Row>
                     <div>To: </div>

@@ -11,10 +11,11 @@ import { NATIVE_COIN, WRAPPED_NATIVE_COIN } from 'constants/index'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
 import { Error } from 'components/Text'
 import { useTransactionHandler } from 'states/transactions/hooks'
+import { useSmartAccount } from 'hooks/useSmartAccount'
 
 const DepositModal = () => {
     const { account, provider, chainId } = useActiveWeb3React()
-    const { wallet } = useSmartAccountContext()
+    const { smartAccountAddress } = useSmartAccount()
     const [value, setValue] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const balance = useETHBalances([account])?.[account || '']
@@ -37,7 +38,7 @@ const DepositModal = () => {
     const ModalContent = (onClose: () => void) => {
         const onDeposit = async () => {
             try {
-                if (!account || !wallet) return
+                if (!account || !smartAccountAddress) return
                 if (Number(balance) < Number(value)) {
                     setError('You have no enough balance.')
                     return
@@ -45,7 +46,7 @@ const DepositModal = () => {
                 setError('')
                 const tx = {
                     from: account,
-                    to: wallet.address,
+                    to: smartAccountAddress,
                     value: mulNumberWithDecimal(value, 18),
                     data: '0x',
                 }
@@ -89,7 +90,7 @@ const DepositModal = () => {
                     <Row gap="10px">
                         <div>Smart account: </div>
                         <div>
-                            {wallet?.address && shortenAddress(wallet?.address)}
+                            {smartAccountAddress && shortenAddress(smartAccountAddress)}
                         </div>
                     </Row>
                     <div>Input amount to deposit</div>

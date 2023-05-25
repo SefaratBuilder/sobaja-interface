@@ -29,7 +29,7 @@ export const useSmartAccount = () => {
         []
     )
 
-    const signAndSendUserOps = useCallback(async (txn: Transaction) => {
+    const sendTransactions = useCallback(async (txns: Transaction[]) => {
         if (!provider || !entryPointContract || !owner || !contract || !chainId) return
         const ownerAddress = owner.result?.[0]
         const ownerSigner = provider.getSigner(ownerAddress)
@@ -41,22 +41,13 @@ export const useSmartAccount = () => {
             index: 0,
             accountAddress: smartAccountAddress
         })
-        console.log({
-            target: txn.to,
-            data: txn.data ?? '0x',
-            nonce: txn.nonce ?? nonceResult?.result?.[0]?.toString(),
-            value: txn.value ?? '0',
-            owner: ownerSigner._address,
-            gasLimit: !isDeployed ? 500000 : undefined
-        })
-        const op = await walletAPI.createSignedUserOp({
-            target: txn.to,
-            data: txn.data ?? '0x',
-            nonce: txn.nonce ?? nonceResult?.result?.[0]?.toString(),
-            value: txn.value ?? '0',
-            owner: ownerSigner._address,
-            gasLimit: !isDeployed ? 500000 : undefined
-        })
+
+        const op = await walletAPI.createSignedUserOp(
+            txns,
+            nonceResult?.result?.[0]?.toString(),
+            ownerSigner._address,
+            !isDeployed ? 500000 : undefined
+        )
         op.signature = await op.signature
         op.nonce = await op.nonce
         op.sender = await op.sender
@@ -75,9 +66,9 @@ export const useSmartAccount = () => {
             contract,
             nonce: nonceResult?.result?.[0]?.toString() ?? '0',
             depositedFund,
-            address: smartAccountAddress,
+            smartAccountAddress,
             isDeployed,
-            signAndSendUserOps,
+            sendTransactions,
         }
-    }, [nonceResult, contract, signAndSendUserOps, depositedFund, isDeployed])
+    }, [nonceResult, contract, sendTransactions, depositedFund, isDeployed])
 }

@@ -20,16 +20,10 @@ import { useToken } from 'hooks/useToken';
 const AA = () => {
     const { contract: factoryContract, smartAccountAddress } = useAAFactory()
     const { account, provider, chainId } = useActiveWeb3React()
-    const { connect, address, loading: eoaWalletLding, disconnect, web3Provider } = useWeb3AuthContext()
-    const { loading, wallet, state: walletState } = useSmartAccountContext()
-    const [txnLoading, setTxnLoading] = useState(false)
-    const nftContract = useNftSmartAccountContract()
-    const [nftBalance, setNftBalance] = useState('')
     const {addTxn} = useTransactionHandler()
-    const [paidTxn, setPaidTxn] = useState<any>()
     const [signedUserOp, setSignedUserOp] = useState<any>()
     const smartAccount = useSmartAccount()
-    const { depositedFund, nonce, contract: smartAccountContract, signAndSendUserOps } = smartAccount
+    const { depositedFund, nonce, contract: smartAccountContract, sendTransactions } = smartAccount
     const entryPointContract = useAAEntryPointContract()
     const token = '0xDf9acc0a00Ae6Ec5eBc8D219d12A0157e7F18A68'
     const tokenContract = useTokenContract(token)
@@ -81,10 +75,9 @@ const AA = () => {
                 0,
                 transferData
             ]
-            setTxnLoading(true)
             const callResult = await smartAccountContract.executeCall(...txn)
             await callResult.wait()
-            setTxnLoading(false)
+            
             addTxn({
                 hash: callResult.hash,
                 msg: 'Send ok',
@@ -92,7 +85,7 @@ const AA = () => {
             })
         }
         catch(err) {
-            setTxnLoading(false)
+            
             console.log('failed', err)
         }
     
@@ -112,40 +105,8 @@ const AA = () => {
         }
     }
 
-    const signUserOp = async () => {
-        if(!account || !tokenContract || !provider || !chainId) return 
-        const transferData = tokenContract.interface.encodeFunctionData('transfer', [account, mulNumberWithDecimal('1', 18)])
-        const owner = provider.getSigner(account)
-
-        const walletAPI = new SimpleAccountAPI({
-            provider: provider, 
-            entryPointAddress: AAEntryPoints[chainId],
-            owner,
-            factoryAddress: AAFactory[chainId],
-            index: 0,
-            accountAddress: smartAccountAddress
-        })
-        const txn = {
-            target: tokenContract.address,
-            data: transferData,
-            nonce: nonce,
-            owner: account,
-            value: 0
-        }
-        console.log({txn})
-        const op = await walletAPI.createSignedUserOp(txn)
-        op.signature = await op.signature
-        op.nonce = await op.nonce
-        op.sender = await op.sender
-        op.preVerificationGas = await op.preVerificationGas
-        console.log('userop =========>', op)
-        setSignedUserOp(op)
-    }
-
     const sendSignedUserOp = async () => {
         if(!entryPointContract || !signedUserOp) return 
-        console.log('asdsad')
-        setTxnLoading(true)
         const callResult = await entryPointContract.handleOps([signedUserOp], account)
         await callResult.wait()
         addTxn({
@@ -153,20 +114,20 @@ const AA = () => {
             msg: "Sent successfully",
             status: true
         })
-        setTxnLoading(false)
+        
         setSignedUserOp(undefined)
     }
 
-    const signAndSendUserOp  = async () => {
+    const withdrawOneUsdt  = async () => {
         try {
             if(!tokenContract || !account) return
             const transferData = tokenContract.interface.encodeFunctionData('transfer', [account, mulNumberWithDecimal('1', 18)])
             const txn = {
-                to: tokenContract.address,
+                target: tokenContract.address,
                 data: transferData,
                 value: 0
             }
-            const callResult = await signAndSendUserOps(txn)
+            const callResult = await sendTransactions([txn])
             if(!callResult) return
             await callResult.wait()
             console.log('ok', callResult)
@@ -176,12 +137,6 @@ const AA = () => {
         }
     }
 
-    useEffect(() => {
-        if(wallet?.address)
-            nftContract?.balanceOf(wallet.address)
-            .then((res: any) => setNftBalance(res.toString()))
-    }, [wallet])
-
     return(
         <AAWrapper gap="10px">
             <Row gap="10px">
@@ -190,16 +145,12 @@ const AA = () => {
             </Row>
             <Row gap="10px">
                 <div>smart account: </div>
-                <div>{smartAccountAddress || wallet?.address}</div>
+                <div>{smartAccountAddress}</div>
             </Row>
             <Row gap="10px">
                 <div>balance eth: </div>
                 <div>{balances?.[0]} eth</div>
             </Row>
-            {/* <Row gap="10px">
-                <div>balance nft: </div>
-                <div>{nftBalance || '0'}</div>
-            </Row> */}
             <Row gap="10px">
                 <div>balance usdt: </div>
                 <div>{balanceToken || '0'} usdt</div>
@@ -208,22 +159,15 @@ const AA = () => {
                 <div>deposited gas fund: </div>
                 <div>{divNumberWithDecimal(depositedFund, 18) || '0'} eth</div>
             </Row>
-            {/* <Row gap="10px">
-                <PrimaryButton onClick={onMint} name={'Mint nft'}  />
-                <PrimaryButton onClick={onBatchMint} name ={'Batch mint nfts'}  />
-            </Row> */}
-            <Row gap="10px">
-                <PrimaryButton onClick={signUserOp} name={'Sign userOp'}  />
-                <PrimaryButton onClick={sendByOwner} name={'Send by owner'}  />
-                <PrimaryButton onClick={sendSignedUserOp} name={'Send signed userOp'}  />
-                <PrimaryButton onClick={signAndSendUserOp} name={'Sign and send'}  />
-            </Row>
             <Row gap="10px">
                 <PrimaryButton
                     onClick={onDepositOneUsdt}
                     name={'Deposit 1 USDT'}
                     
                 />
+                <PrimaryButton onClick={withdrawOneUsdt} name={'Withdraw 1 USDT'}  />
+            </Row>
+            <Row gap="10px">
                 <PrimaryButton
                     onClick={onDeposit}
                     name={'Deposit gas fund'}
@@ -234,16 +178,12 @@ const AA = () => {
                     name={'Withdraw gas fund'}
                     
                 />
-                <PrimaryButton
+            </Row>
+            <PrimaryButton
                     onClick={onDeployAccount}
                     name={'Deploy new account'}
                     
                 />
-            </Row>
-            <Row gap="10px">
-                <PrimaryButton onClick={connect} name={'Connect AA'} />
-                <PrimaryButton onClick={disconnect} name ={'Disconnect AA'} />
-            </Row>
         </AAWrapper>
     )
 }

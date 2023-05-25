@@ -3,13 +3,14 @@ import Modal from 'components/Modal'
 import styled from 'styled-components'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { Columns, Row } from 'components/Layouts'
-import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import GAS_ICON from 'assets/icons/gas-station-dark.svg'
 import { Token } from 'interfaces'
 import { GAS_TOKEN } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { useAppState, useUpdateGasToken } from 'states/application/hooks'
 import LogoToken from 'components/LogoToken'
+import { useSmartAccount } from 'hooks/useSmartAccount'
+import { useActiveWeb3React } from 'hooks'
 
 const TokenSelection = ({
     token,
@@ -20,8 +21,8 @@ const TokenSelection = ({
     gasToken: Token | undefined
     onSetGasToken: (token: Token) => void
 }) => {
-    const { wallet } = useSmartAccountContext()
-    const balance = useCurrencyBalance(wallet?.address, token)
+    const { smartAccountAddress } = useSmartAccount()
+    const balance = useCurrencyBalance(smartAccountAddress, token)
 
     return (
         <TokenWrapper
@@ -44,10 +45,10 @@ const TokenSelection = ({
 }
 
 const GasSetting = () => {
-    const { state } = useSmartAccountContext()
     const { gasToken: gasTokenDefault } = useAppState()
     const [gasToken, setGasToken] = useState<Token>(gasTokenDefault)
     const updateGasToken = useUpdateGasToken()
+    const { chainId } = useActiveWeb3React()
 
     const Button = (onOpen: () => void) => {
         return (
@@ -72,8 +73,8 @@ const GasSetting = () => {
                         account transaction using Paymaster.
                     </div>
                     <div>Select a token: </div>
-                    {state?.chainId &&
-                        GAS_TOKEN[state.chainId].map((token, index) => {
+                    {chainId &&
+                        GAS_TOKEN[chainId].map((token, index) => {
                             return (
                                 <TokenSelection
                                     key={index}

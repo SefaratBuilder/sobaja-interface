@@ -58,19 +58,19 @@ const Add = () => {
     const { onUserInput, onTokenSelection, onChangeMintState } =
         useMintActionHandlers()
     const { account, chainId } = useActiveWeb3React()
-    const { wallet } = useSmartAccountContext()
+    const { smartAccountAddress } = useSmartAccount()
     const routerContract = useRouterContract()
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const contractApproveTokenIn = useTokenContract(tokenIn?.address)
     const contractApproveTokenOut = useTokenContract(tokenOut?.address)
 
     const tokenInApproval = useTokenApproval(
-        wallet?.address || account,
+        smartAccountAddress || account,
         routerAddress,
         tokenIn,
     )
     const tokenOutApproval = useTokenApproval(
-        wallet?.address || account,
+        smartAccountAddress || account,
         routerAddress,
         tokenOut,
     )
@@ -81,7 +81,7 @@ const Add = () => {
     const loca = useLocation()
     const pair = usePair(chainId, tokenIn, tokenOut)
     const ref = useRef<any>()
-    const { sendUserPaidTransaction } = useSmartAccount(wallet?.address)
+    const { sendTransactions } = useSmartAccount()
 
     useOnClickOutside(ref, () => {
         setIsOpenWalletModal(false)
@@ -300,7 +300,7 @@ const Add = () => {
                           refAddress || ZERO_ADDRESS,
                       ]
                 let callResult: any
-                if (!wallet) {
+                if (!smartAccountAddress) {
                     const gasLimit = await routerContract?.estimateGas?.[
                         method
                     ]?.(...args, { value })
@@ -319,24 +319,26 @@ const Add = () => {
                     if (!addData) return
 
                     const txApproveIn = {
-                        to: tokenIn.address,
+                        target: tokenIn.address,
                         data: tokenInApproval.approveEncodeData(
                             routerAddress,
                             mulNumberWithDecimal(inputAmount, tokenIn.decimals),
-                        ),
+                        ) ?? '0x',
+                        value: 0
                     }
                     const txApproveOut = {
-                        to: tokenOut.address,
+                        target: tokenOut.address,
                         data: tokenOutApproval.approveEncodeData(
                             routerAddress,
                             mulNumberWithDecimal(
                                 outputAmount,
                                 tokenOut.decimals,
                             ),
-                        ),
+                        ) ?? '0x',
+                        value: 0
                     }
                     const txAddliqudity = {
-                        to: routerAddress,
+                        target: routerAddress,
                         data: addData,
                         value,
                     }
@@ -349,7 +351,7 @@ const Add = () => {
                             : isInsufficientAllowanceTokenOut
                             ? [txApproveOut, txAddliqudity]
                             : [txAddliqudity]
-                    callResult = await sendUserPaidTransaction(txns)
+                    callResult = await sendTransactions(txns)
                 }
                 const txn = await callResult?.wait?.()
                 initDataTransaction.setIsOpenResultModal(false)
@@ -568,14 +570,14 @@ const Add = () => {
 
     const AddButton = () => {
         const balanceIn = useCurrencyBalance(
-            wallet?.address || account,
+            smartAccountAddress || account,
             tokenIn,
         )
         const balanceOut = useCurrencyBalance(
-            wallet?.address || account,
+            smartAccountAddress || account,
             tokenOut,
         )
-        const isNotConnected = !wallet?.address && !account
+        const isNotConnected = !smartAccountAddress && !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
         const isUndefinedAmount = !inputAmount || !outputAmount
@@ -604,7 +606,7 @@ const Add = () => {
                     <LabelButton name="Enter an amount" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
-                ) : isInsufficientAllowance && !wallet ? (
+                ) : isInsufficientAllowance && !smartAccountAddress ? (
                     <ButtonGroup>
                         {isInsufficientAllowanceTokenIn && (
                             <PrimaryButton

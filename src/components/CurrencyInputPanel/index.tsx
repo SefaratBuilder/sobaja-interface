@@ -8,6 +8,7 @@ import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { useActiveWeb3React } from 'hooks'
 import { fixNum } from 'utils/math'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import { useSmartAccount } from 'hooks/useSmartAccount'
 
 interface CurrencyInputPanelProps {
     token: Token | undefined
@@ -27,8 +28,8 @@ const CurrencyInputPanel = ({
     hideMaxButton,
 }: CurrencyInputPanelProps) => {
     const { account } = useActiveWeb3React()
-    const { wallet } = useSmartAccountContext()
-    const balance = useCurrencyBalance(wallet?.address || account, token)
+    const { smartAccountAddress } = useSmartAccount()
+    const balance = useCurrencyBalance(smartAccountAddress || account, token)
     const handleOnMax = () => {
         if (balance) onUserInput(field, balance)
     }

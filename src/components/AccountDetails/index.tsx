@@ -18,6 +18,7 @@ import GasSetting from './GasSetting'
 import { useAppDispatch } from 'states/hook'
 import { updateSelectedWallet } from 'states/user/reducer'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
+import { useSmartAccount } from 'hooks/useSmartAccount'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
     openOptions: React.Dispatch<React.SetStateAction<void>>
@@ -30,12 +31,12 @@ const AccountDetails = ({
     const [isCopied, setIsCopied] = useState<boolean>(false)
     const {
         connect,
-        web3Provider,
         disconnect: disconnectWeb3Auth,
     } = useWeb3AuthContext()
-    const { wallet, state, loading } = useSmartAccountContext()
-    const balance = useETHBalances([wallet?.address || account])?.[
-        wallet?.address || account || ''
+    const { loading } = useSmartAccountContext()
+    const { smartAccountAddress } = useSmartAccount()
+    const balance = useETHBalances([ smartAccountAddress || account])?.[
+        smartAccountAddress || account || ''
     ]
     const dispatch = useAppDispatch()
     const disconnect = useCallback(() => {
@@ -47,8 +48,8 @@ const AccountDetails = ({
     }, [connector, dispatch])
 
     const handleCopyAddress = () => {
-        if (wallet?.address) {
-            navigator.clipboard.writeText(wallet.address).then(() => {
+        if (smartAccountAddress) {
+            navigator.clipboard.writeText(smartAccountAddress).then(() => {
                 setIsCopied(true)
                 setTimeout(() => {
                     setIsCopied(false)
@@ -83,15 +84,15 @@ const AccountDetails = ({
                             <WrapAccountInfo>
                                 <ImgAccount src="https://picsum.photos/50/50" />
                                 <IdAccount>
-                                    {(wallet?.address &&
-                                        shortenAddress(wallet.address)) ||
+                                    {(smartAccountAddress &&
+                                        shortenAddress(smartAccountAddress)) ||
                                         (account && shortenAddress(account))}
                                 </IdAccount>
                             </WrapAccountInfo>
-                            {wallet && <AAMarker>Smart account</AAMarker>}
+                            {smartAccountAddress && <AAMarker>Smart account</AAMarker>}
                         </Row>
                         <WrapBtnHeader>
-                            {wallet && <GasSetting />}
+                            {smartAccountAddress && <GasSetting />}
                             {isCopied ? (
                                 <CopyBtn>
                                     <CopyAccountAddress src={imgCheckMark} />
@@ -110,13 +111,9 @@ const AccountDetails = ({
                                     </Tooltip>
                                 </CopyBtn>
                             )}
-
-                            {/* <button onClick={() => openOptions()}>
-                            <img src={iconSetting} alt="#" />
-                        </button> */}
                             <button
                                 onClick={() => {
-                                    if (wallet?.address) {
+                                    if (smartAccountAddress) {
                                         disconnectWeb3Auth()
                                     } else {
                                         disconnect()
@@ -140,7 +137,7 @@ const AccountDetails = ({
                         {(chainId && NATIVE_COIN[chainId]?.symbol) || 'ETH'}
                     </Balance>
                     <WrapButton>
-                        {!wallet && (
+                        {!smartAccountAddress && (
                             <>
                                 <PrimaryButton
                                     name={
@@ -153,7 +150,7 @@ const AccountDetails = ({
                                 />
                             </>
                         )}
-                        {wallet && (
+                        {smartAccountAddress && (
                             <>
                                 <DepositModal />
                                 <SendModal />
