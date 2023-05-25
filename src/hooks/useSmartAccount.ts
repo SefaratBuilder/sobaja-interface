@@ -1,46 +1,27 @@
-import { mulNumberWithDecimal } from 'utils/math';
-import { useSmartAccountContext } from "contexts/SmartAccountContext"
-import { useWeb3AuthContext } from "contexts/SocialLoginContext"
 import { Transaction } from "interfaces/smartAccount"
-import { useEffect, useMemo } from "react"
-import { useAppState } from "states/application/hooks"
+import { useCallback, useMemo } from "react"
 import { useSingleCallResult } from "states/multicall/hooks"
 import { useSmartAccountContract } from "./useContract"
 import { SimpleAccountAPI } from 'pantinho-aa'
 import { useActiveWeb3React } from "hooks"
 import { AAEntryPoints, AAFactory } from "constants/addresses"
-import { ethers } from "ethers"
 import { useAAEntryPointContract } from "./useContract"
-import { useToken } from "./useToken"
-import { useCurrencyBalance } from "./useCurrencyBalance"
+import { useAAFactory } from './useAAFactory'
+import { useAAEntryPoint } from './useAAEntryPoint'
+import { computeGasLimit } from "utils"
 
-export const useSmartAccount = (address: string | undefined) => {
-    const { web3Provider } = useWeb3AuthContext()
-    const { wallet, state } = useSmartAccountContext()
-    const contract = useSmartAccountContract(address)
-    const { gasToken } = useAppState()
+export const useSmartAccount = () => {
+    const { smartAccountAddress, isDeployed } = useAAFactory()
+    const contract = useSmartAccountContract(isDeployed ? smartAccountAddress : undefined)
     const { provider, chainId, account } = useActiveWeb3React()
     const entryPointContract = useAAEntryPointContract()
-    const gasBalance = useCurrencyBalance(address, gasToken)
+    const { depositedFund } = useAAEntryPoint()
 
     const nonceResult = useSingleCallResult(
         contract,
         'nonce',
         []
     )
-    const domainSeparator = useSingleCallResult(
-        contract,
-        'domainSeparator',
-        []
-    )
-
-    // const chainid = useSingleCallResult(
-    //     contract,
-    //     'getChainId',
-    //     []
-    // )
-
-    // console.log('chainIddddd', chainid)
 
     const owner = useSingleCallResult(
         contract,
@@ -48,60 +29,55 @@ export const useSmartAccount = (address: string | undefined) => {
         []
     )
 
-    const sendUserPaidTransaction = async (txns: Transaction[]) => {
-        if (!wallet) throw ('Not connected')
-        const feeQuotes = await wallet.getFeeQuotesForBatch({
-            transactions: txns
-        })
-        let feeQuote = feeQuotes.find(fq => fq?.address == gasToken?.address)
-
-        //fallback native coin for paying gas fee when user has no enough balance
-        if (!gasBalance || feeQuote?.payment && feeQuote?.payment >= Number(mulNumberWithDecimal(gasBalance, gasToken.decimals))) feeQuote = feeQuotes[0]
-
-        const paidTransaction = await wallet.createUserPaidTransactionBatch({
-            transactions: txns,
-            feeQuote: feeQuote || feeQuotes[0]
-        })
-        return await wallet.sendUserPaidTransaction({
-            tx: paidTransaction
-        })
-    }
-    const signAndSendUserOps = async (txns: Transaction) => {
-        if (!provider || !chainId || !account || !entryPointContract || !owner || !contract) return
-        const ownerSigner = provider.getSigner(owner.result?.[0])
-        console.log({ ownerSigner })
+    const signAndSendUserOps = useCallback(async (txn: Transaction) => {
+        if (!provider || !entryPointContract || !owner || !contract || !chainId) return
+        const ownerAddress = owner.result?.[0]
+        const ownerSigner = provider.getSigner(ownerAddress)
         const walletAPI = new SimpleAccountAPI({
             provider: provider,
-            entryPointAddress: AAEntryPoints[chainId],
+            entryPointAddress: entryPointContract.address,
             owner: ownerSigner,
             factoryAddress: AAFactory[chainId],
             index: 0,
-            accountAddress: contract.address
+            accountAddress: smartAccountAddress
+        })
+        console.log({
+            target: txn.to,
+            data: txn.data ?? '0x',
+            nonce: txn.nonce ?? nonceResult?.result?.[0]?.toString(),
+            value: txn.value ?? '0',
+            owner: ownerSigner._address,
+            gasLimit: !isDeployed ? 500000 : undefined
         })
         const op = await walletAPI.createSignedUserOp({
-            target: txns.to,
-            data: txns.data ?? '0x',
-            nonce: txns.nonce,
-            value: txns.value ?? '0',
-            owner: ownerSigner._address
+            target: txn.to,
+            data: txn.data ?? '0x',
+            nonce: txn.nonce ?? nonceResult?.result?.[0]?.toString(),
+            value: txn.value ?? '0',
+            owner: ownerSigner._address,
+            gasLimit: !isDeployed ? 500000 : undefined
         })
         op.signature = await op.signature
         op.nonce = await op.nonce
         op.sender = await op.sender
         op.preVerificationGas = await op.preVerificationGas
-        console.log({ op })
-        const callResult = await entryPointContract.handleOps([op], account, { value: '40' })
-        console.log('callResult', callResult)
-    }
+
+        //Test directly call on wallet
+        //Actually, we need to call to ERC4337 service to execute 
+        const callGasLimit = await entryPointContract.estimateGas.handleOps([op], ownerAddress)
+        return entryPointContract.handleOps([op], ownerAddress, { gasLimit: computeGasLimit(callGasLimit) })
+    }, [
+        provider, entryPointContract, owner, chainId, contract
+    ])
 
     return useMemo(() => {
         return {
             contract,
-            data: {
-                nonce: nonceResult?.result?.[0]?.toString() ?? '0'
-            },
-            sendUserPaidTransaction,
-            signAndSendUserOps
+            nonce: nonceResult?.result?.[0]?.toString() ?? '0',
+            depositedFund,
+            address: smartAccountAddress,
+            isDeployed,
+            signAndSendUserOps,
         }
-    }, [nonceResult, contract, sendUserPaidTransaction, signAndSendUserOps])
+    }, [nonceResult, contract, signAndSendUserOps, depositedFund, isDeployed])
 }

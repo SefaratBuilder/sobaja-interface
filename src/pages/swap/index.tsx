@@ -93,11 +93,9 @@ const Swap = () => {
     const updateRef = useUpdateRefAddress()
     const ref = useRef<any>()
     const {
-        sendUserPaidTransaction,
         signAndSendUserOps,
-        data: { nonce },
         contract: smartAccountContract
-    } = useSmartAccount('0x330c7Cbb3b029C58E06E004c22cDef0E13ee97Db' || wallet?.address)
+    } = useSmartAccount()
 
     const isInsufficientAllowance =
         Number(tokenApproval?.allowance) < Number(inputAmount) &&
@@ -395,14 +393,12 @@ const Swap = () => {
                     data: tokenApproval.approveEncodeData(
                         routerAddress,
                         mulNumberWithDecimal(inputAmount, tokenIn.decimals),
-                    ),
-                    nonce,
+                    )
                 }
                 const txSwap = {
                     to: routerAddress,
                     data: swapData,
-                    value: value,
-                    nonce,
+                    value: value
                 }
                 if (isInsufficientAllowance) {
                     // callResult = await sendUserPaidTransaction([

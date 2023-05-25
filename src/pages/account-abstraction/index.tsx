@@ -12,14 +12,13 @@ import { useTransactionHandler } from 'states/transactions/hooks';
 import { SimpleAccountAPI } from 'pantinho-aa'
 import { useSmartAccount } from 'hooks/useSmartAccount';
 import { useActiveWeb3React } from 'hooks';
-import { mulNumberWithDecimal } from 'utils/math';
+import { add, divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math';
 import { useAAFactory } from 'hooks/useAAFactory';
 import { AAEntryPoints, AAFactory } from 'constants/addresses';
 import { useToken } from 'hooks/useToken';
 
-const smartAccountAddress = '0x330c7Cbb3b029C58E06E004c22cDef0E13ee97Db'
-
 const AA = () => {
+    const { contract: factoryContract, smartAccountAddress } = useAAFactory()
     const { account, provider, chainId } = useActiveWeb3React()
     const { connect, address, loading: eoaWalletLding, disconnect, web3Provider } = useWeb3AuthContext()
     const { loading, wallet, state: walletState } = useSmartAccountContext()
@@ -29,19 +28,20 @@ const AA = () => {
     const {addTxn} = useTransactionHandler()
     const [paidTxn, setPaidTxn] = useState<any>()
     const [signedUserOp, setSignedUserOp] = useState<any>()
-    const { data } = useSmartAccount(smartAccountAddress || wallet?.address)
+    const smartAccount = useSmartAccount()
+    const { depositedFund, nonce, contract: smartAccountContract, signAndSendUserOps } = smartAccount
     const entryPointContract = useAAEntryPointContract()
     const token = '0xDf9acc0a00Ae6Ec5eBc8D219d12A0157e7F18A68'
     const tokenContract = useTokenContract(token)
     const tokenType = useToken(token)
-    const { contract, smartAccountAtZero } = useAAFactory()
-    const balanceToken = useCurrencyBalance(smartAccountAddress || wallet?.address?.toLowerCase(), tokenType)
-    const balances = useCurrencyBalances(smartAccountAddress || wallet?.address?.toLowerCase(), [NATIVE_COIN[80001]])
+    const balanceToken = useCurrencyBalance(smartAccountAddress, tokenType)
+    const balances = useCurrencyBalances(smartAccountAddress, [NATIVE_COIN[80001]])
+    console.log("data smart account", smartAccount)
 
     const onDeployAccount = async () => {
         try {
-            if (!contract || !account) return
-            const deployResult = await contract.deployCounterFactualAccount(
+            if (!factoryContract || !account) return
+            const deployResult = await factoryContract.deployCounterFactualAccount(
                 account,
                 '0',
             )
@@ -52,45 +52,69 @@ const AA = () => {
         }
     }
 
-
-    const onMint = async () => {
-        if (!wallet || !walletState || !web3Provider || !nftContract) return;
+    const onDeposit = async () => {
         try {
+            if (!entryPointContract || !smartAccountAddress) return
+            const deployResult = await entryPointContract.depositTo(
+                smartAccountAddress,
+                {
+                    value: mulNumberWithDecimal('0.05', 18)
+                }
+            )
+            await deployResult.wait()
+            console.log('txn hash', deployResult)
+        } catch (err) {
+            console.log('failed to deploy: ', err)
+        }
+    }
 
+    const onDepositOneUsdt = () => {
+        tokenContract?.transfer(smartAccountAddress, mulNumberWithDecimal('1', 18))
+    }
+
+    const sendByOwner = async () => {
+        try {
+            if(!smartAccountContract || !tokenContract) return 
+            const transferData = tokenContract.interface.encodeFunctionData('transfer', [account, mulNumberWithDecimal('0', 18)])
+            const txn = [
+                tokenContract.address,
+                0,
+                transferData
+            ]
             setTxnLoading(true)
-            const safeMintTx = await nftContract.populateTransaction.safeMint(
-              wallet.address
-            );
-
-            const tx1 = {
-              to: nftContract.address,
-              data: safeMintTx.data,
-            };
-
-            const feeQuotes = await wallet.getFeeQuotesForBatch({
-                transactions: [tx1]
-            })
-            console.log({feeQuotes})
-            const paidTransaction = await wallet.createUserPaidTransaction({
-                transaction: tx1,
-                feeQuote: feeQuotes[0]
-            })
-            setPaidTxn(paidTransaction)
-            console.log('signing...', {paidTransaction})
-            const txn = await wallet.sendUserPaidTransaction({
-                tx: paidTransaction
-            })
+            const callResult = await smartAccountContract.executeCall(...txn)
+            await callResult.wait()
             setTxnLoading(false)
+            addTxn({
+                hash: callResult.hash,
+                msg: 'Send ok',
+                status: true
+            })
         }
         catch(err) {
             setTxnLoading(false)
-            console.log('failed to mint nft', err)
+            console.log('failed', err)
+        }
+    
+    }
+
+    const onWithdraw = async () => {
+        try {
+            if (!smartAccountContract || !smartAccountAddress) return
+            const deployResult = await smartAccountContract.withdrawDepositTo(
+                account,
+                depositedFund
+            )
+            await deployResult.wait()
+            console.log('txn hash', deployResult)
+        } catch (err) {
+            console.log('failed to deploy: ', err)
         }
     }
 
     const signUserOp = async () => {
         if(!account || !tokenContract || !provider || !chainId) return 
-        const transferData = await tokenContract.interface.encodeFunctionData('transfer', [account, mulNumberWithDecimal('1', 18)])
+        const transferData = tokenContract.interface.encodeFunctionData('transfer', [account, mulNumberWithDecimal('1', 18)])
         const owner = provider.getSigner(account)
 
         const walletAPI = new SimpleAccountAPI({
@@ -104,11 +128,11 @@ const AA = () => {
         const txn = {
             target: tokenContract.address,
             data: transferData,
-            nonce: data.nonce,
+            nonce: nonce,
             owner: account,
             value: 0
         }
-
+        console.log({txn})
         const op = await walletAPI.createSignedUserOp(txn)
         op.signature = await op.signature
         op.nonce = await op.nonce
@@ -120,8 +144,9 @@ const AA = () => {
 
     const sendSignedUserOp = async () => {
         if(!entryPointContract || !signedUserOp) return 
+        console.log('asdsad')
         setTxnLoading(true)
-        const callResult = await entryPointContract.handleOps([signedUserOp], account, { value: 11 })
+        const callResult = await entryPointContract.handleOps([signedUserOp], account)
         await callResult.wait()
         addTxn({
             hash: callResult.hash,
@@ -130,41 +155,24 @@ const AA = () => {
         })
         setTxnLoading(false)
         setSignedUserOp(undefined)
-
-        
     }
 
-    const onBatchMint = async () => {
-        if (!wallet || !walletState || !web3Provider || !nftContract) return;
+    const signAndSendUserOp  = async () => {
         try {
-            console.log('populating...')
-            setTxnLoading(true)
-            const safeMintTx = await nftContract.populateTransaction.safeMint(
-              wallet.address
-            );
-            const tx1 = {
-                to: nftContract.address,
-                data: safeMintTx.data,
-              };
-              const tx2 = {
-                to: nftContract.address,
-                data: safeMintTx.data,
-              };
-            const txResponse = await wallet.sendTransactionBatch({
-                transactions: [tx1, tx2],
-            });
-            const txHash = await txResponse.wait()
-            setTxnLoading(false)
-            addTxn({
-                hash: txHash.transactionHash,
-                msg: 'Mint batch nfts success',
-                status: true
-            })
-            console.log('mint success with hash: ', txHash.transactionHash)
+            if(!tokenContract || !account) return
+            const transferData = tokenContract.interface.encodeFunctionData('transfer', [account, mulNumberWithDecimal('1', 18)])
+            const txn = {
+                to: tokenContract.address,
+                data: transferData,
+                value: 0
+            }
+            const callResult = await signAndSendUserOps(txn)
+            if(!callResult) return
+            await callResult.wait()
+            console.log('ok', callResult)
         }
         catch(err) {
-            setTxnLoading(false)
-            console.log('failed to mint nft', err)
+            console.log('failed', err)
         }
     }
 
@@ -185,30 +193,51 @@ const AA = () => {
                 <div>{smartAccountAddress || wallet?.address}</div>
             </Row>
             <Row gap="10px">
-                <div>balance matic: </div>
-                <div>{balances?.[0]}</div>
+                <div>balance eth: </div>
+                <div>{balances?.[0]} eth</div>
             </Row>
-            <Row gap="10px">
+            {/* <Row gap="10px">
                 <div>balance nft: </div>
                 <div>{nftBalance || '0'}</div>
+            </Row> */}
+            <Row gap="10px">
+                <div>balance usdt: </div>
+                <div>{balanceToken || '0'} usdt</div>
             </Row>
             <Row gap="10px">
-                <div>balance nft: </div>
-                <div>{balanceToken || '0'}</div>
+                <div>deposited gas fund: </div>
+                <div>{divNumberWithDecimal(depositedFund, 18) || '0'} eth</div>
             </Row>
+            {/* <Row gap="10px">
+                <PrimaryButton onClick={onMint} name={'Mint nft'}  />
+                <PrimaryButton onClick={onBatchMint} name ={'Batch mint nfts'}  />
+            </Row> */}
             <Row gap="10px">
-                <PrimaryButton onClick={onMint} name={'Mint nft'} isLoading={txnLoading} />
-                <PrimaryButton onClick={onBatchMint} name ={'Batch mint nfts'} isLoading={txnLoading} />
-            </Row>
-            <Row gap="10px">
-                <PrimaryButton onClick={signUserOp} name={'Sign userOp'} isLoading={txnLoading} />
-                <PrimaryButton onClick={sendSignedUserOp} name={'Send signed userOp'} isLoading={txnLoading} />
+                <PrimaryButton onClick={signUserOp} name={'Sign userOp'}  />
+                <PrimaryButton onClick={sendByOwner} name={'Send by owner'}  />
+                <PrimaryButton onClick={sendSignedUserOp} name={'Send signed userOp'}  />
+                <PrimaryButton onClick={signAndSendUserOp} name={'Sign and send'}  />
             </Row>
             <Row gap="10px">
                 <PrimaryButton
+                    onClick={onDepositOneUsdt}
+                    name={'Deposit 1 USDT'}
+                    
+                />
+                <PrimaryButton
+                    onClick={onDeposit}
+                    name={'Deposit gas fund'}
+                    
+                />
+                <PrimaryButton
+                    onClick={onWithdraw}
+                    name={'Withdraw gas fund'}
+                    
+                />
+                <PrimaryButton
                     onClick={onDeployAccount}
                     name={'Deploy new account'}
-                    isLoading={txnLoading}
+                    
                 />
             </Row>
             <Row gap="10px">
