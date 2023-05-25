@@ -390,11 +390,15 @@ const Container = styled.div<{ isConnected: boolean }>`
     color: ${({ theme }) => theme.text1};
     animation: ${({ isConnected }) =>
         isConnected ? ` fadeIn 0.3s linear` : ` fadeUp 0.3s linear`};
-
+    ::-webkit-scrollbar {
+        display: none;
+    }
     @media screen and (max-width: 640px) {
         top: 10rem;
-        max-width: unset;
-        border-radius: 12px 12px 0px 0px;
+        max-width: 90%;
+        border-radius: 12px 0px 0px 0px;
+        border-right: none;
+        border-bottom: none;
         animation: fadeUp 0.3s linear;
         height: calc(100vh - 10rem);
     }

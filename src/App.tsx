@@ -24,6 +24,7 @@ import StakeDetails from 'pages/staking'
 import Launchpad from 'pages/launchpad'
 import AA from 'pages/account-abstraction'
 import ToastMessage from 'components/ToastMessage'
+import StakePools from 'pages/staking/listpoolstake'
 
 const App = () => {
     const Updater = () => {
@@ -55,6 +56,7 @@ const App = () => {
                     <Route path="/pools" element={<Pools />} />
                     <Route path="/add" element={<AddLiquidity />} />
                     <Route path="/test-launchpad" element={<Launchpad />} />
+                    <Route path="/test-staking" element={<StakePools />} />
                     <Route path="/staking" element={<StakeDetails />} />
                     <Route path="/bridge" element={<Bridge />} />
                     <Route path="/nfts" element={<NFTs />} />

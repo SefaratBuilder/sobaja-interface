@@ -160,7 +160,7 @@ export const GlobalStyle = createGlobalStyle`
         max-width: 400px!important;
         width: 100%!important;
         background: url(${BgWallet})!important;
-        background-size: cover;
+        background-size: 400px!important;
         background-repeat: no-repeat;
         z-index: 1000!important;
         padding: 20px !important;
@@ -176,6 +176,9 @@ export const GlobalStyle = createGlobalStyle`
             /* min-height: 600px; */
             height: 600px!important;
             animation: fadeUp 0.3s linear;
+        }
+        @media screen and (max-width: 442px) {
+            width: 90%!important;
         }
 
     @keyframes fadeIn {
@@ -258,66 +261,72 @@ export const GlobalStyle = createGlobalStyle`
         box-shadow: none;
         color: #595857;
         display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-align-items: center;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center;
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
-    -ms-flex-pack: center;
-    justify-content: center;
-    width: 100%;
-    height: 40px;
-    border-radius: 8px;
-    border: 1px solid var(--border2);
-    outline: none;
-    font-size: 1rem;
-    font-family: 'Roboto',sans-serif;
-    font-weight: 300;
-    -webkit-letter-spacing: 0.3;
-    -moz-letter-spacing: 0.3;
-    -ms-letter-spacing: 0.3;
-    letter-spacing: 0.3;
-    cursor: pointer;
-    opacity: 1;
-    font-family: Inter,sans-serif;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        width: 100%;
+        height: 40px;
+        border-radius: 8px;
+        border: 1px solid var(--border2);
+        outline: none;
+        font-size: 1rem;
+        font-family: 'Roboto',sans-serif;
+        font-weight: 300;
+        -webkit-letter-spacing: 0.3;
+        -moz-letter-spacing: 0.3;
+        -ms-letter-spacing: 0.3;
+        letter-spacing: 0.3;
+        cursor: pointer;
+        opacity: 1;
+        font-family: Inter,sans-serif;
+        @media screen and (max-width: 442px) {
+            font-size: 11px;
+        }
     }
 
     #w3a-modal.w3a-modal--light button.w3a-button:nth-child(2) {
         background: linear-gradient(87.2deg,#00B2FF 2.69%,#003655 98.02%);
         color: white;
         display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-align-items: center;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center;
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
-    -ms-flex-pack: center;
-    justify-content: center;
-    width: 100%;
-    height: 40px;
-    border-radius: 8px;
-    border: 1px solid var(--border2);
-    outline: none;
-    background: linear-gradient(87.2deg,#00B2FF 2.69%,#003655 98.02%);
-    font-size: 1rem;
-    font-family: 'Roboto',sans-serif;
-    font-weight: 300;
-    -webkit-letter-spacing: 0.3;
-    -moz-letter-spacing: 0.3;
-    -ms-letter-spacing: 0.3;
-    letter-spacing: 0.3;
-    cursor: pointer;
-    opacity: 1;
-    color: var(--text1);
-    font-family: Inter,sans-serif;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        width: 100%;
+        height: 40px;
+        border-radius: 8px;
+        border: 1px solid var(--border2);
+        outline: none;
+        background: linear-gradient(87.2deg,#00B2FF 2.69%,#003655 98.02%);
+        font-size: 1rem;
+        font-family: 'Roboto',sans-serif;
+        font-weight: 300;
+        -webkit-letter-spacing: 0.3;
+        -moz-letter-spacing: 0.3;
+        -ms-letter-spacing: 0.3;
+        letter-spacing: 0.3;
+        cursor: pointer;
+        opacity: 1;
+        color: var(--text1);
+        font-family: Inter,sans-serif;
+        @media screen and (max-width: 442px) {
+            font-size: 11px;
+        }
     }
 
     #w3a-modal button.w3a-button {
