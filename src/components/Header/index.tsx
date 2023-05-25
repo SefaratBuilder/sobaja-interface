@@ -33,20 +33,6 @@ const Header = () => {
                 <ConnectorMobile />
 
                 <Connector>
-                    <button
-                        onClick={() => {
-                            if (!connector.watchAsset) return
-                            connector.watchAsset({
-                                address:
-                                    '0xC4a71a882D95B97d4356B0FA1169f9d262A0396b',
-                                symbol: 'USDC',
-                                decimals: 16,
-                                image: '',
-                            })
-                        }}
-                    >
-                        add Token
-                    </button>
                     <NetworkSelector />
                     <Web3Status />
                 </Connector>

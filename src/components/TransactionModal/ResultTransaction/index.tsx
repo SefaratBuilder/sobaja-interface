@@ -60,11 +60,15 @@ const ResultTransactionModal = ({
                                 : error}
                         </div>
                     </WrapInfoLoad>
-                    <WrapAddErc20>
-                        <AddErc20 onClick={() => addToken()}>
-                            Add {token && token.symbol}
-                        </AddErc20>
-                    </WrapAddErc20>
+                    {token && token.address && token.symbol ? (
+                        <WrapAddErc20>
+                            <AddErc20 onClick={() => addToken()}>
+                                Add {token && token.symbol}
+                            </AddErc20>
+                        </WrapAddErc20>
+                    ) : (
+                        ''
+                    )}
                     <WrapImgResult>
                         <img
                             src={`${isSuccess ? imgSuccess : imgError}`}
