@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useActiveWeb3React } from 'hooks'
 import { shortenAddress } from 'utils'
@@ -19,6 +19,7 @@ import { useAppDispatch } from 'states/hook'
 import { updateSelectedWallet } from 'states/user/reducer'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
 import { ChainId } from 'utils/chainConfig'
+import { ListNetwork } from 'constants/networks'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
     openOptions: React.Dispatch<React.SetStateAction<void>>
@@ -47,6 +48,12 @@ const AccountDetails = ({
         dispatch(updateSelectedWallet({ wallet: undefined }))
     }, [connector, dispatch])
 
+    useEffect(() => {
+        if (chainId !== ChainId.GOERLI) {
+            disconnectWeb3Auth()
+        }
+    }, [chainId])
+
     const handleCopyAddress = () => {
         if (wallet?.address) {
             navigator.clipboard.writeText(wallet.address).then(() => {
@@ -69,9 +76,24 @@ const AccountDetails = ({
 
     const handleOnConnectSmartAccount = async () => {
         try {
-            setToggleWalletModal(false)
-            await connect()
-            setToggleWalletModal(true)
+            if (chainId !== ChainId.GOERLI) {
+                return connector
+                    .activate(
+                        ListNetwork.find(
+                            (network) => network.chainId === ChainId.GOERLI,
+                        )?.switchNetwork[0],
+                    )
+                    ?.then(async (r) => {
+                        console.log('🤦‍♂️ ⟹ )?.then ⟹ r:', r)
+                        // setToggleWalletModal(false)
+                        await connect()
+                        // setToggleWalletModal(true)
+                    })
+            } else {
+                // setToggleWalletModal(false)
+                await connect()
+                // setToggleWalletModal(true)
+            }
         } catch (err) {
             console.log('failed to connect to smart account: ', err)
         }
@@ -81,7 +103,7 @@ const AccountDetails = ({
         <LabelRight>
             <WrapConnectModal isConnected={true}>
                 <Header>
-                    <Row jus="space-between">
+                    <Row jus="space-between" gap="5px">
                         <Row al="center" gap="10px">
                             <WrapAccountInfo>
                                 <ImgAccount src="https://picsum.photos/50/50" />
@@ -236,7 +258,7 @@ const LabelRight = styled.div`
         height: 600px;
     } */
     background: url(${BgWallet});
-    background-size: cover;
+    background-size: 400px;
     background-repeat: no-repeat;
     opacity: 1;
     /* border: 1px solid #003b5c; */
@@ -260,7 +282,7 @@ const LabelRight = styled.div`
         bottom: 0;
         top: unset;
     }
-    @media screen and (max-width: 432px) {
+    @media screen and (max-width: 476px) {
         width: 90%;
     }
     @keyframes fadeIn {
@@ -341,6 +363,9 @@ const Balance = styled.div`
     font-size: 32px;
     line-height: 44px;
     text-align: center;
+    @media screen and (max-width: 391px) {
+        font-size: 18px;
+    }
 `
 const CopyBtn = styled.div`
     position: relative;
@@ -379,6 +404,13 @@ const WrapBtnHeader = styled.div`
         background: none;
         border: none;
         cursor: pointer;
+    }
+
+    @media screen and (max-width: 391px) {
+        img {
+            width: 12px;
+            height: 12px;
+        }
     }
 `
 const WrapFooterBtn = styled.div`
@@ -459,6 +491,9 @@ const WrapContent = styled.div`
     }
     @media screen and (max-width: 390px) {
         padding: 0.5rem 1rem;
+        > div {
+            margin: 0;
+        }
     }
 `
 const Title = styled.div`
@@ -578,7 +613,7 @@ const WrapButton = styled.div`
     }
 
     @media screen and (max-width: 390px) {
-        gap: 0px;
+        /* gap: 0px; */
         button:first-child {
             margin-right: 5px;
         }
@@ -655,6 +690,7 @@ const WrapConnectModal = styled(Container)`
     @media screen and (max-width: 391px) {
         width: 90%;
         margin: auto;
+        font-size: 12px;
         /* right: 10px; */
         /* max-width: 300px; */
     }
