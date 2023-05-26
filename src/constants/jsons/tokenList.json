@@ -1,5 +1,21 @@
 [
     {
+        "address": "0x4cD67E306ecaD1Cac71a2BD4abC1A4c22B55d331",
+        "symbol": "Soba",
+        "decimals": 18,
+        "logoURI": "/images/sbj.svg",
+        "name": "Sobaja test token",
+        "chainId": 280
+    },
+    {
+        "address": "0x9f49D892597ED5F08fe058fF3826859bEDC987a6",
+        "symbol": "Soba",
+        "decimals": 18,
+        "logoURI": "/images/sbj.svg",
+        "name": "Sobaja test token",
+        "chainId": 5
+    },
+    {
         "address": "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
         "symbol": "USDC",
         "decimals": 18,

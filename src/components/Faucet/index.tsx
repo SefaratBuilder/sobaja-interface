@@ -637,9 +637,9 @@ const BtnClose = styled.img`
     width: unset;
     height: 20px;
     cursor: pointer;
-    :hover {
+    /* :hover {
         background: #003b5c;
-    }
+    } */
 `
 
 const BodyModalFaucet = styled.div`

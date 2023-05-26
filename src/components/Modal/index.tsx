@@ -52,18 +52,11 @@ const WrapBox = styled.div`
     height: 100vh;
     width: 400px;
     background: url(${BgWallet});
-    background-size: cover;
+    background-size: 400px;
     background-repeat: no-repeat;
     padding: 20px;
     border-top: 1px solid #003b5c;
     border-left: 1px solid #003b5c;
-    @media screen and (max-width: 1100px) {
-        top: unset;
-        bottom: 0;
-        /* min-height: 600px; */
-        height: 600px;
-    }
-
     animation: fadeIn 0.4s linear;
 
     @media screen and (max-width: 1100px) {
@@ -72,6 +65,11 @@ const WrapBox = styled.div`
         bottom: 0;
         top: unset;
     }
+
+    @media screen and (max-width: 476px) {
+        width: 90%;
+    }
+
     @keyframes fadeIn {
         from {
             transform: translateX(100%);
@@ -125,8 +123,8 @@ const MiddleBox = styled.div`
     border-radius: 8px;
     padding: 10px;
 
-    @media (max-width: 576px) {
-        /* width: 90%; */
+    @media (max-width: 476px) {
+        width: 90%;
     }
 `
 
