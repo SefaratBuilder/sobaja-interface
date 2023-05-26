@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import styled from 'styled-components'
 import { useWeb3React } from '@web3-react/core'
 import AccountDetails from 'components/AccountDetails'
 import OptionsWallet from 'components/OptionsWallet'

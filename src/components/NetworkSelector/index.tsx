@@ -12,7 +12,8 @@ import { changeNetwork } from 'utils/network'
 
 const NetworkSelector = () => {
     const [networkModal, setNetworkModal] = useState(false)
-    const { chainId, connector } = useActiveWeb3React()
+    const { chainId, connector, account } = useActiveWeb3React()
+    console.log('chainId', chainId, connector)
     const networkRef = useRef<any>()
     useOnClickOutside(networkRef, () => {
         setNetworkModal(false)
@@ -59,11 +60,17 @@ const NetworkSelector = () => {
                         return (
                             <li
                                 key={index}
-                                onClick={async () =>
-                                    await connector.activate(
-                                        item.switchNetwork[0],
-                                    )
-                                }
+                                onClick={async () => {
+                                    if (account) {
+                                        await connector.activate(
+                                            item.switchNetwork[0],
+                                        )
+                                    } else {
+                                        await connector.activate(
+                                            item.switchNetwork[0].chainId,
+                                        )
+                                    }
+                                }}
                             >
                                 <span>
                                     {item.logo && (

@@ -65,6 +65,7 @@ const StakeToken = ({ data, onApprove }: IStakeToken) => {
         initDataTransaction,
         setUnstakeData,
     } = data
+    console.log('🤦‍♂️ ⟹ StakeToken ⟹ data:', data)
 
     const { account, chainId } = useActiveWeb3React()
     const stakingContract = useStakingContract()
