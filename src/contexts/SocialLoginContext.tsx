@@ -1,11 +1,10 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { ethers } from 'ethers'
-import SocialLogin from '@biconomy/web3-auth'
+import { Web3Auth, Web3AuthOptions } from '@web3auth/modal'
 import { activeChainId } from '../utils/chainConfig'
-import { useActiveWeb3React } from 'hooks'
 
 interface web3AuthContextType {
-    connect: () => Promise<SocialLogin | null | undefined>
+    connect: () => Promise<Web3Auth | null | undefined>
     disconnect: () => Promise<void>
     provider: any
     ethersProvider: ethers.providers.Web3Provider | null
@@ -51,87 +50,85 @@ export const Web3AuthProvider = ({ children }: any) => {
     const { provider, web3Provider, ethersProvider, address, chainId } =
         web3State
     const [loading, setLoading] = useState(false)
-    const [socialLoginSDK, setSocialLoginSDK] = useState<SocialLogin | null>(
-        null,
-    )
-    const providerWeb3 = useActiveWeb3React()
-
+    const [socialLoginSDK, setSocialLoginSDK] = useState<Web3Auth | null>(null)
+    console.log({ address })
     // create socialLoginSDK and call the init
     useEffect(() => {
         const initWallet = async () => {
-            if (!providerWeb3.chainId) return
-            const sdk = new SocialLogin()
-            await sdk.init({
-                chainId: ethers.utils.hexValue(providerWeb3.chainId).toString(),
-                network: 'mainnet',
-                whitelistUrls: {
-                    'https://sdk-staging.biconomy.io':
-                        'MEQCIBgO86Ds-nQ6JLHWmo5umziadaY-VDCQxLmwy-DX6nCxAiBJPnc0SOZmFTkphRfS7yd81DsC--Uj6Vb-WqvfSXngnQ',
-                    'http://sdk-staging.biconomy.io':
-                        'MEUCIQDW2lTR5y_sTv3UTJEhfnC3_cLDb_aBrWtev8Ih4kXG4QIgIMjQhpQs9g14c3t64bEt3mQMMPuWHrbLBfo7hRAGEZc',
-                    'https://sdk-dev.biconomy.io':
-                        'MEQCID90gUAazem-Ia_YIfVqLZr0lxo0Oawnx9ZoIcCiTtCNAiB6fZOA3AV22CDKtQ0QKYUSucPymeJoP3wmMsHZjNj-wQ',
-                    'http://sdk-dev.biconomy.io':
-                        'MEUCIQCt5ga5aLrrAjtojAZmfTFwcv9bgmTbR_VKjDTtbRf0pAIgESLgcY-tBQe1pzsawiPdEY0vQwe8ux0XDTAtBh--MRM',
+            const sdk = new Web3Auth({
+                clientId:
+                    'BE7tc_MkDFzJp3ujQwPTeptBbTCE87628dJ7bcndPvcJYKT5NSRnbDk0NIYjW_4iAbNsxbPhoLwlMLMcsFA87Qc', // get from https://dashboard.web3auth.io
+                web3AuthNetwork: 'testnet',
+                chainConfig: {
+                    chainNamespace: 'eip155',
+                    chainId: '0x5', // EVM chain's Chain ID
+                    rpcTarget:
+                        'https://goerli.infura.io/v3/8f8561738d754550b1b5fdc095c6e0a9', // EVM chain's RPC endpoint
+                    // Avoid using public rpcTarget in production.
+                    // Use services like Infura, Quicknode, Alchemy, Ankr etc.
+                    displayName: 'Goerli', // EVM chain's Name
+                    blockExplorer: 'https://goerli.etherscan.io/', // EVM chain's Blockexplorer
+                    ticker: 'ETH', // EVM chain's Ticker
+                    tickerName: 'Ethereum', // EVM chain's Ticker Name
                 },
             })
+            await sdk.initModal()
             // sdk.showConnectModal();
             setSocialLoginSDK(sdk)
         }
         if (!socialLoginSDK) initWallet()
-    }, [socialLoginSDK, providerWeb3.chainId])
-
-    // if wallet already connected close widget
-    useEffect(() => {
-        if (socialLoginSDK && address) {
-            socialLoginSDK.hideWallet()
-        }
-    }, [address, socialLoginSDK])
+    }, [socialLoginSDK])
 
     const connect = useCallback(async () => {
-        if (address) return
-        if (socialLoginSDK?.provider) {
+        try {
+            if (address) return
+            if (socialLoginSDK?.provider) {
+                setLoading(true)
+                const web3Provider = new ethers.providers.Web3Provider(
+                    socialLoginSDK.provider,
+                )
+                const signer = web3Provider.getSigner()
+                const gotAccount = await signer.getAddress()
+                const network = await web3Provider.getNetwork()
+                setWeb3State({
+                    provider: socialLoginSDK.provider,
+                    web3Provider: web3Provider,
+                    ethersProvider: web3Provider,
+                    address: gotAccount,
+                    chainId: Number(network.chainId),
+                })
+                setLoading(false)
+                return
+            }
+
             setLoading(true)
-            const web3Provider = new ethers.providers.Web3Provider(
-                socialLoginSDK.provider,
-            )
-            const signer = web3Provider.getSigner()
-            const gotAccount = await signer.getAddress()
-            const network = await web3Provider.getNetwork()
-            setWeb3State({
-                provider: socialLoginSDK.provider,
-                web3Provider: web3Provider,
-                ethersProvider: web3Provider,
-                address: gotAccount,
-                chainId: Number(network.chainId),
+            const sdk = new Web3Auth({
+                clientId:
+                    'BE7tc_MkDFzJp3ujQwPTeptBbTCE87628dJ7bcndPvcJYKT5NSRnbDk0NIYjW_4iAbNsxbPhoLwlMLMcsFA87Qc', // get from https://dashboard.web3auth.io
+                web3AuthNetwork: 'testnet',
+                chainConfig: {
+                    chainNamespace: 'eip155',
+                    chainId: '0x5', // EVM chain's Chain ID
+                    rpcTarget:
+                        'https://goerli.infura.io/v3/8f8561738d754550b1b5fdc095c6e0a9', // EVM chain's RPC endpoint
+                    // Avoid using public rpcTarget in production.
+                    // Use services like Infura, Quicknode, Alchemy, Ankr etc.
+                    displayName: 'Goerli', // EVM chain's Name
+                    blockExplorer: 'https://goerli.etherscan.io/', // EVM chain's Blockexplorer
+                    ticker: 'ETH', // EVM chain's Ticker
+                    tickerName: 'Ethereum', // EVM chain's Ticker Name
+                },
             })
+            console.log('connecting.....')
+            await sdk.initModal()
+            console.log('connected')
+            await sdk.connect()
+            setSocialLoginSDK(sdk)
             setLoading(false)
-            return
-        }
-        if (socialLoginSDK) {
-            socialLoginSDK.showWallet()
             return socialLoginSDK
+        } catch (err) {
+            console.log('failed to connect')
         }
-        setLoading(true)
-        const sdk = new SocialLogin()
-        await sdk.init({
-            chainId: ethers.utils.hexValue(activeChainId).toString(),
-            network: 'mainnet',
-            whitelistUrls: {
-                'https://sdk-staging.biconomy.io':
-                    'MEQCIBgO86Ds-nQ6JLHWmo5umziadaY-VDCQxLmwy-DX6nCxAiBJPnc0SOZmFTkphRfS7yd81DsC--Uj6Vb-WqvfSXngnQ',
-                'http://sdk-staging.biconomy.io':
-                    'MEUCIQDW2lTR5y_sTv3UTJEhfnC3_cLDb_aBrWtev8Ih4kXG4QIgIMjQhpQs9g14c3t64bEt3mQMMPuWHrbLBfo7hRAGEZc',
-                'https://sdk-dev.biconomy.io':
-                    'MEQCID90gUAazem-Ia_YIfVqLZr0lxo0Oawnx9ZoIcCiTtCNAiB6fZOA3AV22CDKtQ0QKYUSucPymeJoP3wmMsHZjNj-wQ',
-                'http://sdk-dev.biconomy.io':
-                    'MEUCIQCt5ga5aLrrAjtojAZmfTFwcv9bgmTbR_VKjDTtbRf0pAIgESLgcY-tBQe1pzsawiPdEY0vQwe8ux0XDTAtBh--MRM',
-            },
-        })
-        sdk.showWallet()
-        setSocialLoginSDK(sdk)
-        setLoading(false)
-        return socialLoginSDK
     }, [address, socialLoginSDK])
 
     // after social login -> set provider info
@@ -159,7 +156,7 @@ export const Web3AuthProvider = ({ children }: any) => {
     }, [address, connect, socialLoginSDK])
 
     const disconnect = useCallback(async () => {
-        if (!socialLoginSDK || !socialLoginSDK.web3auth) {
+        if (!socialLoginSDK || !socialLoginSDK) {
             console.error('Web3Modal not initialized.')
             return
         }
@@ -171,7 +168,6 @@ export const Web3AuthProvider = ({ children }: any) => {
             address: '',
             chainId: activeChainId,
         })
-        socialLoginSDK.hideWallet()
     }, [socialLoginSDK])
 
     return (

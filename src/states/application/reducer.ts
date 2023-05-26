@@ -8,7 +8,8 @@ import {
     updateApplicationState,
     toggleDarkMode,
     updateRefAddress,
-    updateGasToken
+    updateGasToken,
+    updateStepFaucet
 } from './actions'
 import { GAS_TOKEN } from 'constants/index'
 
@@ -24,6 +25,7 @@ export interface ApplicationState {
     userDarkMode: boolean
     refAddress: string | undefined
     gasToken: Token
+    stepFaucet: number
 }
 
 const initialState: ApplicationState = {
@@ -37,7 +39,8 @@ const initialState: ApplicationState = {
     isUpdateApplication: false,
     userDarkMode: false,
     refAddress: undefined,
-    gasToken: GAS_TOKEN[80001][0]
+    gasToken: GAS_TOKEN[80001][0],
+    stepFaucet: 0
 }
 
 export default createReducer(initialState, (builder) => {
@@ -73,5 +76,8 @@ export default createReducer(initialState, (builder) => {
         })
         .addCase(updateGasToken, (state, action) => {
             state.gasToken = action.payload
+        })
+        .addCase(updateStepFaucet, (state, action) => {
+            state.stepFaucet = action.payload
         })
 })
