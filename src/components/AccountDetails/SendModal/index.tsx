@@ -117,11 +117,13 @@ const SendModal = () => {
                     </div>
                     <Row gap="10px" al="center">
                         <div className="to">Balance: {balanceToken || '0'}</div>
-                        <TokenListModal
-                            token={token}
-                            field={Field.INPUT}
-                            onUserSelect={onSelectToken}
-                        />
+                        {chainId && (
+                            <TokenListModal
+                                token={token}
+                                field={Field.INPUT}
+                                onUserSelect={onSelectToken}
+                            />
+                        )}
                     </Row>
                     <Row gap="10px">
                         <div>From: </div>
