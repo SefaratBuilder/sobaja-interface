@@ -19,6 +19,7 @@ import ComponentsTransaction, {
 import { URLSCAN_BY_CHAINID, ZERO_ADDRESS } from 'constants/index'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import axios from 'axios'
+import { useSmartAccount } from 'hooks/useSmartAccount'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
@@ -26,6 +27,7 @@ const Faucet = () => {
     const faucetContract = useFaucetContract()
     const { account, chainId, provider } = useActiveWeb3React()
     const initDataTransaction = InitCompTransaction()
+    const { smartAccountAddress, sendTransactions } = useSmartAccount()
     const { addTxn } = useTransactionHandler()
 
     const isDisable = useMemo(
@@ -117,15 +119,25 @@ const Faucet = () => {
 
     const clickFaucetToken = async (erc20: string) => {
         try {
-            if (faucetContract == null) return
+            if (!faucetContract) return
             setIsDisplayFaucet(false)
             initDataTransaction.setIsOpenWaitingModal(true)
-
-            const tx = await faucetContract?.requestTokens(erc20)
+            let callResult: any
+            if(smartAccountAddress) {
+                const txn = {
+                    target: faucetContract.address,
+                    data: faucetContract.interface.encodeFunctionData('requestTokens', [erc20]),
+                    value: 0
+                } 
+                console.log('aaa')
+                callResult = await sendTransactions([txn])
+            } else {
+                callResult = await faucetContract.requestTokens(erc20)
+            }
 
             initDataTransaction.setIsOpenWaitingModal(false)
             initDataTransaction.setIsOpenResultModal(true)
-            const result = await tx.wait()
+            const result = await callResult.wait()
 
             initDataTransaction.setIsOpenResultModal(false)
 

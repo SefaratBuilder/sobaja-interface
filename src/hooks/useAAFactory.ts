@@ -23,7 +23,10 @@ export const useAAFactory = () => {
     useEffect(() => {
         const getAddress = async () => {
             try {
-                if (!account || !contract) return
+                if (!account || !contract) return () => {
+                    setSmartAccountAddress(undefined)
+                    setIsDeyloyed(false)
+                }
                 let address: string
                 //get and check is address deployed
                 address = await contract.getDeployedAccount(account, '0')

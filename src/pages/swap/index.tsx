@@ -48,7 +48,6 @@ import { useTransactionHandler } from 'states/transactions/hooks'
 import ComponentsTransaction, {
     InitCompTransaction,
 } from 'components/TransactionModal'
-import ToastMessage from 'components/ToastMessage'
 import imgCopy from 'assets/icons/copy.svg'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import { sendEvent } from 'utils/analytics'
@@ -56,9 +55,6 @@ import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
 import { useEstimateGas } from 'hooks/useEstimateGas'
-import { BigNumber } from '@ethersproject/bignumber'
-import { useSmartAccountContext } from 'contexts/SmartAccountContext'
-import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
 import { useSmartAccount } from 'hooks/useSmartAccount'
 
 const Swap = () => {
@@ -75,7 +71,6 @@ const Swap = () => {
     const contractApprove = useTokenContract(tokenIn?.address)
     const {
         sendTransactions,
-        contract: smartAccountContract,
         smartAccountAddress
     } = useSmartAccount()
     const tokenApproval = useTokenApproval(
@@ -361,7 +356,7 @@ const Swap = () => {
             }
             const { args, value } = swapArguments
             let callResult: any
-            if (!smartAccountContract) {
+            if (!smartAccountAddress) {
                 const gasLimit = await routerContract?.estimateGas[method](
                     ...args,
                     {
@@ -436,7 +431,7 @@ const Swap = () => {
             initDataTransaction.setIsOpenResultModal(true)
             console.log('error', error)
         }
-    }, [initDataTransaction, isInsufficientAllowance])
+    }, [initDataTransaction, isInsufficientAllowance, smartAccountAddress])
 
     const openWalletModal = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
@@ -565,7 +560,7 @@ const Swap = () => {
                     <LabelButton name="Insufficient Balance" />
                 ) : isInffuficientLiquidity ? (
                     <LabelButton name="Insufficient Liquidity" />
-                ) : isInsufficientAllowance && !smartAccountContract ? (
+                ) : isInsufficientAllowance && !smartAccountAddress ? (
                     <PrimaryButton
                         name={`Approve ${tokenIn?.symbol}`}
                         onClick={handleOnApprove}
@@ -593,7 +588,7 @@ const Swap = () => {
                         Number(tokenApproval?.allowance) <
                             Number(inputAmount) &&
                         !isNativeCoin(tokenIn) &&
-                        !smartAccountContract
+                        !smartAccountAddress
                             ? handleOnApprove
                             : onConfirm
                     }

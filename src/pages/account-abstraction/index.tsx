@@ -9,7 +9,6 @@ import { useAAEntryPointContract, useNftSmartAccountContract, useTokenContract }
 import { useCurrencyBalance, useCurrencyBalances, useETHBalances } from 'hooks/useCurrencyBalance';
 import { NATIVE_COIN } from 'constants/index';
 import { useTransactionHandler } from 'states/transactions/hooks';
-import { SimpleAccountAPI } from 'pantinho-aa'
 import { useSmartAccount } from 'hooks/useSmartAccount';
 import { useActiveWeb3React } from 'hooks';
 import { add, divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math';
@@ -23,14 +22,13 @@ const AA = () => {
     const {addTxn} = useTransactionHandler()
     const [signedUserOp, setSignedUserOp] = useState<any>()
     const smartAccount = useSmartAccount()
-    const { depositedFund, nonce, contract: smartAccountContract, sendTransactions } = smartAccount
+    const { depositedFund, nonce, contract: smartAccountContract, sendTransactions, isDeployed } = smartAccount
     const entryPointContract = useAAEntryPointContract()
     const token = '0xDf9acc0a00Ae6Ec5eBc8D219d12A0157e7F18A68'
     const tokenContract = useTokenContract(token)
     const tokenType = useToken(token)
     const balanceToken = useCurrencyBalance(smartAccountAddress, tokenType)
     const balances = useCurrencyBalances(smartAccountAddress, [NATIVE_COIN[80001]])
-    console.log("data smart account", smartAccount)
 
     const onDeployAccount = async () => {
         try {
@@ -93,7 +91,7 @@ const AA = () => {
 
     const onWithdraw = async () => {
         try {
-            if (!smartAccountContract || !smartAccountAddress) return
+            if (!smartAccountContract || !smartAccountAddress) return console.log('asdasd', !smartAccountContract, !smartAccountAddress)
             const deployResult = await smartAccountContract.withdrawDepositTo(
                 account,
                 depositedFund
@@ -148,6 +146,14 @@ const AA = () => {
                 <div>{smartAccountAddress}</div>
             </Row>
             <Row gap="10px">
+                <div>is deployed: </div>
+                <div>{isDeployed ? 'true' : 'false'}</div>
+            </Row>
+            <Row gap="10px">
+                <div>nonce: </div>
+                <div>{nonce}</div>
+            </Row>
+            <Row gap="10px">
                 <div>balance eth: </div>
                 <div>{balances?.[0]} eth</div>
             </Row>
@@ -179,11 +185,10 @@ const AA = () => {
                     
                 />
             </Row>
-            <PrimaryButton
+            {/* <PrimaryButton
                     onClick={onDeployAccount}
                     name={'Deploy new account'}
-                    
-                />
+                /> */}
         </AAWrapper>
     )
 }
