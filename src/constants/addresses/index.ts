@@ -191,8 +191,6 @@ const FaucetTokens: { [chainId: number]: Array<Token> } = {
     [ChainId.MUMBAI]: []
 }
 
-
-
 export {
     MULTICALL_ABI,
     MULTICALL_NETWORKS,

@@ -18,8 +18,8 @@ import GasSetting from './GasSetting'
 import { useAppDispatch } from 'states/hook'
 import { updateSelectedWallet } from 'states/user/reducer'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
-import { ChainId } from 'utils/chainConfig'
 import { ListNetwork } from 'constants/networks'
+import { ChainId } from 'interfaces'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
     openOptions: React.Dispatch<React.SetStateAction<void>>

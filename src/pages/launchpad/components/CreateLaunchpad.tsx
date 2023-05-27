@@ -393,7 +393,7 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
             </>
             <Container>
                 <NavTitle onClick={() => setCurrentPage('Infomation')}>
-                    {'<'} Launchpad
+                    {'<'} Back Launchpad
                 </NavTitle>
                 <WrapBody>
                     <WrapFirstContent>
@@ -801,14 +801,14 @@ const WrapBody = styled.div``
 
 const NavTitle = styled.div`
     cursor: pointer;
-    padding: 5px 8px;
+    /* padding: 5px 8px; */
     /* padding: 0 0 3.5rem; */
     margin-bottom: 1.5rem;
-    font-size: 20px;
-    border: 2px solid white;
-    border-radius: 12px;
+    /* font-size: 20px; */
+    /* border: 2px solid white; */
+    /* border-radius: 12px; */
     /* width: 22%; */
-    max-width: 150px;
+    max-width: 200px;
 `
 const WrapSelect = styled.div`
     display: flex;
@@ -817,18 +817,22 @@ const WrapSelect = styled.div`
     gap: 10px;
 `
 const Select = styled.div`
-    display: flex;
-    gap: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    max-width: 300px;
+    background: rgba(0, 178, 255, 0.3);
+    /* border: 1px solid white; */
+    border-radius: 6px;
     div {
         margin: auto 0;
-        border: 1px solid white;
-        padding: 2px 5px;
+        padding: 10px;
         cursor: pointer;
-        border-radius: 6px;
     }
     .active {
-        background: #848282;
-        scale: 1.1;
+        background: #00b2ff;
+        border-radius: 6px;
+
+        /* scale: 1.1; */
     }
 `
 

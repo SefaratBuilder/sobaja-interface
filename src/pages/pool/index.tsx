@@ -631,6 +631,7 @@ export default function Pools() {
                             transaction={transactions}
                             width={width}
                             tokenList={tokenList}
+                            setCurrentPage={setCurrentPage}
                         />
                     )}
                 </CustomizeBox>
