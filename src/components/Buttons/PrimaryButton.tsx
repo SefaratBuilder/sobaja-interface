@@ -10,6 +10,7 @@ interface PrimaryButtonProps {
     type?: string
     color?: string
     isLoading?: boolean
+    size?: string
 }
 
 const PrimaryButton = ({
@@ -21,6 +22,7 @@ const PrimaryButton = ({
     type,
     color,
     isLoading,
+    size,
 }: PrimaryButtonProps) => {
     return (
         <Button
@@ -30,6 +32,7 @@ const PrimaryButton = ({
             className={type}
             color={color}
             isLoading={isLoading}
+            size={size}
         >
             {img && <img src={img} alt="button image" />} <span>{name}</span>
         </Button>
@@ -43,6 +46,7 @@ export const Button = styled.button<{
     color?: any
     disabled?: boolean
     isLoading?: boolean
+    size?: string
 }>`
     display: flex;
     align-items: center;
@@ -56,7 +60,7 @@ export const Button = styled.button<{
         color
             ? color
             : 'linear-gradient(87.2deg, #00B2FF 2.69%, #003655 98.02%);'};
-    font-size: 1rem;
+    font-size: ${({ size }) => (size ? size : '1rem')};
 
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
@@ -68,6 +72,7 @@ export const Button = styled.button<{
     font-family: Inter, sans-serif;
     span {
         font-weight: 700;
+        font-size: ${({ size }) => (size ? size : '1rem')};
     }
     :hover {
         opacity: 0.8;
@@ -97,6 +102,13 @@ export const Button = styled.button<{
 
         span {
             font-size: 14px !important;
+        }
+    }
+    &.white-black {
+        color: black;
+        background: white;
+        span {
+            font-weight: 500;
         }
     }
 
