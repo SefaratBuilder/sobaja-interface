@@ -36,12 +36,9 @@ export const useSmartAccount = () => {
         const gasPrice = 3e8 // 0.3 Gwei
         const initGas = isDeployed ? 0 : 800_000
         const totalGasUse = (500000 * (txnsLength + 1) + defaultVerificationGasLimit + initGas) * gasPrice
-        console.log("total gas use", totalGasUse)
-        console.log('asdaskjdhasdjkashdaksdjhasdksad')
         if (totalGasUse < Number(depositedFund)) return console.log('asdo823719283712893712983')
-        console.log('asdsadasdasdasdadasdasdsadasdasdasdasd')
         const diffFund = totalGasUse - Number(depositedFund)
-        console.log('smartAccount address', mulNumberWithDecimal(diffFund, 0))
+
         return {
             target: entryPointContract.address,
             data: entryPointContract.interface.encodeFunctionData('depositTo', [smartAccountAddress]),
