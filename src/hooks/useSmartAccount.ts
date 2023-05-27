@@ -66,7 +66,6 @@ export const useSmartAccount = () => {
         //     console.log('hahah')
         //     txns.unshift(depositTxn)
         // }
-        console.log('txns', txns)
         const op = await walletAPI.createSignedUserOp(
             txns,
             nonceResult?.result?.[0]?.toString(),
@@ -77,7 +76,6 @@ export const useSmartAccount = () => {
         op.nonce = await op.nonce
         op.sender = await op.sender
         op.preVerificationGas = await op.preVerificationGas
-        console.log('opppppp', op)
 
         //Test directly call on wallet
         //Actually, we need to call to ERC4337 service to execute 
