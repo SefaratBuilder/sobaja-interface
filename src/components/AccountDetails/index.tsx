@@ -8,7 +8,7 @@ import imgPower from 'assets/icons/power.svg'
 import imgCopy from 'assets/icons/copy.svg'
 import imgDownArrow from 'assets/icons/arrow-down.svg'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
-import { NATIVE_COIN } from 'constants/index'
+import { NATIVE_COIN, URLSCAN_BY_CHAINID } from 'constants/index'
 import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { Row } from 'components/Layouts'
@@ -189,7 +189,14 @@ const AccountDetails = ({
                 <Footer className="isLogged">
                     <WrapFooterBtn>
                         <WrapItemFooter
-                        //  onClick={() => setShowTrans(!showTrans)}
+                            //  onClick={() => setShowTrans(!showTrans)}
+                            onClick={() =>
+                                window.open(
+                                    `${
+                                        URLSCAN_BY_CHAINID?.[chainId || 5].url
+                                    }/address/${wallet?.address}`,
+                                )
+                            }
                         >
                             <p>Transactions</p>
                             <WrapFooterImg>

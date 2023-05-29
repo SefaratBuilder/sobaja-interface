@@ -823,6 +823,7 @@ const Select = styled.div`
     background: rgba(0, 178, 255, 0.3);
     /* border: 1px solid white; */
     border-radius: 6px;
+    text-align: center;
     div {
         margin: auto 0;
         padding: 10px;

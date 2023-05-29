@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import Modal from 'components/Modal'
 import styled from 'styled-components'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
@@ -186,7 +186,14 @@ const DepositModal = () => {
         )
     }
 
-    return <Modal button={Button} children={ModalContent} isRight={true} />
+    return (
+        <Modal
+            button={Button}
+            children={ModalContent}
+            isRight={true}
+            setErr={setError}
+        />
+    )
 }
 
 const ModalWrapper = styled.div``
