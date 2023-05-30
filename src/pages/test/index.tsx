@@ -32,7 +32,7 @@ const Calendar = () => {
     const [time, setTime] = useState(new Date())
     const [month, setMonth] = useState(time.getUTCMonth() + 1)
     const [year, setYear] = useState(time.getFullYear())
-    const [activeTimestamp, setActiveTimestamp] = useState(0)
+    const [activeTimestamp, setActiveTimestamp] = useState(time.getTime())
 
     const firstDateOfMonth = useMemo(() => {
         return getFirstDateOfMonth(time)
