@@ -28,31 +28,12 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account, chainId, connector } = useActiveWeb3React()
+    const { account, chainId, disconnect } = useActiveWeb3React()
     const [isCopied, setIsCopied] = useState<boolean>(false)
-    const {
-        connect,
-        web3Provider,
-        disconnect: disconnectWeb3Auth,
-    } = useWeb3AuthContext()
     const { wallet, state, loading } = useSmartAccountContext()
     const balance = useETHBalances([wallet?.address || account])?.[
         wallet?.address || account || ''
     ]
-    const dispatch = useAppDispatch()
-    const disconnect = useCallback(() => {
-        if (connector && connector.deactivate) {
-            connector.deactivate()
-        }
-        connector.resetState()
-        dispatch(updateSelectedWallet({ wallet: undefined }))
-    }, [connector, dispatch])
-
-    useEffect(() => {
-        if (chainId !== ChainId.GOERLI) {
-            disconnectWeb3Auth()
-        }
-    }, [chainId])
 
     const handleCopyAddress = () => {
         if (wallet?.address) {
@@ -71,31 +52,6 @@ const AccountDetails = ({
                     setIsCopied(false)
                 }, 1000)
             })
-        }
-    }
-
-    const handleOnConnectSmartAccount = async () => {
-        try {
-            if (chainId !== ChainId.GOERLI) {
-                return connector
-                    .activate(
-                        ListNetwork.find(
-                            (network) => network.chainId === ChainId.GOERLI,
-                        )?.switchNetwork[0],
-                    )
-                    ?.then(async (r) => {
-                        console.log('🤦‍♂️ ⟹ )?.then ⟹ r:', r)
-                        // setToggleWalletModal(false)
-                        await connect()
-                        // setToggleWalletModal(true)
-                    })
-            } else {
-                // setToggleWalletModal(false)
-                await connect()
-                // setToggleWalletModal(true)
-            }
-        } catch (err) {
-            console.log('failed to connect to smart account: ', err)
         }
     }
 
@@ -141,11 +97,7 @@ const AccountDetails = ({
                         </button> */}
                             <button
                                 onClick={() => {
-                                    if (wallet?.address) {
-                                        disconnectWeb3Auth()
-                                    } else {
-                                        disconnect()
-                                    }
+                                    disconnect()
                                 }}
                             >
                                 <img src={imgPower} alt="#" />
@@ -173,7 +125,7 @@ const AccountDetails = ({
                                             ? 'Connecting'
                                             : 'Use smart account'
                                     }
-                                    onClick={handleOnConnectSmartAccount}
+                                    onClick={() => {}}
                                     isLoading={loading}
                                 />
                             </>
