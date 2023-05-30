@@ -3734,14 +3734,9 @@
   optionalDependencies:
     "secp256k1" "^3.8.0"
 
-"@toruslabs/eccrypto@^2.0.0":
+"@toruslabs/eccrypto@^2.0.0", "@toruslabs/eccrypto@^2.1.1":
   "integrity" "sha512-7sviL0wLYsfA5ogEAOIdb0tu/QAOFXfHc9B8ONYtF04x4Mg3Nr89LL35FhjaEm055q8Ru7cUQhEFSiqJqm9GCw=="
   "resolved" "https://registry.npmjs.org/@toruslabs/eccrypto/-/eccrypto-2.2.1.tgz"
-  "version" "2.2.1"
-  dependencies:
-    "elliptic" "^6.5.4"
-
-"@toruslabs/eccrypto@^2.1.1":
   "version" "2.2.1"
   dependencies:
     "elliptic" "^6.5.4"
@@ -4997,14 +4992,14 @@
   "resolved" "https://registry.npmjs.org/@walletconnect/types/-/types-1.8.0.tgz"
   "version" "1.8.0"
 
-"@walletconnect/types@^2.5.2":
-  "integrity" "sha512-Z4Y+BKPX7X1UBCf7QV35mVy2QU9CS+5G+EthCaJwpieirZNHamHEwNXUjuUUb3PrYOLwlfRYUT5edeFW9wvoeQ=="
-  "resolved" "https://registry.npmjs.org/@walletconnect/types/-/types-2.7.7.tgz"
-  "version" "2.7.7"
+"@walletconnect/types@^2.5.2", "@walletconnect/types@2.5.2":
+  "integrity" "sha512-VnV43qs4f2hwv6wGQ9ZSE+smP0z2oVy2XaVO5Szd2fmOx9bB+ov+sQzh9xeoQ+DhjNrbJhUaecW/peE6CPPSag=="
+  "resolved" "https://registry.npmjs.org/@walletconnect/types/-/types-2.5.2.tgz"
+  "version" "2.5.2"
   dependencies:
     "@walletconnect/events" "^1.0.1"
-    "@walletconnect/heartbeat" "1.2.1"
-    "@walletconnect/jsonrpc-types" "1.0.3"
+    "@walletconnect/heartbeat" "1.2.0"
+    "@walletconnect/jsonrpc-types" "^1.0.2"
     "@walletconnect/keyvaluestorage" "^1.0.2"
     "@walletconnect/logger" "^2.0.1"
     "events" "^3.3.0"
@@ -5016,18 +5011,6 @@
   "integrity" "sha512-Cn+3I0V0vT9ghMuzh1KzZvCkiAxTq+1TR2eSqw5E5AVWfmCtECFkVZBP6uUJZ8YjwLqXheI+rnjqPy7sVM4Fyg=="
   "resolved" "https://registry.npmjs.org/@walletconnect/types/-/types-1.8.0.tgz"
   "version" "1.8.0"
-
-"@walletconnect/types@2.5.2":
-  "integrity" "sha512-VnV43qs4f2hwv6wGQ9ZSE+smP0z2oVy2XaVO5Szd2fmOx9bB+ov+sQzh9xeoQ+DhjNrbJhUaecW/peE6CPPSag=="
-  "resolved" "https://registry.npmjs.org/@walletconnect/types/-/types-2.5.2.tgz"
-  "version" "2.5.2"
-  dependencies:
-    "@walletconnect/events" "^1.0.1"
-    "@walletconnect/heartbeat" "1.2.0"
-    "@walletconnect/jsonrpc-types" "^1.0.2"
-    "@walletconnect/keyvaluestorage" "^1.0.2"
-    "@walletconnect/logger" "^2.0.1"
-    "events" "^3.3.0"
 
 "@walletconnect/types@2.7.2":
   "integrity" "sha512-1O2UefakZpT0ErRfEAXY7Ls3qdUrKDky/DsK088xR6klyfkQOx+aSVH0fJYLhmnqPTuvp3lrqNbsDc0s6/6nvg=="
@@ -6548,6 +6531,8 @@
   "version" "4.12.0"
 
 "bn.js@^4.11.8":
+  "integrity" "sha512-c98Bf3tPniI+scsdk237ku1Dc3ujXQTSgyiPUDEOe7tRkhrqridvh8klBv0HCEso1OLOYcHuCv/cS6DNxKH+ZA=="
+  "resolved" "https://registry.npmjs.org/bn.js/-/bn.js-4.12.0.tgz"
   "version" "4.12.0"
 
 "bn.js@^4.11.9":

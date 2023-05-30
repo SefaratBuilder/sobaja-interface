@@ -9,12 +9,11 @@ import { useNavigate } from 'react-router-dom'
 import Faucet from 'components/Faucet'
 import { useActiveWeb3React } from 'hooks'
 import ConnectorMobile from 'components/ConnectorMobile'
-import { useWeb3React } from '@web3-react/core'
 
 const Header = () => {
     const [burgerNav, setBurgerNav] = useState(false)
     const navigate = useNavigate()
-    const { connector } = useWeb3React()
+    const { connector } = useActiveWeb3React()
     return (
         <HeaderWrapper>
             <Logo onClick={() => navigate('/')}>

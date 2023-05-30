@@ -1,17 +1,14 @@
 import React, { useEffect, useRef, useState, Fragment } from 'react'
 import styled from 'styled-components'
 import PrimaryButton, { Button } from 'components/Buttons/PrimaryButton'
-import WalletModal from 'components/WalletModal'
 import { Activity } from 'react-feather'
 import { shortenAddress } from 'utils'
-import { useWeb3React } from '@web3-react/core'
 import arrowDown from 'assets/icons/arrow-down.svg'
-import { ListNetwork } from 'constants/networks/index'
-import { changeNetwork } from 'utils/network'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import { useActiveWeb3React } from 'hooks'
 
 const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
-    const { account, connector, provider } = useWeb3React()
+    const { account, connector, provider } = useActiveWeb3React()
     const error = undefined
     const { wallet } = useSmartAccountContext()
 

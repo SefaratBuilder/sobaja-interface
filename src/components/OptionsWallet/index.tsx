@@ -12,6 +12,9 @@ import { useAppDispatch } from 'states/hook'
 import { updateSelectedWallet } from 'states/user/reducer'
 import Loader from 'components/Loader'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
+import PrimaryButton from 'components/Buttons/PrimaryButton'
+import { useActiveWeb3React } from 'hooks'
+import { WALLET_ADAPTERS } from '@web3auth/base'
 
 const WALLET_VIEWS = {
     OPTIONS: 'options',
@@ -36,6 +39,7 @@ function OptionsWallet({
 }: actionWallet) {
     const connections = getConnections()
     const dispatch = useAppDispatch()
+    const { web3AuthConnect } = useActiveWeb3React()
 
     const tryActivation = async (connector: Connection | undefined) => {
         try {
@@ -115,6 +119,15 @@ function OptionsWallet({
             })
     }
 
+    const handleConnect = () => {
+        web3AuthConnect(WALLET_ADAPTERS.OPENLOGIN, {
+            loginProvider: 'sms_passwordless',
+            extraLoginOptions: {
+                login_hint: '+84-377704631'
+            }
+        })
+    }
+
     return (
         <Container>
             <Header>
@@ -131,6 +144,9 @@ function OptionsWallet({
             </Header>
             <WrapContent>
                 <WrapItem>{getOptions()}</WrapItem>
+                <WrapItem>
+                    <PrimaryButton name='Social Login' onClick={handleConnect} />
+                </WrapItem>
                 <Title>
                     <div>
                         By connecting a wallet, you agree to Sobajaswap &nbsp;
