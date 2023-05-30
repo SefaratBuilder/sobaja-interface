@@ -28,11 +28,21 @@ const months = [
     'December',
 ]
 
-const Calendar = () => {
+const Calendar = ({
+    setDateRange,
+}: {
+    setDateRange: React.Dispatch<
+        React.SetStateAction<{
+            startDate: Date
+            endDate: Date
+        }>
+    >
+}) => {
     const [time, setTime] = useState(new Date())
     const [month, setMonth] = useState(time.getUTCMonth() + 1)
     const [year, setYear] = useState(time.getFullYear())
     const [activeTimestamp, setActiveTimestamp] = useState(time.getTime())
+    const [isStartDate, setIsStartDate] = useState(true)
 
     const firstDateOfMonth = useMemo(() => {
         return getFirstDateOfMonth(time)
@@ -109,8 +119,11 @@ const Calendar = () => {
 
     const handleOnClick = (day: number) => {
         const tstamp = getTimestampOnClick(day)
-        console.log({ timestamp: tstamp })
         setActiveTimestamp(tstamp)
+
+        // if(isStartDate) setDateRange(i => {return {
+        //     ...i, startDate
+        // }})
     }
 
     return (

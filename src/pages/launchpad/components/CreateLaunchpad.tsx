@@ -27,6 +27,7 @@ import ComponentsTransaction, {
 import { useTransactionHandler } from 'states/transactions/hooks'
 import Blur from 'components/Blur'
 import { useQueryLaunchpad } from 'hooks/useQueryLaunchpad'
+import Calendar from 'components/Calendar'
 
 interface ICreateLaunchpad {
     setCurrentPage: React.Dispatch<
@@ -116,7 +117,7 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
                 'ddd MMM DD YYYY 00:00:00',
             ),
         ),
-        key: 'selection',
+        // key: 'selection',
     })
 
     // useOnClickOutside(refDatePicker, () => setCalendarModal(false))
@@ -336,6 +337,10 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
 
     const onChangeHourStart = (timeUnix: number) => {
         handleOnChange('startTime', timeUnix.toFixed())
+        console.log(
+            '🤦‍♂️ ⟹ onChangeHourStart ⟹  timeUnix.toFixed():',
+            timeUnix.toFixed(),
+        )
     }
 
     const onChangeHourExpiry = (timeUnix: number) => {
@@ -472,10 +477,11 @@ const CreateLaunchpad = ({ setCurrentPage }: ICreateLaunchpad) => {
                         </LabelBtn> */}
 
                         <WrapDatePicker ref={refDatePicker}>
-                            <DatePicker
+                            {/* <DatePicker
                                 dateRange={dateRange}
                                 setDateRange={setDateRange}
-                            />
+                            /> */}
+                            <Calendar setDateRange={setDateRange} />
                             <p className="title-time">Select Time</p>
                             <Time>
                                 <TimeInput>
