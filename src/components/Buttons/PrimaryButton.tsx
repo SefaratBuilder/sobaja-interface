@@ -74,6 +74,16 @@ export const Button = styled.button<{
         font-weight: 700;
         font-size: ${({ size }) => (size ? size : '1rem')};
     }
+
+    &.option-login {
+        gap: 10px;
+        img {
+            height: 25px;
+            width: 25px;
+            border-radius: 50%;
+        }
+    }
+
     :hover {
         opacity: 0.8;
     }
