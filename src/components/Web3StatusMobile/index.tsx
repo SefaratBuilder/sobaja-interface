@@ -12,7 +12,7 @@ const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
     const error = undefined
     const { smartAccountAddress } = useSmartAccount()
 
-    function formatConnectorName(account: any) {
+    function formatConnectorName(account: any, error: any) {
         return (
             <Fragment>
                 <WalletName>
@@ -31,7 +31,7 @@ const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
                     id="web3-status-connected"
                     onClick={() => setToggleWalletModal(!toggleWalletModal)}
                 >
-                    {formatConnectorName(account)}
+                    {formatConnectorName(account, error)}
                 </Web3StatusConnect>
             )
         } else if (error) {
@@ -107,6 +107,7 @@ const WalletName = styled.div`
 const Icon = styled.img`
     height: 20px;
     width: 20px;
+    border-radius: 50%;
 `
 
 const Web3StatusConnect = styled(Button)`

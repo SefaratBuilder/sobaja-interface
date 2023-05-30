@@ -4,7 +4,6 @@ import styled from 'styled-components'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { Columns, Row } from 'components/Layouts'
 import { useActiveWeb3React } from 'hooks'
-import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { computeGasLimit, shortenAddress } from 'utils'
 import { divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math'
 import { NATIVE_COIN, ZERO_ADDRESS } from 'constants/index'
@@ -117,11 +116,13 @@ const SendModal = () => {
                     </div>
                     <Row gap="10px" al="center">
                         <div className="to">Balance: {balanceToken || '0'}</div>
-                        <TokenListModal
-                            token={token}
-                            field={Field.INPUT}
-                            onUserSelect={onSelectToken}
-                        />
+                        {chainId && (
+                            <TokenListModal
+                                token={token}
+                                field={Field.INPUT}
+                                onUserSelect={onSelectToken}
+                            />
+                        )}
                     </Row>
                     <Row gap="10px">
                         <div>From: </div>

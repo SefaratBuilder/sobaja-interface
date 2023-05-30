@@ -10,15 +10,9 @@ const Updater = () => {
 
     useEffect(() => {
         if (chainId) {
-            // const newMintState = mintState.tokenIn?.address === "0x0000000000000000000000000000000000000000" ?
-            //     { ...mintState, tokenIn: NATIVE_COIN[chainId] } :
-            //     mintState.tokenOut?.address === "0x0000000000000000000000000000000000000000" ?
-            //         { ...mintState, tokenIn: NATIVE_COIN[chainId] }
-            //         : mintState
             const newMintState = { ...mintState, tokenIn: NATIVE_COIN[chainId], tokenOut: undefined }
             onChangeMintState(newMintState)
         }
-        console.log('updating mint state...')
     }, [chainId])
 
     return null

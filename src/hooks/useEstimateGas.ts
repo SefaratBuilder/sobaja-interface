@@ -44,10 +44,10 @@ export function useEstimateGas(
                 if (!gasPrice) {
                     throw new Error('Gas price not found')
                 }
-                console.log('Real gas', formatUnits(gasPrice))
+                // console.log('Real gas', formatUnits(gasPrice))
 
                 const gasUsed = gasEstimate.mul(gasPrice)
-                console.log('Actual gas used:', formatUnits(gasUsed))
+                // console.log('Actual gas used:', formatUnits(gasUsed))
 
                 return setGasUsed(formatUnits(gasUsed))
             }

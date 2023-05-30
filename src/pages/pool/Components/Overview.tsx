@@ -15,6 +15,11 @@ import { useMintActionHandlers } from 'states/mint/hooks'
 import { Field } from 'interfaces'
 import { useTokens } from 'hooks/useToken'
 import { useToken } from 'hooks/useToken'
+import { compare } from 'utils/compare'
+import { WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
+import { useActiveWeb3React } from 'hooks'
+import { ZERO_ADDRESS } from 'constants/index'
+import { NATIVE_COIN } from 'constants/index'
 
 const Overview = ({
     pool,
@@ -32,10 +37,12 @@ const Overview = ({
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
     const navigate = useNavigate()
     const { onTokenSelection } = useMintActionHandlers()
+    const { chainId } = useActiveWeb3React()
 
     const poolRemoveTokens = useTokens(
         pool?.addresses ? pool?.addresses?.map((p) => p) : [],
     )
+
     /**
      * @dev dataShow: titles in transactions
      */
@@ -59,25 +66,40 @@ const Overview = ({
     const dTransactions = useMemo(() => {
         if (transaction?.[0]) {
             return indexFieldActive === 0
-                ? uniqByKeepFirst(
-                      transaction.filter(
-                          (tx) =>
-                              tx.pair.token0.id === pool?.addresses?.[1] &&
-                              tx.pair.token1.id === pool?.addresses?.[2],
-                      ),
-                      (t: ISwap | IMint) => t.pair.id,
-                  )
-                : uniqByKeepFirst(
-                      transaction.filter(
-                          (tx) =>
-                              tx.pair.token0.id === pool?.addresses?.[1] &&
-                              tx.pair.token1.id === pool?.addresses?.[2],
-                      ),
-                      (t: ISwap | IMint) => t.pair.id,
-                  ).filter(
-                      (t: any) =>
-                          t?.type === dataShow.fields?.[indexFieldActive],
-                  )
+                ? 
+                // uniqByKeepFirst(
+                //       transaction.filter(
+                //           (tx) =>
+                //               tx.pair.token0.id === pool?.addresses?.[1] &&
+                //               tx.pair.token1.id === pool?.addresses?.[2],
+                //       ),
+                //       (t: ISwap | IMint) => t.pair.id,
+                //   )
+                  transaction.filter(
+                    (tx) =>
+                        tx.pair.token0.id === pool?.addresses?.[1] &&
+                        tx.pair.token1.id === pool?.addresses?.[2],
+                )
+                : 
+                // uniqByKeepFirst(
+                //       transaction.filter(
+                //           (tx) =>
+                //               tx.pair.token0.id === pool?.addresses?.[1] &&
+                //               tx.pair.token1.id === pool?.addresses?.[2],
+                //       ),
+                //       (t: ISwap | IMint) => t.pair.id,
+                //   ).filter(
+                //       (t: any) =>
+                //           t?.type === dataShow.fields?.[indexFieldActive],
+                //   )
+                  transaction.filter(
+                    (tx) =>
+                        tx.pair.token0.id === pool?.addresses?.[1] &&
+                        tx.pair.token1.id === pool?.addresses?.[2],
+                ).filter(
+                    (t: any) =>
+                        t?.type === dataShow.fields?.[indexFieldActive],
+                )
         }
         return []
     }, [transaction, indexFieldActive])
@@ -97,8 +119,32 @@ const Overview = ({
      *@handleOnAdd wrong data subgraph so navigate page add first, not set tokens
      */
     const handleOnAdd = () => {
-        // onTokenSelection(Field.INPUT, poolRemoveTokens?.[1])
-        // onTokenSelection(Field.OUTPUT, poolRemoveTokens?.[2])
+        if (
+            chainId &&
+            poolRemoveTokens &&
+            poolRemoveTokens?.length > 0 &&
+            poolRemoveTokens?.[1] &&
+            poolRemoveTokens?.[2]
+        ) {
+            onTokenSelection(
+                Field.INPUT,
+                compare(
+                    poolRemoveTokens[1].address,
+                    WRAPPED_NATIVE_ADDRESSES?.[chainId],
+                )
+                    ? NATIVE_COIN?.[chainId]
+                    : poolRemoveTokens[1],
+            )
+            onTokenSelection(
+                Field.OUTPUT,
+                compare(
+                    poolRemoveTokens[2].address,
+                    WRAPPED_NATIVE_ADDRESSES?.[chainId],
+                )
+                    ? NATIVE_COIN?.[chainId]
+                    : poolRemoveTokens[2],
+            )
+        }
 
         navigate('/add')
     }

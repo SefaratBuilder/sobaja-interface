@@ -10,11 +10,12 @@ import { useAAEntryPointContract } from "./useContract"
 import { useAAFactory } from './useAAFactory'
 import { useAAEntryPoint } from './useAAEntryPoint'
 import { computeGasLimit } from "utils"
+import { useWeb3AuthContext } from 'contexts/SocialLoginContext';
 
 export const useSmartAccount = () => {
     const { smartAccountAddress, isDeployed } = useAAFactory()
+    const { ethersProvider, address, chainId } = useWeb3AuthContext()
     const contract = useSmartAccountContract(isDeployed ? smartAccountAddress : undefined)
-    const { provider, chainId, account } = useActiveWeb3React()
     const entryPointContract = useAAEntryPointContract()
     const { depositedFund } = useAAEntryPoint()
 
@@ -31,12 +32,13 @@ export const useSmartAccount = () => {
     )
 
     const depositFundTxn = useCallback((txnsLength: number) => {
+        if (!entryPointContract) return
         const defaultGasPerTxn = 500_000
         const defaultVerificationGasLimit = 1_000_000
         const gasPrice = 3e8 // 0.3 Gwei
         const initGas = isDeployed ? 0 : 800_000
         const totalGasUse = (500000 * (txnsLength + 1) + defaultVerificationGasLimit + initGas) * gasPrice
-        if (totalGasUse < Number(depositedFund)) return console.log('asdo823719283712893712983')
+        if (totalGasUse < Number(depositedFund)) return
         const diffFund = totalGasUse - Number(depositedFund)
 
         return {
@@ -49,11 +51,11 @@ export const useSmartAccount = () => {
     ])
 
     const sendTransactions = useCallback(async (txns: Transaction[]) => {
-        if (!provider || !entryPointContract || !owner || !chainId) return
-        const ownerAddress = owner.result?.[0] || account
-        const ownerSigner = provider.getSigner(ownerAddress)
+        if (!ethersProvider || !entryPointContract || !owner || !chainId) return
+        const ownerAddress = owner.result?.[0] || address
+        const ownerSigner = ethersProvider.getSigner(ownerAddress)
         const walletAPI = new SimpleAccountAPI({
-            provider: provider,
+            provider: ethersProvider,
             entryPointAddress: entryPointContract.address,
             owner: ownerSigner,
             factoryAddress: AAFactory[chainId],
@@ -80,10 +82,9 @@ export const useSmartAccount = () => {
         //Test directly call on wallet
         //Actually, we need to call to ERC4337 service to execute 
         const callGasLimit = await entryPointContract.estimateGas.handleOps([op], ownerAddress)
-        console.log('callGasLimit', callGasLimit)
         return entryPointContract.handleOps([op], ownerAddress, { gasLimit: computeGasLimit(callGasLimit) })
     }, [
-        provider, entryPointContract, owner, chainId, depositFundTxn
+        ethersProvider, entryPointContract, owner, chainId, depositFundTxn
     ])
 
     return useMemo(() => {

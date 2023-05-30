@@ -15,7 +15,6 @@ import { useTransactionHandler } from 'states/transactions/hooks'
 import ComponentsTransaction, {
     InitCompTransaction,
 } from 'components/TransactionModal'
-import ToastMessage from 'components/ToastMessage'
 
 import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
@@ -24,20 +23,17 @@ import CurrentStake from './Components/CurrentStake'
 
 import LabelStake from './Components/LabelStake'
 import LabelUnStake from './Components/LabelUnstake'
-import { Token } from 'interfaces'
+import { ChainId, Token } from 'interfaces'
+import { useLocation } from 'react-router-dom'
 
 const Stake = () => {
-    const [isStakeToken, setIsStakeToken] = useState(true)
     const [inputStakeValue, setInputStakeValue] = useState<number | string>(
         '25',
     )
-
     const { chainId, account } = useActiveWeb3React()
-
     const stakingToken = useToken(
         chainId ? STAKING_TOKEN?.[chainId] : undefined,
     )
-
     const [unstakeData, setUnstakeData] = useState<{
         stake: string
         reward: string
@@ -58,6 +54,8 @@ const Stake = () => {
     const routerAddress = chainId ? STAKING[chainId] : undefined
     const tokenApproval = useTokenApproval(account, routerAddress, stakingToken)
     const balanceIn = useCurrencyBalance(account, stakingToken)
+    const { search } = useLocation()
+    const [isStakeToken, setIsStakeToken] = useState(!search)
 
     const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
@@ -120,62 +118,66 @@ const Stake = () => {
                     initDataTransaction.isOpenResultModal ||
                     initDataTransaction.isOpenWaitingModal) && <Blur />}
             </>
-            <ToastMessage />
-            <WrapContainer>
-                <StakingContainer ref={ref}>
-                    {!account && isOpenWalletModal && (
-                        <>
-                            <WalletModal
-                                setToggleWalletModal={setIsOpenWalletModal}
+            {/* <ToastMessage /> */}
+            {chainId === ChainId.GOERLI || !chainId ? (
+                <p style={{ textAlign: 'center' }}>Coming soon...</p>
+            ) : (
+                <WrapContainer>
+                    <StakingContainer ref={ref}>
+                        {!account && isOpenWalletModal && (
+                            <>
+                                <WalletModal
+                                    setToggleWalletModal={setIsOpenWalletModal}
+                                />
+                                <OpacityModal
+                                    onClick={() => setIsOpenWalletModal(false)}
+                                />
+                                {/* <Blur /> */}
+                            </>
+                        )}
+                        {isStakeToken ? (
+                            <LabelStake
+                                data={{
+                                    tokenApproval,
+                                    inputStakeValue,
+                                    setInputStakeValue,
+                                    stakingToken,
+                                    openWalletModal,
+                                    isStakeToken,
+                                    setIsStakeToken,
+                                    balanceIn,
+                                    isShowHistory,
+                                    setIsShowHistory,
+                                    initDataTransaction,
+                                    setUnstakeData,
+                                }}
+                                onApprove={() => handleOnApprove()}
                             />
-                            <OpacityModal
-                                onClick={() => setIsOpenWalletModal(false)}
+                        ) : (
+                            <LabelUnStake
+                                isStakeToken={isStakeToken}
+                                setIsStakeToken={setIsStakeToken}
+                                balanceIn={balanceIn}
+                                unstakeData={unstakeData}
+                                // inputUnstakeValue={inputUnstakeValue}
+                                // setInputUnstakeValue={setInputUnstakeValue}
+                                isShowCurrent={isShowCurrent}
+                                setIsShowCurrent={setIsShowCurrent}
+                                stakingToken={stakingToken}
+                                initDataTransaction={initDataTransaction}
                             />
-                            {/* <Blur /> */}
-                        </>
-                    )}
-                    {isStakeToken ? (
-                        <LabelStake
-                            data={{
-                                tokenApproval,
-                                inputStakeValue,
-                                setInputStakeValue,
-                                stakingToken,
-                                openWalletModal,
-                                isStakeToken,
-                                setIsStakeToken,
-                                balanceIn,
-                                isShowHistory,
-                                setIsShowHistory,
-                                initDataTransaction,
-                                setUnstakeData,
-                            }}
-                            onApprove={() => handleOnApprove()}
-                        />
-                    ) : (
-                        <LabelUnStake
-                            isStakeToken={isStakeToken}
-                            setIsStakeToken={setIsStakeToken}
-                            balanceIn={balanceIn}
-                            unstakeData={unstakeData}
-                            // inputUnstakeValue={inputUnstakeValue}
-                            // setInputUnstakeValue={setInputUnstakeValue}
-                            isShowCurrent={isShowCurrent}
-                            setIsShowCurrent={setIsShowCurrent}
-                            stakingToken={stakingToken}
-                            initDataTransaction={initDataTransaction}
-                        />
-                    )}
-                </StakingContainer>
-                <CurrentStake
-                    setIsStakeToken={setIsStakeToken}
-                    setUnstakeData={setUnstakeData}
-                    unstakeData={unstakeData}
-                />
+                        )}
+                    </StakingContainer>
+                    <CurrentStake
+                        setIsStakeToken={setIsStakeToken}
+                        setUnstakeData={setUnstakeData}
+                        unstakeData={unstakeData}
+                    />
 
-                {/* {isStakeToken && isShowHistory && <History />} */}
-                {/* {!isStakeToken && isShowCurrent && <CurrentStake />} */}
-            </WrapContainer>
+                    {/* {isStakeToken && isShowHistory && <History />} */}
+                    {/* {!isStakeToken && isShowCurrent && <CurrentStake />} */}
+                </WrapContainer>
+            )}
         </>
     )
 }

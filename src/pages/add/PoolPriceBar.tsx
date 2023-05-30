@@ -41,7 +41,6 @@ const PoolPriceBar = ({
         pair.reserve0 && pair.reserve1
             ? Number(pair.reserve1) / Number(pair.reserve0)
             : 0
-    console.log({ pair })
 
     return (
         <>

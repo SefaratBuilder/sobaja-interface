@@ -46,7 +46,6 @@ import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
 import { useEstimateGas } from 'hooks/useEstimateGas'
-import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { useSmartAccount } from 'hooks/useSmartAccount'
 
 const Add = () => {
@@ -353,9 +352,10 @@ const Add = () => {
                             : [txAddliqudity]
                     callResult = await sendTransactions(txns)
                 }
+                
+                initDataTransaction.setIsOpenWaitingModal(false)
+                initDataTransaction.setIsOpenResultModal(true)
                 const txn = await callResult?.wait?.()
-                initDataTransaction.setIsOpenResultModal(false)
-
                 if (txn) {
                     addTxn({
                         hash: txn?.transactionHash || callResult.hash,
@@ -364,7 +364,7 @@ const Add = () => {
                     })
                 }
                 initDataTransaction.setIsOpenWaitingModal(false)
-                initDataTransaction.setIsOpenResultModal(true)
+
                 sendEvent({
                     category: 'Defi',
                     action: 'Add liquidity',
@@ -873,5 +873,6 @@ const LabelMsg = styled.div`
     margin: auto;
     opacity: 0.5;
 `
+
 
 export default Add

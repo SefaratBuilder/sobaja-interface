@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { Columns, Row } from 'components/Layouts';
-import { useSmartAccountContext } from 'contexts/SmartAccountContext';
 import { useWeb3AuthContext } from 'contexts/SocialLoginContext';
 import styled from 'styled-components'
 import { shortenAddress } from 'utils';

@@ -1,5 +1,9 @@
 import { ApolloClient, InMemoryCache, gql, useQuery } from '@apollo/client';
+import { POOLS_SUBGRAPH_URL } from 'constants/index';
+import { useActiveWeb3React } from 'hooks';
+import { ChainId } from 'interfaces';
 import { useEffect, useMemo, useState } from 'react';
+import { useAppState } from 'states/application/hooks';
 // import { InMemoryCache } from '@apollo/client/cache/index'
 export interface Data {
     network: string,
@@ -17,13 +21,13 @@ export interface Data {
     reserve1: string,
 }
 
-const APIURL = 'https://api.thegraph.com/subgraphs/name/anvospace/s-subajaswap'
+// const APIURL = 'https://api.thegraph.com/subgraphs/name/anvospace/s-subajaswap'
 
 // Initialize the Apollo Client
-const client = new ApolloClient({
-    uri: APIURL,
-    cache: new InMemoryCache(),
-});
+// const client = new ApolloClient({
+//     uri: APIURL,
+//     cache: new InMemoryCache(),
+// });
 
 const getTotalPair = gql`
     query GetPairs {
@@ -105,6 +109,15 @@ const GetDailyVolOfPair = gql`
 
 export const useQueryPool = (skipValue: number) => {
     const [poolData, setPoolData] = useState<Data[]>()
+    const { chainId } = useActiveWeb3React()
+    const { isUpdateApplication } = useAppState()
+
+    const client = useMemo(() => {
+        return new ApolloClient({
+            uri: POOLS_SUBGRAPH_URL[chainId || 80001],
+            cache: new InMemoryCache(),
+        })
+    }, [chainId])
 
     async function fetchTVL(ascOrDesc: String, skip: Number) {
         try {
@@ -128,7 +141,7 @@ export const useQueryPool = (skipValue: number) => {
     async function fetch24hVolOfPair(pairAddress: String) {
         try {
             // Fetch pair volume
-            const volResponse = await client.query({
+            const volResponse = await client?.query({
                 query: GetDailyVolOfPair,
                 variables: {
                     pairAddress: pairAddress,
@@ -247,12 +260,22 @@ export const useQueryPool = (skipValue: number) => {
 
     useEffect(() => {
         fetchData(skipValue);
-    }, [skipValue])
+    }, [skipValue, chainId, isUpdateApplication])
 
     return poolData || []
 }
 
 export const useGetTotalPools = (): number => {
+    const { chainId } = useActiveWeb3React()
+    const { isUpdateApplication } = useAppState()
+
+    const client = useMemo(() => {
+        return new ApolloClient({
+            uri: POOLS_SUBGRAPH_URL?.[chainId || 280],
+            cache: new InMemoryCache(),
+        })
+    }, [chainId])
+
     const query = useQuery(getTotalPair, {
         client
     })
@@ -260,7 +283,7 @@ export const useGetTotalPools = (): number => {
     return useMemo(() => {
         const d = query.data?.pairs?.length
         return d || 0
-    }, [query])
+    }, [query, chainId, isUpdateApplication])
 }
 
 export interface ISwap {
@@ -341,6 +364,15 @@ const handleTransaction = (data: Array<IDataTransaction>) => {
 }
 
 export const useGetPoolsTransactions = (): Array<ISwap | IMint> => {
+    const { chainId } = useActiveWeb3React()
+    const { isUpdateApplication } = useAppState()
+
+    const client = useMemo(() => {
+        return new ApolloClient({
+            uri: POOLS_SUBGRAPH_URL?.[chainId || 280],
+            cache: new InMemoryCache(),
+        })
+    }, [chainId])
     const query = useQuery(getTransactions, {
         client
     })
@@ -349,5 +381,5 @@ export const useGetPoolsTransactions = (): Array<ISwap | IMint> => {
         const d: Array<IDataTransaction> = query.data?.transactions
 
         return handleTransaction(d)
-    }, [query])
+    }, [query, chainId, isUpdateApplication])
 }

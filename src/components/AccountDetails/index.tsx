@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useActiveWeb3React } from 'hooks'
 import { shortenAddress } from 'utils'
@@ -10,7 +10,6 @@ import imgDownArrow from 'assets/icons/arrow-down.svg'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
 import { NATIVE_COIN } from 'constants/index'
 import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
-import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { Row } from 'components/Layouts'
 import DepositModal from './DepositModal'
 import SendModal from './SendModal'
@@ -19,6 +18,8 @@ import { useAppDispatch } from 'states/hook'
 import { updateSelectedWallet } from 'states/user/reducer'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
 import { useSmartAccount } from 'hooks/useSmartAccount'
+import { ChainId } from 'utils/chainConfig'
+import { ListNetwork } from 'constants/networks'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
     openOptions: React.Dispatch<React.SetStateAction<void>>
@@ -32,8 +33,8 @@ const AccountDetails = ({
     const {
         connect,
         disconnect: disconnectWeb3Auth,
+        loading
     } = useWeb3AuthContext()
-    const { loading } = useSmartAccountContext()
     const { smartAccountAddress } = useSmartAccount()
     const balance = useETHBalances([ smartAccountAddress || account])?.[
         smartAccountAddress || account || ''
@@ -69,7 +70,7 @@ const AccountDetails = ({
 
     const handleOnConnectSmartAccount = async () => {
         try {
-            connect()
+            await connect()
         } catch (err) {
             console.log('failed to connect to smart account: ', err)
         }
@@ -79,7 +80,7 @@ const AccountDetails = ({
         <LabelRight>
             <WrapConnectModal isConnected={true}>
                 <Header>
-                    <Row jus="space-between">
+                    <Row jus="space-between" gap="5px">
                         <Row al="center" gap="10px">
                             <WrapAccountInfo>
                                 <ImgAccount src="https://picsum.photos/50/50" />
@@ -145,7 +146,7 @@ const AccountDetails = ({
                                             ? 'Connecting'
                                             : 'Use smart account'
                                     }
-                                    onClick={handleOnConnectSmartAccount}
+                                    onClick={connect}
                                     isLoading={loading}
                                 />
                             </>
@@ -213,23 +214,70 @@ const AccountDetails = ({
 
 const LabelRight = styled.div`
     position: fixed;
-    right: 0;
+    /* top: 9%; */
+    /* right: 0;
 
-    top: 9%;
     height: 100vh;
-    /* width: 400px; */
     max-width: 400px;
     width: 100%;
+    z-index: 999;
     background: url(${BgWallet});
     background-size: cover;
     background-repeat: no-repeat;
-    z-index: 999;
-
+    
     @media screen and (max-width: 1100px) {
         top: unset;
         bottom: 0;
-        /* min-height: 600px; */
         height: 600px;
+    } */
+    background: url(${BgWallet});
+    background-size: 400px;
+    background-repeat: no-repeat;
+    opacity: 1;
+    /* border: 1px solid #003b5c; */
+    border-top: 1px solid #003b5c;
+    border-left: 1px solid #003b5c;
+    box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
+    overflow: auto;
+    max-width: 400px;
+    width: 100%;
+    right: 0px;
+    bottom: 0px;
+    top: 121.49px;
+
+    height: 100vh;
+    animation: fadeIn 0.4s ease-in-out;
+    z-index: 999;
+
+    @media screen and (max-width: 1100px) {
+        animation: fadeUp 0.3s linear;
+        height: 600px;
+        bottom: 0;
+        top: unset;
+    }
+    @media screen and (max-width: 476px) {
+        width: 90%;
+    }
+    @keyframes fadeIn {
+        from {
+            transform: translateX(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(0px);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeUp {
+        from {
+            transform: translateY(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(0px);
+            opacity: 1;
+        }
     }
 `
 
@@ -288,6 +336,9 @@ const Balance = styled.div`
     font-size: 32px;
     line-height: 44px;
     text-align: center;
+    @media screen and (max-width: 391px) {
+        font-size: 18px;
+    }
 `
 const CopyBtn = styled.div`
     position: relative;
@@ -326,6 +377,13 @@ const WrapBtnHeader = styled.div`
         background: none;
         border: none;
         cursor: pointer;
+    }
+
+    @media screen and (max-width: 391px) {
+        img {
+            width: 12px;
+            height: 12px;
+        }
     }
 `
 const WrapFooterBtn = styled.div`
@@ -406,6 +464,9 @@ const WrapContent = styled.div`
     }
     @media screen and (max-width: 390px) {
         padding: 0.5rem 1rem;
+        > div {
+            margin: 0;
+        }
     }
 `
 const Title = styled.div`
@@ -525,7 +586,7 @@ const WrapButton = styled.div`
     }
 
     @media screen and (max-width: 390px) {
-        gap: 0px;
+        /* gap: 0px; */
         button:first-child {
             margin-right: 5px;
         }
@@ -602,8 +663,9 @@ const WrapConnectModal = styled(Container)`
     @media screen and (max-width: 391px) {
         width: 90%;
         margin: auto;
-        right: 10px;
-        max-width: 300px;
+        font-size: 12px;
+        /* right: 10px; */
+        /* max-width: 300px; */
     }
 `
 

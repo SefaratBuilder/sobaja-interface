@@ -6,8 +6,6 @@ import TokenListModal from 'components/TokenListModal'
 import { Columns } from 'components/Layouts'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { useActiveWeb3React } from 'hooks'
-import { fixNum } from 'utils/math'
-import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { useSmartAccount } from 'hooks/useSmartAccount'
 
 interface CurrencyInputPanelProps {
@@ -27,9 +25,10 @@ const CurrencyInputPanel = ({
     onUserSelect,
     hideMaxButton,
 }: CurrencyInputPanelProps) => {
-    const { account } = useActiveWeb3React()
+    const { account, chainId } = useActiveWeb3React()
     const { smartAccountAddress } = useSmartAccount()
     const balance = useCurrencyBalance(smartAccountAddress || account, token)
+
     const handleOnMax = () => {
         if (balance) onUserInput(field, balance)
     }
@@ -38,11 +37,13 @@ const CurrencyInputPanel = ({
         <Wrapper>
             <Row>
                 <Input value={value} field={field} onUserInput={onUserInput} />
-                <TokenListModal
-                    onUserSelect={onUserSelect}
-                    field={field}
-                    token={token}
-                />
+                {chainId && (
+                    <TokenListModal
+                        onUserSelect={onUserSelect}
+                        field={field}
+                        token={token}
+                    />
+                )}
             </Row>
             <Row>
                 <div className="t2">$</div>
@@ -71,6 +72,7 @@ const Wrapper = styled(Columns)`
 const Row = styled.div`
     display: grid;
     grid-template-columns: 1fr max(150px);
+    grid-gap: 12px;
 
     .t2 {
         font-size: 14px;

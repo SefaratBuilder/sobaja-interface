@@ -24,8 +24,10 @@ import StakeDetails from 'pages/staking'
 import Launchpad from 'pages/launchpad'
 import AA from 'pages/account-abstraction'
 import ToastMessage from 'components/ToastMessage'
+import StakePools from 'pages/staking/listpoolstake'
 
 const App = () => {
+
     const Updater = () => {
         const { pathname, search } = useLocation()
         useEffect(() => {
@@ -50,11 +52,13 @@ const App = () => {
 
             <AppContainer>
                 <ToastMessage />
+                {/* {smartLoading && <HiddenWeb3Auth />} */}
                 <Routes>
                     <Route path="/swap" element={<Swap />} />
                     <Route path="/pools" element={<Pools />} />
                     <Route path="/add" element={<AddLiquidity />} />
                     <Route path="/test-launchpad" element={<Launchpad />} />
+                    <Route path="/test-staking" element={<StakePools />} />
                     <Route path="/staking" element={<StakeDetails />} />
                     <Route path="/bridge" element={<Bridge />} />
                     <Route path="/nfts" element={<NFTs />} />

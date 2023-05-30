@@ -303,6 +303,12 @@ const Swap = () => {
                     tokenIn,
                     tokenOut,
                 })
+                initDataTransaction.setAddErc20({
+                    address: tokenOut.address,
+                    symbol: tokenOut.symbol,
+                    decimals: tokenOut.decimals,
+                    image: tokenOut.logoURI,
+                })
                 initDataTransaction.setIsOpenConfirmModal(true)
             }
         } catch (error) {
@@ -714,7 +720,7 @@ const SwapContainer = styled(Columns)`
     position: relative;
     z-index: 0;
 
-    @media (max-width: 500px) {
+    @media (max-width: 576px) {
         width: 90%;
     }
 `

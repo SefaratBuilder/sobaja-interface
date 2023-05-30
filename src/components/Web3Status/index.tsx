@@ -1,4 +1,4 @@
-import React, { useState, Fragment } from 'react'
+import React, { useState, Fragment, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
 import { Button } from 'components/Buttons/PrimaryButton'
 import WalletModal from 'components/WalletModal'
@@ -7,6 +7,11 @@ import { shortenAddress } from 'utils'
 import arrowDown from 'assets/icons/arrow-down.svg'
 import { useSmartAccount } from 'hooks/useSmartAccount'
 import { useActiveWeb3React } from 'hooks'
+import { ListNetwork } from 'constants/networks/index'
+import { changeNetwork } from 'utils/network'
+import BgWallet from 'assets/brand/bg-connect-wallet.png'
+import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
+import { ChainId } from 'interfaces'
 
 const Web3Status = () => {
     const { account } = useActiveWeb3React()
