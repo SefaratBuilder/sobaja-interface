@@ -20,6 +20,7 @@ import { updateSelectedWallet } from 'states/user/reducer'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
 import { ListNetwork } from 'constants/networks'
 import { ChainId } from 'interfaces'
+import WrapDetailsAccount from './Details'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
     openOptions: React.Dispatch<React.SetStateAction<void>>
@@ -138,6 +139,7 @@ const AccountDetails = ({
                         )}
                     </WrapButton>
                 </WrapContent>
+                <WrapDetailsAccount balance={balance} />
                 <Footer className="isLogged">
                     <WrapFooterBtn>
                         <WrapItemFooter
@@ -537,7 +539,7 @@ const Footer = styled.div`
     max-height: 355px;
     padding: 1rem 1.5rem;
     gap: 10px;
-    border-top: 1px solid #918f8f;
+    /* border-top: 1px solid #918f8f; */
 
     &.isLogged {
         padding: 0;
