@@ -72,9 +72,6 @@ export const SmartAccountProvider = ({ children }: any) => {
     const [loading, setLoading] = useState(false)
     const { addTxn } = useTransactionHandler()
 
-    useEffect(() => {
-        console.log({ wallet })
-    }, [wallet])
     const resetState = useCallback(() => {
         setWallet(null)
         setState(null)
@@ -222,22 +219,22 @@ export const SmartAccountProvider = ({ children }: any) => {
         }
     }
 
-    useEffect(() => {
-        if (wallet && selectedAccount) {
-            wallet.setSmartAccountVersion(
-                selectedAccount.version as SmartAccountVersion,
-            )
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedAccount])
+    // useEffect(() => {
+    //     if (wallet && selectedAccount) {
+    //         wallet.setSmartAccountVersion(
+    //             selectedAccount.version as SmartAccountVersion,
+    //         )
+    //     }
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [selectedAccount])
 
-    useEffect(() => {
-        getSmartAccount()
-    }, [getSmartAccount])
+    // useEffect(() => {
+    //     getSmartAccount()
+    // }, [getSmartAccount])
 
-    useEffect(() => {
-        getSmartAccountBalance()
-    }, [wallet, state])
+    // useEffect(() => {
+    //     getSmartAccountBalance()
+    // }, [wallet, state])
 
     return (
         <SmartAccountContext.Provider
