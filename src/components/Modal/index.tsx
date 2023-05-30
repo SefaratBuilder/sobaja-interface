@@ -14,11 +14,15 @@ interface ModalProps {
     ) => ReactElement<any, string | JSXElementConstructor<any>>
     button: (onOpen: () => void) => ReactNode
     isRight?: boolean
+    setErr?: React.Dispatch<React.SetStateAction<string>>
 }
 
 const Modal = (props: ModalProps) => {
     const [isOpen, setIsOpen] = useState(false)
-    const handleOpen = () => setIsOpen(true)
+    const handleOpen = () => {
+        setIsOpen(true)
+        props?.setErr && props?.setErr('')
+    }
     const handleClose = () => setIsOpen(false)
 
     return (

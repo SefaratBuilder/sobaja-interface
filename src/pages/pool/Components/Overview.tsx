@@ -48,7 +48,6 @@ const Overview = ({
     const { onTokenSelection } = useMintActionHandlers()
     const { onTokenSelection: SelectionTokenSwap } = useSwapActionHandlers()
     const { chainId } = useActiveWeb3React()
-
     const poolRemoveTokens = useTokens(
         pool?.addresses ? pool?.addresses?.map((p) => p) : [],
     )
@@ -196,7 +195,7 @@ const Overview = ({
                                 className="back"
                                 onClick={() => setCurrentPage('Pools')}
                             >
-                                {'< Back'}
+                                {width && width > 370 ? '< Back' : '<'}
                             </div>
                             <Row gap="20px" className="address">
                                 <p>Contract</p>
@@ -345,6 +344,7 @@ const Overview = ({
                         transactions?.map((tx: any, index: number) => {
                             return (
                                 <Transactions
+                                    className="trans"
                                     isMobile={width ? width <= 692 : false}
                                     key={index}
                                 >
@@ -448,6 +448,13 @@ const LabelTransactions = styled(Columns)`
 
     background: #48494c52;
     border-radius: 6px;
+
+    .trans {
+        :hover {
+            background: #716c6c8e;
+        }
+        cursor: pointer;
+    }
 `
 
 const LabelAssets = styled(Columns)`
@@ -568,11 +575,6 @@ const Transactions = styled.div<{ isMobile?: boolean }>`
         isMobile ? '110px 1fr 1fr' : '1fr 1fr 1fr 1fr 1fr'};
     grid-gap: 14px;
     padding: 10px 4px;
-
-    :hover {
-        background: #868484;
-        cursor: pointer;
-    }
 
     span {
         overflow: hidden;

@@ -27,6 +27,7 @@ import ToastMessage from 'components/ToastMessage'
 import StakePools from 'pages/staking/listpoolstake'
 import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import Calendar from 'pages/test'
 
 const App = () => {
     const { loading } = useWeb3AuthContext()
@@ -63,6 +64,7 @@ const App = () => {
                     <Route path="/add" element={<AddLiquidity />} />
                     <Route path="/test-launchpad" element={<Launchpad />} />
                     <Route path="/test-staking" element={<StakePools />} />
+                    <Route path="/test-calendar" element={<Calendar />} />
                     <Route path="/staking" element={<StakeDetails />} />
                     <Route path="/bridge" element={<Bridge />} />
                     <Route path="/nfts" element={<NFTs />} />
