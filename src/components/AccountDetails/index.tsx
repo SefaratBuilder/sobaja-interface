@@ -217,9 +217,11 @@ const LabelRight = styled.div`
         top: unset;
         bottom: 0;
         height: 600px;
+        max-height: 100vh;
+        overflow: auto;
     } */
     background: url(${BgWallet});
-    background-size: 400px;
+    background-size: cover;
     background-repeat: no-repeat;
     opacity: 1;
     /* border: 1px solid #003b5c; */
@@ -233,19 +235,24 @@ const LabelRight = styled.div`
     bottom: 0px;
     top: 121.49px;
 
-    height: 100vh;
+    height: calc(100vh - 120px);
     animation: fadeIn 0.4s ease-in-out;
     z-index: 999;
-
-    @media screen and (max-width: 1100px) {
+    @media screen and (max-width: 499px) {
+        max-width: 100%;
+        animation: fadeUp 0.3s linear;
+    }
+    @media screen and (min-width: 500px) and (max-width: 1100px) {
         animation: fadeUp 0.3s linear;
         height: 600px;
+        max-height: 100vh;
+        overflow: auto;
         bottom: 0;
         top: unset;
     }
-    @media screen and (max-width: 476px) {
-        width: 90%;
-    }
+    // @media screen and (max-width: 476px) {
+    //     width: 90%;
+    // }
     @keyframes fadeIn {
         from {
             transform: translateX(100%);

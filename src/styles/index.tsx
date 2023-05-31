@@ -160,7 +160,7 @@ export const GlobalStyle = createGlobalStyle`
         left:unset!important;
 
         top: 121.49px!important;
-        height: 100vh!important;
+        height: calc(100vh - 120px)!important;
         /* width: 400px!important; */
         max-width: 400px!important;
         width: 100%!important;
@@ -175,16 +175,22 @@ export const GlobalStyle = createGlobalStyle`
 
         
         animation: fadeIn 0.4s ease-in-out;
-        @media screen and (max-width: 1100px) {
+        @media screen and (max-width: 499px) {
+            max-width: 100% !important;
+            animation: fadeUp 0.3s linear !important;
+        }
+        @media screen and (min-width: 500px) and (max-width: 1100px) {
             top: unset!important;
             bottom: 0!important;
+            max-height: 100vh !important;
+            overflow: auto !important;
             /* min-height: 600px; */
             height: 600px!important;
             animation: fadeUp 0.3s linear;
         }
-        @media screen and (max-width: 442px) {
-            width: 90%!important;
-        }
+        // @media screen and (max-width: 442px) {
+        //     width: 90%!important;
+        // }
 
     @keyframes fadeIn {
         from {
@@ -396,8 +402,10 @@ export const GlobalStyle = createGlobalStyle`
     .w3a-parent-container #w3a-modal .w3a-modal__inner {
         /* min-height: unset!important; */
         max-width: 350px !important;
-        min-height: 300px!important;
-
+        min-height: 50px !important;
+        @media (max-width: 399px){
+            max-width: 300px !important;
+        }
     }
 
 
@@ -501,8 +509,13 @@ export const GlobalStyle = createGlobalStyle`
             font-size: 10px !important;
         }
     }
+<<<<<<< HEAD
+    .w3a-adapter-list.w3ajs-socials-adapters li:nth-child(7){
+        // display: none;
+=======
     .w3a-parent-container #w3a-modal .w3a-header {
         padding-top: 0 !important;
+>>>>>>> 0a1990021f053de965d4adc08e16b9cda8aa086c
     }
 `
 
