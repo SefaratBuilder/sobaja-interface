@@ -100,6 +100,13 @@ const AAFactory: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0xAAC689E7b679F03CD5ef2b8A888e7a709966cF84',
 }
 
+const PAYMASTERS: { [chainId: number]: string } = {
+    [ChainId.ZKTESTNET]: '0xe21b991650Bf6a3065Abb0eAC543846fb5f0af07',
+    [ChainId.GOERLI]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+    [ChainId.MUMBAI]: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+    [ChainId.ZKMAINNET]: '0xAAC689E7b679F03CD5ef2b8A888e7a709966cF84',
+}
+
 const FaucetTokens: { [chainId: number]: Array<Token> } = {
     [ChainId.ZKTESTNET]: [
         {
@@ -212,5 +219,6 @@ export {
     AAFactory,
     FaucetTokens,
     FaucetSoba,
-    FAUCETSOBA_ABI
+    FAUCETSOBA_ABI,
+    PAYMASTERS
 }

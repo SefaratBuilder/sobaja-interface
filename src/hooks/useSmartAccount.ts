@@ -62,12 +62,6 @@ export const useSmartAccount = () => {
             index: 0,
             accountAddress: smartAccountAddress
         })
-        //add deposit into head of array txns
-        // const depositTxn = depositFundTxn(txns.length)
-        // if (depositTxn) {
-        //     console.log('hahah')
-        //     txns.unshift(depositTxn)
-        // }
         const op = await walletAPI.createSignedUserOp(
             txns,
             nonceResult?.result?.[0]?.toString(),
