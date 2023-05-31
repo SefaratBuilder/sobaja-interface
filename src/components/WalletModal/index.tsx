@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useWeb3React } from '@web3-react/core'
 import AccountDetails from 'components/AccountDetails'
 import OptionsWallet from 'components/OptionsWallet'
+import { useActiveWeb3React } from 'hooks'
 
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -15,7 +15,7 @@ const WALLET_VIEWS = {
 
 const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
     const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT)
-    const { account } = useWeb3React()
+    const { account } = useActiveWeb3React()
     const [pendingError, setPendingError] = useState<boolean>(false)
     const [pendingWallet, setPendingWallet] = useState<string | undefined>()
 

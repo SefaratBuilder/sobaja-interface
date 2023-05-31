@@ -5,18 +5,13 @@ import WalletModal from 'components/WalletModal'
 import { Activity } from 'react-feather'
 import { shortenAddress } from 'utils'
 import arrowDown from 'assets/icons/arrow-down.svg'
-import { useSmartAccount } from 'hooks/useSmartAccount'
 import { useActiveWeb3React } from 'hooks'
-import { ListNetwork } from 'constants/networks/index'
-import { changeNetwork } from 'utils/network'
-import BgWallet from 'assets/brand/bg-connect-wallet.png'
-import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
-import { ChainId } from 'interfaces'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Web3Status = () => {
-    const { account } = useActiveWeb3React()
+    const { account, chainId } = useActiveWeb3React()
     const [toggleWalletModal, setToggleWalletModal] = useState<boolean>(false)
-    const { smartAccountAddress } = useSmartAccount()
+    const { smartAccountAddress } = useSmartAccountContext()
     const error = undefined
 
     function formatConnectorName(account: any, error: any) {

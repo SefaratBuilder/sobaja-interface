@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useActiveWeb3React } from 'hooks'
 import { shortenAddress } from 'utils'
@@ -8,45 +8,26 @@ import imgPower from 'assets/icons/power.svg'
 import imgCopy from 'assets/icons/copy.svg'
 import imgDownArrow from 'assets/icons/arrow-down.svg'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
-import { NATIVE_COIN } from 'constants/index'
-import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
+import { NATIVE_COIN, URLSCAN_BY_CHAINID } from 'constants/index'
 import { Row } from 'components/Layouts'
 import DepositModal from './DepositModal'
 import SendModal from './SendModal'
 import GasSetting from './GasSetting'
-import { useAppDispatch } from 'states/hook'
-import { updateSelectedWallet } from 'states/user/reducer'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
-import { useSmartAccount } from 'hooks/useSmartAccount'
-import { ChainId } from 'utils/chainConfig'
-import { ListNetwork } from 'constants/networks'
-interface connectModalWallet {
-    setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
-    openOptions: React.Dispatch<React.SetStateAction<void>>
-}
-const AccountDetails = ({
-    setToggleWalletModal,
-    openOptions,
-}: connectModalWallet) => {
-    const { account, chainId, connector } = useActiveWeb3React()
+import WrapDetailsAccount from './Details'
+import { useUpdateIsSmartAccount } from 'states/application/hooks'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+
+const AccountDetails = () => {
+    const { account, chainId, disconnect } = useActiveWeb3React()
     const [isCopied, setIsCopied] = useState<boolean>(false)
-    const {
-        connect,
-        disconnect: disconnectWeb3Auth,
-        loading
-    } = useWeb3AuthContext()
-    const { smartAccountAddress } = useSmartAccount()
-    const balance = useETHBalances([ smartAccountAddress || account])?.[
+    const { smartAccountAddress } = useSmartAccountContext()
+
+    const updateIsSmartAccount = useUpdateIsSmartAccount()
+    const balance = useETHBalances([smartAccountAddress || account])?.[
         smartAccountAddress || account || ''
     ]
-    const dispatch = useAppDispatch()
-    const disconnect = useCallback(() => {
-        if (connector && connector.deactivate) {
-            connector.deactivate()
-        }
-        connector.resetState()
-        dispatch(updateSelectedWallet({ wallet: undefined }))
-    }, [connector, dispatch])
+
 
     const handleCopyAddress = () => {
         if (smartAccountAddress) {
@@ -65,14 +46,6 @@ const AccountDetails = ({
                     setIsCopied(false)
                 }, 1000)
             })
-        }
-    }
-
-    const handleOnConnectSmartAccount = async () => {
-        try {
-            await connect()
-        } catch (err) {
-            console.log('failed to connect to smart account: ', err)
         }
     }
 
@@ -114,11 +87,7 @@ const AccountDetails = ({
                             )}
                             <button
                                 onClick={() => {
-                                    if (smartAccountAddress) {
-                                        disconnectWeb3Auth()
-                                    } else {
-                                        disconnect()
-                                    }
+                                    disconnect()
                                 }}
                             >
                                 <img src={imgPower} alt="#" />
@@ -142,27 +111,36 @@ const AccountDetails = ({
                             <>
                                 <PrimaryButton
                                     name={
-                                        loading
-                                            ? 'Connecting'
-                                            : 'Use smart account'
+                                        // loading
+                                        //     ? 'Connecting'
+                                        //     : 
+                                            'Use smart account'
                                     }
-                                    onClick={connect}
-                                    isLoading={loading}
+                                    onClick={() => updateIsSmartAccount(true)}
+                                    // isLoading={loading}
                                 />
                             </>
                         )}
                         {smartAccountAddress && (
-                            <>
+                            <Row gap="5px">
                                 <DepositModal />
                                 <SendModal />
-                            </>
+                            </Row>
                         )}
                     </WrapButton>
                 </WrapContent>
+                <WrapDetailsAccount balance={balance} />
                 <Footer className="isLogged">
                     <WrapFooterBtn>
                         <WrapItemFooter
-                        //  onClick={() => setShowTrans(!showTrans)}
+                            //  onClick={() => setShowTrans(!showTrans)}
+                            onClick={() =>
+                                window.open(
+                                    `${
+                                        URLSCAN_BY_CHAINID?.[chainId || 5].url
+                                    }/address/${smartAccountAddress}`,
+                                )
+                            }
                         >
                             <p>Transactions</p>
                             <WrapFooterImg>
@@ -172,31 +150,7 @@ const AccountDetails = ({
                         </WrapItemFooter>
                         <WrapModalTransaction
                             showTrans={false}
-                            // showTrans={showTrans}
                         >
-                            {/* <p>
-                            {transactions && transactions.length > 0
-                                ? 'Your recent transactions:'
-                                : 'You have no transactions'}
-                        </p> */}
-                            {/* {transactions?.map((i) => {
-                            return (
-                                <RowTransaction
-                                    onClick={() =>
-                                        openExplorerByHash(
-                                            i.hash,
-                                            network?.name,
-                                        )
-                                    }
-                                >
-                                    <p>{i.method}</p>
-                                    <div>
-                                        <p>{i.date}</p>
-                                        <p>{i.time}</p>
-                                    </div>
-                                </RowTransaction>
-                            )
-                        })} */}
                         </WrapModalTransaction>
                         <WrapItemFooter className="fade">
                             <p>Language</p>
@@ -214,22 +168,6 @@ const AccountDetails = ({
 
 const LabelRight = styled.div`
     position: fixed;
-    /* top: 9%; */
-    /* right: 0;
-
-    height: 100vh;
-    max-width: 400px;
-    width: 100%;
-    z-index: 999;
-    background: url(${BgWallet});
-    background-size: cover;
-    background-repeat: no-repeat;
-    
-    @media screen and (max-width: 1100px) {
-        top: unset;
-        bottom: 0;
-        height: 600px;
-    } */
     background: url(${BgWallet});
     background-size: 400px;
     background-repeat: no-repeat;
@@ -551,7 +489,7 @@ const Footer = styled.div`
     max-height: 355px;
     padding: 1rem 1.5rem;
     gap: 10px;
-    border-top: 1px solid #918f8f;
+    /* border-top: 1px solid #918f8f; */
 
     &.isLogged {
         padding: 0;

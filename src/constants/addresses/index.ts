@@ -95,7 +95,7 @@ const AAEntryPoints: { [chainId: number]: string } = {
 
 const AAFactory: { [chainId: number]: string } = {
     [ChainId.ZKTESTNET]: '0x27aD0F9905BD47C1C46F51BbaBB2509717918fBD',
-    [ChainId.GOERLI]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+    [ChainId.GOERLI]: '0x000000F9eE1842Bb72F6BBDD75E6D3d4e3e9594C',
     [ChainId.MUMBAI]: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
     [ChainId.ZKMAINNET]: '0xAAC689E7b679F03CD5ef2b8A888e7a709966cF84',
 }
@@ -197,8 +197,6 @@ const FaucetTokens: { [chainId: number]: Array<Token> } = {
     ],
     [ChainId.MUMBAI]: []
 }
-
-
 
 export {
     MULTICALL_ABI,

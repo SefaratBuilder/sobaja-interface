@@ -19,18 +19,18 @@ import ComponentsTransaction, {
 import { URLSCAN_BY_CHAINID, ZERO_ADDRESS } from 'constants/index'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import axios from 'axios'
-import { useSmartAccount } from 'hooks/useSmartAccount'
 import { FaucetTokens } from 'constants/addresses'
 import { ChainId, Token } from 'interfaces'
 import BGSoba from 'assets/icons/soba2.jpg'
 import Twitter from 'assets/icons/twitter.svg'
 import Discord from 'assets/icons/discord.svg'
 import CloseButton from 'assets/icons/icon-close.svg'
-import { useAppState, useUpdateStepFaucet } from 'states/application/hooks'
+import { useUpdateStepFaucet } from 'states/application/hooks'
 import { ListNetwork } from 'constants/networks'
 import Loader from 'components/Loader'
 import Arrow from 'assets/icons/arrow-link.svg'
 import { useWindowDimensions } from 'hooks/useWindowSize'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
@@ -40,7 +40,7 @@ const Faucet = () => {
     const faucetSobaContract = useFaucetSobaContract()
     const { account, chainId, provider, connector } = useActiveWeb3React()
     const initDataTransaction = InitCompTransaction()
-    const { smartAccountAddress, sendTransactions } = useSmartAccount()
+    const { smartAccountAddress, sendTransactions } = useSmartAccountContext()
     const { addTxn } = useTransactionHandler()
     const { stepFaucet, setStepFaucet } = useUpdateStepFaucet()
     const { width } = useWindowDimensions()
@@ -184,7 +184,7 @@ const Faucet = () => {
     const clickFaucetToken = async (item: Token) => {
         try {
             const { address, symbol, decimals, logoURI: image } = item
-            if (faucetContract == null || !faucetSobaContract == null) return
+            if (faucetContract == null || faucetSobaContract == null) return
 
             setIsDisplayFaucet(false)
             initDataTransaction.setAddErc20({
@@ -199,9 +199,10 @@ const Faucet = () => {
             if(smartAccountAddress) {
                 const txn = {
                     target: contract.address,
-                    data: contract.interface.encodeFunctionData('requestTokens', [erc20]),
+                    data: contract.interface.encodeFunctionData('requestTokens', [item.address]),
                     value: 0
                 } 
+                console.log('haha')
                 callResult = await sendTransactions([txn])
             } else {
                 callResult = await contract.requestTokens(address)
@@ -296,15 +297,6 @@ const Faucet = () => {
                             </ContentFaucet>
                             <CoinButton>
                                 {showMintCoins()}
-                                {/* {chainId !== 280 && (
-                                    <Row>
-                                        <Error fontSize="14px">
-                                            Wrong network! Please switch to
-                                            zkSync Goerli network to faucet
-                                            tokens.
-                                        </Error>
-                                    </Row>
-                                )} */}
                             </CoinButton>
                         </BodyModalFaucet>
                     </ContainerFaucetModal>

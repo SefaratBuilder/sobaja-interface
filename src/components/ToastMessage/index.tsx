@@ -62,27 +62,6 @@ const ToastMessage = ({ payload, setToastMessageModal }: ToastMsg) => {
     return (
         <ToastMessageWrapper>
             <>
-                {/* <PrimaryButton
-                    name="Add"
-                    onClick={() => {
-                        setHash((hash) => hash + 1)
-                        addTxn({
-                            hash: 'asdasdsa',
-                            msg: 'asd kad asod asd asd asd as dqwiopejwq as da dasd asd asd a',
-                            status: true,
-                        })
-                    }}
-                />
-                <PrimaryButton
-                    name="Remove"
-                    onClick={() => {
-                        removeTxn({
-                            hash: 'asdasdsa',
-                            msg: 'asd kad asod asd asd asd as dqwiopejwq as da dasd asd asd a',
-                            status: true,
-                        })
-                    }}
-                /> */}
                 {txnList.map((txn, index: any) => {
                     return (
                         <Toast

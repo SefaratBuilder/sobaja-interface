@@ -14,16 +14,21 @@ interface ModalProps {
     ) => ReactElement<any, string | JSXElementConstructor<any>>
     button: (onOpen: () => void) => ReactNode
     isRight?: boolean
+    setErr?: React.Dispatch<React.SetStateAction<string>>
 }
 
 const Modal = (props: ModalProps) => {
     const [isOpen, setIsOpen] = useState(false)
-    const handleOpen = () => setIsOpen(true)
+    const handleOpen = () => {
+        setIsOpen(true)
+        props?.setErr && props?.setErr('')
+    }
     const handleClose = () => setIsOpen(false)
 
     return (
+        <>
+        {props.button(handleOpen)}
         <ModalWrapper>
-            {props.button(handleOpen)}
             <MuiModal
                 open={isOpen}
                 onClose={handleClose}
@@ -39,6 +44,7 @@ const Modal = (props: ModalProps) => {
                 )}
             </MuiModal>
         </ModalWrapper>
+        </>
     )
 }
 
@@ -57,7 +63,7 @@ const WrapBox = styled.div`
     padding: 20px;
     border-top: 1px solid #003b5c;
     border-left: 1px solid #003b5c;
-    animation: fadeIn 0.4s linear;
+    /* animation: fadeIn 0.4s linear; */
 
     @media screen and (max-width: 1100px) {
         animation: fadeUp 0.3s linear;

@@ -1,26 +1,23 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { Columns, Row } from 'components/Layouts';
-import { useWeb3AuthContext } from 'contexts/SocialLoginContext';
 import styled from 'styled-components'
-import { shortenAddress } from 'utils';
-import { useAAEntryPointContract, useNftSmartAccountContract, useTokenContract } from 'hooks/useContract';
-import { useCurrencyBalance, useCurrencyBalances, useETHBalances } from 'hooks/useCurrencyBalance';
+import { useAAEntryPointContract, useTokenContract } from 'hooks/useContract';
+import { useCurrencyBalance, useCurrencyBalances } from 'hooks/useCurrencyBalance';
 import { NATIVE_COIN } from 'constants/index';
 import { useTransactionHandler } from 'states/transactions/hooks';
-import { useSmartAccount } from 'hooks/useSmartAccount';
 import { useActiveWeb3React } from 'hooks';
-import { add, divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math';
+import { divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math';
 import { useAAFactory } from 'hooks/useAAFactory';
-import { AAEntryPoints, AAFactory } from 'constants/addresses';
 import { useToken } from 'hooks/useToken';
+import { useSmartAccountContext } from 'contexts/SmartAccountContext';
 
 const AA = () => {
     const { contract: factoryContract, smartAccountAddress } = useAAFactory()
-    const { account, provider, chainId } = useActiveWeb3React()
+    const { account } = useActiveWeb3React()
     const {addTxn} = useTransactionHandler()
     const [signedUserOp, setSignedUserOp] = useState<any>()
-    const smartAccount = useSmartAccount()
+    const smartAccount = useSmartAccountContext()
     const { depositedFund, nonce, contract: smartAccountContract, sendTransactions, isDeployed } = smartAccount
     const entryPointContract = useAAEntryPointContract()
     const token = '0xDf9acc0a00Ae6Ec5eBc8D219d12A0157e7F18A68'
@@ -90,7 +87,7 @@ const AA = () => {
 
     const onWithdraw = async () => {
         try {
-            if (!smartAccountContract || !smartAccountAddress) return console.log('asdasd', !smartAccountContract, !smartAccountAddress)
+            if (!smartAccountContract || !smartAccountAddress) return 
             const deployResult = await smartAccountContract.withdrawDepositTo(
                 account,
                 depositedFund

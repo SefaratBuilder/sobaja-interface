@@ -5,8 +5,8 @@ import { Row } from 'components/Layouts'
 import LogoToken from 'components/LogoToken'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { useActiveWeb3React } from 'hooks'
-import { useSmartAccount } from 'hooks/useSmartAccount'
 import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 interface TokenSelectionProps {
     token: Token
@@ -22,7 +22,7 @@ const TokenSelection = ({
     onAdd,
 }: TokenSelectionProps) => {
     const { account } = useActiveWeb3React()
-    const { smartAccountAddress } = useSmartAccount()
+    const { smartAccountAddress } = useSmartAccountContext()
     const { address } = useWeb3AuthContext()
     const balance = useCurrencyBalance(address ? smartAccountAddress : account, token)
 

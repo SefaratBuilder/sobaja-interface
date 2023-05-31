@@ -57,6 +57,7 @@ const getTransactions = gql`
                 createdAtTimestamp
             }
             from
+            timestamp
             }
             mints {
             amount0
@@ -73,6 +74,7 @@ const getTransactions = gql`
                 }
                 createdAtTimestamp
             }
+            timestamp
             sender
             }
         }
@@ -304,6 +306,7 @@ export interface ISwap {
         from: string
         id: string
     },
+    timestamp?: string,
     type?: string,
     date?: string
 }
@@ -323,6 +326,8 @@ export interface IMint {
         },
         createdAtTimestamp: string,
     },
+    timestamp?: string,
+
     sender: string
     type?: string,
     date?: string
@@ -336,6 +341,7 @@ export interface IDataTransaction {
 
 const handleDate = (now: number, txTime: number) => {
     const ts = (now - txTime)
+
     if (ts >= 60 * 60 * 24) {
         return `${Math.round(ts / (60 * 60 * 24))} days ago`
     } else if (ts > 60 * 60) {
@@ -351,16 +357,20 @@ const handleTransaction = (data: Array<IDataTransaction>) => {
     const result: Array<ISwap | IMint> = []
     const currentTimestamp = new Date().getTime() / 1000
 
-    data?.map(d => {
-        if (d.swaps?.[0]) {
-            result.push({ ...d.swaps?.[0], type: 'Swap', date: handleDate(currentTimestamp, Number(d.swaps?.[0]?.pair?.createdAtTimestamp)) })
-        }
-        if (d.mints?.[0]) {
-            result.push({ ...d.mints?.[0], type: 'Add', date: handleDate(currentTimestamp, Number(d.mints?.[0]?.pair?.createdAtTimestamp)) })
+    // const sortData = data?.sort((a, b) => Number(b?.swaps?.[0]?.timestamp || b?.mints?.[0]?.timestamp) - Number(a?.swaps?.[0]?.timestamp || a?.mints?.[0]?.timestamp))
+    const sortData = data?.map(i => {
+        return {
+            data: i?.swaps?.[0] ? { ...i.swaps?.[0] } : i?.mints?.[0] ? { ...i.mints?.[0] } : undefined,
+            dateTx: i?.swaps?.[0] ? i.swaps?.[0]?.timestamp : i?.mints?.[0] ? i.mints?.[0]?.timestamp : undefined,
+            type: i?.swaps?.[0] ? 'Swap' : i?.mints?.[0] ? 'Add' : undefined
         }
     })
 
-    return result
+    sortData?.map(d => {
+        if (d.data && d.dateTx && d.type)
+            result.push({ ...d.data, type: d.type, date: handleDate(currentTimestamp, Number(d.dateTx)), timestamp: d.dateTx })
+    })
+    return result.sort((a, b) => Number(b.timestamp) - Number(a.timestamp))
 }
 
 export const useGetPoolsTransactions = (): Array<ISwap | IMint> => {

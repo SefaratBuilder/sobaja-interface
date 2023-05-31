@@ -6,7 +6,7 @@ import TokenListModal from 'components/TokenListModal'
 import { Columns } from 'components/Layouts'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { useActiveWeb3React } from 'hooks'
-import { useSmartAccount } from 'hooks/useSmartAccount'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 interface CurrencyInputPanelProps {
     token: Token | undefined
@@ -26,7 +26,7 @@ const CurrencyInputPanel = ({
     hideMaxButton,
 }: CurrencyInputPanelProps) => {
     const { account, chainId } = useActiveWeb3React()
-    const { smartAccountAddress } = useSmartAccount()
+    const { smartAccountAddress } = useSmartAccountContext()
     const balance = useCurrencyBalance(smartAccountAddress || account, token)
 
     const handleOnMax = () => {

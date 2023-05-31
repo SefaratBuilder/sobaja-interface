@@ -55,7 +55,7 @@ import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
 import { useEstimateGas } from 'hooks/useEstimateGas'
-import { useSmartAccount } from 'hooks/useSmartAccount'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -72,7 +72,7 @@ const Swap = () => {
     const {
         sendTransactions,
         smartAccountAddress
-    } = useSmartAccount()
+    } = useSmartAccountContext()
     const tokenApproval = useTokenApproval(
         smartAccountAddress || account,
         routerAddress,
@@ -396,11 +396,9 @@ const Swap = () => {
                     value: value
                 }
                 if (isInsufficientAllowance) {
-                    console.log('asdasda')
                     callResult = await sendTransactions([txApprove, txSwap])
 
                 } else {
-                    console.log('123123')
                     callResult = await sendTransactions([txSwap])
                 }
             }

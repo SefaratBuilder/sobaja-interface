@@ -1,16 +1,16 @@
 import { Fragment } from 'react'
 import styled from 'styled-components'
-import { Button } from 'components/Buttons/PrimaryButton'
+import PrimaryButton, { Button } from 'components/Buttons/PrimaryButton'
 import { Activity } from 'react-feather'
 import { shortenAddress } from 'utils'
 import arrowDown from 'assets/icons/arrow-down.svg'
 import { useActiveWeb3React } from 'hooks'
-import { useSmartAccount } from 'hooks/useSmartAccount'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Web3StatusMobile = ({ toggleWalletModal, setToggleWalletModal }: any) => {
-    const { account } = useActiveWeb3React()
+    const { account, connector, provider } = useActiveWeb3React()
     const error = undefined
-    const { smartAccountAddress } = useSmartAccount()
+    const { smartAccountAddress } = useSmartAccountContext()
 
     function formatConnectorName(account: any, error: any) {
         return (

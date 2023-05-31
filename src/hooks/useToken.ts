@@ -9,6 +9,10 @@ import { Contract, FixedNumber } from 'ethers'
 import { ETHER_ADDRESS } from 'constants/index'
 import { ZERO_ADDRESS } from 'constants/index'
 import { NATIVE_COIN } from 'constants/index'
+import tokenList from 'constants/jsons/tokenList.json'
+import UNKNOWN from 'assets/icons/question-mark-button-dark.svg'
+
+
 
 export function useToken(address: string | undefined): Token | undefined {
     const { chainId } = useActiveWeb3React()
@@ -93,7 +97,8 @@ export function useTokens(
                 decimals,
                 chainId,
                 symbol,
-                logoURI: '',
+                logoURI: tokenList.filter(token => token.chainId === chainId).find((t) => t.address == address || t.symbol == symbol)
+                    ?.logoURI || UNKNOWN,
             }
         })
     }, [addresses, chainId])

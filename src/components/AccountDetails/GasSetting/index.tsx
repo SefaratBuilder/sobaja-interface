@@ -9,8 +9,8 @@ import { GAS_TOKEN } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { useAppState, useUpdateGasToken } from 'states/application/hooks'
 import LogoToken from 'components/LogoToken'
-import { useSmartAccount } from 'hooks/useSmartAccount'
 import { useActiveWeb3React } from 'hooks'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const TokenSelection = ({
     token,
@@ -21,7 +21,7 @@ const TokenSelection = ({
     gasToken: Token | undefined
     onSetGasToken: (token: Token) => void
 }) => {
-    const { smartAccountAddress } = useSmartAccount()
+    const { smartAccountAddress } = useSmartAccountContext()
     const balance = useCurrencyBalance(smartAccountAddress, token)
 
     return (
@@ -101,7 +101,8 @@ const GasSetting = () => {
 }
 
 const TokenWrapper = styled(Row)<{ isActived: boolean }>`
-    border: 2px solid ${({ isActived }) => (isActived ? '#1469c3' : 'white')};
+    border: 2px solid
+        ${({ isActived }) => (isActived ? '#1469c3' : '#ffffff5c')};
     padding: 8px;
     border-radius: 4px;
     cursor: pointer;

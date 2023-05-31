@@ -1,6 +1,6 @@
 import { Columns, Row } from 'components/Layouts'
 import { Data, IMint, ISwap } from 'hooks/useQueryPool'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import imgCopy from 'assets/icons/copy.svg'
 import UNKNOWN from 'assets/icons/question-mark-button-dark.svg'
@@ -20,25 +20,34 @@ import { WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
 import { useActiveWeb3React } from 'hooks'
 import { ZERO_ADDRESS } from 'constants/index'
 import { NATIVE_COIN } from 'constants/index'
+import Pagination from 'components/Pagination'
+import { useSwapActionHandlers } from 'states/swap/hooks'
 
 const Overview = ({
     pool,
     transaction,
     width,
     tokenList,
+    setCurrentPage,
 }: {
     pool?: Data
     transaction?: (ISwap | IMint)[]
     width?: number
     tokenList?: string[]
+    setCurrentPage: React.Dispatch<
+        React.SetStateAction<'Pools' | 'Details' | 'Position'>
+    >
 }) => {
     const [isCopied, setIsCopied] = useState(false)
     const [indexFieldActive, setIndexFieldActive] = useState(0)
+    const [page, setPage] = useState<number>(1)
+    const [transactions, setTransactions] = useState<(ISwap | IMint)[]>()
+
     const [modalRemovePool, setModalRemovePool] = useState<boolean>(false)
     const navigate = useNavigate()
     const { onTokenSelection } = useMintActionHandlers()
+    const { onTokenSelection: SelectionTokenSwap } = useSwapActionHandlers()
     const { chainId } = useActiveWeb3React()
-
     const poolRemoveTokens = useTokens(
         pool?.addresses ? pool?.addresses?.map((p) => p) : [],
     )
@@ -66,43 +75,40 @@ const Overview = ({
     const dTransactions = useMemo(() => {
         if (transaction?.[0]) {
             return indexFieldActive === 0
-                ? 
-                // uniqByKeepFirst(
-                //       transaction.filter(
-                //           (tx) =>
-                //               tx.pair.token0.id === pool?.addresses?.[1] &&
-                //               tx.pair.token1.id === pool?.addresses?.[2],
-                //       ),
-                //       (t: ISwap | IMint) => t.pair.id,
-                //   )
-                  transaction.filter(
-                    (tx) =>
-                        tx.pair.token0.id === pool?.addresses?.[1] &&
-                        tx.pair.token1.id === pool?.addresses?.[2],
-                )
-                : 
-                // uniqByKeepFirst(
-                //       transaction.filter(
-                //           (tx) =>
-                //               tx.pair.token0.id === pool?.addresses?.[1] &&
-                //               tx.pair.token1.id === pool?.addresses?.[2],
-                //       ),
-                //       (t: ISwap | IMint) => t.pair.id,
-                //   ).filter(
-                //       (t: any) =>
-                //           t?.type === dataShow.fields?.[indexFieldActive],
-                //   )
-                  transaction.filter(
-                    (tx) =>
-                        tx.pair.token0.id === pool?.addresses?.[1] &&
-                        tx.pair.token1.id === pool?.addresses?.[2],
-                ).filter(
-                    (t: any) =>
-                        t?.type === dataShow.fields?.[indexFieldActive],
-                )
+                ? transaction.filter(
+                      (tx) =>
+                          tx.pair.token0.id === pool?.addresses?.[1] &&
+                          tx.pair.token1.id === pool?.addresses?.[2],
+                  )
+                : transaction
+                      .filter(
+                          (tx) =>
+                              tx.pair.token0.id === pool?.addresses?.[1] &&
+                              tx.pair.token1.id === pool?.addresses?.[2],
+                      )
+                      .filter(
+                          (t: any) =>
+                              t?.type === dataShow.fields?.[indexFieldActive],
+                      )
         }
         return []
-    }, [transaction, indexFieldActive])
+    }, [transaction, indexFieldActive, pool])
+
+    const totalPage =
+        dTransactions && dTransactions?.length > 0
+            ? Math.ceil(dTransactions?.length / 10)
+            : 1
+
+    useEffect(() => {
+        const filterData = dTransactions.filter(
+            (d, index) => index >= (page - 1) * 10 && index < page * 10,
+        )
+        setTransactions(filterData)
+    }, [page, dTransactions])
+
+    useEffect(() => {
+        page > totalPage && setPage(1)
+    }, [indexFieldActive, totalPage, page])
 
     const handleCopyAddress = () => {
         if (pool?.addresses?.[0]) {
@@ -149,54 +155,99 @@ const Overview = ({
         navigate('/add')
     }
 
+    const handleOnSwap = () => {
+        if (
+            chainId &&
+            poolRemoveTokens &&
+            poolRemoveTokens?.length > 0 &&
+            poolRemoveTokens?.[1] &&
+            poolRemoveTokens?.[2]
+        ) {
+            SelectionTokenSwap(
+                Field.INPUT,
+                compare(
+                    poolRemoveTokens[1].address,
+                    WRAPPED_NATIVE_ADDRESSES?.[chainId],
+                )
+                    ? NATIVE_COIN?.[chainId]
+                    : poolRemoveTokens[1],
+            )
+            SelectionTokenSwap(
+                Field.OUTPUT,
+                compare(
+                    poolRemoveTokens[2].address,
+                    WRAPPED_NATIVE_ADDRESSES?.[chainId],
+                )
+                    ? NATIVE_COIN?.[chainId]
+                    : poolRemoveTokens[2],
+            )
+        }
+        navigate('/swap')
+    }
+
     return (
         <Container>
             <WrapData gap="20px">
                 <LabelX>
                     <LabelContract>
-                        <Row gap="20px">
-                            <p>Contract</p>
-                            <Row gap="5px">
-                                <p>
-                                    {pool?.addresses?.[0] &&
-                                        shortenAddress(pool?.addresses?.[0], 6)}
-                                </p>
-                                <>
-                                    {isCopied ? (
-                                        <CopyBtn>
-                                            <CopyAccountAddress
-                                                src={imgCheckMark}
-                                            />
-                                            <Tooltip className="tooltip">
-                                                Copied
-                                            </Tooltip>
-                                        </CopyBtn>
-                                    ) : (
-                                        <CopyBtn>
-                                            <CopyAccountAddress
-                                                onClick={() =>
-                                                    handleCopyAddress()
-                                                }
-                                                src={imgCopy}
-                                            />
-                                            <Tooltip className="tooltip">
-                                                Click to copy address
-                                            </Tooltip>
-                                        </CopyBtn>
-                                    )}
-                                </>
+                        <Row gap="10px" al="center">
+                            <div
+                                className="back"
+                                onClick={() => setCurrentPage('Pools')}
+                            >
+                                {width && width > 370 ? '< Back' : '<'}
+                            </div>
+                            <Row gap="20px" className="address">
+                                <p>Contract</p>
+                                <Row gap="5px">
+                                    <p>
+                                        {pool?.addresses?.[0] &&
+                                            shortenAddress(
+                                                pool?.addresses?.[0],
+                                                6,
+                                            )}
+                                    </p>
+                                    <>
+                                        {isCopied ? (
+                                            <CopyBtn>
+                                                <CopyAccountAddress
+                                                    src={imgCheckMark}
+                                                />
+                                                <Tooltip className="tooltip">
+                                                    Copied
+                                                </Tooltip>
+                                            </CopyBtn>
+                                        ) : (
+                                            <CopyBtn>
+                                                <CopyAccountAddress
+                                                    onClick={() =>
+                                                        handleCopyAddress()
+                                                    }
+                                                    src={imgCopy}
+                                                />
+                                                <Tooltip className="tooltip">
+                                                    Click to copy address
+                                                </Tooltip>
+                                            </CopyBtn>
+                                        )}
+                                    </>
+                                </Row>
                             </Row>
                         </Row>
                     </LabelContract>
                     <Row gap="10px">
                         <PrimaryButton
+                            name="Swap"
+                            onClick={() => handleOnSwap()}
+                        />
+                        <PrimaryButton
                             name="Add"
                             onClick={() => handleOnAdd()}
                         />
-                        <PrimaryButton
+                        {/* <PrimaryButton
                             name="Remove"
                             onClick={() => setModalRemovePool(true)}
-                        />
+                        /> */}
                     </Row>
                 </LabelX>
 
@@ -289,10 +340,11 @@ const Overview = ({
                             return <span key={index}>{t}</span>
                         })}
                     </Transactions>
-                    {dTransactions &&
-                        dTransactions?.map((tx: any, index: number) => {
+                    {transactions &&
+                        transactions?.map((tx: any, index: number) => {
                             return (
                                 <Transactions
+                                    className="trans"
                                     isMobile={width ? width <= 692 : false}
                                     key={index}
                                 >
@@ -362,6 +414,12 @@ const Overview = ({
                         })}
                 </LabelTransactions>
             </WrapData>
+            <Pagination
+                page={page}
+                setPage={setPage}
+                setLoadingChangePage={undefined}
+                totalPage={totalPage}
+            />
         </Container>
     )
 }
@@ -390,6 +448,13 @@ const LabelTransactions = styled(Columns)`
 
     background: #48494c52;
     border-radius: 6px;
+
+    .trans {
+        :hover {
+            background: #716c6c8e;
+        }
+        cursor: pointer;
+    }
 `
 
 const LabelAssets = styled(Columns)`
@@ -421,14 +486,30 @@ const LabelAssets = styled(Columns)`
 `
 
 const LabelContract = styled.div`
-    width: 256px;
-    padding: 10px 10px;
-    border-radius: 6px;
-    background: #48494c52;
+    /* width: 256px; */
+    display: flex;
+    gap: 5px;
+    /* padding: 10px 10px; */
+    align-items: center;
     img {
         width: 16px;
         height: 16px;
         cursor: pointer;
+    }
+
+    .address {
+        background: #48494c52;
+        padding: 10px 10px;
+        border-radius: 6px;
+    }
+
+    .back {
+        cursor: pointer;
+        /* background: #48494c52; */
+        padding: 10px;
+        background: white;
+        color: black;
+        border-radius: 6px;
     }
 `
 
@@ -493,6 +574,8 @@ const Transactions = styled.div<{ isMobile?: boolean }>`
     grid-template-columns: ${({ isMobile }) =>
         isMobile ? '110px 1fr 1fr' : '1fr 1fr 1fr 1fr 1fr'};
     grid-gap: 14px;
+    padding: 10px 4px;
+
     span {
         overflow: hidden;
         text-overflow: ellipsis;

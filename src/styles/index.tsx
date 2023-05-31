@@ -68,7 +68,9 @@ export const GlobalStyle = createGlobalStyle`
     //style for biconomy connection modal
     .w3a-modal__header {
         /* background: white; */
-        display: none!important;
+        /* display: none!important; */
+        height: 0;
+        /* opacity: 0; */
         button {
             width: 100%!important;
         height: 100%!important;
@@ -498,6 +500,9 @@ export const GlobalStyle = createGlobalStyle`
         @media (max-width: 767px){
             font-size: 10px !important;
         }
+    }
+    .w3a-parent-container #w3a-modal .w3a-header {
+        padding-top: 0 !important;
     }
 `
 

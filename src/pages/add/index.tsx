@@ -18,13 +18,11 @@ import {
 } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import {
-    useFactoryContract,
     useRouterContract,
     useTokenContract,
-    useRouterSmartAccountContract,
 } from 'hooks/useContract'
 import { useActiveWeb3React } from 'hooks'
-import { divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math'
+import { mulNumberWithDecimal } from 'utils/math'
 import { usePair } from 'hooks/useAllPairs'
 import { calcSlippageAmount, isNativeCoin, shortenAddress } from 'utils'
 import WalletModal from 'components/WalletModal'
@@ -46,7 +44,7 @@ import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
 import { useEstimateGas } from 'hooks/useEstimateGas'
-import { useSmartAccount } from 'hooks/useSmartAccount'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Add = () => {
     const mintState = useMintState()
@@ -57,7 +55,7 @@ const Add = () => {
     const { onUserInput, onTokenSelection, onChangeMintState } =
         useMintActionHandlers()
     const { account, chainId } = useActiveWeb3React()
-    const { smartAccountAddress } = useSmartAccount()
+    const { smartAccountAddress } = useSmartAccountContext()
     const routerContract = useRouterContract()
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const contractApproveTokenIn = useTokenContract(tokenIn?.address)
@@ -80,7 +78,7 @@ const Add = () => {
     const loca = useLocation()
     const pair = usePair(chainId, tokenIn, tokenOut)
     const ref = useRef<any>()
-    const { sendTransactions } = useSmartAccount()
+    const { sendTransactions } = useSmartAccountContext()
 
     useOnClickOutside(ref, () => {
         setIsOpenWalletModal(false)

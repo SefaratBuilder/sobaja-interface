@@ -1,28 +1,27 @@
-import { ReactNode, useEffect, useState } from 'react'
+import { useState } from 'react'
 import Modal from 'components/Modal'
 import styled from 'styled-components'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { Columns, Row } from 'components/Layouts'
 import { useActiveWeb3React } from 'hooks'
-import { computeGasLimit, shortenAddress } from 'utils'
-import { divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math'
+import { shortenAddress } from 'utils'
+import { mulNumberWithDecimal } from 'utils/math'
 import { NATIVE_COIN, ZERO_ADDRESS } from 'constants/index'
 import {
     useCurrencyBalance,
-    useETHBalances,
-    useTokenBalance,
 } from 'hooks/useCurrencyBalance'
 import { Error } from 'components/Text'
-import { useTokenContract, useTokenSmartAccountContract } from 'hooks/useContract'
+import { useTokenContract } from 'hooks/useContract'
 import { useToken } from 'hooks/useToken'
 import TokenListModal from 'components/TokenListModal'
 import { Field, Token } from 'interfaces'
 import { useTransactionHandler } from 'states/transactions/hooks'
-import { useSmartAccount } from 'hooks/useSmartAccount'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import CloseIcon from 'assets/icons/x.svg'
 
 const SendModal = () => {
     const { account, chainId } = useActiveWeb3React()
-    const { smartAccountAddress, sendTransactions } = useSmartAccount()
+    const { smartAccountAddress, sendTransactions } = useSmartAccountContext()
     const [value, setValue] = useState('')
     const [toAddress, setToAddress] = useState('')
     const [token, setToken] = useState<Token>(NATIVE_COIN[280])
@@ -106,9 +105,9 @@ const SendModal = () => {
             <ModalWrapper>
                 <ModalHeader>
                     <div>Withdraw</div>
-                    {/* <div className="close-btn" onClick={onClose}>
-                        X
-                    </div> */}
+                    <div className="close-btn" onClick={onClose}>
+                        <img src={CloseIcon} alt="close icon" />
+                    </div>
                 </ModalHeader>
                 <ModalBody>
                     <div className="subtitle">

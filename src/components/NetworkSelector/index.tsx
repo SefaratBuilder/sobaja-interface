@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import imgDownArrowWhite from 'assets/icons/chevron-white.svg'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { useActiveWeb3React } from 'hooks'
-import detectEthereumProvider from '@metamask/detect-provider'
 import imgCircleWhite from '../../assets/icons/circleWhite.png'
 import imgCircleGreen from '../../assets/icons/circleGreen.png'
 import { InfoNetwork, ListNetwork } from 'constants/networks/index'
@@ -12,7 +11,7 @@ import { changeNetwork } from 'utils/network'
 
 const NetworkSelector = () => {
     const [networkModal, setNetworkModal] = useState(false)
-    const { chainId, connector, account } = useActiveWeb3React()
+    const { chainId, account, connector, switchNetwork } = useActiveWeb3React()
 
     const networkRef = useRef<any>()
     useOnClickOutside(networkRef, () => {
@@ -62,9 +61,13 @@ const NetworkSelector = () => {
                                 key={index}
                                 onClick={async () => {
                                     if (account) {
-                                        await connector.activate(
-                                            item.switchNetwork[0],
-                                        )
+                                        if(switchNetwork) {
+                                            switchNetwork(item.chainId)
+                                        } else {
+                                            await connector.activate(
+                                                item.switchNetwork[0],
+                                            )
+                                        }
                                     } else {
                                         await connector.activate(
                                             item.switchNetwork[0].chainId,

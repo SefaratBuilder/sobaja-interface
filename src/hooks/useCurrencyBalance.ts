@@ -11,7 +11,7 @@ import ERC20_INTERFACE from 'constants/jsons/erc20'
 import { NATIVE_COIN } from 'constants/index'
 import { useTokenList } from 'states/lists/hooks'
 import { divNumberWithDecimal, fixNum } from 'utils/math'
-import { useSmartAccount } from './useSmartAccount'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 /**
  * Returns a map of the given addresses to their eventually consistent ETH balances.
@@ -165,7 +165,7 @@ export function useAllTokenBalances(): {
     [tokenAddress: string]: string | undefined
 } {
     const { account, chainId } = useActiveWeb3React()
-    const { smartAccountAddress } = useSmartAccount()
+    const { smartAccountAddress } = useSmartAccountContext()
     const currentList = useTokenList()
     const balances = useTokenBalances(smartAccountAddress || account, currentList)
     let ethBalanceWithAccountKey = useETHBalances([smartAccountAddress || account])
