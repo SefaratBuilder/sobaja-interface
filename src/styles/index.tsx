@@ -401,7 +401,9 @@ export const GlobalStyle = createGlobalStyle`
         /* min-height: unset!important; */
         max-width: 350px !important;
         min-height: 50px !important;
-
+        @media (max-width: 399px){
+            max-width: 300px !important;
+        }
     }
 
 
@@ -504,6 +506,9 @@ export const GlobalStyle = createGlobalStyle`
         @media (max-width: 767px){
             font-size: 10px !important;
         }
+    }
+    .w3a-adapter-list.w3ajs-socials-adapters li:nth-child(7){
+        // display: none;
     }
 `
 
