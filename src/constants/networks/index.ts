@@ -71,7 +71,7 @@ export const ListNetwork = [
                     symbol: 'ETH',
                     decimals: 18,
                 },
-                rpcUrls: ['https://goerli.infura.io/v3/'],
+                rpcUrls: ['https://goerli.infura.io/v3/4ce320c5dbb64931a12d1e2f34e582cf'],
                 blockExplorerUrls: ['https://goerli.etherscan.io'],
             },
         ],

@@ -9,8 +9,8 @@ import NotiIcon from 'assets/icons/notification.svg'
 import { useAppState } from 'states/application/hooks'
 import { Pair } from 'utils/pair'
 import { convertNativeToWrappedToken } from 'utils'
-import { useWeb3React } from '@web3-react/core'
 import imageGas from 'assets/icons/gas-station.png'
+import { useActiveWeb3React } from 'hooks'
 
 const PoolPriceBar = ({
     pair,
@@ -23,7 +23,7 @@ const PoolPriceBar = ({
     setDropDown: React.Dispatch<React.SetStateAction<boolean>>
     gasFee?: string
 }) => {
-    const { chainId } = useWeb3React()
+    const { chainId } = useActiveWeb3React()
     const { inputAmount, outputAmount, tokenIn, tokenOut, swapType } =
         useSwapState()
     const { slippage } = useAppState()

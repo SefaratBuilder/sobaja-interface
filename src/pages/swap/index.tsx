@@ -312,6 +312,12 @@ const Swap = () => {
                     tokenIn,
                     tokenOut,
                 })
+                initDataTransaction.setAddErc20({
+                    address: tokenOut.address,
+                    symbol: tokenOut.symbol,
+                    decimals: tokenOut.decimals,
+                    image: tokenOut.logoURI,
+                })
                 initDataTransaction.setIsOpenConfirmModal(true)
             }
         } catch (error) {

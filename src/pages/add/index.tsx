@@ -351,9 +351,10 @@ const Add = () => {
                             : [txAddliqudity]
                     callResult = await sendUserPaidTransaction(txns)
                 }
+                
+                initDataTransaction.setIsOpenWaitingModal(false)
+                initDataTransaction.setIsOpenResultModal(true)
                 const txn = await callResult?.wait?.()
-                initDataTransaction.setIsOpenResultModal(false)
-
                 if (txn) {
                     addTxn({
                         hash: txn?.transactionHash || callResult.hash,
@@ -362,7 +363,7 @@ const Add = () => {
                     })
                 }
                 initDataTransaction.setIsOpenWaitingModal(false)
-                initDataTransaction.setIsOpenResultModal(true)
+
                 sendEvent({
                     category: 'Defi',
                     action: 'Add liquidity',
@@ -871,5 +872,6 @@ const LabelMsg = styled.div`
     margin: auto;
     opacity: 0.5;
 `
+
 
 export default Add

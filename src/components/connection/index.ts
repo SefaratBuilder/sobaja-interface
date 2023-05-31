@@ -19,6 +19,7 @@ import { WalletConnect } from '@web3-react/walletconnect'
 import { Connection, ConnectionType } from './types';
 import { BitKeep } from './bitkeep/src';
 import { Okex } from './okex/src';
+import { Argent } from './argent/src';
 
 export const useAppSelector: TypedUseSelectorHook<ReturnType<typeof store.getState>> = useSelector
 
@@ -29,21 +30,50 @@ export function onError(error: Error) {
 }
 
 
-const MAINNET_CHAINS = {
+// const MAINNET_CHAINS = {
+//     324: {
+//         urls: ['https://mainnet.era.zksync.io'].filter(Boolean),
+//         name: 'Mainnet',
+
+//     },
+//     5: {
+//         urls: [`https://goerli.infura.io/v3/`].filter(Boolean),
+//         name: 'Goerli',
+//     }
+// }
+
+// const CHAINS: any = {
+//     ...MAINNET_CHAINS
+// }
+export const MAINNET_CHAINS: any = {
     324: {
         urls: ['https://mainnet.era.zksync.io'].filter(Boolean),
         name: 'Mainnet',
-
-    },
-    1: {
-        urls: [`https://mainnet.infura.io/v3/`].filter(Boolean),
-        name: 'Ether',
     }
 }
 
-const CHAINS: any = {
-    ...MAINNET_CHAINS
+export const TESTNET_CHAINS: any = {
+    5: {
+        urls: ['https://goerli.infura.io/v3/4ce320c5dbb64931a12d1e2f34e582cf'].filter(Boolean),
+        name: 'Görli',
+    },
+    80001: {
+        urls: ['https://rpc-mumbai.maticvigil.com'].filter(Boolean),
+        name: 'Polygon Mumbai',
+    },
+    280: {
+        urls: ['https://zksync2-testnet.zksync.dev'].filter(Boolean),
+        name: 'ZkSync Testnet',
+    },
 }
+
+
+
+export const CHAINS: any = {
+    ...MAINNET_CHAINS,
+    ...TESTNET_CHAINS,
+}
+
 const URLS: { [chainId: number]: string[] } = Object.keys(CHAINS).reduce<{ [chainId: number]: string[] }>(
     (accumulator, chainId) => {
         const validURLs: string[] = CHAINS[Number(chainId)].urls
@@ -51,7 +81,7 @@ const URLS: { [chainId: number]: string[] } = Object.keys(CHAINS).reduce<{ [chai
         if (validURLs.length) {
             accumulator[Number(chainId)] = validURLs
         }
-
+        console.log("accumulator", accumulator)
         return accumulator
     },
     {}
@@ -59,9 +89,10 @@ const URLS: { [chainId: number]: string[] } = Object.keys(CHAINS).reduce<{ [chai
 
 
 
-export const [web3Network, web3NetworkHooks] = initializeConnector<Network>(
-    (actions) => new Network({ actions, urlMap: URLS, defaultChainId: 324 })
-)
+// export const [web3Network, web3NetworkHooks] = initializeConnector<Network>(
+//     (actions) => new Network({ actions, urlMap: URLS, defaultChainId: 324 })
+// )
+export const [web3Network, web3NetworkHooks] = initializeConnector<Network>((actions) => new Network({ actions, urlMap: URLS, defaultChainId: 324 }))
 const [web3CoinbaseWallet, web3CoinbaseWalletHooks] = initializeConnector<CoinbaseWallet>(
     (actions) =>
         new CoinbaseWallet({
@@ -89,15 +120,18 @@ export const [web3Bitkeep, web3BitkeepHooks] = initializeConnector<BitKeep>(
 export const [web3WalletOkex, web3WalletOkexHooks] = initializeConnector<Okex>(
     (actions) => new Okex({ actions, onError }),
 )
+export const [web3WalletArgent, web3WalletArgentHooks] = initializeConnector<Argent>(
+    (actions) => new Argent({ actions, onError }),
+)
 
 
 
 export const argentConnection: Connection = {
     // TODO(WEB-3131) re-add "Install MetaMask" string when no injector is present
     getName: () => 'Argent',
-    connector: web3Network,
-    hooks: web3NetworkHooks,
-    type: ConnectionType.OKEX,
+    connector: web3WalletArgent,
+    hooks: web3WalletArgentHooks,
+    type: ConnectionType.ARGENT,
     getIcon: () => ARGENT_ICON,
     shouldDisplay: () => true,
     overrideActivate: () => false,

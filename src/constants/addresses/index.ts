@@ -2,6 +2,7 @@ import MULTICALL_ABI from '../jsons/multicall.json'
 import FACTORY_ABI from '../jsons/factory.json'
 import ROUTER_ABI from '../jsons/router.json'
 import FAUCET_ABI from '../jsons/faucet.json'
+import FAUCETSOBA_ABI from '../jsons/faucetSoba.json'
 import STAKING_ABI from '../jsons/staking.json'
 import { ChainId, Token } from 'interfaces'
 import ETH from 'assets/token-logos/eth.svg'
@@ -78,6 +79,13 @@ const Faucet: { [chainId: number]: string } = {
     [ChainId.ZKMAINNET]: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
 }
 
+const FaucetSoba: { [chainId: number]: string } = {
+    [ChainId.ZKTESTNET]: '0x7B988Ce49935878E415914B1e5fbc1DA27f91325',
+    [ChainId.GOERLI]: '0x4000b56201b6bC61328991Ab21C2fe0dc8A1D849',
+    [ChainId.MUMBAI]: '0x4000b56201b6bC61328991Ab21C2fe0dc8A1D849',
+    [ChainId.ZKMAINNET]: '0x4000b56201b6bC61328991Ab21C2fe0dc8A1D849',
+}
+
 const AAEntryPoints: { [chainId: number]: string } = {
     [ChainId.ZKTESTNET]: '0x79bB68F405b3960f21EE21762aDE78c80eDfF933',
     [ChainId.GOERLI]: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
@@ -103,12 +111,12 @@ const FaucetTokens: { [chainId: number]: Array<Token> } = {
             "chainId": ChainId.ZKTESTNET,
         },
         {
-            "address": "0x9CB9f4b656C81De33378E34A58fd78889Cb54d52",
-            "symbol": "BTC",
+            "address": "0x4cD67E306ecaD1Cac71a2BD4abC1A4c22B55d331",
+            "symbol": "Soba",
             "decimals": 18,
-            "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/wbtc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-            "name": "Bitcoin",
-            "chainId": ChainId.ZKTESTNET,
+            "logoURI": "/images/sbj.svg",
+            "name": "Sobaja test token",
+            "chainId": ChainId.ZKTESTNET
         },
         {
             "address": "0x14b92edf57277eBd00c3B7C3C3C714f7F7aa45AB",
@@ -147,13 +155,14 @@ const FaucetTokens: { [chainId: number]: Array<Token> } = {
             "chainId": ChainId.GOERLI,
         },
         {
-            "address": "0xeb456fBD8ED9ad79F4F72B13514Aa7fD37Ea2f91",
-            "symbol": "BTC",
+            "address": "0x9f49D892597ED5F08fe058fF3826859bEDC987a6",
+            "symbol": "Soba",
             "decimals": 18,
-            "logoURI": "https://firebasestorage.googleapis.com/v0/b/token-library.appspot.com/o/wbtc.svg?alt=media&token=1985e3d8-3aa7-4d04-8839-565d4c341615",
-            "name": "Bitcoin",
-            "chainId": ChainId.GOERLI,
-        }, {
+            "logoURI": "/images/sbj.svg",
+            "name": "Sobaja test token",
+            "chainId": ChainId.GOERLI
+        },
+        {
             "address": "0x161d04115afA19Ce3eEe85cca184E7e07811Ce8b",
             "symbol": "DAI",
             "decimals": 18,
@@ -177,11 +186,10 @@ const FaucetTokens: { [chainId: number]: Array<Token> } = {
             "name": "USDT Coin",
             "chainId": ChainId.GOERLI,
         },
+
     ],
     [ChainId.MUMBAI]: []
 }
-
-
 
 export {
     MULTICALL_ABI,
@@ -200,5 +208,7 @@ export {
     STAKING_ABI,
     AAEntryPoints,
     AAFactory,
-    FaucetTokens
+    FaucetTokens,
+    FaucetSoba,
+    FAUCETSOBA_ABI
 }

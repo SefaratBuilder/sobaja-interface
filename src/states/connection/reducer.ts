@@ -13,6 +13,7 @@ const initialState: ConnectionState = {
     [ConnectionType.NETWORK]: undefined,
     [ConnectionType.BITKEEP]: undefined,
     [ConnectionType.OKEX]: undefined,
+    [ConnectionType.ARGENT]: undefined,
   },
 }
 

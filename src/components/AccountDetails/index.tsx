@@ -8,7 +8,7 @@ import imgPower from 'assets/icons/power.svg'
 import imgCopy from 'assets/icons/copy.svg'
 import imgDownArrow from 'assets/icons/arrow-down.svg'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
-import { NATIVE_COIN } from 'constants/index'
+import { NATIVE_COIN, URLSCAN_BY_CHAINID } from 'constants/index'
 import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { Row } from 'components/Layouts'
@@ -18,8 +18,9 @@ import GasSetting from './GasSetting'
 import { useAppDispatch } from 'states/hook'
 import { updateSelectedWallet } from 'states/user/reducer'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
-import { ChainId } from 'utils/chainConfig'
 import { ListNetwork } from 'constants/networks'
+import { ChainId } from 'interfaces'
+import WrapDetailsAccount from './Details'
 interface connectModalWallet {
     setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
     openOptions: React.Dispatch<React.SetStateAction<void>>
@@ -28,31 +29,12 @@ const AccountDetails = ({
     setToggleWalletModal,
     openOptions,
 }: connectModalWallet) => {
-    const { account, chainId, connector } = useActiveWeb3React()
+    const { account, chainId, disconnect } = useActiveWeb3React()
     const [isCopied, setIsCopied] = useState<boolean>(false)
-    const {
-        connect,
-        web3Provider,
-        disconnect: disconnectWeb3Auth,
-    } = useWeb3AuthContext()
     const { wallet, state, loading } = useSmartAccountContext()
     const balance = useETHBalances([wallet?.address || account])?.[
         wallet?.address || account || ''
     ]
-    const dispatch = useAppDispatch()
-    const disconnect = useCallback(() => {
-        if (connector && connector.deactivate) {
-            connector.deactivate()
-        }
-        connector.resetState()
-        dispatch(updateSelectedWallet({ wallet: undefined }))
-    }, [connector, dispatch])
-
-    useEffect(() => {
-        if (chainId !== ChainId.GOERLI) {
-            disconnectWeb3Auth()
-        }
-    }, [chainId])
 
     const handleCopyAddress = () => {
         if (wallet?.address) {
@@ -71,31 +53,6 @@ const AccountDetails = ({
                     setIsCopied(false)
                 }, 1000)
             })
-        }
-    }
-
-    const handleOnConnectSmartAccount = async () => {
-        try {
-            if (chainId !== ChainId.GOERLI) {
-                return connector
-                    .activate(
-                        ListNetwork.find(
-                            (network) => network.chainId === ChainId.GOERLI,
-                        )?.switchNetwork[0],
-                    )
-                    ?.then(async (r) => {
-                        console.log('🤦‍♂️ ⟹ )?.then ⟹ r:', r)
-                        // setToggleWalletModal(false)
-                        await connect()
-                        // setToggleWalletModal(true)
-                    })
-            } else {
-                // setToggleWalletModal(false)
-                await connect()
-                // setToggleWalletModal(true)
-            }
-        } catch (err) {
-            console.log('failed to connect to smart account: ', err)
         }
     }
 
@@ -141,11 +98,7 @@ const AccountDetails = ({
                         </button> */}
                             <button
                                 onClick={() => {
-                                    if (wallet?.address) {
-                                        disconnectWeb3Auth()
-                                    } else {
-                                        disconnect()
-                                    }
+                                    disconnect()
                                 }}
                             >
                                 <img src={imgPower} alt="#" />
@@ -173,7 +126,7 @@ const AccountDetails = ({
                                             ? 'Connecting'
                                             : 'Use smart account'
                                     }
-                                    onClick={handleOnConnectSmartAccount}
+                                    onClick={() => {}}
                                     isLoading={loading}
                                 />
                             </>
@@ -186,10 +139,18 @@ const AccountDetails = ({
                         )}
                     </WrapButton>
                 </WrapContent>
+                <WrapDetailsAccount balance={balance} />
                 <Footer className="isLogged">
                     <WrapFooterBtn>
                         <WrapItemFooter
-                        //  onClick={() => setShowTrans(!showTrans)}
+                            //  onClick={() => setShowTrans(!showTrans)}
+                            onClick={() =>
+                                window.open(
+                                    `${
+                                        URLSCAN_BY_CHAINID?.[chainId || 5].url
+                                    }/address/${wallet?.address}`,
+                                )
+                            }
                         >
                             <p>Transactions</p>
                             <WrapFooterImg>
@@ -585,7 +546,7 @@ const Footer = styled.div`
     max-height: 355px;
     padding: 1rem 1.5rem;
     gap: 10px;
-    border-top: 1px solid #918f8f;
+    /* border-top: 1px solid #918f8f; */
 
     &.isLogged {
         padding: 0;

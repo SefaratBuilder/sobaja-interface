@@ -7,12 +7,13 @@ import multicall from './multicall/reducer'
 import transactions from './transactions/reducer'
 import mint from './mint/reducer'
 import user from './user/reducer'
+import users from './users/reducer'
 import connection from './user/reducer'
 import { createAction } from '@reduxjs/toolkit'
 export const updateVersion = createAction<void>('global/updateVersion')
 import { setupListeners } from '@reduxjs/toolkit/query/react'
 
-const PERSISTED_KEYS: string[] = ['user', 'application', 'multicall', 'transactions', 'lists']
+const PERSISTED_KEYS: string[] = ['user', 'application', 'transactions']
 
 const store = configureStore({
     reducer: {
@@ -23,7 +24,8 @@ const store = configureStore({
         transactions,
         mint,
         user,
-        connection
+        connection,
+        users
     },
     middleware: [save({ states: PERSISTED_KEYS })],
     preloadedState: load({ states: PERSISTED_KEYS }),

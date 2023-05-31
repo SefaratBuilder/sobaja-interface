@@ -13,7 +13,7 @@ import ConnectorMobile from 'components/ConnectorMobile'
 const Header = () => {
     const [burgerNav, setBurgerNav] = useState(false)
     const navigate = useNavigate()
-
+    const { connector } = useActiveWeb3React()
     return (
         <HeaderWrapper>
             <Logo onClick={() => navigate('/')}>

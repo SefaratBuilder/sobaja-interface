@@ -21,6 +21,7 @@ import { URLSCAN_BY_CHAINID } from 'constants/index'
 import { useFairLaunchContract } from 'hooks/useContract'
 import { getContract } from 'utils'
 import { FAIRLAUNCH_ABI } from 'constants/jsons/fairlaunch'
+import BgSoba from 'assets/icons/soba2.svg'
 
 const UnknowThumbnail =
     // 'https://thelagostoday.com/wp-content/uploads/2021/07/bit-bitcoin.jpg'
@@ -273,20 +274,27 @@ const ListLaunchpad = ({
                                                             ]?.symbol
                                                         }
                                                     </div>
-                                                    <div>
-                                                        Start Time:{' '}
-                                                        {handleTime(
-                                                            launchpad.startTime,
-                                                            true,
-                                                        )}
+                                                    <div className="label-time">
+                                                        <div>
+                                                            Start Time:{' '}
+                                                            <span>
+                                                                {handleTime(
+                                                                    launchpad.startTime,
+                                                                    true,
+                                                                )}
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            End Time:{' '}
+                                                            <span>
+                                                                {handleTime(
+                                                                    launchpad.endTime,
+                                                                    true,
+                                                                )}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        End Time:{' '}
-                                                        {handleTime(
-                                                            launchpad.endTime,
-                                                            true,
-                                                        )}
-                                                    </div>
+
                                                     <div>
                                                         Payment Crypto:{' '}
                                                         {
@@ -324,7 +332,7 @@ const ListLaunchpad = ({
                                                                     ],
                                                                 )
                                                             }
-                                                            type="launch-pad"
+                                                            size="12px"
                                                         />
                                                     </div>
                                                 </WrapDetails>
@@ -398,7 +406,7 @@ const WrapLaunchpad = styled.div`
     flex-wrap: wrap;
     color: #111;
     gap: 25px;
-    text-align: end;
+    /* text-align: end; */
 
     @media screen and (max-width: 788px) {
         justify-content: center;
@@ -406,12 +414,13 @@ const WrapLaunchpad = styled.div`
     /* flex-direction: row-reverse; */
 `
 const CardDetails = styled(Row)`
-    border: 1px solid black;
+    border: 1px solid #003b5c;
     border-radius: 10px;
-    background: #fff;
+    background: url(${BgSoba});
     /* gap: 5.5rem; */
     display: block;
     max-width: 350px;
+    color: white;
 
     .thumbnail {
         /* min-width: 550px; */
@@ -442,9 +451,9 @@ const Details = styled.div`
         flex-direction: column;
         justify-content: center;
         /* min-height: 300px; */
-        span {
+        /* span {
             font-size: 22px;
-        }
+        } */
     }
 `
 
@@ -491,8 +500,21 @@ const WrapDetails = styled.div`
     flex-direction: column;
     gap: 8px;
     /* padding: 1rem 0.5rem; */
-    padding: 0 1rem;
+    /* padding: 0 1rem; */
     font-size: 14px;
+
+    .label-time {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        padding: 12px;
+        div:nth-child(1) {
+            padding-bottom: 1rem;
+        }
+        div {
+            display: flex;
+            justify-content: space-between;
+        }
+    }
 
     .btn-view {
         /* width: 50%; */

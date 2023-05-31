@@ -26,7 +26,7 @@ const CurrencyInputPanel = ({
     onUserSelect,
     hideMaxButton,
 }: CurrencyInputPanelProps) => {
-    const { account } = useActiveWeb3React()
+    const { account, chainId } = useActiveWeb3React()
     const { wallet } = useSmartAccountContext()
     const balance = useCurrencyBalance(wallet?.address || account, token)
     const handleOnMax = () => {
@@ -37,11 +37,13 @@ const CurrencyInputPanel = ({
         <Wrapper>
             <Row>
                 <Input value={value} field={field} onUserInput={onUserInput} />
-                <TokenListModal
-                    onUserSelect={onUserSelect}
-                    field={field}
-                    token={token}
-                />
+                {chainId && (
+                    <TokenListModal
+                        onUserSelect={onUserSelect}
+                        field={field}
+                        token={token}
+                    />
+                )}
             </Row>
             <Row>
                 <div className="t2">$</div>

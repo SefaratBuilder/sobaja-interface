@@ -68,7 +68,9 @@ export const GlobalStyle = createGlobalStyle`
     //style for biconomy connection modal
     .w3a-modal__header {
         /* background: white; */
-        display: none!important;
+        /* display: none!important; */
+        height: 0;
+        /* opacity: 0; */
         button {
             width: 100%!important;
         height: 100%!important;
@@ -507,8 +509,13 @@ export const GlobalStyle = createGlobalStyle`
             font-size: 10px !important;
         }
     }
+<<<<<<< HEAD
     .w3a-adapter-list.w3ajs-socials-adapters li:nth-child(7){
         // display: none;
+=======
+    .w3a-parent-container #w3a-modal .w3a-header {
+        padding-top: 0 !important;
+>>>>>>> 0a1990021f053de965d4adc08e16b9cda8aa086c
     }
 `
 
