@@ -22,12 +22,20 @@ interface TokenListModalProps {
     token: Token | undefined
     field: Field
     onUserSelect: (field: Field, token: Token) => void
+    onSelectToken?: (
+        token: Token,
+        balance: string,
+        allTokenBalances: {
+            [tokenAddress: string]: string | undefined
+        },
+    ) => void
 }
 
 const TokenListModal = ({
     token,
     field,
     onUserSelect,
+    onSelectToken,
 }: TokenListModalProps) => {
     const [searchQuery, setSearchQuery] = useState<string | undefined>('')
     const addTokenToCurrentList = useAddTokenToCurrentList()
@@ -125,6 +133,12 @@ const TokenListModal = ({
                                         onUserSelect={(e) => {
                                             onUserSelect(field, token)
                                             onClose()
+                                            onSelectToken &&
+                                                onSelectToken(
+                                                    token,
+                                                    '0',
+                                                    allTokenBalances,
+                                                )
                                         }}
                                     />
                                 )
@@ -143,6 +157,12 @@ const TokenListModal = ({
                                     onUserSelect={() => {
                                         onUserSelect(field, token)
                                         onClose()
+                                        onSelectToken &&
+                                            onSelectToken(
+                                                token,
+                                                '0',
+                                                allTokenBalances,
+                                            )
                                     }}
                                 />
                             )
@@ -153,6 +173,12 @@ const TokenListModal = ({
                             onUserSelect={(e) => {
                                 onUserSelect(field, queriedToken)
                                 onClose()
+                                onSelectToken &&
+                                    onSelectToken(
+                                        queriedToken,
+                                        '0',
+                                        allTokenBalances,
+                                    )
                             }}
                             hideAddButton={false}
                             onAdd={() => handleAddToken(queriedToken)}

@@ -13,7 +13,9 @@ import { createAction } from '@reduxjs/toolkit'
 export const updateVersion = createAction<void>('global/updateVersion')
 import { setupListeners } from '@reduxjs/toolkit/query/react'
 
-const PERSISTED_KEYS: string[] = ['user', 'application', 'transactions']
+const PERSISTED_KEYS: string[] = ['user', 'application', 'transactions'
+    , 'users'
+]
 
 const store = configureStore({
     reducer: {

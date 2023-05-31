@@ -40,6 +40,7 @@ const App = () => {
 
         return (
             <>
+                {/* <UpdateUserDetailsLogin /> */}
                 <SwapUpdater />
                 <MintUpdater />
                 <AppUpdater />

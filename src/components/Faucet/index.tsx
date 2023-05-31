@@ -31,6 +31,7 @@ import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import Loader from 'components/Loader'
 import Arrow from 'assets/icons/arrow-link.svg'
 import { useWindowDimensions } from 'hooks/useWindowSize'
+import { useAddUser, useUsersState } from 'states/users/hooks'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
@@ -44,6 +45,50 @@ const Faucet = () => {
     const { wallet } = useSmartAccountContext()
     const { stepFaucet, setStepFaucet } = useUpdateStepFaucet()
     const { width } = useWindowDimensions()
+    const addUser = useAddUser()
+    const userData = useUsersState()
+
+    const handleDataUser = ({
+        hash,
+        status,
+        method,
+    }: {
+        hash: string
+        status: boolean
+        method: string
+    }) => {
+        addTxn({
+            hash,
+            msg: method,
+            status,
+        })
+        const date =
+            new Date().toDateString().split(' ')?.slice(1, 3).join(' ') +
+            ' ' +
+            new Date().toLocaleTimeString('vi')
+        const newUser = {
+            ...userData,
+            activity:
+                userData.activity.length === 5
+                    ? [
+                          ...userData.activity.slice(1),
+                          {
+                              method,
+                              timestamp: date,
+                              hash,
+                          },
+                      ]
+                    : [
+                          ...userData.activity,
+                          {
+                              method,
+                              timestamp: date,
+                              hash,
+                          },
+                      ],
+        }
+        addUser(newUser)
+    }
 
     const getAddress = useMemo(() => {
         return chainId !== ChainId.GOERLI ? account : wallet?.address || account
@@ -156,12 +201,10 @@ const Faucet = () => {
                 console.log({ wait })
                 initDataTransaction.setIsOpenResultModal(false)
 
-                addTxn({
-                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
-                        hash || ''
-                    }`,
-                    msg: 'Faucet',
+                handleDataUser({
+                    hash: wait?.transactionHash || '',
                     status: wait?.status === 1 ? true : false,
+                    method: `Faucet`,
                 })
             } else {
                 initDataTransaction.setError(dataFaucet.data?.error || 'Failed')
@@ -207,12 +250,18 @@ const Faucet = () => {
 
             // initDataTransaction.setIsOpenResultModal(false)
 
-            addTxn({
-                hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
-                    result.hash || ''
-                }`,
-                msg: 'Faucet',
+            // addTxn({
+            //     hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+            //         result.hash || ''
+            //     }`,
+            //     msg: 'Faucet',
+            //     status: result.status === 1 ? true : false,
+            // })
+
+            handleDataUser({
+                hash: result.hash,
                 status: result.status === 1 ? true : false,
+                method: `Faucet`,
             })
             sendEvent({
                 category: 'Defi',

@@ -28,6 +28,7 @@ const Toast = ({ txn }: { txn: Txn }) => {
         }
     }, [txn])
 
+    console.log(getEtherscanLink(chainId || 80001, txn.hash, 'transaction'))
     return (
         <ToastWrapper className="toast" href="#">
             <Row al={'center'} jus={'space-between'} gap={'10px'}>
@@ -41,7 +42,16 @@ const Toast = ({ txn }: { txn: Txn }) => {
             </Row>
             <span
                 className="view-link"
-                onClick={() => txn.hash && window.open(getEtherscanLink(chainId || 80001, txn.hash, 'transaction'))}
+                onClick={() =>
+                    txn.hash &&
+                    window.open(
+                        getEtherscanLink(
+                            chainId || 80001,
+                            txn.hash,
+                            'transaction',
+                        ),
+                    )
+                }
             >
                 View on explorer
             </span>

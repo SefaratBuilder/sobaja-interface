@@ -29,6 +29,7 @@ export function useActiveWeb3React() {
             provider: web3AuthProvider || provider,
             disconnect,
             web3AuthConnect,
+            connector
 
         }
     }, [

@@ -48,6 +48,7 @@ import { OpacityModal } from 'components/Web3Status'
 import { useEstimateGas } from 'hooks/useEstimateGas'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { useSmartAccount } from 'hooks/useSmartAccount'
+import { useAddUser, useUsersState } from 'states/users/hooks'
 
 const Add = () => {
     const mintState = useMintState()
@@ -81,6 +82,8 @@ const Add = () => {
     const loca = useLocation()
     const pair = usePair(chainId, tokenIn, tokenOut)
     const ref = useRef<any>()
+    const addUser = useAddUser()
+    const userData = useUsersState()
     const { sendUserPaidTransaction } = useSmartAccount(wallet?.address)
 
     useOnClickOutside(ref, () => {
@@ -135,6 +138,50 @@ const Add = () => {
                     }, 1000)
                 })
         }
+    }
+    const handleDataUser = ({
+        hash,
+        status,
+        method,
+        msg,
+    }: {
+        hash: string
+        status: boolean
+        method: string
+        msg?: string
+    }) => {
+        addTxn({
+            hash,
+            msg: method,
+            status,
+        })
+
+        const date =
+            new Date().toDateString().split(' ')?.slice(1, 3).join(' ') +
+            ' ' +
+            new Date().toLocaleTimeString('vi')
+        const newUser = {
+            ...userData,
+            activity:
+                userData.activity.length === 5
+                    ? [
+                          ...userData.activity.slice(1),
+                          {
+                              method: msg || method,
+                              timestamp: date,
+                              hash,
+                          },
+                      ]
+                    : [
+                          ...userData.activity,
+                          {
+                              method: msg || method,
+                              timestamp: date,
+                              hash,
+                          },
+                      ],
+        }
+        addUser(newUser)
     }
 
     const handleOnAdd = async () => {
@@ -351,15 +398,16 @@ const Add = () => {
                             : [txAddliqudity]
                     callResult = await sendUserPaidTransaction(txns)
                 }
-                
+
                 initDataTransaction.setIsOpenWaitingModal(false)
                 initDataTransaction.setIsOpenResultModal(true)
                 const txn = await callResult?.wait?.()
                 if (txn) {
-                    addTxn({
+                    handleDataUser({
                         hash: txn?.transactionHash || callResult.hash,
-                        msg: `Add liquidity ${tokenIn?.symbol} and ${tokenOut?.symbol}`,
-                        status: txn?.status === 1 ? true : false,
+                        status: txn.status === 1 ? true : false,
+                        method: `Add liquidity ${tokenIn?.symbol} and ${tokenOut?.symbol}`,
+                        msg: `Add ${tokenIn?.symbol}/${tokenOut?.symbol}`,
                     })
                 }
                 initDataTransaction.setIsOpenWaitingModal(false)
@@ -406,21 +454,16 @@ const Add = () => {
                     routerAddress,
                     mulNumberWithDecimal(amount, decimals), //amount * 10 ** decimals
                 )
-                console.log('🤦‍♂️ ⟹ Add ⟹ callResult:', callResult)
-
                 initDataTransaction.setIsOpenWaitingModal(false)
                 initDataTransaction.setIsOpenResultModal(true)
 
                 const txn = await callResult.wait()
-                console.log('🤦‍♂️ ⟹ Add ⟹ txn:', { txn })
                 initDataTransaction.setIsOpenResultModal(false)
 
-                addTxn({
-                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
-                        callResult.hash || ''
-                    }`,
-                    msg: 'Approve',
+                handleDataUser({
+                    hash: txn?.transactionHash || callResult.hash,
                     status: txn.status === 1 ? true : false,
+                    method: `Approve ${tokenIn?.address}`,
                 })
                 console.log('add suceessss =>')
             }
@@ -872,6 +915,5 @@ const LabelMsg = styled.div`
     margin: auto;
     opacity: 0.5;
 `
-
 
 export default Add

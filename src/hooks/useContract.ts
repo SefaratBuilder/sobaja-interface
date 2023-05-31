@@ -42,7 +42,7 @@ export const useContract = (
     ABI: any,
     withSignerIfPossible = true,
 ): Contract | null => {
-    const { connector, account, provider } = useActiveWeb3React()
+    const { account, provider } = useActiveWeb3React()
 
     return useMemo(() => {
         if (!address || !ABI || !provider) return null

@@ -60,6 +60,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
 import { useSmartAccount } from 'hooks/useSmartAccount'
+import { useAddUser, useUsersState } from 'states/users/hooks'
 
 const Swap = () => {
     const swapState = useSwapState()
@@ -92,6 +93,9 @@ const Swap = () => {
     const { slippage } = useSlippageTolerance()
     const updateRef = useUpdateRefAddress()
     const ref = useRef<any>()
+    const addUser = useAddUser()
+    const userData = useUsersState()
+
     const {
         sendUserPaidTransaction,
         signAndSendUserOps,
@@ -300,6 +304,48 @@ const Swap = () => {
         argsEstimate.method,
         argsEstimate.args,
     )
+    const handleDataUser = ({
+        hash,
+        status,
+        method,
+    }: {
+        hash: string
+        status: boolean
+        method: string
+    }) => {
+        addTxn({
+            hash,
+            msg: method,
+            status,
+        })
+
+        const date =
+            new Date().toDateString().split(' ')?.slice(1, 3).join(' ') +
+            ' ' +
+            new Date().toLocaleTimeString('vi')
+        const newUser = {
+            ...userData,
+            activity:
+                userData.activity.length === 5
+                    ? [
+                          ...userData.activity.slice(1),
+                          {
+                              method,
+                              timestamp: date,
+                              hash,
+                          },
+                      ]
+                    : [
+                          ...userData.activity,
+                          {
+                              method,
+                              timestamp: date,
+                              hash,
+                          },
+                      ],
+        }
+        addUser(newUser)
+    }
 
     const handleOnSwap = async () => {
         try {
@@ -342,10 +388,10 @@ const Swap = () => {
                 const txn = await callResult.wait()
                 initDataTransaction.setIsOpenResultModal(false)
 
-                addTxn({
+                handleDataUser({
                     hash: callResult.hash,
-                    msg: 'Approve',
                     status: txn.status === 1 ? true : false,
+                    method: `Approve ${tokenIn.symbol}`,
                 })
             }
         } catch (err) {
@@ -436,10 +482,14 @@ const Swap = () => {
             const txn = await callResult?.wait?.()
             initDataTransaction.setIsOpenResultModal(false)
             if (!txn) return
-            addTxn({
+
+            handleDataUser({
                 hash: txn.transactionHash || callResult.hash,
-                msg: `Swap ${tokenIn?.symbol} to ${tokenOut?.symbol}`,
                 status: txn.status === 1 ? true : false,
+                method:
+                    tokenIn && tokenOut
+                        ? `Swap ${tokenIn.symbol}/${tokenOut.symbol}`
+                        : 'Swap',
             })
             /**
              * @dev reset input && output state when transaction success

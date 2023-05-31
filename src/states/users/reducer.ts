@@ -1,7 +1,10 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { updateActivity, updateBalanceTokens } from './action'
+import { addUser, updateActivity, updateBalanceTokens, updateUser } from './action'
 import { ChainId, Token } from 'interfaces'
 import { WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
+import { getKeyValue } from 'utils/handleType'
+import { NATIVE_COIN } from 'constants/index'
+import { useUpdateUser } from './hooks'
 export interface UserActivity {
   method: string,
   timestamp: string,
@@ -14,7 +17,7 @@ export interface UserBalance extends Token {
 
 export const initBalanceToken = (chainId: ChainId): UserBalance => {
   return {
-    address: WRAPPED_NATIVE_ADDRESSES[chainId],
+    address: NATIVE_COIN[chainId].address,
     symbol: 'ETH',
     chainId: chainId,
     name: 'Ethereum',
@@ -24,45 +27,70 @@ export const initBalanceToken = (chainId: ChainId): UserBalance => {
   }
 }
 
+export const initUser: User = {
+  balances: [],
+  activity: [],
+}
+
 export interface User {
   balances: Array<UserBalance> | []
   activity: Array<UserActivity> | []
 }
 
-export interface UserState {
+export interface UsersDetails {
   users: {
-    [ChainId.GOERLI]: User,
-    [ChainId.MUMBAI]: User,
-    [ChainId.ZKMAINNET]: User,
-    [ChainId.ZKTESTNET]: User,
+    [chainId in number]: {
+      [x in string]: User
+    }
   }
 }
+// export interface UsersDetails {
+//   users: {
+//     [ChainId.GOERLI]: {
+//       [address: string]: User
+//     },
+//     [ChainId.MUMBAI]: {
+//       [address: string]: User
+//     },
+//     [ChainId.ZKMAINNET]: {
+//       [address: string]: User
+//     },
+//     [ChainId.ZKTESTNET]: {
+//       [address: string]: User
+//     },
+//   }
+// }
 
-export const initialState: UserState = {
+export const initialState: UsersDetails = {
   users: {
-    [ChainId.GOERLI]: { balances: [initBalanceToken(ChainId.GOERLI)], activity: [] },
-    [ChainId.MUMBAI]: { balances: [initBalanceToken(ChainId.MUMBAI)], activity: [] },
-    [ChainId.ZKMAINNET]: { balances: [initBalanceToken(ChainId.ZKMAINNET)], activity: [] },
-    [ChainId.ZKTESTNET]: { balances: [initBalanceToken(ChainId.ZKTESTNET)], activity: [] },
+    [ChainId.GOERLI]: { '0x': initUser },
+    [ChainId.MUMBAI]: { '0x': initUser },
+    [ChainId.ZKMAINNET]: { '0x': initUser },
+    [ChainId.ZKTESTNET]: { '0x': initUser },
   }
 }
-
-const typeChain = [ChainId.GOERLI, ChainId.MUMBAI, ChainId.ZKMAINNET, ChainId.ZKTESTNET]
+// export const initialState: UsersDetails = {
+//   users: {
+//     [ChainId.GOERLI]: undefined,
+//     [ChainId.MUMBAI]: undefined,
+//     [ChainId.ZKMAINNET]: undefined,
+//     [ChainId.ZKTESTNET]: undefined,
+//   }
+// }
 
 export default createReducer(initialState, (builder) => {
-  builder
-
-    .addCase(updateBalanceTokens, (state: any, action) => {
-      const { chainId, balances } = action.payload
-      if (chainId && typeChain.includes(chainId)) {
-        state.users[chainId].balances = balances
+  builder.addCase(addUser, (state, action) => {
+    const { users, account, chainId } = action.payload
+    return {
+      users:
+      {
+        ...state.users,
+        [chainId]: {
+          ...state.users[chainId],
+          [account]: users
+        }
       }
-    })
-    .addCase(updateActivity, (state: any, action) => {
-      const { chainId, activity } = action.payload
-      if (chainId && typeChain.includes(chainId)) {
-        state.users[chainId].activity = activity
-      }
-    })
 
+    }
+  })
 })
