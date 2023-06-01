@@ -159,7 +159,7 @@ function OptionsWallet({
         }
     }
     const [isActive, setActive] = useState(false);
-    const ToggleClass = () => {
+    const ToggleViewMoreSocial = () => {
         setActive(!isActive);
       };
 
@@ -266,7 +266,7 @@ function OptionsWallet({
                             We do not store any data related to your social
                             logins.
                         </div>
-                        <div onClick={ToggleClass} className={isActive ? "active more-social" : "inactive more-social"} >
+                        <div onClick={ToggleViewMoreSocial} className={isActive ? "active more-social" : "inactive more-social"} >
                         <p className='p1'>View more options</p>
                         <p className='p2'>View less options</p>
                         </div>
