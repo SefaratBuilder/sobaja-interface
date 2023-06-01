@@ -735,8 +735,7 @@ const SwapContainer = styled(Columns)`
     z-index: 0;
 
     @media (max-width: 576px) {
-        width: 94%;
-        padding: 20px 10px;
+        width: 90%;
     }
 `
 
