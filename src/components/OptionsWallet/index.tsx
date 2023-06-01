@@ -159,7 +159,7 @@ function OptionsWallet({
         }
     }
     const [isActive, setActive] = useState(false)
-    const ToggleClass = () => {
+    const ToggleViewMoreSocial = () => {
         setActive(!isActive)
     }
 
@@ -269,7 +269,7 @@ function OptionsWallet({
                             logins.
                         </div>
                         <div
-                            onClick={ToggleClass}
+                            onClick={ToggleViewMoreSocial}
                             className={
                                 isActive
                                     ? 'active more-social'

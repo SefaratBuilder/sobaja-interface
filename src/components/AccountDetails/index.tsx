@@ -69,7 +69,7 @@ const AccountDetails = () => {
                                     onClick={() => {
                                         chainId &&
                                             window.open(
-                                                `${URLSCAN_BY_CHAINID[chainId]?.url}/address/${smartAccountAddress}`,
+                                                `${URLSCAN_BY_CHAINID[chainId]?.url}address/${smartAccountAddress}`,
                                             )
                                     }}
                                 >

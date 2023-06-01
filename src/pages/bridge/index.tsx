@@ -113,7 +113,7 @@ const ContentTopHolder= styled.div`
         margin-top: 0;
     }
     @media screen and (max-width: 560px){
-        margin: 0 20px 0 20px;
+        margin: 0 10px 0 10px;
     }
 `;
 const ContentTop= styled.div`
@@ -207,6 +207,7 @@ max-width: 680px;
 margin: auto;
 display: flex;
 flex-wrap: wrap;
+justify-content: center;
 background: url(${BridgeBg});
 background-repeat: no-repeat;
 background-size: cover;
@@ -215,7 +216,7 @@ margin-top: 10px;
 padding: 20px 10px;
 // z-index: -1;
 @media screen and (max-width: 710px){
-    margin: 10px 20px 0 20px;
+    margin: 10px 10px 0 10px;
 }
 }
 `;
@@ -261,7 +262,7 @@ span{
     text-decoration: none;
 }
 @media screen and (max-width: 359px){
-    max-width: 41%;
+    max-width: 42%;
     font-size: 10px;
 }
 @media screen and (min-width: 360px) and (max-width: 479px){
