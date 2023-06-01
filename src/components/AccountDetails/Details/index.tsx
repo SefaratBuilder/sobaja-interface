@@ -282,7 +282,7 @@ const WrapTokens = styled.div<{ isReverse?: boolean }>`
     display: flex;
     flex-direction: ${({ isReverse }) =>
         isReverse ? 'column-reverse' : 'column'};
-    max-height: 200px;
+    max-height: 210px;
     overflow: scroll;
 
     span {

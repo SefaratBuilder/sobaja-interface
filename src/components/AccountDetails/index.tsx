@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import styled from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
 import { useActiveWeb3React } from 'hooks'
 import { shortenAddress } from 'utils'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
@@ -177,6 +177,7 @@ const AccountDetails = () => {
                     </WrapFooterBtn>
                 </Footer>
             </WrapConnectModal>
+            <GlobalStyle />
         </LabelRight>
     )
 }
@@ -647,6 +648,12 @@ const WrapConnectModal = styled(Container)`
         font-size: 12px;
         /* right: 10px; */
         /* max-width: 300px; */
+    }
+`
+
+const GlobalStyle = createGlobalStyle`
+    body {
+        overflow: hidden;
     }
 `
 
