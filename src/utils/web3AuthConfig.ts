@@ -56,7 +56,8 @@ export const chainConfig: { [chainId in number]: CustomChainConfig } = {
 
 export const web3AuthConfig: Web3AuthNoModalOptions = {
     clientId:
-        'BE7tc_MkDFzJp3ujQwPTeptBbTCE87628dJ7bcndPvcJYKT5NSRnbDk0NIYjW_4iAbNsxbPhoLwlMLMcsFA87Qc', // get from https://dashboard.web3auth.io
+        // 'BE7tc_MkDFzJp3ujQwPTeptBbTCE87628dJ7bcndPvcJYKT5NSRnbDk0NIYjW_4iAbNsxbPhoLwlMLMcsFA87Qc', // get from https://dashboard.web3auth.io
+        'BBXxtX2BNExyTOqn90Mhh4KKL_OV-aMQbapEKD_fBzKUGfOh3Ha0kav783hmQc1e36hy_QffFlICBbGXRG1JWhk', // get from https://dashboard.web3auth.io
     web3AuthNetwork: 'mainnet',
     chainConfig: chainConfig[ChainId.ZKTESTNET],
 }
