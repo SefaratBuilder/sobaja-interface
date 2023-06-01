@@ -30,13 +30,5 @@
         "logoURI": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/dai.png",
         "chainId": 80001,
         "name": "DAI Coin"
-    },
-    {
-        "symbol": "WETH",
-        "address": "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa",
-        "decimals": 18,
-        "logoURI": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png",
-        "chainId": 80001,
-        "name": "Wrapped Ethereum"
     }
 ]

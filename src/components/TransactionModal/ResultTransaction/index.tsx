@@ -1,15 +1,13 @@
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import styled from 'styled-components'
-import imgClose from 'assets/icons/x.svg'
 import imgSuccess from 'assets/icons/success.svg'
 import imgError from 'assets/icons/error.svg'
-
 import { useAppState } from 'states/application/hooks'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { useCallback, useEffect, useRef } from 'react'
 import Blur from 'components/Blur'
 import { WatchAssetParameters } from '@web3-react/types'
-import { useWeb3React } from '@web3-react/core'
+import { useActiveWeb3React } from 'hooks'
 
 interface ResultModal {
     isSuccess: boolean
@@ -26,7 +24,7 @@ const ResultTransactionModal = ({
     addErc20,
 }: ResultModal) => {
     const { userDarkMode } = useAppState()
-    const { connector } = useWeb3React()
+    const { connector } = useActiveWeb3React()
     const token = addErc20
     const ref = useRef<any>()
 

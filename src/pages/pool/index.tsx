@@ -195,7 +195,7 @@ export default function Pools() {
 
     const rows = useQueryPool((page - 1) * 10)
     const transactions = useGetPoolsTransactions()
-
+    console.log({transactions})
     const [overviewPool, setOverviewPool] = useState<Data>()
 
     const [poolsAdminInCurrentPag, setPoolsAdminInCurrentPag] =
@@ -662,12 +662,13 @@ const Container = styled.div`
         background-repeat: no-repeat;
         background-size: cover;
         min-width: 84px;
-        border-radius: 12px 12px 0px 0px;
+        border-radius: 22px 22px 0px 0px;
+        margin-left: -8px;
     }
 
     .black-bg2 {
         background: rgba(255, 255, 255, 0.3) !important;
-        min-width: 84px;
+        min-width: 84px;     
     }
 
     @media screen and (max-width: 772px) {

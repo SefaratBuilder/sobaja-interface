@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import imgClose from 'assets/icons/icon-close.svg'
 import {
@@ -12,6 +12,10 @@ import { useAppDispatch } from 'states/hook'
 import { updateSelectedWallet } from 'states/user/reducer'
 import Loader from 'components/Loader'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
+import PrimaryButton from 'components/Buttons/PrimaryButton'
+import { useActiveWeb3React } from 'hooks'
+import { WALLET_ADAPTERS } from '@web3auth/base'
+import { PhoneNumberFormat, PhoneNumberUtil } from 'google-libphonenumber'
 
 const WALLET_VIEWS = {
     OPTIONS: 'options',
@@ -36,6 +40,11 @@ function OptionsWallet({
 }: actionWallet) {
     const connections = getConnections()
     const dispatch = useAppDispatch()
+    const { web3AuthConnect } = useActiveWeb3React()
+    const [typeConnect, setTypeConnect] = useState<'Wallet' | 'Social'>(
+        'Wallet',
+    )
+    const [phoneNumber, setPhoneNumber] = useState('')
 
     const tryActivation = async (connector: Connection | undefined) => {
         try {
@@ -115,33 +124,197 @@ function OptionsWallet({
             })
     }
 
+    /**
+     *
+     * @param isPhone connect by phone: true | by social: false
+     * @param name: connect by phone: undefined | by social: social name
+     * @returns
+     */
+    const handleConnect = (isPhone: boolean, name?: string) => {
+        try {
+            // * login by phone
+            if (isPhone) {
+                const utilPhone: any =
+                    PhoneNumberUtil.getInstance().parseAndKeepRawInput(
+                        phoneNumber,
+                    )
+                const convertPhone = `+${utilPhone?.values_?.['1']}-${utilPhone?.values_?.['2']}`
+                return web3AuthConnect(WALLET_ADAPTERS.OPENLOGIN, {
+                    loginProvider: 'sms_passwordless',
+                    extraLoginOptions: {
+                        login_hint: convertPhone,
+                    },
+                })
+            }
+
+            // * login by social
+            return (
+                name &&
+                web3AuthConnect(WALLET_ADAPTERS.OPENLOGIN, {
+                    loginProvider: name,
+                })
+            )
+        } catch (error) {
+            console.log({ error })
+        }
+    }
+    const [isActive, setActive] = useState(false)
+    const ToggleViewMoreSocial = () => {
+        setActive(!isActive)
+    }
+
+    const socialLoginList = [
+        {
+            name: 'twitter',
+            img: 'https://images.web3auth.io/login-twitter-active.svg',
+        },
+        {
+            name: 'discord',
+            img: 'https://images.web3auth.io/login-discord-active.svg',
+        },
+        {
+            name: 'facebook',
+            img: 'https://images.web3auth.io/login-facebook-active.svg',
+        },
+        {
+            name: 'reddit',
+            img: 'https://images.web3auth.io/login-reddit-active.svg',
+        },
+        {
+            name: 'twitch',
+            img: 'https://images.web3auth.io/login-twitch-active.svg',
+        },
+        {
+            name: 'apple',
+            img: 'https://images.web3auth.io/login-apple-active.svg',
+        },
+        {
+            name: 'line',
+            img: 'https://images.web3auth.io/login-line-active.svg',
+        },
+        {
+            name: 'github',
+            img: 'https://images.web3auth.io/login-github-active.svg',
+        },
+        {
+            name: 'kakao',
+            img: 'https://images.web3auth.io/login-kakao-active.svg',
+        },
+        {
+            name: 'linkedin',
+            img: 'https://images.web3auth.io/login-linkedin-active.svg',
+        },
+        {
+            name: 'weibo',
+            img: 'https://images.web3auth.io/login-weibo-active.svg',
+        },
+        {
+            name: 'wechat',
+            img: 'https://images.web3auth.io/login-wechat-active.svg',
+        },
+    ]
+
     return (
         <Container>
             <Header>
-                <span>Connect a wallet</span>
-                <div>
-                    <BtnClose
-                        onClick={() => {
-                            setToggleWalletModal(false)
-                        }}
-                        src={imgClose}
-                        alt=""
-                    />
+                <div className="label-btn">
+                    <span
+                        className={`${
+                            typeConnect === 'Wallet' ? 'active' : ''
+                        }`}
+                        onClick={() => setTypeConnect('Wallet')}
+                    >
+                        <p>Connect a wallet</p>
+                    </span>
+                    <span
+                        className={`${
+                            typeConnect === 'Social' ? 'active' : ''
+                        }`}
+                        onClick={() => setTypeConnect('Social')}
+                    >
+                        <p>Social Login</p>
+                    </span>
                 </div>
             </Header>
             <WrapContent>
-                <WrapItem>{getOptions()}</WrapItem>
+                {typeConnect === 'Wallet' && (
+                    <WrapItem>{getOptions()}</WrapItem>
+                )}
+                {typeConnect === 'Social' && (
+                    <WrapItem>
+                        <PrimaryButton
+                            name="Continue with Google"
+                            onClick={() => handleConnect(false, 'google')}
+                            img="https://images.web3auth.io/login-google-active.svg"
+                            type="option-login"
+                        />
+                        <LabelSocialConnect
+                            className={isActive ? 'active' : 'inactive'}
+                        >
+                            {socialLoginList.map((social, index) => {
+                                return (
+                                    <div
+                                        onClick={() =>
+                                            handleConnect(false, social.name)
+                                        }
+                                        key={index}
+                                    >
+                                        <img src={social.img} alt="" />
+                                    </div>
+                                )
+                            })}
+                        </LabelSocialConnect>
+                        <div className="content-social">
+                            We do not store any data related to your social
+                            logins.
+                        </div>
+                        <div
+                            onClick={ToggleViewMoreSocial}
+                            className={
+                                isActive
+                                    ? 'active more-social'
+                                    : 'inactive more-social'
+                            }
+                        >
+                            <p className="p1">View more options</p>
+                            <p className="p2">View less options</p>
+                        </div>
+                        <div className="line"></div>
+
+                        <div className="email">Email or phone</div>
+                        <input
+                            type="text"
+                            placeholder="sobajaswap@gmail.com || +123666666666"
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                        />
+                        <PrimaryButton
+                            name="Continue"
+                            onClick={() => handleConnect(true)}
+                            type="option-login"
+                        />
+                    </WrapItem>
+                )}
+
                 <Title>
-                    <div>
-                        By connecting a wallet, you agree to Sobajaswap &nbsp;
-                        <a href="#" target="_blank" rel="noreferrer">
-                            Terms of Service &nbsp;
-                        </a>
-                        and
-                        <a href="#" target="_blank" rel="noreferrer">
-                            &nbsp; Privacy Policy.
-                        </a>
-                    </div>
+                    {/* {typeConnect === 'Social' && (
+                        <div>
+                            We do not store any data related to your social
+                            logins.
+                        </div>
+                    )} */}
+                    {typeConnect === 'Wallet' && (
+                        <div>
+                            By connecting a wallet, you agree to Sobajaswap
+                            &nbsp;
+                            <a href="#" target="_blank" rel="noreferrer">
+                                Terms of Service &nbsp;
+                            </a>
+                            and
+                            <a href="#" target="_blank" rel="noreferrer">
+                                &nbsp; Privacy Policy.
+                            </a>
+                        </div>
+                    )}
                 </Title>
             </WrapContent>
         </Container>
@@ -206,15 +379,78 @@ const Container = styled.div`
         }
     }
 `
+
+const LabelSocialConnect = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+
+    grid-gap: 10px;
+    &.inactive {
+        // height: 50px;
+        // overflow: hidden;
+        div:nth-child(4),
+        div:nth-child(5),
+        div:nth-child(6),
+        div:nth-child(7),
+        div:nth-child(8),
+        div:nth-child(9),
+        div:nth-child(10),
+        div:nth-child(11),
+        div:nth-child(12) {
+            display: none;
+        }
+    }
+    div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #003b5c;
+        background: rgb(255, 255, 255);
+        min-height: 48px;
+        border-radius: 8px;
+        @media screen and (max-width: 767px) {
+            min-height: 42px;
+        }
+        :hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        img {
+            width: 35px;
+            height: 35px;
+            @media screen and (max-width: 767px) {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    }
+`
+
 const StyledLoader = styled(Loader)`
     margin-right: 1rem;
 `
 
 const Header = styled.div`
     display: flex;
-    justify-content: space-between;
-    padding: 1rem 1.5rem 0;
-    /* border-bottom: 1px solid rgba(157, 195, 230, 0.5); */
+    justify-content: center;
+    padding: 3rem 1.5rem 0;
+
+    .label-btn {
+        display: flex;
+        background: rgba(0, 178, 255, 0.3);
+        border-radius: 8px;
+        width: 100%;
+    }
+
+    .active {
+        background: #00b2ff;
+    }
+    span:nth-child(1) {
+        border-radius: 8px 0 0 8px;
+    }
+    span:nth-child(2) {
+        border-radius: 0 8px 8px 0;
+    }
 
     span {
         cursor: pointer;
@@ -222,8 +458,11 @@ const Header = styled.div`
         font-family: 'Inter';
         font-style: normal;
         font-weight: 400;
-        font-size: 20px;
-        line-height: 39px;
+        font-size: 18px;
+        line-height: 30px;
+        padding: 10px 10px;
+        width: 50%;
+        text-align: center;
     }
     ::before {
         content: '';
@@ -247,6 +486,11 @@ const Header = styled.div`
             margin: auto;
         }
     }
+    @media screen and (max-width: 767px) {
+        span {
+            font-size: 14px;
+        }
+    }
 `
 const WrapContent = styled.div`
     padding: 0.5rem 1.5rem 1.2rem;
@@ -264,6 +508,9 @@ const Title = styled.div`
     div {
         font-size: 14px;
         margin-bottom: 15px;
+        @media screen and (max-width: 767px) {
+            font-size: 12px;
+        }
     }
 
     div:first-child {
@@ -306,6 +553,56 @@ const WrapItem = styled.div`
     cursor: pointer;
     opacity: 1;
     gap: 20px;
+    .email {
+        font-size: 18px;
+        @media screen and (max-width: 767px) {
+            font-size: 14px;
+        }
+    }
+    .content-social {
+        font-size: 14px;
+        @media screen and (max-width: 767px) {
+            font-size: 12px;
+        }
+    }
+    .more-social {
+        color: #00b2ff;
+        font-size: 12px;
+        text-align: right;
+        padding: 0 10px;
+    }
+    input {
+        outline: none;
+        border: none;
+        background: rgb(255, 255, 255);
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-size: 16px;
+        color: rgba(0, 0, 0, 0.8);
+        ::placeholder {
+            color: #888888;
+        }
+    }
+    .active.more-social {
+        .p1 {
+            display: none;
+        }
+    }
+    .inactive.more-social {
+        .p2 {
+            display: none;
+        }
+    }
+    .line {
+        height: 1.5px;
+        width: 100%;
+        background: linear-gradient(
+            90deg,
+            rgba(0, 59, 92, 0.140625) 0%,
+            #004b76 51.56%,
+            rgba(0, 59, 92, 0) 100%
+        );
+    }
     &.active {
         opacity: 1;
     }
@@ -314,9 +611,9 @@ const WrapItem = styled.div`
         ::-webkit-scrollbar {
             display: none;
         }
-        div:nth-child(4) {
-            order: 1;
-        }
+        // div:nth-child(4) {
+        //     order: 1;
+        // }
     }
     @media screen and (max-width: 375px) {
     }
@@ -360,14 +657,23 @@ const ItemContent = styled.button`
     font-family: Inter;
 
     img {
-        height: 50px;
-        width: 50px;
+        height: 42px;
+        width: 42px;
         object-fit: contain;
         border-radius: 50%;
     }
     span {
-        font-size: 18px;
+        font-size: 16px;
         color: white;
+    }
+    @media screen and (max-width: 767px) {
+        img {
+            height: 38px;
+            width: 38px;
+        }
+        span {
+            font-size: 14px;
+        }
     }
 `
 export default OptionsWallet

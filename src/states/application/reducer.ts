@@ -9,7 +9,8 @@ import {
     toggleDarkMode,
     updateRefAddress,
     updateGasToken,
-    updateStepFaucet
+    updateStepFaucet,
+    updateIsSmartAccount
 } from './actions'
 import { GAS_TOKEN } from 'constants/index'
 
@@ -26,6 +27,7 @@ export interface ApplicationState {
     refAddress: string | undefined
     gasToken: Token
     stepFaucet: number
+    isSmartAccount: boolean
 }
 
 const initialState: ApplicationState = {
@@ -40,7 +42,8 @@ const initialState: ApplicationState = {
     userDarkMode: false,
     refAddress: undefined,
     gasToken: GAS_TOKEN[80001][0],
-    stepFaucet: 0
+    stepFaucet: 0,
+    isSmartAccount: false
 }
 
 export default createReducer(initialState, (builder) => {
@@ -79,5 +82,8 @@ export default createReducer(initialState, (builder) => {
         })
         .addCase(updateStepFaucet, (state, action) => {
             state.stepFaucet = action.payload
+        })
+        .addCase(updateIsSmartAccount, (state, action) => {
+            state.isSmartAccount = action.payload
         })
 })

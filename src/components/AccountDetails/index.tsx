@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import styled from 'styled-components'
+import React, { useState } from 'react'
+import styled, { createGlobalStyle } from 'styled-components'
 import { useActiveWeb3React } from 'hooks'
 import { shortenAddress } from 'utils'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
@@ -7,56 +7,32 @@ import imgCheckMark from 'assets/icons/check-mark.svg'
 import imgPower from 'assets/icons/power.svg'
 import imgCopy from 'assets/icons/copy.svg'
 import imgDownArrow from 'assets/icons/arrow-down.svg'
+import arrow from 'assets/icons/arrow-link-green.svg'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
-import { NATIVE_COIN } from 'constants/index'
-import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
-import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import { NATIVE_COIN, URLSCAN_BY_CHAINID } from 'constants/index'
 import { Row } from 'components/Layouts'
 import DepositModal from './DepositModal'
 import SendModal from './SendModal'
 import GasSetting from './GasSetting'
-import { useAppDispatch } from 'states/hook'
-import { updateSelectedWallet } from 'states/user/reducer'
 import BgWallet from 'assets/brand/bg-connect-wallet.png'
-import { ListNetwork } from 'constants/networks'
-import { ChainId } from 'interfaces'
-interface connectModalWallet {
-    setToggleWalletModal: React.Dispatch<React.SetStateAction<boolean>>
-    openOptions: React.Dispatch<React.SetStateAction<void>>
-}
-const AccountDetails = ({
-    setToggleWalletModal,
-    openOptions,
-}: connectModalWallet) => {
-    const { account, chainId, connector } = useActiveWeb3React()
-    const [isCopied, setIsCopied] = useState<boolean>(false)
-    const {
-        connect,
-        web3Provider,
-        disconnect: disconnectWeb3Auth,
-    } = useWeb3AuthContext()
-    const { wallet, state, loading } = useSmartAccountContext()
-    const balance = useETHBalances([wallet?.address || account])?.[
-        wallet?.address || account || ''
-    ]
-    const dispatch = useAppDispatch()
-    const disconnect = useCallback(() => {
-        if (connector && connector.deactivate) {
-            connector.deactivate()
-        }
-        connector.resetState()
-        dispatch(updateSelectedWallet({ wallet: undefined }))
-    }, [connector, dispatch])
+import WrapDetailsAccount from './Details'
+import { useUpdateIsSmartAccount } from 'states/application/hooks'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import LogoETH from 'assets/token-logos/eth.svg'
 
-    useEffect(() => {
-        if (chainId !== ChainId.GOERLI) {
-            disconnectWeb3Auth()
-        }
-    }, [chainId])
+const AccountDetails = () => {
+    const { account, chainId, disconnect } = useActiveWeb3React()
+    const [isCopied, setIsCopied] = useState<boolean>(false)
+    const { smartAccountAddress } = useSmartAccountContext()
+
+    const updateIsSmartAccount = useUpdateIsSmartAccount()
+    const balance = useETHBalances([smartAccountAddress || account])?.[
+        smartAccountAddress || account || ''
+    ]
 
     const handleCopyAddress = () => {
-        if (wallet?.address) {
-            navigator.clipboard.writeText(wallet.address).then(() => {
+        if (smartAccountAddress) {
+            navigator.clipboard.writeText(smartAccountAddress).then(() => {
                 setIsCopied(true)
                 setTimeout(() => {
                     setIsCopied(false)
@@ -74,31 +50,6 @@ const AccountDetails = ({
         }
     }
 
-    const handleOnConnectSmartAccount = async () => {
-        try {
-            if (chainId !== ChainId.GOERLI) {
-                return connector
-                    .activate(
-                        ListNetwork.find(
-                            (network) => network.chainId === ChainId.GOERLI,
-                        )?.switchNetwork[0],
-                    )
-                    ?.then(async (r) => {
-                        console.log('🤦‍♂️ ⟹ )?.then ⟹ r:', r)
-                        // setToggleWalletModal(false)
-                        await connect()
-                        // setToggleWalletModal(true)
-                    })
-            } else {
-                // setToggleWalletModal(false)
-                await connect()
-                // setToggleWalletModal(true)
-            }
-        } catch (err) {
-            console.log('failed to connect to smart account: ', err)
-        }
-    }
-
     return (
         <LabelRight>
             <WrapConnectModal isConnected={true}>
@@ -108,15 +59,29 @@ const AccountDetails = ({
                             <WrapAccountInfo>
                                 <ImgAccount src="https://picsum.photos/50/50" />
                                 <IdAccount>
-                                    {(wallet?.address &&
-                                        shortenAddress(wallet.address)) ||
+                                    {(smartAccountAddress &&
+                                        shortenAddress(smartAccountAddress)) ||
                                         (account && shortenAddress(account))}
                                 </IdAccount>
                             </WrapAccountInfo>
-                            {wallet && <AAMarker>Smart account</AAMarker>}
+                            {smartAccountAddress && (
+                                <AAMarker
+                                    onClick={() => {
+                                        chainId &&
+                                            window.open(
+                                                `${URLSCAN_BY_CHAINID[chainId]?.url}address/${smartAccountAddress}`,
+                                            )
+                                    }}
+                                >
+                                    Smart account
+                                    <div>
+                                        <img src={arrow} alt="arrow" />
+                                    </div>
+                                </AAMarker>
+                            )}
                         </Row>
                         <WrapBtnHeader>
-                            {wallet && <GasSetting />}
+                            {smartAccountAddress && <GasSetting />}
                             {isCopied ? (
                                 <CopyBtn>
                                     <CopyAccountAddress src={imgCheckMark} />
@@ -135,17 +100,9 @@ const AccountDetails = ({
                                     </Tooltip>
                                 </CopyBtn>
                             )}
-
-                            {/* <button onClick={() => openOptions()}>
-                            <img src={iconSetting} alt="#" />
-                        </button> */}
                             <button
                                 onClick={() => {
-                                    if (wallet?.address) {
-                                        disconnectWeb3Auth()
-                                    } else {
-                                        disconnect()
-                                    }
+                                    disconnect()
                                 }}
                             >
                                 <img src={imgPower} alt="#" />
@@ -155,41 +112,51 @@ const AccountDetails = ({
                 </Header>
                 <WrapContent>
                     <NameBalance>
-                        {(chainId && NATIVE_COIN[chainId]?.symbol) || 'ETH'}{' '}
-                        Balance
+                        {/* {(chainId && NATIVE_COIN[chainId]?.symbol) || 'ETH'}{' '}
+                        Balance */}
+                        <img src={LogoETH} alt="logo-eth" />
                     </NameBalance>
                     <Balance className={'to'}>
-                        {balance ? balance.toString() : 0}
+                        {balance ? Number(balance).toFixed(6) : 0}
                     </Balance>
                     <Balance>
                         {(chainId && NATIVE_COIN[chainId]?.symbol) || 'ETH'}
                     </Balance>
                     <WrapButton>
-                        {!wallet && (
+                        {!smartAccountAddress && (
                             <>
                                 <PrimaryButton
                                     name={
-                                        loading
-                                            ? 'Connecting'
-                                            : 'Use smart account'
+                                        // loading
+                                        //     ? 'Connecting'
+                                        //     :
+                                        'Use smart account'
                                     }
-                                    onClick={handleOnConnectSmartAccount}
-                                    isLoading={loading}
+                                    onClick={() => updateIsSmartAccount(true)}
+                                    // isLoading={loading}
                                 />
                             </>
                         )}
-                        {wallet && (
-                            <>
+                        {smartAccountAddress && (
+                            <Row gap="5px">
                                 <DepositModal />
                                 <SendModal />
-                            </>
+                            </Row>
                         )}
                     </WrapButton>
                 </WrapContent>
+                <WrapDetailsAccount balance={balance || '0'} />
                 <Footer className="isLogged">
                     <WrapFooterBtn>
                         <WrapItemFooter
-                        //  onClick={() => setShowTrans(!showTrans)}
+                            //  onClick={() => setShowTrans(!showTrans)}
+                            onClick={() =>
+                                window.open(
+                                    `${
+                                        URLSCAN_BY_CHAINID?.[chainId || 5].url
+                                    }/address/${smartAccountAddress}`,
+                                )
+                            }
                         >
                             <p>Transactions</p>
                             <WrapFooterImg>
@@ -199,32 +166,7 @@ const AccountDetails = ({
                         </WrapItemFooter>
                         <WrapModalTransaction
                             showTrans={false}
-                            // showTrans={showTrans}
-                        >
-                            {/* <p>
-                            {transactions && transactions.length > 0
-                                ? 'Your recent transactions:'
-                                : 'You have no transactions'}
-                        </p> */}
-                            {/* {transactions?.map((i) => {
-                            return (
-                                <RowTransaction
-                                    onClick={() =>
-                                        openExplorerByHash(
-                                            i.hash,
-                                            network?.name,
-                                        )
-                                    }
-                                >
-                                    <p>{i.method}</p>
-                                    <div>
-                                        <p>{i.date}</p>
-                                        <p>{i.time}</p>
-                                    </div>
-                                </RowTransaction>
-                            )
-                        })} */}
-                        </WrapModalTransaction>
+                        ></WrapModalTransaction>
                         <WrapItemFooter className="fade">
                             <p>Language</p>
                             <WrapFooterImg>
@@ -235,30 +177,15 @@ const AccountDetails = ({
                     </WrapFooterBtn>
                 </Footer>
             </WrapConnectModal>
+            <GlobalStyle />
         </LabelRight>
     )
 }
 
 const LabelRight = styled.div`
     position: fixed;
-    /* top: 9%; */
-    /* right: 0;
-
-    height: 100vh;
-    max-width: 400px;
-    width: 100%;
-    z-index: 999;
     background: url(${BgWallet});
     background-size: cover;
-    background-repeat: no-repeat;
-    
-    @media screen and (max-width: 1100px) {
-        top: unset;
-        bottom: 0;
-        height: 600px;
-    } */
-    background: url(${BgWallet});
-    background-size: 400px;
     background-repeat: no-repeat;
     opacity: 1;
     /* border: 1px solid #003b5c; */
@@ -266,25 +193,33 @@ const LabelRight = styled.div`
     border-left: 1px solid #003b5c;
     box-shadow: rgb(0 0 0 / 5%) 0px 4px 8px 0px;
     overflow: auto;
-    max-width: 400px;
+    max-width: 450px;
     width: 100%;
     right: 0px;
     bottom: 0px;
-    top: 121.49px;
+    top: 90px;
 
-    height: 100vh;
+    height: calc(100vh - 90px);
     animation: fadeIn 0.4s ease-in-out;
     z-index: 999;
-
-    @media screen and (max-width: 1100px) {
+    ::-webkit-scrollbar {
+        display: none;
+    }
+    @media screen and (max-width: 499px) {
+        max-width: 90%;
+        animation: fadeUp 0.3s linear;
+    }
+    @media screen and (min-width: 500px) and (max-width: 1100px) {
         animation: fadeUp 0.3s linear;
         height: 600px;
+        max-height: 100vh;
+        overflow: auto;
         bottom: 0;
         top: unset;
     }
-    @media screen and (max-width: 476px) {
-        width: 90%;
-    }
+    // @media screen and (max-width: 476px) {
+    //     width: 90%;
+    // }
     @keyframes fadeIn {
         from {
             transform: translateX(100%);
@@ -309,11 +244,23 @@ const LabelRight = styled.div`
 `
 
 const AAMarker = styled.div`
+    display: flex;
+    gap: 2px;
     padding: 4px;
     border: 1px solid #14e986;
     color: #14e986;
     border-radius: 4px;
     font-size: 10px;
+    justify-content: center;
+    cursor: pointer;
+    img {
+        width: 8px;
+        height: 8px;
+    }
+
+    @media screen and (max-width: 321px) {
+        font-size: 8px;
+    }
 `
 
 const WrapModalTransaction = styled.div<{ showTrans: boolean }>`
@@ -357,6 +304,11 @@ const NameBalance = styled.div`
     line-height: 20px;
     color: #d9d9d9;
     text-align: center;
+    img {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+    }
 `
 const Balance = styled.div`
     font-weight: 600;
@@ -364,7 +316,8 @@ const Balance = styled.div`
     line-height: 44px;
     text-align: center;
     @media screen and (max-width: 391px) {
-        font-size: 18px;
+        font-size: 16px;
+        line-height: 30px;
     }
 `
 const CopyBtn = styled.div`
@@ -406,7 +359,9 @@ const WrapBtnHeader = styled.div`
         cursor: pointer;
     }
 
-    @media screen and (max-width: 391px) {
+    @media screen and (max-width: 399px) {
+        gap: 4px;
+
         img {
             width: 12px;
             height: 12px;
@@ -578,7 +533,7 @@ const Footer = styled.div`
     max-height: 355px;
     padding: 1rem 1.5rem;
     gap: 10px;
-    border-top: 1px solid #918f8f;
+    /* border-top: 1px solid #918f8f; */
 
     &.isLogged {
         padding: 0;
@@ -674,7 +629,7 @@ const WrapConnectModal = styled(Container)`
     left: 0;
     margin: auto;
 
-    max-width: 350px;
+    max-width: 400px;
     /* left: unset; */
     /* right: 20px; */
     /* top: 90px; */
@@ -687,12 +642,18 @@ const WrapConnectModal = styled(Container)`
         top: unset;
         bottom: 60px; */
     }
-    @media screen and (max-width: 391px) {
+    @media screen and (max-width: 492px) {
         width: 90%;
         margin: auto;
         font-size: 12px;
         /* right: 10px; */
         /* max-width: 300px; */
+    }
+`
+
+const GlobalStyle = createGlobalStyle`
+    body {
+        overflow: hidden;
     }
 `
 

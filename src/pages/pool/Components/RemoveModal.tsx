@@ -22,6 +22,7 @@ import {
 import { useRouterContract } from 'hooks/useContract'
 import { sendEvent } from 'utils/analytics'
 import { ZERO_ADDRESS } from '../../../constants'
+import { useAddUser, useUsersState } from 'states/users/hooks'
 
 const RemoveModal = ({
     poolRemove,
@@ -47,7 +48,6 @@ const RemoveModal = ({
     initDataTransaction: CompTransaction
 }) => {
     const [percentValue, setPercentValue] = useState(0)
-    console.log('🤦‍♂️ ⟹ percentValue:', percentValue)
     const { account, chainId } = useActiveWeb3React()
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const urlTokens = useTokensUrl(tokenList)
@@ -55,10 +55,57 @@ const RemoveModal = ({
     const { slippage, deadline } = useAppState()
     const routerContract = useRouterContract()
     const updateAppication = useUpdateApplicationState()
+    const addUser = useAddUser()
+    const userData = useUsersState()
 
     const arrPrecent = [0, 25, 50, 75, 100]
     const handleChangeInput = (value: any) => {
         setPercentValue(value)
+    }
+
+    const handleDataUser = ({
+        hash,
+        status,
+        method,
+        msg,
+    }: {
+        hash: string
+        status: boolean
+        method: string
+        msg?: string
+    }) => {
+        addTxn({
+            hash,
+            msg: method,
+            status,
+        })
+
+        const date =
+            new Date().toDateString().split(' ')?.slice(1, 3).join(' ') +
+            ' ' +
+            new Date().toLocaleTimeString('vi')
+        const newUser = {
+            ...userData,
+            activity:
+                userData.activity.length === 5
+                    ? [
+                          ...userData.activity.slice(1),
+                          {
+                              method: msg || method,
+                              timestamp: date,
+                              hash,
+                          },
+                      ]
+                    : [
+                          ...userData.activity,
+                          {
+                              method: msg || method,
+                              timestamp: date,
+                              hash,
+                          },
+                      ],
+        }
+        addUser(newUser)
     }
 
     const tokenApproval = useTokenApproval(
@@ -96,16 +143,22 @@ const RemoveModal = ({
 
                 const txn = await callResult.wait()
                 initDataTransaction.setIsOpenResultModal(false)
-                addTxn({
-                    hash:
-                        getEtherscanLink(
-                            chainId,
-                            callResult.hash,
-                            'transaction',
-                        ) || '',
-                    // hash: tx?.hash || '',
-                    msg: 'Approve',
+                // addTxn({
+                //     hash:
+                //         getEtherscanLink(
+                //             chainId,
+                //             callResult.hash,
+                //             'transaction',
+                //         ) || '',
+                //     // hash: tx?.hash || '',
+                //     msg: 'Approve',
+                //     status: txn.status === 1 ? true : false,
+                // })
+
+                handleDataUser({
+                    hash: callResult.hash,
                     status: txn.status === 1 ? true : false,
+                    method: `Approve ${poolRemove?.tokenLp?.symbol}`,
                 })
             }
         } catch (err) {
@@ -256,20 +309,26 @@ const RemoveModal = ({
 
                 initDataTransaction.setIsOpenResultModal(false)
 
-                addTxn({
-                    hash:
-                        getEtherscanLink(
-                            chainId,
-                            callResult.hash,
-                            'transaction',
-                        ) || '',
-                    // hash: tx?.hash || '',
-                    msg: `Remove ${poolRemove.token0?.symbol} and ${poolRemove.token1?.symbol}`,
+                // addTxn({
+                //     hash:
+                //         getEtherscanLink(
+                //             chainId,
+                //             callResult.hash,
+                //             'transaction',
+                //         ) || '',
+                //     // hash: tx?.hash || '',
+                //     msg: `Remove ${poolRemove.token0?.symbol} and ${poolRemove.token1?.symbol}`,
+                //     status: txn.status === 1 ? true : false,
+                // })
+
+                handleDataUser({
+                    hash: callResult.hash,
                     status: txn.status === 1 ? true : false,
+                    method: `Remove ${poolRemove.token0?.symbol} and ${poolRemove.token1?.symbol}`,
+                    msg: `Remove ${poolRemove.token0?.symbol}/${poolRemove.token1?.symbol}`,
                 })
 
                 updateAppication()
-                // navigate('/pools')
             }
         } catch (error) {
             console.log(error)

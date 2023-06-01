@@ -7,14 +7,13 @@ import SobajaLogo from 'assets/brand/sobajaswap-logo.svg'
 import { Columns } from 'components/Layouts'
 import { useNavigate } from 'react-router-dom'
 import Faucet from 'components/Faucet'
-import { useActiveWeb3React } from 'hooks'
 import ConnectorMobile from 'components/ConnectorMobile'
-import { useWeb3React } from '@web3-react/core'
+import imgClose from 'assets/icons/icon-close.svg'
 
 const Header = () => {
     const [burgerNav, setBurgerNav] = useState(false)
     const navigate = useNavigate()
-    const { connector } = useWeb3React()
+
     return (
         <HeaderWrapper>
             <Logo onClick={() => navigate('/')}>
@@ -47,7 +46,9 @@ const Header = () => {
                             </MenuIcon>
                         </>
                     ) : (
-                        'X'
+                        <div>
+                            <img src={imgClose} alt="" />
+                        </div>
                     )}
                 </WrapperNavigator>
             </WrapConnect>

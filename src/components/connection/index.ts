@@ -81,7 +81,6 @@ const URLS: { [chainId: number]: string[] } = Object.keys(CHAINS).reduce<{ [chai
         if (validURLs.length) {
             accumulator[Number(chainId)] = validURLs
         }
-        console.log("accumulator", accumulator)
         return accumulator
     },
     {}

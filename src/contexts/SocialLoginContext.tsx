@@ -1,11 +1,21 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { ethers } from 'ethers'
-import { Web3Auth, Web3AuthOptions } from '@web3auth/modal'
-import { activeChainId } from '../utils/chainConfig'
+import { web3AuthConfig, openLoginAdapterConfig, chainConfig } from '../utils/web3AuthConfig'
+import { Web3AuthNoModal } from '@web3auth/no-modal'
+import {
+    OpenloginAdapter,
+    OpenloginLoginParams,
+} from '@web3auth/openlogin-adapter'
+import { WALLET_ADAPTER_TYPE } from '@web3auth/base'
+import { ChainId } from 'interfaces'
 
 interface web3AuthContextType {
-    connect: () => Promise<Web3Auth | null | undefined>
+    connect: (
+        method?: WALLET_ADAPTER_TYPE,
+        params?: OpenloginLoginParams,
+    ) => Promise<Web3AuthNoModal | null | undefined>
     disconnect: () => Promise<void>
+    switchNetwork: (chainId: ChainId) => Promise<void>
     provider: any
     ethersProvider: ethers.providers.Web3Provider | null
     web3Provider: ethers.providers.Web3Provider | null
@@ -16,11 +26,12 @@ interface web3AuthContextType {
 export const Web3AuthContext = React.createContext<web3AuthContextType>({
     connect: () => Promise.resolve(null),
     disconnect: () => Promise.resolve(),
+    switchNetwork: (chainId: ChainId) => Promise.resolve(),
     loading: false,
     provider: null,
     ethersProvider: null,
     web3Provider: null,
-    chainId: activeChainId,
+    chainId: ChainId.ZKTESTNET,
     address: '',
 })
 export const useWeb3AuthContext = () => useContext(Web3AuthContext)
@@ -42,7 +53,7 @@ const initialState: StateType = {
     web3Provider: null,
     ethersProvider: null,
     address: '',
-    chainId: activeChainId,
+    chainId: ChainId.ZKTESTNET,
 }
 
 export const Web3AuthProvider = ({ children }: any) => {
@@ -50,110 +61,90 @@ export const Web3AuthProvider = ({ children }: any) => {
     const { provider, web3Provider, ethersProvider, address, chainId } =
         web3State
     const [loading, setLoading] = useState(false)
-    const [socialLoginSDK, setSocialLoginSDK] = useState<Web3Auth | null>(null)
-    console.log({ address })
-    // create socialLoginSDK and call the init
-    useEffect(() => {
+    const [socialLoginSDK, setSocialLoginSDK] =
+        useState<Web3AuthNoModal | null>(null)
+
+        useEffect(() => {
         const initWallet = async () => {
-            const sdk = new Web3Auth({
-                clientId:
-                    'BE7tc_MkDFzJp3ujQwPTeptBbTCE87628dJ7bcndPvcJYKT5NSRnbDk0NIYjW_4iAbNsxbPhoLwlMLMcsFA87Qc', // get from https://dashboard.web3auth.io
-                web3AuthNetwork: 'testnet',
-                chainConfig: {
-                    chainNamespace: 'eip155',
-                    chainId: '0x5', // EVM chain's Chain ID
-                    rpcTarget:
-                        'https://goerli.infura.io/v3/8f8561738d754550b1b5fdc095c6e0a9', // EVM chain's RPC endpoint
-                    // Avoid using public rpcTarget in production.
-                    // Use services like Infura, Quicknode, Alchemy, Ankr etc.
-                    displayName: 'Goerli', // EVM chain's Name
-                    blockExplorer: 'https://goerli.etherscan.io/', // EVM chain's Blockexplorer
-                    ticker: 'ETH', // EVM chain's Ticker
-                    tickerName: 'Ethereum', // EVM chain's Ticker Name
-                },
-            })
-            await sdk.initModal()
-            // sdk.showConnectModal();
+            const sdk = new Web3AuthNoModal(web3AuthConfig)
+            await sdk.init()
             setSocialLoginSDK(sdk)
         }
         if (!socialLoginSDK) initWallet()
     }, [socialLoginSDK])
 
-    const connect = useCallback(async () => {
-        try {
-            if (address) return
-            if (socialLoginSDK?.provider) {
-                setLoading(true)
-                const web3Provider = new ethers.providers.Web3Provider(
-                    socialLoginSDK.provider,
-                )
-                const signer = web3Provider.getSigner()
-                const gotAccount = await signer.getAddress()
-                const network = await web3Provider.getNetwork()
-                setWeb3State({
-                    provider: socialLoginSDK.provider,
-                    web3Provider: web3Provider,
-                    ethersProvider: web3Provider,
-                    address: gotAccount,
-                    chainId: Number(network.chainId),
-                })
-                setLoading(false)
-                return
-            }
-
+    const afterConnect = useCallback(async () => {
+        if (socialLoginSDK?.provider) {
             setLoading(true)
-            const sdk = new Web3Auth({
-                clientId:
-                    'BE7tc_MkDFzJp3ujQwPTeptBbTCE87628dJ7bcndPvcJYKT5NSRnbDk0NIYjW_4iAbNsxbPhoLwlMLMcsFA87Qc', // get from https://dashboard.web3auth.io
-                web3AuthNetwork: 'testnet',
-                chainConfig: {
-                    chainNamespace: 'eip155',
-                    chainId: '0x5', // EVM chain's Chain ID
-                    rpcTarget:
-                        'https://goerli.infura.io/v3/8f8561738d754550b1b5fdc095c6e0a9', // EVM chain's RPC endpoint
-                    // Avoid using public rpcTarget in production.
-                    // Use services like Infura, Quicknode, Alchemy, Ankr etc.
-                    displayName: 'Goerli', // EVM chain's Name
-                    blockExplorer: 'https://goerli.etherscan.io/', // EVM chain's Blockexplorer
-                    ticker: 'ETH', // EVM chain's Ticker
-                    tickerName: 'Ethereum', // EVM chain's Ticker Name
-                },
+            const web3Provider = new ethers.providers.Web3Provider(
+                socialLoginSDK.provider,
+            )
+            const signer = web3Provider.getSigner()
+            const gotAccount = await signer.getAddress()
+            const network = await web3Provider.getNetwork()
+            setWeb3State({
+                provider: socialLoginSDK.provider,
+                web3Provider: web3Provider,
+                ethersProvider: web3Provider,
+                address: gotAccount,
+                chainId: Number(network.chainId),
             })
-            console.log('connecting.....')
-            await sdk.initModal()
-            console.log('connected')
-            await sdk.connect()
-            setSocialLoginSDK(sdk)
             setLoading(false)
-            return socialLoginSDK
-        } catch (err) {
-            console.log('failed to connect')
+            return
         }
     }, [address, socialLoginSDK])
 
-    // after social login -> set provider info
-    useEffect(() => {
-        ;(async () => {
-            if (socialLoginSDK?.provider && !address) {
-                connect()
-            }
-        })()
-    }, [address, connect, socialLoginSDK, socialLoginSDK?.provider])
-
-    // after metamask login -> get provider event
-    useEffect(() => {
-        const interval = setInterval(async () => {
-            if (address) {
-                clearInterval(interval)
-            }
-            if (socialLoginSDK?.provider && !address) {
-                connect()
-            }
-        }, 1000)
-        return () => {
-            clearInterval(interval)
+    const autoConnect = async () => {
+        try {
+            const sdk = new Web3AuthNoModal(web3AuthConfig)
+            const openloginAdapter = new OpenloginAdapter(openLoginAdapterConfig)
+            sdk.configureAdapter(openloginAdapter)
+            await sdk.init()
+            await sdk.addChain(chainConfig[ChainId.GOERLI])
+            await sdk.addChain(chainConfig[ChainId.MUMBAI])
+            await sdk.addChain(chainConfig[ChainId.ZKMAINNET])
+            await sdk.addChain(chainConfig[ChainId.ZKTESTNET])
+            await sdk.getUserInfo()
+            setSocialLoginSDK(sdk)
+        } catch(err) {
+            console.log(err)
         }
-    }, [address, connect, socialLoginSDK])
+    }
+
+    const connect = useCallback(
+        async (method?: WALLET_ADAPTER_TYPE, params?: OpenloginLoginParams) => {
+            try {
+                if (!method || !params || address) return
+
+                setLoading(true)
+                const sdk = new Web3AuthNoModal(web3AuthConfig)
+                const openloginAdapter = new OpenloginAdapter(openLoginAdapterConfig)
+                sdk.configureAdapter(openloginAdapter)
+                await sdk.init()
+                try {
+                    await sdk.connectTo(method, params)
+                }
+                catch(err) {
+                    console.log('failed', err)
+                    try {
+                        await sdk.getUserInfo()
+                    } catch(err) {
+                        throw err
+                    }
+                }
+                await sdk.addChain(chainConfig[ChainId.GOERLI])
+                await sdk.addChain(chainConfig[ChainId.MUMBAI])
+                await sdk.addChain(chainConfig[ChainId.ZKMAINNET])
+                await sdk.addChain(chainConfig[ChainId.ZKTESTNET])
+                setSocialLoginSDK(sdk)
+                setLoading(false)
+                return socialLoginSDK
+            } catch (err) {
+                console.log('failed to connect', err)
+            }
+        },
+        [address, socialLoginSDK],
+    )
 
     const disconnect = useCallback(async () => {
         if (!socialLoginSDK || !socialLoginSDK) {
@@ -166,15 +157,46 @@ export const Web3AuthProvider = ({ children }: any) => {
             web3Provider: null,
             ethersProvider: null,
             address: '',
-            chainId: activeChainId,
+            chainId: ChainId.ZKTESTNET,
         })
     }, [socialLoginSDK])
+
+    const switchNetwork = useCallback(async (chainId: ChainId) => {
+        try {
+            if (!socialLoginSDK) {
+                console.error('Web3Modal not initialized.')
+                return
+            }
+            const cloneSdk = socialLoginSDK
+            await cloneSdk.switchChain({chainId: chainConfig[chainId].chainId})
+            await cloneSdk.getUserInfo()
+            setSocialLoginSDK(cloneSdk)
+            afterConnect()
+        } catch(err) {
+            console.log('failed to switch', err)
+        }
+    }, [socialLoginSDK])
+
+    // after social login -> set provider info
+    useEffect(() => {
+        (async () => {
+            if (socialLoginSDK?.provider && !address) {
+                afterConnect()
+            }
+        })()
+    }, [address, connect, socialLoginSDK, socialLoginSDK?.provider])
+
+    // auto connect if user is already connected
+    useEffect(() => {
+        autoConnect()
+    }, [])
 
     return (
         <Web3AuthContext.Provider
             value={{
                 connect,
                 disconnect,
+                switchNetwork,
                 loading,
                 provider: provider,
                 ethersProvider: ethersProvider || null,

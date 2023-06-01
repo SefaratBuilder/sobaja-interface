@@ -4,10 +4,10 @@ import App from './App'
 import { Provider } from 'react-redux'
 import store from './states'
 import { Buffer } from 'buffer'
-import { SmartAccountProvider } from 'contexts/SmartAccountContext'
 import { Web3AuthProvider } from 'contexts/SocialLoginContext'
 import { GlobalStyle } from 'styles'
 import Web3Provider from './components/Web3Provider'
+import { SmartAccountProvider } from 'contexts/SmartAccountContext'
 import ReactGA from 'react-ga4'
 
 ReactGA.initialize('G-K8KM7MVBW1')

@@ -71,9 +71,33 @@ export const Button = styled.button<{
     color: var(--text1);
     font-family: Inter, sans-serif;
     span {
-        font-weight: 700;
+        font-weight: 400;
         font-size: ${({ size }) => (size ? size : '1rem')};
     }
+    @media screen and (max-width: 767px) {
+        height: ${({ height }) => (height ? height : '40px')};
+        span {
+            font-size: ${({ size }) => (size ? size : '14px')};
+        }
+    }
+
+    &.option-login {
+        gap: 10px;
+        height: 48px;
+        @media screen and (max-width: 767px) {
+            height: 42px;
+        }
+        img {
+            height: 35px;
+            width: 35px;
+            border-radius: 50%;
+            @media screen and (max-width: 767px) {
+                height: 30px;
+                width: 30px;
+            }
+        }
+    }
+
     :hover {
         opacity: 0.8;
     }

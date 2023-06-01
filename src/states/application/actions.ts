@@ -38,3 +38,6 @@ export const updateStepFaucet = createAction<number>(
     'application/updateStepFaucet'
 )
 
+export const updateIsSmartAccount = createAction<boolean>(
+    'application/updateIsSmartAccount'
+)
