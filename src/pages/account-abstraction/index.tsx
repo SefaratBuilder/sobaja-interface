@@ -21,6 +21,7 @@ const AA = () => {
     const { depositedFund, nonce, contract: smartAccountContract, sendTransactions, isDeployed } = smartAccount
     const entryPointContract = useAAEntryPointContract()
     const token = '0xDf9acc0a00Ae6Ec5eBc8D219d12A0157e7F18A68'
+
     const tokenContract = useTokenContract(token)
     const tokenType = useToken(token)
     const balanceToken = useCurrencyBalance(smartAccountAddress, tokenType)
@@ -43,6 +44,7 @@ const AA = () => {
     const onDeposit = async () => {
         try {
             if (!entryPointContract || !smartAccountAddress) return
+            console.log(entryPointContract)
             const deployResult = await entryPointContract.depositTo(
                 smartAccountAddress,
                 {
@@ -87,7 +89,7 @@ const AA = () => {
 
     const onWithdraw = async () => {
         try {
-            if (!smartAccountContract || !smartAccountAddress) return 
+            if (!smartAccountContract || !smartAccountAddress) return console.log(smartAccountContract, smartAccountAddress)
             const deployResult = await smartAccountContract.withdrawDepositTo(
                 account,
                 depositedFund
@@ -124,7 +126,6 @@ const AA = () => {
             const callResult = await sendTransactions([txn])
             if(!callResult) return
             await callResult.wait()
-            console.log('ok', callResult)
         }
         catch(err) {
             console.log('failed', err)

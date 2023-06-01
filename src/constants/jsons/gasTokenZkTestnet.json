@@ -1,18 +1,18 @@
 [
     {
-        "symbol": "MATIC",
+        "symbol": "ETH",
         "address": "0x0000000000000000000000000000000000000000",
         "decimals": 18,
-        "logoURI": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/matic.png",
-        "chainId": 80001,
-        "name": "Polygon"
+        "logoURI": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png",
+        "chainId": 280,
+        "name": "Ethereum"
     },
     {
         "symbol": "USDC",
         "address": "0xdA5289fCAAF71d52a80A254da614a192b693e977",
         "decimals": 6,
         "logoURI": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdc.png",
-        "chainId": 80001,
+        "chainId": 280,
         "name": "USD Coin"
     },
     {
@@ -20,7 +20,7 @@
         "address": "0xeaBc4b91d9375796AA4F69cC764A4aB509080A58",
         "decimals": 18,
         "logoURI": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdt.png",
-        "chainId": 80001,
+        "chainId": 280,
         "name": "Tether"
     },
     {
@@ -28,7 +28,7 @@
         "address": "0xf61cBcaC6C5E4F27543495890536B799D18f7178",
         "decimals": 18,
         "logoURI": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/dai.png",
-        "chainId": 80001,
+        "chainId": 280,
         "name": "DAI Coin"
     }
 ]

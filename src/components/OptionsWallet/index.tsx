@@ -158,8 +158,20 @@ function OptionsWallet({
             console.log({ error })
         }
     }
+    const [isActive, setActive] = useState(false);
+    const ToggleClass = () => {
+        setActive(!isActive);
+      };
 
     const socialLoginList = [
+        {
+            name: 'twitter',
+            img: 'https://images.web3auth.io/login-twitter-active.svg',
+        },
+        {
+            name: 'discord',
+            img: 'https://images.web3auth.io/login-discord-active.svg',
+        },
         {
             name: 'facebook',
             img: 'https://images.web3auth.io/login-facebook-active.svg',
@@ -169,16 +181,12 @@ function OptionsWallet({
             img: 'https://images.web3auth.io/login-reddit-active.svg',
         },
         {
-            name: 'discord',
-            img: 'https://images.web3auth.io/login-discord-active.svg',
-        },
-        {
             name: 'twitch',
             img: 'https://images.web3auth.io/login-twitch-active.svg',
         },
         {
             name: 'apple',
-            img: 'https://images.web3auth.io/login-apple-light.svg',
+            img: 'https://images.web3auth.io/login-apple-active.svg',
         },
         {
             name: 'line',
@@ -186,7 +194,7 @@ function OptionsWallet({
         },
         {
             name: 'github',
-            img: 'https://images.web3auth.io/login-github-light.svg',
+            img: 'https://images.web3auth.io/login-github-active.svg',
         },
         {
             name: 'kakao',
@@ -195,10 +203,6 @@ function OptionsWallet({
         {
             name: 'linkedin',
             img: 'https://images.web3auth.io/login-linkedin-active.svg',
-        },
-        {
-            name: 'twitter',
-            img: 'https://images.web3auth.io/login-twitter-active.svg',
         },
         {
             name: 'weibo',
@@ -220,7 +224,7 @@ function OptionsWallet({
                         }`}
                         onClick={() => setTypeConnect('Wallet')}
                     >
-                        Connect a wallet
+                      <p>Connect a wallet</p>
                     </span>
                     <span
                         className={`${
@@ -228,7 +232,7 @@ function OptionsWallet({
                         }`}
                         onClick={() => setTypeConnect('Social')}
                     >
-                        Social Login
+                        <p>Social Login</p>
                     </span>
                 </div>
             </Header>
@@ -244,7 +248,7 @@ function OptionsWallet({
                             img="https://images.web3auth.io/login-google-active.svg"
                             type="option-login"
                         />
-                        <LabelSocialConnect>
+                        <LabelSocialConnect className={isActive ? "active" : "inactive"}>
                             {socialLoginList.map((social, index) => {
                                 return (
                                     <div
@@ -258,16 +262,20 @@ function OptionsWallet({
                                 )
                             })}
                         </LabelSocialConnect>
-                        <div>
+                        <div className="content-social">
                             We do not store any data related to your social
                             logins.
                         </div>
+                        <div onClick={ToggleClass} className={isActive ? "active more-social" : "inactive more-social"} >
+                        <p className='p1'>View more options</p>
+                        <p className='p2'>View less options</p>
+                        </div>
                         <div className="line"></div>
 
-                        <div>Email or phone</div>
+                        <div className="email">Email or phone</div>
                         <input
                             type="text"
-                            placeholder="Eg: +(00)123456"
+                            placeholder="sobajaswap@gmail.com || +123666666666"
                             onChange={(e) => setPhoneNumber(e.target.value)}
                         />
                         <PrimaryButton
@@ -368,21 +376,43 @@ const LabelSocialConnect = styled.div`
     grid-template-columns: 1fr 1fr 1fr;
 
     grid-gap: 10px;
+    &.inactive{
+        // height: 50px;
+        // overflow: hidden;
+        div:nth-child(4),
+        div:nth-child(5),
+        div:nth-child(6),
+        div:nth-child(7),
+        div:nth-child(8),
+        div:nth-child(9),
+        div:nth-child(10),
+        div:nth-child(11),
+        div:nth-child(12){
+            display:none;
+        }
+    }
     div {
         display: flex;
         justify-content: center;
         align-items: center;
         border: 1px solid #003b5c;
-        background: #0b0b0b;
-        min-height: 40px;
+        background: rgb(255, 255, 255);
+        min-height: 48px;
         border-radius: 8px;
+        @media screen and (max-width: 767px) {
+            min-height: 42px;
+        }
         :hover {
-            background: #454444bf;
+            background: rgba(255, 255, 255, 0.8);
         }
 
         img {
-            width: 24px;
-            height: 24px;
+            width: 35px;
+            height: 35px;
+            @media screen and (max-width: 767px) {
+                width: 30px;
+                height: 30px;
+            }
         }
     }
 `
@@ -395,16 +425,23 @@ const Header = styled.div`
     display: flex;
     justify-content: center;
     padding: 3rem 1.5rem 0;
+   
 
     .label-btn {
         display: flex;
         background: rgba(0, 178, 255, 0.3);
-        border-radius: 12px;
+        border-radius: 8px;
+        width: 100%;
     }
 
     .active {
         background: #00b2ff;
-        border-radius: 12px;
+    }
+    span:nth-child(1){
+        border-radius: 8px 0 0 8px;
+    }
+    span:nth-child(2){
+        border-radius:  0 8px 8px 0;
     }
 
     span {
@@ -413,10 +450,11 @@ const Header = styled.div`
         font-family: 'Inter';
         font-style: normal;
         font-weight: 400;
-        font-size: 20px;
+        font-size: 18px;
         line-height: 30px;
-        padding: 10px 20px;
-        /* text-align: center; */
+        padding: 10px 10px;
+        width: 50%;
+        text-align: center;
     }
     ::before {
         content: '';
@@ -440,6 +478,11 @@ const Header = styled.div`
             margin: auto;
         }
     }
+    @media screen and (max-width: 767px){
+        span{
+            font-size: 14px;
+        }
+    }
 `
 const WrapContent = styled.div`
     padding: 0.5rem 1.5rem 1.2rem;
@@ -457,6 +500,9 @@ const Title = styled.div`
     div {
         font-size: 14px;
         margin-bottom: 15px;
+        @media screen and (max-width: 767px) {
+            font-size: 12px;
+        }
     }
 
     div:first-child {
@@ -499,17 +545,51 @@ const WrapItem = styled.div`
     cursor: pointer;
     opacity: 1;
     gap: 20px;
-
+    .email{
+        font-size: 18px;
+        @media screen and (max-width: 767px) {
+            font-size: 14px;
+        }
+    }
+    .content-social{
+         font-size: 14px;
+        @media screen and (max-width: 767px) {
+            font-size: 12px;
+        }
+    }
+    .more-social{
+        color: #00B2FF;
+        font-size: 12px;
+        text-align: right;
+        padding: 0 10px;
+    }
     input {
         outline: none;
         border: none;
-        background: rgb(57, 57, 56);
+        background: rgb(255, 255, 255);
         padding: 10px 16px;
-        border-radius: 9px;
+        border-radius: 6px;
         font-size: 16px;
-        color: white;
+        color: rgba(0, 0, 0, 0.8);
+        ::placeholder {
+            color: #888888;
+        }
     }
-
+    .active.more-social{
+        .p1{
+            display: none;
+        }
+    }
+    .inactive.more-social{
+        .p2{
+            display: none;
+        }
+    }
+    .line{
+        height: 1.5px;
+        width: 100%;
+        background: linear-gradient(90deg,rgba(0,59,92,0.140625) 0%,#004B76 51.56%,rgba(0,59,92,0) 100%);
+    }
     &.active {
         opacity: 1;
     }
@@ -518,9 +598,9 @@ const WrapItem = styled.div`
         ::-webkit-scrollbar {
             display: none;
         }
-        div:nth-child(4) {
-            order: 1;
-        }
+        // div:nth-child(4) {
+        //     order: 1;
+        // }
     }
     @media screen and (max-width: 375px) {
     }
@@ -564,14 +644,23 @@ const ItemContent = styled.button`
     font-family: Inter;
 
     img {
-        height: 50px;
-        width: 50px;
+        height: 42px;
+        width: 42px;
         object-fit: contain;
         border-radius: 50%;
     }
     span {
-        font-size: 18px;
+        font-size: 16px;
         color: white;
+    }
+    @media screen and (max-width: 767px){
+        img {
+            height: 38px;
+            width: 38px;
+        }
+        span {
+            font-size: 14px;
+        }
     }
 `
 export default OptionsWallet

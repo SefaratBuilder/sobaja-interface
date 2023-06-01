@@ -37,7 +37,7 @@ export const useAAFactory = () => {
                         setIsDeyloyed(true)
                     }
                 } else {
-                    address = await contract.callStatic.deployCounterFactualAccount(account, '0')
+                    address = await contract.getAddressForCounterFactualAccount(account, '0')
                     const code = await provider.getCode(address)
                     if (code.length > 2) {
                         setIsDeyloyed(true)

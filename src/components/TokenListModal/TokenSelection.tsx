@@ -23,8 +23,7 @@ const TokenSelection = ({
 }: TokenSelectionProps) => {
     const { account } = useActiveWeb3React()
     const { smartAccountAddress } = useSmartAccountContext()
-    const { address } = useWeb3AuthContext()
-    const balance = useCurrencyBalance(address ? smartAccountAddress : account, token)
+    const balance = useCurrencyBalance(smartAccountAddress || account, token)
 
     return (
         <WrapperSelection onClick={() => onUserSelect(token)}>

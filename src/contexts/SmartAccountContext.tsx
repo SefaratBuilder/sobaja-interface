@@ -10,6 +10,8 @@ import { SimpleAccountAPI } from 'pantinho-aa'
 import { AAFactory } from 'constants/addresses'
 import { computeGasLimit } from 'utils'
 import { useActiveWeb3React } from 'hooks'
+import { ChainId } from 'interfaces'
+import axios from 'axios'
 
 interface SmartAccountContextType {
     contract: ethers.Contract | null,
@@ -51,15 +53,28 @@ export const SmartAccountProvider = ({ children }: any) => {
         const totalGasUse = (500000 * (txnsLength + 1) + defaultVerificationGasLimit + initGas) * gasPrice
         if (totalGasUse < Number(depositedFund)) return
         const diffFund = totalGasUse - Number(depositedFund)
-
+        console.log(diffFund)
         return {
             target: entryPointContract.address,
             data: entryPointContract.interface.encodeFunctionData('depositTo', [smartAccountAddress]),
-            value: mulNumberWithDecimal(diffFund, 0)
+            // value: mulNumberWithDecimal(diffFund, 0)
+            value: mulNumberWithDecimal(0.5, 18)
         }
     }, [
         smartAccountAddress, isDeployed, entryPointContract, depositedFund
     ])
+
+    const executeUserOp = async (userOp: any, chainId: ChainId) => {
+        try {
+            const result = await axios.post('http://localhost:3000/user-operations/execute', {
+                userOp,
+                chainId
+            })
+            return result.data.hash as string
+        } catch(err) {
+            return ""
+        }
+    }
 
     const sendTransactions = useCallback(async (txns: Transaction[]) => {
         if (!provider || !entryPointContract || !chainId) return
@@ -73,11 +88,11 @@ export const SmartAccountProvider = ({ children }: any) => {
             index: 0,
             accountAddress: smartAccountAddress
         })
-        console.log('txns', txns)
         const op = await walletAPI.createSignedUserOp(
             txns,
             nonceResult?.result?.[0]?.toString(),
             ownerSigner._address,
+            chainId !== ChainId.ZKTESTNET && chainId !== ChainId.ZKMAINNET ? 100_000 : 3_000_000,
             !isDeployed ? 500000 : undefined
         )
         op.signature = await op.signature
@@ -85,10 +100,13 @@ export const SmartAccountProvider = ({ children }: any) => {
         op.sender = await op.sender
         op.preVerificationGas = await op.preVerificationGas
         console.log('op', op)
-        //Test directly call on wallet
-        //Actually, we need to call to ERC4337 service to execute 
-        const callGasLimit = await entryPointContract.estimateGas.handleOps([op], ownerAddress)
-        return entryPointContract.handleOps([op], ownerAddress, { gasLimit: computeGasLimit(callGasLimit) })
+        // //Test directly call on wallet
+        // //Actually, we need to call to ERC4337 service to execute 
+        // const callGasLimit = await entryPointContract.estimateGas.handleOps([op], ownerAddress)
+        // return entryPointContract.handleOps([op], ownerAddress, { gasLimit: computeGasLimit(callGasLimit) })
+        const hash = await executeUserOp(op, chainId)
+        console.log('hashhhh', hash)
+        return await provider.getTransaction(hash)
     }, [
         provider, entryPointContract, chainId, depositFundTxn
     ])

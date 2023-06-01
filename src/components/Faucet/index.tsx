@@ -202,7 +202,6 @@ const Faucet = () => {
                     data: contract.interface.encodeFunctionData('requestTokens', [item.address]),
                     value: 0
                 } 
-                console.log('haha')
                 callResult = await sendTransactions([txn])
             } else {
                 callResult = await contract.requestTokens(address)
