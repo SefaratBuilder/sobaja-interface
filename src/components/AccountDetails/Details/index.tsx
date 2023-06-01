@@ -1,30 +1,106 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import ETH from 'assets/token-logos/eth.svg'
 import PlusIcon from 'assets/icons/plus.svg'
 import Arrow from 'assets/icons/arrow-link.svg'
-import { useUpdateBalanceTokens, useUsersState } from 'states/users/hooks'
+import { useAddUser, useUsersState } from 'states/users/hooks'
 import { useActiveWeb3React } from 'hooks'
-import { UserActivity, UserBalance } from 'states/users/reducer'
+import {
+    User,
+    UserActivity,
+    UserBalance,
+    UsersDetails,
+    initBalanceToken,
+} from 'states/users/reducer'
+import { Field, Token } from 'interfaces'
+import { NATIVE_COIN, URLSCAN_BY_CHAINID } from 'constants/index'
 
-const WrapDetailsAccount = (balance?: string) => {
+import TokenListModal from 'components/TokenListModal'
+import { useAllTokenBalances } from 'hooks/useCurrencyBalance'
+import SendModal from '../SendModal'
+
+const WrapDetailsAccount = ({ balance }: { balance?: string }) => {
     const [currentTab, setCurrentTab] = useState<'Balances' | 'Activity'>(
         'Balances',
     )
     const { chainId } = useActiveWeb3React()
-    const { users } = useUsersState()
-    // const updateBalances = useUpdateBalanceTokens()
-    // useEffect(() => {
-    //     if (balance) {
-    //         const newListBalance = users?.[chainId]?.balances?.map(i => {
-    //             return i
-    //         })
-    //         updateBalances({
-    //             ...users?.[chainId]?.balances,
+    const allBalances = useAllTokenBalances()
 
-    //         })
-    //     }
-    // }, [balance])
+    // const [token, setToken] = useState<Token>(NATIVE_COIN[chainId || 5])
+    // const tokenStruct = useToken(token.address)
+    // const balanceToken = useCurrencyBalance(account, tokenStruct)
+    // const updateBalance = useUpdateBalanceTokens()
+    const addUser = useAddUser()
+    const userData = useUsersState()
+
+    /**
+     * @add handle add token to list UsersState
+     */
+    const handleOnAdd = useCallback(
+        (
+            token: Token,
+            balance: string,
+            allTokenBalances: {
+                [tokenAddress: string]: string | undefined
+            },
+        ) => {
+            const updateBalance = userData.balances.map((i) => {
+                return {
+                    ...i,
+                    balance: allTokenBalances?.[i.address] || i.balance,
+                }
+            })
+
+            const newUser = {
+                balances: [
+                    ...updateBalance,
+                    {
+                        ...token,
+                        balance: allTokenBalances?.[token.address] || balance,
+                    },
+                ],
+                activity: [...userData.activity],
+            }
+
+            !userData.balances.map((i) => i.address).includes(token.address) &&
+                addUser(newUser)
+        },
+        [userData],
+    )
+
+    /**
+     * @init init data balance when not exist
+     */
+    useEffect(() => {
+        if (!chainId) return
+        if (!userData && balance) {
+            addUser({
+                balances: [{ ...initBalanceToken(chainId), balance: balance }],
+                activity: [],
+            })
+        }
+    }, [chainId, balance])
+
+    /**
+     * @update update balances when open
+     */
+    useEffect(() => {
+        if (userData) {
+            const updateBalance = userData.balances.map((i) => {
+                return {
+                    ...i,
+                    balance: allBalances?.[i.address] || i.balance,
+                }
+            })
+
+            const newUser = {
+                balances: [...updateBalance],
+                activity: [...userData.activity],
+            }
+            addUser(newUser)
+            console.log('update balances')
+        }
+    }, [])
 
     return (
         <Container>
@@ -42,47 +118,68 @@ const WrapDetailsAccount = (balance?: string) => {
                     Activity
                 </div>
             </WrapDetail>
-            <WrapTokens>
-                {currentTab === 'Balances' &&
-                    chainId &&
-                    users?.[chainId?.toString()]?.balances.map(
-                        (i: UserBalance) => {
-                            return (
-                                <>
-                                    <LabelToken>
-                                        <div>
-                                            <img src={ETH} alt="" />
-                                            <span>{i.symbol}</span>
-                                        </div>
-                                        <div>${i.balance}</div>
-                                    </LabelToken>
-                                    <Line />
-                                </>
-                            )
-                        },
-                    )}
-                {currentTab === 'Activity' &&
-                    chainId &&
-                    users?.[chainId?.toString()]?.activity?.map(
-                        (i: UserActivity) => {
-                            return (
-                                <>
-                                    <LabelToken>
-                                        <div>
-                                            <img src={ETH} alt="" />
-                                            <span>{i.method}</span>
-                                        </div>
-                                        <div>${i.timestamp}</div>
-                                    </LabelToken>
-                                    <Line />
-                                </>
-                            )
-                        },
-                    )}
 
-                <Line isNotLast={true} />
-            </WrapTokens>
+            {currentTab === 'Balances' && (
+                <WrapTokens>
+                    {userData &&
+                        userData?.balances?.map(
+                            (i: UserBalance, index: number) => {
+                                return (
+                                    <span key={index}>
+                                        <CustomSendModal>
+                                            <SendModal propsToken={i} />
+                                        </CustomSendModal>
 
+                                        <LabelToken key={index}>
+                                            <div>
+                                                <img
+                                                    src={i.logoURI || ETH}
+                                                    alt="logo-token"
+                                                />
+                                                <span>{i.symbol}</span>
+                                            </div>
+                                            <div>
+                                                ≈${Number(i.balance).toFixed(6)}
+                                            </div>
+                                        </LabelToken>
+                                        {<Line />}
+                                    </span>
+                                )
+                            },
+                        )}
+                </WrapTokens>
+            )}
+            {currentTab === 'Activity' && (
+                <WrapTokens isReverse={true}>
+                    {userData &&
+                        userData?.activity?.map(
+                            (i: UserActivity, index: number) => {
+                                return (
+                                    <span key={index}>
+                                        <LabelToken
+                                            key={index}
+                                            onClick={() =>
+                                                chainId &&
+                                                window.open(
+                                                    `${URLSCAN_BY_CHAINID[chainId].url}tx/${i.hash}`,
+                                                )
+                                            }
+                                        >
+                                            <div>
+                                                {/* <img src={ETH} alt="" /> */}
+                                                <span>{i.method}</span>
+                                            </div>
+                                            <div>{i.timestamp}</div>
+                                        </LabelToken>
+                                        {<Line />}
+                                    </span>
+                                )
+                            },
+                        )}
+
+                    {/* <Line isNotLast={true} /> */}
+                </WrapTokens>
+            )}
             <WrapAddToken>
                 <div>Don't see your token?</div>
                 <div>
@@ -90,6 +187,16 @@ const WrapDetailsAccount = (balance?: string) => {
                         <img src={PlusIcon} alt="plus" />
                     </Icon>
                     Add Token
+                    {chainId && (
+                        <CustomTokenListModal>
+                            <TokenListModal
+                                token={NATIVE_COIN[chainId]}
+                                field={Field.INPUT}
+                                onUserSelect={() => {}}
+                                onSelectToken={handleOnAdd}
+                            />
+                        </CustomTokenListModal>
+                    )}
                 </div>
             </WrapAddToken>
             <Line isNotLast={true} />
@@ -124,6 +231,10 @@ const WrapAddToken = styled.div`
     div:nth-child(2) {
         cursor: pointer;
     }
+
+    @media screen and (max-width: 391px) {
+        padding: 0.5rem 0;
+    }
 `
 
 const Icon = styled.div`
@@ -151,6 +262,9 @@ const WrapLink = styled.div`
         width: 12px;
         height: 12px;
     }
+    @media screen and (max-width: 391px) {
+        padding: 0.5rem 1.5rem;
+    }
 `
 
 const WrapDetail = styled.div`
@@ -170,7 +284,28 @@ const WrapDetail = styled.div`
     }
 `
 
-const WrapTokens = styled.div``
+const WrapTokens = styled.div<{ isReverse?: boolean }>`
+    position: relative;
+    display: flex;
+    flex-direction: ${({ isReverse }) =>
+        isReverse ? 'column-reverse' : 'column'};
+    max-height: 210px;
+    /* height: 100%; */
+    overflow-y: scroll;
+
+    span {
+        :hover {
+            background: #b5baba7a;
+        }
+    }
+
+    ::-webkit-scrollbar {
+        display: none;
+        /* width: 8px;
+        background-color: #f5f5f5; */
+    }
+`
+
 const LabelToken = styled.div`
     display: flex;
     justify-content: space-between;
@@ -190,6 +325,9 @@ const LabelToken = styled.div`
         height: 18px;
         border-radius: 50%;
     }
+    @media screen and (max-width: 391px) {
+        padding: 0.2rem 1rem;
+    }
 `
 
 const Line = styled.div<{ isNotLast?: boolean }>`
@@ -199,4 +337,15 @@ const Line = styled.div<{ isNotLast?: boolean }>`
         isNotLast
             ? 'linear-gradient(90deg, rgba(0, 59, 92, 0.140625) 0%, #004B76 51.56%, rgba(0, 59, 92, 0) 100%)'
             : 'linear-gradient(270deg,rgba(255, 255, 255, 0) 0%,#ffffff 50.52%,rgba(255, 255, 255, 0) 100%)'};
+`
+
+const CustomTokenListModal = styled.div`
+    position: absolute;
+    opacity: 0;
+`
+
+const CustomSendModal = styled.div`
+    position: absolute;
+    width: 100%;
+    opacity: 0;
 `

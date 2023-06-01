@@ -25,12 +25,13 @@ import BGSoba from 'assets/icons/soba2.jpg'
 import Twitter from 'assets/icons/twitter.svg'
 import Discord from 'assets/icons/discord.svg'
 import CloseButton from 'assets/icons/icon-close.svg'
-import { useAppState, useUpdateStepFaucet } from 'states/application/hooks'
+import { useUpdateStepFaucet } from 'states/application/hooks'
 import { ListNetwork } from 'constants/networks'
-import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import Loader from 'components/Loader'
 import Arrow from 'assets/icons/arrow-link.svg'
 import { useWindowDimensions } from 'hooks/useWindowSize'
+import { useAddUser, useUsersState } from 'states/users/hooks'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Faucet = () => {
     const [isDislayFaucet, setIsDisplayFaucet] = useState<boolean>(false)
@@ -40,14 +41,58 @@ const Faucet = () => {
     const faucetSobaContract = useFaucetSobaContract()
     const { account, chainId, provider, connector } = useActiveWeb3React()
     const initDataTransaction = InitCompTransaction()
+    const { smartAccountAddress, sendTransactions } = useSmartAccountContext()
     const { addTxn } = useTransactionHandler()
-    const { wallet } = useSmartAccountContext()
     const { stepFaucet, setStepFaucet } = useUpdateStepFaucet()
     const { width } = useWindowDimensions()
+    const addUser = useAddUser()
+    const userData = useUsersState()
+
+    const handleDataUser = ({
+        hash,
+        status,
+        method,
+    }: {
+        hash: string
+        status: boolean
+        method: string
+    }) => {
+        addTxn({
+            hash,
+            msg: method,
+            status,
+        })
+        const date =
+            new Date().toDateString().split(' ')?.slice(1, 3).join(' ') +
+            ' ' +
+            new Date().toLocaleTimeString('vi')
+        const newUser = {
+            ...userData,
+            activity:
+                userData.activity.length === 5
+                    ? [
+                          ...userData.activity.slice(1),
+                          {
+                              method,
+                              timestamp: date,
+                              hash,
+                          },
+                      ]
+                    : [
+                          ...userData.activity,
+                          {
+                              method,
+                              timestamp: date,
+                              hash,
+                          },
+                      ],
+        }
+        addUser(newUser)
+    }
 
     const getAddress = useMemo(() => {
-        return chainId !== ChainId.GOERLI ? account : wallet?.address || account
-    }, [wallet, chainId, account])
+        return smartAccountAddress || account
+    }, [smartAccountAddress, account])
 
     const listNetworksSupported = ListNetwork.filter(
         (i) => i.chainId === ChainId.GOERLI || i.chainId === ChainId.ZKTESTNET,
@@ -156,12 +201,10 @@ const Faucet = () => {
                 console.log({ wait })
                 initDataTransaction.setIsOpenResultModal(false)
 
-                addTxn({
-                    hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
-                        hash || ''
-                    }`,
-                    msg: 'Faucet',
+                handleDataUser({
+                    hash: wait?.transactionHash || '',
                     status: wait?.status === 1 ? true : false,
+                    method: `Faucet`,
                 })
             } else {
                 initDataTransaction.setError(dataFaucet.data?.error || 'Failed')
@@ -184,7 +227,7 @@ const Faucet = () => {
     const clickFaucetToken = async (item: Token) => {
         try {
             const { address, symbol, decimals, logoURI: image } = item
-            if (faucetContract == null || !faucetSobaContract == null) return
+            if (faucetContract == null || faucetSobaContract == null) return
 
             setIsDisplayFaucet(false)
             initDataTransaction.setAddErc20({
@@ -194,25 +237,41 @@ const Faucet = () => {
                 image,
             })
             initDataTransaction.setIsOpenWaitingModal(true)
-            let tx
-            if (item.symbol == 'Soba') {
-                tx = await faucetSobaContract?.requestTokens(address)
+            const contract = item.symbol ? faucetContract : faucetSobaContract
+            let callResult: any
+            if (smartAccountAddress) {
+                const txn = {
+                    target: contract.address,
+                    data: contract.interface.encodeFunctionData(
+                        'requestTokens',
+                        [item.address],
+                    ),
+                    value: 0,
+                }
+                callResult = await sendTransactions([txn])
             } else {
-                tx = await faucetContract?.requestTokens(address)
+                callResult = await contract.requestTokens(address)
             }
+
             initDataTransaction.setIsOpenWaitingModal(false)
 
             initDataTransaction.setIsOpenResultModal(true)
-            const result = await tx.wait()
+            const result = await callResult.wait()
 
             // initDataTransaction.setIsOpenResultModal(false)
 
-            addTxn({
-                hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
-                    result.hash || ''
-                }`,
-                msg: 'Faucet',
+            // addTxn({
+            //     hash: `${chainId && URLSCAN_BY_CHAINID[chainId].url}/tx/${
+            //         result.hash || ''
+            //     }`,
+            //     msg: 'Faucet',
+            //     status: result.status === 1 ? true : false,
+            // })
+
+            handleDataUser({
+                hash: result.hash,
                 status: result.status === 1 ? true : false,
+                method: `Faucet`,
             })
             sendEvent({
                 category: 'Defi',
@@ -287,18 +346,7 @@ const Faucet = () => {
                                     reality of Mainnet.
                                 </TextCoin>
                             </ContentFaucet>
-                            <CoinButton>
-                                {showMintCoins()}
-                                {/* {chainId !== 280 && (
-                                    <Row>
-                                        <Error fontSize="14px">
-                                            Wrong network! Please switch to
-                                            zkSync Goerli network to faucet
-                                            tokens.
-                                        </Error>
-                                    </Row>
-                                )} */}
-                            </CoinButton>
+                            <CoinButton>{showMintCoins()}</CoinButton>
                         </BodyModalFaucet>
                     </ContainerFaucetModal>
                 </FaucetModalDiv>

@@ -1,24 +1,19 @@
 import React, { useState, Fragment, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
-import PrimaryButton, { Button } from 'components/Buttons/PrimaryButton'
+import { Button } from 'components/Buttons/PrimaryButton'
 import WalletModal from 'components/WalletModal'
 import { Activity } from 'react-feather'
 import { shortenAddress } from 'utils'
 import arrowDown from 'assets/icons/arrow-down.svg'
-import { useSmartAccountContext } from 'contexts/SmartAccountContext'
-import { ChainId } from 'interfaces'
 import { useActiveWeb3React } from 'hooks'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 
 const Web3Status = () => {
     const { account, chainId } = useActiveWeb3React()
     const [toggleWalletModal, setToggleWalletModal] = useState<boolean>(false)
-    const { wallet } = useSmartAccountContext()
-
-    const getAddress = useMemo(() => {
-        return chainId !== ChainId.GOERLI ? account : wallet?.address || account
-    }, [wallet, chainId, account])
-
+    const { smartAccountAddress } = useSmartAccountContext()
     const error = undefined
+
     function formatConnectorName(account: any, error: any) {
         return (
             <Fragment>
@@ -83,7 +78,7 @@ const Web3Status = () => {
     return (
         <Fragment>
             <Web3StatusWrapper>
-                {Web3StatusInner(getAddress, error)}
+                {Web3StatusInner(smartAccountAddress || account, error)}
             </Web3StatusWrapper>
             {toggleWalletModal ? (
                 <WalletModal setToggleWalletModal={setToggleWalletModal} />

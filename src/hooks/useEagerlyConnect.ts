@@ -26,7 +26,7 @@ export default function useEagerlyConnect() {
   const getConnection = useGetConnection()
 
   let selectedConnection: Connection | undefined
-  console.log("selectedWallet", selectedWallet)
+
   if (selectedWallet && selectedWallet !== 'ARGENT') {
     try {
       selectedConnection = getConnection(selectedWallet)

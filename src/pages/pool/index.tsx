@@ -195,7 +195,7 @@ export default function Pools() {
 
     const rows = useQueryPool((page - 1) * 10)
     const transactions = useGetPoolsTransactions()
-
+    console.log({transactions})
     const [overviewPool, setOverviewPool] = useState<Data>()
 
     const [poolsAdminInCurrentPag, setPoolsAdminInCurrentPag] =

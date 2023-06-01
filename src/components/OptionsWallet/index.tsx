@@ -158,10 +158,10 @@ function OptionsWallet({
             console.log({ error })
         }
     }
-    const [isActive, setActive] = useState(false);
+    const [isActive, setActive] = useState(false)
     const ToggleViewMoreSocial = () => {
-        setActive(!isActive);
-      };
+        setActive(!isActive)
+    }
 
     const socialLoginList = [
         {
@@ -224,7 +224,7 @@ function OptionsWallet({
                         }`}
                         onClick={() => setTypeConnect('Wallet')}
                     >
-                      <p>Connect a wallet</p>
+                        <p>Connect a wallet</p>
                     </span>
                     <span
                         className={`${
@@ -248,7 +248,9 @@ function OptionsWallet({
                             img="https://images.web3auth.io/login-google-active.svg"
                             type="option-login"
                         />
-                        <LabelSocialConnect className={isActive ? "active" : "inactive"}>
+                        <LabelSocialConnect
+                            className={isActive ? 'active' : 'inactive'}
+                        >
                             {socialLoginList.map((social, index) => {
                                 return (
                                     <div
@@ -266,16 +268,23 @@ function OptionsWallet({
                             We do not store any data related to your social
                             logins.
                         </div>
-                        <div onClick={ToggleViewMoreSocial} className={isActive ? "active more-social" : "inactive more-social"} >
-                        <p className='p1'>View more options</p>
-                        <p className='p2'>View less options</p>
+                        <div
+                            onClick={ToggleViewMoreSocial}
+                            className={
+                                isActive
+                                    ? 'active more-social'
+                                    : 'inactive more-social'
+                            }
+                        >
+                            <p className="p1">View more options</p>
+                            <p className="p2">View less options</p>
                         </div>
                         <div className="line"></div>
 
                         <div className="email">Email or phone</div>
                         <input
                             type="text"
-                            placeholder="to address"
+                            placeholder="sobajaswap@gmail.com || +123666666666"
                             onChange={(e) => setPhoneNumber(e.target.value)}
                         />
                         <PrimaryButton
@@ -376,7 +385,7 @@ const LabelSocialConnect = styled.div`
     grid-template-columns: 1fr 1fr 1fr;
 
     grid-gap: 10px;
-    &.inactive{
+    &.inactive {
         // height: 50px;
         // overflow: hidden;
         div:nth-child(4),
@@ -387,8 +396,8 @@ const LabelSocialConnect = styled.div`
         div:nth-child(9),
         div:nth-child(10),
         div:nth-child(11),
-        div:nth-child(12){
-            display:none;
+        div:nth-child(12) {
+            display: none;
         }
     }
     div {
@@ -425,7 +434,6 @@ const Header = styled.div`
     display: flex;
     justify-content: center;
     padding: 3rem 1.5rem 0;
-   
 
     .label-btn {
         display: flex;
@@ -437,11 +445,11 @@ const Header = styled.div`
     .active {
         background: #00b2ff;
     }
-    span:nth-child(1){
+    span:nth-child(1) {
         border-radius: 8px 0 0 8px;
     }
-    span:nth-child(2){
-        border-radius:  0 8px 8px 0;
+    span:nth-child(2) {
+        border-radius: 0 8px 8px 0;
     }
 
     span {
@@ -478,8 +486,8 @@ const Header = styled.div`
             margin: auto;
         }
     }
-    @media screen and (max-width: 767px){
-        span{
+    @media screen and (max-width: 767px) {
+        span {
             font-size: 14px;
         }
     }
@@ -545,20 +553,20 @@ const WrapItem = styled.div`
     cursor: pointer;
     opacity: 1;
     gap: 20px;
-    .email{
+    .email {
         font-size: 18px;
         @media screen and (max-width: 767px) {
             font-size: 14px;
         }
     }
-    .content-social{
-         font-size: 14px;
+    .content-social {
+        font-size: 14px;
         @media screen and (max-width: 767px) {
             font-size: 12px;
         }
     }
-    .more-social{
-        color: #00B2FF;
+    .more-social {
+        color: #00b2ff;
         font-size: 12px;
         text-align: right;
         padding: 0 10px;
@@ -575,20 +583,25 @@ const WrapItem = styled.div`
             color: #888888;
         }
     }
-    .active.more-social{
-        .p1{
+    .active.more-social {
+        .p1 {
             display: none;
         }
     }
-    .inactive.more-social{
-        .p2{
+    .inactive.more-social {
+        .p2 {
             display: none;
         }
     }
-    .line{
+    .line {
         height: 1.5px;
         width: 100%;
-        background: linear-gradient(90deg,rgba(0,59,92,0.140625) 0%,#004B76 51.56%,rgba(0,59,92,0) 100%);
+        background: linear-gradient(
+            90deg,
+            rgba(0, 59, 92, 0.140625) 0%,
+            #004b76 51.56%,
+            rgba(0, 59, 92, 0) 100%
+        );
     }
     &.active {
         opacity: 1;
@@ -653,7 +666,7 @@ const ItemContent = styled.button`
         font-size: 16px;
         color: white;
     }
-    @media screen and (max-width: 767px){
+    @media screen and (max-width: 767px) {
         img {
             height: 38px;
             width: 38px;

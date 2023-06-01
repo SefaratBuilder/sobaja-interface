@@ -1,254 +1,142 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext } from 'react'
 import { ethers } from 'ethers'
-import SmartAccount from '@biconomy/smart-account'
-import { SmartAccountState, SmartAccountVersion } from '@biconomy/core-types'
-import { useWeb3AuthContext } from './SocialLoginContext'
+import { useAAFactory } from 'hooks/useAAFactory'
+import {
+    useAAEntryPointContract,
+    useSmartAccountContract,
+} from 'hooks/useContract'
+import { useAAEntryPoint } from 'hooks/useAAEntryPoint'
+import { useSingleCallResult } from 'states/multicall/hooks'
+import { mulNumberWithDecimal } from 'utils/math'
+import { Transaction } from 'interfaces/smartAccount'
+import { SimpleAccountAPI } from 'pantinho-aa'
+import { AAFactory } from 'constants/addresses'
+import { computeGasLimit } from 'utils'
 import { useActiveWeb3React } from 'hooks'
 import { ChainId } from 'interfaces'
-import { supportedChains } from 'utils/chainConfig'
-import { useTransactionHandler } from 'states/transactions/hooks'
+import axios from 'axios'
 
-// Types
-type Balance = {
-    totalBalanceInUsd: number
-    alltokenBalances: any[]
-}
-type ISmartAccount = {
-    version: string
-    smartAccountAddress: string
+interface SmartAccountContextType {
+    contract: ethers.Contract | null
+    nonce: string | undefined
+    depositedFund: string | undefined
+    smartAccountAddress: string | undefined
     isDeployed: boolean
+    sendTransactions: (txns: Transaction[]) => Promise<any>
 }
-type smartAccountContextType = {
-    wallet: SmartAccount | null
-    state: SmartAccountState | null
-    balance: Balance
-    loading: boolean
-    isFetchingBalance: boolean
-    selectedAccount: ISmartAccount | null
-    smartAccountsArray: ISmartAccount[]
-    setSelectedAccount: React.Dispatch<
-        React.SetStateAction<ISmartAccount | null>
-    >
-    getSmartAccount: () => Promise<string>
-    getSmartAccountBalance: () => Promise<string>
-}
-
-// Context
-export const SmartAccountContext = React.createContext<smartAccountContextType>(
+export const SmartAccountContext = React.createContext<SmartAccountContextType>(
     {
-        wallet: null,
-        state: null,
-        balance: {
-            totalBalanceInUsd: 0,
-            alltokenBalances: [],
-        },
-        loading: false,
-        isFetchingBalance: false,
-        selectedAccount: null,
-        smartAccountsArray: [],
-        setSelectedAccount: () => {},
-        getSmartAccount: () => Promise.resolve(''),
-        getSmartAccountBalance: () => Promise.resolve(''),
+        contract: null,
+        nonce: undefined,
+        depositedFund: undefined,
+        smartAccountAddress: undefined,
+        isDeployed: false,
+        sendTransactions: async () => {},
     },
 )
+
 export const useSmartAccountContext = () => useContext(SmartAccountContext)
 
-// Provider
 export const SmartAccountProvider = ({ children }: any) => {
-    const { chainId } = useActiveWeb3React()
-    const { provider, address } = useWeb3AuthContext()
-    const [wallet, setWallet] = useState<SmartAccount | null>(null)
-    const [state, setState] = useState<SmartAccountState | null>(null)
-    const [selectedAccount, setSelectedAccount] =
-        useState<ISmartAccount | null>(null)
-    const [smartAccountsArray, setSmartAccountsArray] = useState<
-        ISmartAccount[]
-    >([])
-    const [balance, setBalance] = useState<Balance>({
-        totalBalanceInUsd: 0,
-        alltokenBalances: [],
-    })
-    const [isFetchingBalance, setIsFetchingBalance] = useState(false)
-    const [loading, setLoading] = useState(false)
-    const { addTxn } = useTransactionHandler()
+    const { smartAccountAddress, isDeployed } = useAAFactory()
+    const contract = useSmartAccountContract(
+        isDeployed ? smartAccountAddress : undefined,
+    )
+    const entryPointContract = useAAEntryPointContract()
+    const { depositedFund } = useAAEntryPoint()
+    const { account, chainId, provider } = useActiveWeb3React()
 
-    const resetState = useCallback(() => {
-        setWallet(null)
-        setState(null)
-        setSelectedAccount(null)
-        setSmartAccountsArray([])
-        setBalance({
-            totalBalanceInUsd: 0,
-            alltokenBalances: [],
-        })
-        setIsFetchingBalance(false)
-        setLoading(false)
-    }, [])
+    const nonceResult = useSingleCallResult(contract, 'nonce', [])
 
-    const getSmartAccount = useCallback(async () => {
-        if (!provider || !address || !chainId) return resetState()
+    const depositFundTxn = useCallback(
+        (txnsLength: number) => {
+            if (!entryPointContract) return
+            const defaultVerificationGasLimit = 1_000_000
+            const gasPrice = 3e8 // 0.3 Gwei
+            const initGas = isDeployed ? 0 : 800_000
+            const totalGasUse =
+                (500000 * (txnsLength + 1) +
+                    defaultVerificationGasLimit +
+                    initGas) *
+                gasPrice
+            if (totalGasUse < Number(depositedFund)) return
+            const diffFund = totalGasUse - Number(depositedFund)
+            console.log(diffFund)
+            return {
+                target: entryPointContract.address,
+                data: entryPointContract.interface.encodeFunctionData(
+                    'depositTo',
+                    [smartAccountAddress],
+                ),
+                // value: mulNumberWithDecimal(diffFund, 0)
+                value: mulNumberWithDecimal(0.5, 18),
+            }
+        },
+        [smartAccountAddress, isDeployed, entryPointContract, depositedFund],
+    )
 
+    const executeUserOp = async (userOp: any, chainId: ChainId) => {
         try {
-            setLoading(true)
-            const walletProvider = new ethers.providers.Web3Provider(provider)
-            // New instance, all config params are optional
-            const wallet = new SmartAccount(walletProvider, {
-                activeNetworkId: chainId,
-                supportedNetworksIds: supportedChains,
-                networkConfig: [
-                    {
-                        chainId: 80001, //mumbai
-                        dappAPIKey: process.env.REACT_APP_BICONOMY_API_KEY,
-                    },
-                    {
-                        chainId: 5, //goerli
-                        dappAPIKey: process.env.REACT_APP_BICONOMY_API_KEY,
-                    },
-                ],
-            })
-
-            // Wallet initialization to fetch wallet info
-            const smartAccount = await wallet.init()
-            setWallet(wallet)
-            console.info('smartAccount', smartAccount)
-
-            smartAccount.on('txHashGenerated', (response: any) => {
-                console.log(
-                    'txHashGenerated event received in AddLP via emitter',
-                    response,
-                )
-                // showSuccessMessage(`Transaction sent: ${response.hash}`, response.hash);
-            })
-
-            smartAccount.on('txHashChanged', (response: any) => {
-                console.log(
-                    'txHashChanged event received in AddLP via emitter',
-                    response,
-                )
-                // showSuccessMessage(
-                //   `Transaction updated with hash: ${response.hash}`,
-                //   response.hash
-                // );
-            })
-
-            smartAccount.on('txMined', (response: any) => {
-                console.log('Transaction sent successfully', response)
-                addTxn({
-                    hash: response.hash,
-                    msg: 'Transaction has been sent successfully',
-                    status: true,
-                })
-            })
-
-            smartAccount.on('error', (response: any) => {
-                addTxn({
-                    hash: response.hash,
-                    msg: 'Transaction sent failed',
-                    status: false,
-                })
-            })
-
-            // get all smart account versions available and update in state
-            const { data } = await smartAccount.getSmartAccountsByOwner({
-                chainId: chainId,
-                owner: address,
-            })
-            console.log('smart accounts by owner', data)
-
-            const accountData = []
-            for (let i = 0; i < data.length; ++i) {
-                accountData.push(data[i])
-            }
-            setSmartAccountsArray(accountData)
-            // set the first wallet version as default
-            if (accountData.length) {
-                wallet.setSmartAccountVersion(
-                    accountData[0].version as SmartAccountVersion,
-                )
-                setSelectedAccount(accountData[0])
-            }
-
-            // get address, isDeployed and other data
-            const state = await smartAccount.getSmartAccountState()
-            setState(state)
-            setLoading(false)
-            return ''
-        } catch (error: any) {
-            setLoading(false)
-            console.error({ getSmartAccount: error })
-            return error.message
-        }
-    }, [provider, address])
-
-    const getSmartAccountBalance = async () => {
-        if (
-            !provider ||
-            !address ||
-            !chainId ||
-            (chainId && chainId !== ChainId.GOERLI)
-        )
-            return console.log('Wallet not connected')
-        if (!state || !wallet) return console.log('Init Smart Account First')
-
-        try {
-            setIsFetchingBalance(true)
-            // ethAdapter could be used like this
-            // const bal = await wallet.ethersAdapter().getBalance(state.address);
-            // console.log(bal);
-            // you may use EOA address my goerli SCW 0x1927366dA53F312a66BD7D09a88500Ccd16f175e
-            const balanceParams = {
-                chainId: chainId,
-                eoaAddress: state.address,
-                tokenAddresses: [],
-            }
-            const balFromSdk = await wallet.getAlltokenBalances(balanceParams)
-            const usdBalFromSdk = await wallet.getTotalBalanceInUsd(
-                balanceParams,
+            const result = await axios.post(
+                'http://localhost:3000/user-operations/execute',
+                {
+                    userOp,
+                    chainId,
+                },
             )
-            console.log({ balFromSdk })
-            setBalance({
-                totalBalanceInUsd: usdBalFromSdk.data.totalBalance,
-                alltokenBalances: balFromSdk.data,
-            })
-            setIsFetchingBalance(false)
+            return result.data.hash as string
+        } catch (err) {
             return ''
-        } catch (error: any) {
-            setIsFetchingBalance(false)
-            console.error({ getSmartAccountBalance: error })
-            return error.message
         }
     }
 
-    // useEffect(() => {
-    //     if (wallet && selectedAccount) {
-    //         wallet.setSmartAccountVersion(
-    //             selectedAccount.version as SmartAccountVersion,
-    //         )
-    //     }
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [selectedAccount])
-
-    // useEffect(() => {
-    //     getSmartAccount()
-    // }, [getSmartAccount])
-
-    // useEffect(() => {
-    //     getSmartAccountBalance()
-    // }, [wallet, state])
+    const sendTransactions = useCallback(
+        async (txns: Transaction[]) => {
+            if (!provider || !entryPointContract || !chainId) return
+            const ownerAddress = account
+            const ownerSigner = provider.getSigner(ownerAddress)
+            const walletAPI = new SimpleAccountAPI({
+                provider: provider,
+                entryPointAddress: entryPointContract.address,
+                owner: ownerSigner,
+                factoryAddress: AAFactory[chainId],
+                index: 0,
+                accountAddress: smartAccountAddress,
+            })
+            const op = await walletAPI.createSignedUserOp(
+                txns,
+                nonceResult?.result?.[0]?.toString(),
+                ownerSigner._address,
+                chainId !== ChainId.ZKTESTNET && chainId !== ChainId.ZKMAINNET
+                    ? 100_000
+                    : 3_000_000,
+                // !isDeployed ? 500000 : undefined
+            )
+            op.signature = await op.signature
+            op.nonce = await op.nonce
+            op.sender = await op.sender
+            op.preVerificationGas = await op.preVerificationGas
+            console.log('op', op)
+            // //Test directly call on wallet
+            // //Actually, we need to call to ERC4337 service to execute
+            // const callGasLimit = await entryPointContract.estimateGas.handleOps([op], ownerAddress)
+            // return entryPointContract.handleOps([op], ownerAddress, { gasLimit: computeGasLimit(callGasLimit) })
+            const hash = await executeUserOp(op, chainId)
+            console.log('hashhhh', hash)
+            return await provider.getTransaction(hash)
+        },
+        [provider, entryPointContract, chainId, depositFundTxn],
+    )
 
     return (
         <SmartAccountContext.Provider
             value={{
-                wallet,
-                state,
-                balance,
-                loading,
-                isFetchingBalance,
-                selectedAccount,
-                smartAccountsArray,
-                setSelectedAccount,
-                getSmartAccount,
-                getSmartAccountBalance,
+                contract,
+                nonce: nonceResult?.result?.[0]?.toString() ?? '0',
+                depositedFund,
+                smartAccountAddress,
+                isDeployed,
+                sendTransactions,
             }}
         >
             {children}

@@ -4,29 +4,28 @@ import styled from 'styled-components'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { Columns, Row } from 'components/Layouts'
 import { useActiveWeb3React } from 'hooks'
-import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { computeGasLimit, shortenAddress } from 'utils'
 import { mulNumberWithDecimal } from 'utils/math'
-import {
-    NATIVE_COIN,
-    URLSCAN_BY_CHAINID,
-    WRAPPED_NATIVE_COIN,
-} from 'constants/index'
+import { NATIVE_COIN, URLSCAN_BY_CHAINID } from 'constants/index'
 import { useETHBalances } from 'hooks/useCurrencyBalance'
 import { Error } from 'components/Text'
 import { useTransactionHandler } from 'states/transactions/hooks'
 import QRCode from 'react-qr-code'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import imgCopy from 'assets/icons/copy.svg'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import CloseIcon from 'assets/icons/x.svg'
 
 const DepositModal = () => {
     const { account, provider, chainId } = useActiveWeb3React()
-    const { wallet } = useSmartAccountContext()
+    const { smartAccountAddress } = useSmartAccountContext()
     const [value, setValue] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [isCopied, setIsCopied] = useState(false)
+    const balance = useETHBalances([smartAccountAddress || account])?.[
+        smartAccountAddress || account || ''
+    ]
 
-    const balance = useETHBalances([account])?.[account || '']
     const [error, setError] = useState('')
     const { addTxn } = useTransactionHandler()
 
@@ -40,8 +39,8 @@ const DepositModal = () => {
     }
 
     const handleCopyAddress = () => {
-        if (wallet?.address) {
-            navigator.clipboard.writeText(wallet?.address).then(() => {
+        if (smartAccountAddress) {
+            navigator.clipboard.writeText(smartAccountAddress).then(() => {
                 setIsCopied(true)
                 setTimeout(() => {
                     setIsCopied(false)
@@ -60,12 +59,13 @@ const DepositModal = () => {
         }
         const handleOnView = (linkUrl?: string) => {
             return (
-                linkUrl && window.open(`${linkUrl}/address/${wallet?.address}`)
+                linkUrl &&
+                window.open(`${linkUrl}/address/${smartAccountAddress}`)
             )
         }
         const onDeposit = async () => {
             try {
-                if (!account || !wallet) return
+                if (!account || !smartAccountAddress) return
                 if (Number(balance) < Number(value)) {
                     setError('You have no enough balance.')
                     return
@@ -73,7 +73,7 @@ const DepositModal = () => {
                 setError('')
                 const tx = {
                     from: account,
-                    to: wallet.address,
+                    to: smartAccountAddress,
                     value: mulNumberWithDecimal(value, 18),
                     data: '0x',
                 }
@@ -105,9 +105,9 @@ const DepositModal = () => {
             <ModalWrapper>
                 <ModalHeader>
                     <div>Deposit</div>
-                    {/* <div className="close-btn" onClick={onClose}>
-                        X
-                    </div> */}
+                    <div className="close-btn" onClick={onClose}>
+                        <img src={CloseIcon} alt="close icon" />
+                    </div>
                 </ModalHeader>
                 <ModalBody>
                     <div className="subtitle">
@@ -116,7 +116,7 @@ const DepositModal = () => {
                     </div>
                     <div className="cen">
                         <QRCode
-                            value={wallet?.address?.toString() || '0x'}
+                            value={smartAccountAddress?.toString() || '0x'}
                             size={160}
                             viewBox="0 0 160 160"
                         />
@@ -141,8 +141,8 @@ const DepositModal = () => {
                         <div>Smart account: </div>
                         <Row gap="10px">
                             <div>
-                                {wallet?.address &&
-                                    shortenAddress(wallet?.address, 6)}
+                                {smartAccountAddress &&
+                                    shortenAddress(smartAccountAddress, 6)}
                             </div>
                             {isCopied ? (
                                 <CopyBtn>
@@ -232,6 +232,10 @@ const ModalBody = styled(Columns)`
                 /* flex-direction: column; */
             }
         }
+    }
+
+    @media screen and (max-width: 375px) {
+        font-size: 11px;
     }
 `
 
