@@ -118,62 +118,68 @@ const WrapDetailsAccount = ({ balance }: { balance?: string }) => {
                     Activity
                 </div>
             </WrapDetail>
-            <WrapTokens>
-                {currentTab === 'Balances' &&
-                    userData &&
-                    userData?.balances?.map((i: UserBalance, index: number) => {
-                        return (
-                            <span key={index}>
-                                <CustomSendModal>
-                                    <SendModal propsToken={i} />
-                                </CustomSendModal>
 
-                                <LabelToken key={index}>
-                                    <div>
-                                        <img
-                                            src={i.logoURI || ETH}
-                                            alt="logo-token"
-                                        />
-                                        <span>{i.symbol}</span>
-                                    </div>
-                                    <div>≈${Number(i.balance).toFixed(6)}</div>
-                                </LabelToken>
-                                {<Line />}
-                            </span>
-                        )
-                    })}
-            </WrapTokens>
-            <WrapTokens isReverse={true}>
-                {currentTab === 'Activity' &&
-                    userData &&
-                    userData?.activity?.map(
-                        (i: UserActivity, index: number) => {
-                            return (
-                                <span key={index}>
-                                    <LabelToken
-                                        key={index}
-                                        onClick={() =>
-                                            chainId &&
-                                            window.open(
-                                                `${URLSCAN_BY_CHAINID[chainId].url}tx/${i.hash}`,
-                                            )
-                                        }
-                                    >
-                                        <div>
-                                            {/* <img src={ETH} alt="" /> */}
-                                            <span>{i.method}</span>
-                                        </div>
-                                        <div>{i.timestamp}</div>
-                                    </LabelToken>
-                                    {<Line />}
-                                </span>
-                            )
-                        },
-                    )}
+            {currentTab === 'Balances' && (
+                <WrapTokens>
+                    {userData &&
+                        userData?.balances?.map(
+                            (i: UserBalance, index: number) => {
+                                return (
+                                    <span key={index}>
+                                        <CustomSendModal>
+                                            <SendModal propsToken={i} />
+                                        </CustomSendModal>
 
-                {/* <Line isNotLast={true} /> */}
-            </WrapTokens>
+                                        <LabelToken key={index}>
+                                            <div>
+                                                <img
+                                                    src={i.logoURI || ETH}
+                                                    alt="logo-token"
+                                                />
+                                                <span>{i.symbol}</span>
+                                            </div>
+                                            <div>
+                                                ≈${Number(i.balance).toFixed(6)}
+                                            </div>
+                                        </LabelToken>
+                                        {<Line />}
+                                    </span>
+                                )
+                            },
+                        )}
+                </WrapTokens>
+            )}
+            {currentTab === 'Activity' && (
+                <WrapTokens isReverse={true}>
+                    {userData &&
+                        userData?.activity?.map(
+                            (i: UserActivity, index: number) => {
+                                return (
+                                    <span key={index}>
+                                        <LabelToken
+                                            key={index}
+                                            onClick={() =>
+                                                chainId &&
+                                                window.open(
+                                                    `${URLSCAN_BY_CHAINID[chainId].url}tx/${i.hash}`,
+                                                )
+                                            }
+                                        >
+                                            <div>
+                                                {/* <img src={ETH} alt="" /> */}
+                                                <span>{i.method}</span>
+                                            </div>
+                                            <div>{i.timestamp}</div>
+                                        </LabelToken>
+                                        {<Line />}
+                                    </span>
+                                )
+                            },
+                        )}
 
+                    {/* <Line isNotLast={true} /> */}
+                </WrapTokens>
+            )}
             <WrapAddToken>
                 <div>Don't see your token?</div>
                 <div>
@@ -279,19 +285,24 @@ const WrapDetail = styled.div`
 `
 
 const WrapTokens = styled.div<{ isReverse?: boolean }>`
+    position: relative;
     display: flex;
     flex-direction: ${({ isReverse }) =>
         isReverse ? 'column-reverse' : 'column'};
     max-height: 210px;
-    overflow: scroll;
+    /* height: 100%; */
+    overflow-y: scroll;
 
     span {
         :hover {
             background: #b5baba7a;
         }
     }
+
     ::-webkit-scrollbar {
         display: none;
+        /* width: 8px;
+        background-color: #f5f5f5; */
     }
 `
 
