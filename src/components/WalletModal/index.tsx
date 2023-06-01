@@ -29,10 +29,10 @@ const WalletModal = ({ setToggleWalletModal }: connectModalWallet) => {
         if (account && walletView === WALLET_VIEWS.ACCOUNT) {
             return (
                 <AccountDetails
-                    setToggleWalletModal={setToggleWalletModal}
-                    openOptions={() => {
-                        setWalletView(WALLET_VIEWS.OPTIONS)
-                    }}
+                // setToggleWalletModal={setToggleWalletModal}
+                // openOptions={() => {
+                // setWalletView(WALLET_VIEWS.OPTIONS)
+                // }}
                 />
             )
         }

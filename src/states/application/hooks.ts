@@ -10,7 +10,8 @@ import {
     toggleDarkMode,
     updateRefAddress,
     updateGasToken,
-    updateStepFaucet
+    updateStepFaucet,
+    updateIsSmartAccount
 } from './actions'
 import { ApplicationState } from './reducer'
 
@@ -70,6 +71,11 @@ export const useUpdateRefAddress = () => {
 export const useUpdateGasToken = () => {
     const dispatch = useDispatch()
     return (token: Token) => dispatch(updateGasToken(token))
+}
+
+export const useUpdateIsSmartAccount = () => {
+    const dispatch = useDispatch()
+    return (bool: boolean) => dispatch(updateIsSmartAccount(bool))
 }
 
 export const useUpdateStepFaucet = () => {

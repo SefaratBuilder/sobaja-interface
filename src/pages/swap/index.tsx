@@ -48,7 +48,6 @@ import { useTransactionHandler } from 'states/transactions/hooks'
 import ComponentsTransaction, {
     InitCompTransaction,
 } from 'components/TransactionModal'
-import ToastMessage from 'components/ToastMessage'
 import imgCopy from 'assets/icons/copy.svg'
 import imgCheckMark from 'assets/icons/check-mark.svg'
 import { sendEvent } from 'utils/analytics'
@@ -56,10 +55,8 @@ import Blur from 'components/Blur'
 import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
 import { useEstimateGas } from 'hooks/useEstimateGas'
-import { BigNumber } from '@ethersproject/bignumber'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import { useWeb3AuthContext } from 'contexts/SocialLoginContext'
-import { useSmartAccount } from 'hooks/useSmartAccount'
 import { useAddUser, useUsersState } from 'states/users/hooks'
 
 const Swap = () => {
@@ -70,23 +67,23 @@ const Swap = () => {
     const { onUserInput, onSwitchTokens, onTokenSelection, onChangeSwapState } =
         useSwapActionHandlers()
     const { chainId, account } = useActiveWeb3React()
-    const { wallet } = useSmartAccountContext()
     const { refAddress } = useAppState()
     const [isOpenWalletModal, setIsOpenWalletModal] = useState(false)
     const pair = usePair(chainId, tokenIn, tokenOut)
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const contractApprove = useTokenContract(tokenIn?.address)
-
+    const { sendTransactions, smartAccountAddress } = useSmartAccountContext()
     const tokenApproval = useTokenApproval(
-        wallet?.address || account,
+        smartAccountAddress || account,
         routerAddress,
         tokenIn,
     )
-    const balanceIn = useCurrencyBalance(wallet?.address || account, tokenIn)
+    const balanceIn = useCurrencyBalance(
+        smartAccountAddress || account,
+        tokenIn,
+    )
     const routerContract = useRouterContract()
     const { deadline } = useTransactionDeadline()
-    const [gasCost, setGasCost] = useState<BigNumber>()
-
     const { addTxn } = useTransactionHandler()
     const initDataTransaction = InitCompTransaction()
     const loca = useLocation()
@@ -95,12 +92,6 @@ const Swap = () => {
     const ref = useRef<any>()
     const addUser = useAddUser()
     const userData = useUsersState()
-
-    const {
-        sendUserPaidTransaction,
-        signAndSendUserOps,
-        data: { nonce },
-    } = useSmartAccount(wallet?.address)
 
     const isInsufficientAllowance =
         Number(tokenApproval?.allowance) < Number(inputAmount) &&
@@ -131,11 +122,11 @@ const Swap = () => {
     )
 
     const handleCopyAddress = () => {
-        if (wallet) {
+        if (smartAccountAddress) {
             navigator.clipboard
                 .writeText(
                     `https://app.sobajaswap.com/#/swap?
-                        ${wallet.address}`,
+                        ${smartAccountAddress}`,
                 )
                 .then(() => {
                     setIsCopied(true)
@@ -192,7 +183,7 @@ const Swap = () => {
                     args: [
                         amountOutMin, //amountOutMin
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
-                        wallet?.address || account,
+                        smartAccountAddress || account,
                         calcTransactionDeadline(deadline),
                         refAddress || ZERO_ADDRESS,
                     ],
@@ -204,7 +195,7 @@ const Swap = () => {
                         amountIn, //amountIn
                         amountOutMin, //amountOutMin
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
-                        wallet?.address || account,
+                        smartAccountAddress || account,
                         calcTransactionDeadline(deadline),
                         refAddress || ZERO_ADDRESS,
                     ],
@@ -216,7 +207,7 @@ const Swap = () => {
                         amountIn, //amountIn
                         amountOutMin, //amountOutMin
                         [tokenIn.address, tokenOut.address],
-                        wallet?.address || account,
+                        smartAccountAddress || account,
                         calcTransactionDeadline(deadline),
                         refAddress || ZERO_ADDRESS,
                     ],
@@ -229,7 +220,7 @@ const Swap = () => {
                         amountOut, //amountOut
                         amountInMax, //amountInMax
                         [tokenIn.address, WRAPPED_NATIVE_ADDRESSES[chainId]],
-                        wallet?.address || account,
+                        smartAccountAddress || account,
                         calcTransactionDeadline(deadline),
                         refAddress || ZERO_ADDRESS,
                     ],
@@ -240,7 +231,7 @@ const Swap = () => {
                     args: [
                         amountOut, //amountOut
                         [WRAPPED_NATIVE_ADDRESSES[chainId], tokenOut.address],
-                        wallet?.address || account,
+                        smartAccountAddress || account,
                         calcTransactionDeadline(deadline),
                         refAddress || ZERO_ADDRESS,
                     ],
@@ -252,7 +243,7 @@ const Swap = () => {
                         amountOut, //amountOut
                         amountInMax, //amountInMax
                         [tokenIn.address, tokenOut.address],
-                        wallet?.address || account,
+                        smartAccountAddress || account,
                         calcTransactionDeadline(deadline),
                         refAddress || ZERO_ADDRESS,
                     ],
@@ -409,18 +400,15 @@ const Swap = () => {
 
             const method = getSwapMethod()
             const swapArguments = getSwapArguments()
-            console.log('🤦‍♂️ ⟹ onConfirm ⟹ swapArguments:', { swapArguments })
+
             if (!swapArguments) {
                 initDataTransaction.setError('Failed')
                 initDataTransaction.setIsOpenWaitingModal(false)
                 return initDataTransaction.setIsOpenResultModal(true)
             }
             const { args, value } = swapArguments
-            // const referralAddress = refAddress || ZERO_ADDRESS
-            // const newArgs = [...args, referralAddress]
-            // console.log('🤦‍♂️ ⟹ onConfirm ⟹ newArgs:', newArgs)
             let callResult: any
-            if (!wallet) {
+            if (!smartAccountAddress) {
                 const gasLimit = await routerContract?.estimateGas[method](
                     ...args,
                     {
@@ -441,27 +429,23 @@ const Swap = () => {
                 if (!swapData || !tokenIn || !routerAddress || !inputAmount)
                     return
                 const txApprove = {
-                    to: tokenIn.address,
-                    data: tokenApproval.approveEncodeData(
-                        routerAddress,
-                        mulNumberWithDecimal(inputAmount, tokenIn.decimals),
-                    ),
-                    nonce,
+                    target: tokenIn.address,
+                    data:
+                        tokenApproval.approveEncodeData(
+                            routerAddress,
+                            mulNumberWithDecimal(inputAmount, tokenIn.decimals),
+                        ) ?? '0x',
+                    value: 0,
                 }
                 const txSwap = {
-                    to: routerAddress,
+                    target: routerAddress,
                     data: swapData,
                     value: value,
-                    nonce,
                 }
                 if (isInsufficientAllowance) {
-                    callResult = await sendUserPaidTransaction([
-                        txApprove,
-                        txSwap,
-                    ])
+                    callResult = await sendTransactions([txApprove, txSwap])
                 } else {
-                    // callResult = await signAndSendUserOps(txSwap)
-                    callResult = await sendUserPaidTransaction([txSwap])
+                    callResult = await sendTransactions([txSwap])
                 }
             }
 
@@ -501,7 +485,7 @@ const Swap = () => {
             initDataTransaction.setIsOpenResultModal(true)
             console.log('error', error)
         }
-    }, [initDataTransaction, isInsufficientAllowance])
+    }, [initDataTransaction, isInsufficientAllowance, smartAccountAddress])
 
     const openWalletModal = () => {
         setIsOpenWalletModal(!isOpenWalletModal)
@@ -604,7 +588,7 @@ const Swap = () => {
     ])
 
     const SwapButton = () => {
-        const isNotConnected = !wallet && !account
+        const isNotConnected = !smartAccountAddress && !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
         const isUndefinedAmount = !inputAmount && !outputAmount
@@ -630,7 +614,7 @@ const Swap = () => {
                     <LabelButton name="Insufficient Balance" />
                 ) : isInffuficientLiquidity ? (
                     <LabelButton name="Insufficient Liquidity" />
-                ) : isInsufficientAllowance && !wallet ? (
+                ) : isInsufficientAllowance && !smartAccountAddress ? (
                     <PrimaryButton
                         name={`Approve ${tokenIn?.symbol}`}
                         onClick={handleOnApprove}
@@ -658,7 +642,7 @@ const Swap = () => {
                         Number(tokenApproval?.allowance) <
                             Number(inputAmount) &&
                         !isNativeCoin(tokenIn) &&
-                        !wallet
+                        !smartAccountAddress
                             ? handleOnApprove
                             : onConfirm
                     }
@@ -734,13 +718,16 @@ const Swap = () => {
                     />
                 )}
                 <SwapButton />
-                {wallet || account ? (
+                {smartAccountAddress || account ? (
                     <Referral>
                         <span>Referral:</span>
                         <p>
                             https://app.sobajaswap.com/#/swap?
-                            {(wallet || account) &&
-                                shortenAddress(wallet?.address || account, 5)}
+                            {(smartAccountAddress || account) &&
+                                shortenAddress(
+                                    smartAccountAddress || account,
+                                    5,
+                                )}
                         </p>
                         <span>
                             {isCopied ? (

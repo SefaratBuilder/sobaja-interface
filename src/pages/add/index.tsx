@@ -17,14 +17,9 @@ import {
     ZERO_ADDRESS,
 } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
-import {
-    useFactoryContract,
-    useRouterContract,
-    useTokenContract,
-    useRouterSmartAccountContract,
-} from 'hooks/useContract'
+import { useRouterContract, useTokenContract } from 'hooks/useContract'
 import { useActiveWeb3React } from 'hooks'
-import { divNumberWithDecimal, mulNumberWithDecimal } from 'utils/math'
+import { mulNumberWithDecimal } from 'utils/math'
 import { usePair } from 'hooks/useAllPairs'
 import { calcSlippageAmount, isNativeCoin, shortenAddress } from 'utils'
 import WalletModal from 'components/WalletModal'
@@ -47,7 +42,6 @@ import { useOnClickOutside } from 'hooks/useOnClickOutSide'
 import { OpacityModal } from 'components/Web3Status'
 import { useEstimateGas } from 'hooks/useEstimateGas'
 import { useSmartAccountContext } from 'contexts/SmartAccountContext'
-import { useSmartAccount } from 'hooks/useSmartAccount'
 import { useAddUser, useUsersState } from 'states/users/hooks'
 
 const Add = () => {
@@ -59,19 +53,19 @@ const Add = () => {
     const { onUserInput, onTokenSelection, onChangeMintState } =
         useMintActionHandlers()
     const { account, chainId } = useActiveWeb3React()
-    const { wallet } = useSmartAccountContext()
+    const { smartAccountAddress } = useSmartAccountContext()
     const routerContract = useRouterContract()
     const routerAddress = chainId ? ROUTERS[chainId] : undefined
     const contractApproveTokenIn = useTokenContract(tokenIn?.address)
     const contractApproveTokenOut = useTokenContract(tokenOut?.address)
 
     const tokenInApproval = useTokenApproval(
-        wallet?.address || account,
+        smartAccountAddress || account,
         routerAddress,
         tokenIn,
     )
     const tokenOutApproval = useTokenApproval(
-        wallet?.address || account,
+        smartAccountAddress || account,
         routerAddress,
         tokenOut,
     )
@@ -84,7 +78,7 @@ const Add = () => {
     const ref = useRef<any>()
     const addUser = useAddUser()
     const userData = useUsersState()
-    const { sendUserPaidTransaction } = useSmartAccount(wallet?.address)
+    const { sendTransactions } = useSmartAccountContext()
 
     useOnClickOutside(ref, () => {
         setIsOpenWalletModal(false)
@@ -347,7 +341,7 @@ const Add = () => {
                           refAddress || ZERO_ADDRESS,
                       ]
                 let callResult: any
-                if (!wallet) {
+                if (!smartAccountAddress) {
                     const gasLimit = await routerContract?.estimateGas?.[
                         method
                     ]?.(...args, { value })
@@ -366,24 +360,31 @@ const Add = () => {
                     if (!addData) return
 
                     const txApproveIn = {
-                        to: tokenIn.address,
-                        data: tokenInApproval.approveEncodeData(
-                            routerAddress,
-                            mulNumberWithDecimal(inputAmount, tokenIn.decimals),
-                        ),
+                        target: tokenIn.address,
+                        data:
+                            tokenInApproval.approveEncodeData(
+                                routerAddress,
+                                mulNumberWithDecimal(
+                                    inputAmount,
+                                    tokenIn.decimals,
+                                ),
+                            ) ?? '0x',
+                        value: 0,
                     }
                     const txApproveOut = {
-                        to: tokenOut.address,
-                        data: tokenOutApproval.approveEncodeData(
-                            routerAddress,
-                            mulNumberWithDecimal(
-                                outputAmount,
-                                tokenOut.decimals,
-                            ),
-                        ),
+                        target: tokenOut.address,
+                        data:
+                            tokenOutApproval.approveEncodeData(
+                                routerAddress,
+                                mulNumberWithDecimal(
+                                    outputAmount,
+                                    tokenOut.decimals,
+                                ),
+                            ) ?? '0x',
+                        value: 0,
                     }
                     const txAddliqudity = {
-                        to: routerAddress,
+                        target: routerAddress,
                         data: addData,
                         value,
                     }
@@ -396,7 +397,7 @@ const Add = () => {
                             : isInsufficientAllowanceTokenOut
                             ? [txApproveOut, txAddliqudity]
                             : [txAddliqudity]
-                    callResult = await sendUserPaidTransaction(txns)
+                    callResult = await sendTransactions(txns)
                 }
 
                 initDataTransaction.setIsOpenWaitingModal(false)
@@ -612,14 +613,14 @@ const Add = () => {
 
     const AddButton = () => {
         const balanceIn = useCurrencyBalance(
-            wallet?.address || account,
+            smartAccountAddress || account,
             tokenIn,
         )
         const balanceOut = useCurrencyBalance(
-            wallet?.address || account,
+            smartAccountAddress || account,
             tokenOut,
         )
-        const isNotConnected = !wallet?.address && !account
+        const isNotConnected = !smartAccountAddress && !account
         const unSupportedNetwork =
             chainId && !ALL_SUPPORTED_CHAIN_IDS.includes(chainId)
         const isUndefinedAmount = !inputAmount || !outputAmount
@@ -648,7 +649,7 @@ const Add = () => {
                     <LabelButton name="Enter an amount" />
                 ) : isInsufficientBalance ? (
                     <LabelButton name="Insufficient Balance" />
-                ) : isInsufficientAllowance && !wallet ? (
+                ) : isInsufficientAllowance && !smartAccountAddress ? (
                     <ButtonGroup>
                         {isInsufficientAllowanceTokenIn && (
                             <PrimaryButton

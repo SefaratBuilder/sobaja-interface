@@ -13,15 +13,19 @@ import {
     initBalanceToken,
 } from 'states/users/reducer'
 import { Field, Token } from 'interfaces'
-import { NATIVE_COIN } from 'constants/index'
+import { NATIVE_COIN, URLSCAN_BY_CHAINID } from 'constants/index'
 
 import TokenListModal from 'components/TokenListModal'
+import { useAllTokenBalances } from 'hooks/useCurrencyBalance'
+import SendModal from '../SendModal'
 
 const WrapDetailsAccount = ({ balance }: { balance?: string }) => {
     const [currentTab, setCurrentTab] = useState<'Balances' | 'Activity'>(
         'Balances',
     )
     const { chainId } = useActiveWeb3React()
+    const allBalances = useAllTokenBalances()
+
     // const [token, setToken] = useState<Token>(NATIVE_COIN[chainId || 5])
     // const tokenStruct = useToken(token.address)
     // const balanceToken = useCurrencyBalance(account, tokenStruct)
@@ -29,6 +33,9 @@ const WrapDetailsAccount = ({ balance }: { balance?: string }) => {
     const addUser = useAddUser()
     const userData = useUsersState()
 
+    /**
+     * @add handle add token to list UsersState
+     */
     const handleOnAdd = useCallback(
         (
             token: Token,
@@ -61,6 +68,9 @@ const WrapDetailsAccount = ({ balance }: { balance?: string }) => {
         [userData],
     )
 
+    /**
+     * @init init data balance when not exist
+     */
     useEffect(() => {
         if (!chainId) return
         if (!userData && balance) {
@@ -70,6 +80,27 @@ const WrapDetailsAccount = ({ balance }: { balance?: string }) => {
             })
         }
     }, [chainId, balance])
+
+    /**
+     * @update update balances when open
+     */
+    useEffect(() => {
+        if (userData) {
+            const updateBalance = userData.balances.map((i) => {
+                return {
+                    ...i,
+                    balance: allBalances?.[i.address] || i.balance,
+                }
+            })
+
+            const newUser = {
+                balances: [...updateBalance],
+                activity: [...userData.activity],
+            }
+            addUser(newUser)
+            console.log('update balances')
+        }
+    }, [])
 
     return (
         <Container>
@@ -93,6 +124,10 @@ const WrapDetailsAccount = ({ balance }: { balance?: string }) => {
                     userData?.balances?.map((i: UserBalance, index: number) => {
                         return (
                             <span key={index}>
+                                <CustomSendModal>
+                                    <SendModal propsToken={i} />
+                                </CustomSendModal>
+
                                 <LabelToken key={index}>
                                     <div>
                                         <img
@@ -103,7 +138,7 @@ const WrapDetailsAccount = ({ balance }: { balance?: string }) => {
                                     </div>
                                     <div>≈${Number(i.balance).toFixed(6)}</div>
                                 </LabelToken>
-                                <Line />
+                                {<Line />}
                             </span>
                         )
                     })}
@@ -115,20 +150,28 @@ const WrapDetailsAccount = ({ balance }: { balance?: string }) => {
                         (i: UserActivity, index: number) => {
                             return (
                                 <span key={index}>
-                                    <LabelToken key={index}>
+                                    <LabelToken
+                                        key={index}
+                                        onClick={() =>
+                                            chainId &&
+                                            window.open(
+                                                `${URLSCAN_BY_CHAINID[chainId].url}tx/${i.hash}`,
+                                            )
+                                        }
+                                    >
                                         <div>
                                             {/* <img src={ETH} alt="" /> */}
                                             <span>{i.method}</span>
                                         </div>
                                         <div>{i.timestamp}</div>
                                     </LabelToken>
-                                    <Line />
+                                    {<Line />}
                                 </span>
                             )
                         },
                     )}
 
-                <Line isNotLast={true} />
+                {/* <Line isNotLast={true} /> */}
             </WrapTokens>
 
             <WrapAddToken>
@@ -182,6 +225,10 @@ const WrapAddToken = styled.div`
     div:nth-child(2) {
         cursor: pointer;
     }
+
+    @media screen and (max-width: 391px) {
+        padding: 0.5rem 0;
+    }
 `
 
 const Icon = styled.div`
@@ -209,6 +256,9 @@ const WrapLink = styled.div`
         width: 12px;
         height: 12px;
     }
+    @media screen and (max-width: 391px) {
+        padding: 0.5rem 1.5rem;
+    }
 `
 
 const WrapDetail = styled.div`
@@ -234,6 +284,12 @@ const WrapTokens = styled.div<{ isReverse?: boolean }>`
         isReverse ? 'column-reverse' : 'column'};
     max-height: 200px;
     overflow: scroll;
+
+    span {
+        :hover {
+            background: #b5baba7a;
+        }
+    }
     ::-webkit-scrollbar {
         display: none;
     }
@@ -258,6 +314,9 @@ const LabelToken = styled.div`
         height: 18px;
         border-radius: 50%;
     }
+    @media screen and (max-width: 391px) {
+        padding: 0.2rem 1rem;
+    }
 `
 
 const Line = styled.div<{ isNotLast?: boolean }>`
@@ -271,5 +330,11 @@ const Line = styled.div<{ isNotLast?: boolean }>`
 
 const CustomTokenListModal = styled.div`
     position: absolute;
+    opacity: 0;
+`
+
+const CustomSendModal = styled.div`
+    position: absolute;
+    width: 100%;
     opacity: 0;
 `

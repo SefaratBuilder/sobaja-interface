@@ -52,7 +52,7 @@ export const Button = styled.button<{
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: ${({ height }) => (height ? height : '40px')};
+    height: ${({ height }) => (height ? height : '48px')};
     border-radius: 8px;
     border: 1px solid var(--border2);
     outline: none;
@@ -71,16 +71,26 @@ export const Button = styled.button<{
     color: var(--text1);
     font-family: Inter, sans-serif;
     span {
-        font-weight: 700;
+        font-weight: 400;
         font-size: ${({ size }) => (size ? size : '1rem')};
+    }
+    @media screen and (max-width: 767px) {
+        height: ${({ height }) => (height ? height : '38px')};
+        span {
+            font-size: ${({ size }) => (size ? size : '14px')};
+        }
     }
 
     &.option-login {
         gap: 10px;
         img {
-            height: 25px;
-            width: 25px;
+            height: 35px;
+            width: 35px;
             border-radius: 50%;
+            @media screen and (max-width: 767px) {
+                height: 30px;
+                width: 30px;
+            }
         }
     }
 

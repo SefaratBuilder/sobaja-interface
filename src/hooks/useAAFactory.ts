@@ -1,14 +1,18 @@
-import { getAddress } from '@ethersproject/address';
-import { useWeb3AuthContext } from 'contexts/SocialLoginContext';
-import { useActiveWeb3React } from "hooks"
+import { ZERO_ADDRESS } from 'constants/index';
+import { useActiveWeb3React } from 'hooks';
+import { ChainId } from 'interfaces';
 import { useEffect, useMemo, useState } from "react"
+import { useBlockNumber } from 'states/application/hooks';
 import { useSingleCallResult } from "states/multicall/hooks"
 import { useAAFactoryContract } from "./useContract"
 
+
 export const useAAFactory = () => {
-    const { chainId, account, provider } = useActiveWeb3React()
+    const { account, isSmartAccount, chainId, provider } = useActiveWeb3React()
     const contract = useAAFactoryContract()
     const [isDeployed, setIsDeyloyed] = useState(false)
+    const [smartAccountAddress, setSmartAccountAddress] = useState<string>()
+    const block = useBlockNumber()
 
     const basicImplementation = useSingleCallResult(
         contract,
@@ -16,30 +20,48 @@ export const useAAFactory = () => {
         []
     )
 
-    const smartAccountAtZero = useSingleCallResult(
-        contract,
-        'getAddressForCounterFactualAccount',
-        [account || undefined, '0']
-    )
-
     useEffect(() => {
-        const checkIsDeployed = async () => {
-            if (smartAccountAtZero.result?.[0]) {
-                const code = await provider?.getCode(smartAccountAtZero.result?.[0])
-                code && code.length > 2 ? setIsDeyloyed(true) : setIsDeyloyed(false)
-            } else {
+        const getAddress = async () => {
+            try {
+                if (!account || !contract || !isSmartAccount || !provider) return (() => {
+                    setSmartAccountAddress(undefined)
+                    setIsDeyloyed(false)
+                })()
+                let address: string
+                if (chainId === ChainId.ZKTESTNET || chainId === ChainId.ZKMAINNET) {
+                    address = await contract.getDeployedAccount(account, '0')
+                    if (address == ZERO_ADDRESS) {
+                        setIsDeyloyed(false)
+                        address = await contract.callStatic.deployCounterFactualAccount(account, '0')
+                    } else {
+                        setIsDeyloyed(true)
+                    }
+                } else {
+                    address = await contract.getAddressForCounterFactualAccount(account, '0')
+                    const code = await provider.getCode(address)
+                    if (code.length > 2) {
+                        setIsDeyloyed(true)
+                    } else {
+                        setIsDeyloyed(false)
+                    }
+                }
+                setSmartAccountAddress(address)
+            }
+            catch (err) {
+                console.log('failed to get smart account address', err)
+                setSmartAccountAddress(undefined)
                 setIsDeyloyed(false)
             }
         }
-        checkIsDeployed()
-    }, [smartAccountAtZero, provider, contract])
+        getAddress()
+    }, [block, account, isSmartAccount, chainId])
 
     return useMemo(() => {
         return {
             contract,
             basicImplementation: basicImplementation.result?.[0],
-            smartAccountAtZero: smartAccountAtZero.result?.[0],
+            smartAccountAddress: smartAccountAddress,
             isDeployed
         }
-    }, [contract, basicImplementation, smartAccountAtZero])
+    }, [contract, basicImplementation, smartAccountAddress, isDeployed])
 }

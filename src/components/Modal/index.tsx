@@ -26,23 +26,25 @@ const Modal = (props: ModalProps) => {
     const handleClose = () => setIsOpen(false)
 
     return (
-        <ModalWrapper>
+        <>
             {props.button(handleOpen)}
-            <MuiModal
-                open={isOpen}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                {!props?.isRight ? (
-                    <MiddleBox>{props.children(handleClose)}</MiddleBox>
-                ) : (
-                    <WrapBox>
-                        <Box>{props.children(handleClose)}</Box>
-                    </WrapBox>
-                )}
-            </MuiModal>
-        </ModalWrapper>
+            <ModalWrapper>
+                <MuiModal
+                    open={isOpen}
+                    onClose={handleClose}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                >
+                    {!props?.isRight ? (
+                        <MiddleBox>{props.children(handleClose)}</MiddleBox>
+                    ) : (
+                        <WrapBox>
+                            <Box>{props.children(handleClose)}</Box>
+                        </WrapBox>
+                    )}
+                </MuiModal>
+            </ModalWrapper>
+        </>
     )
 }
 
@@ -52,16 +54,17 @@ const WrapBox = styled.div`
     position: fixed;
     right: 0;
 
-    top: 121.49px;
+    /* top: 121.49px; */
+    top: 90.49px;
     height: 100vh;
-    width: 400px;
+    width: 450px;
     background: url(${BgWallet});
-    background-size: 400px;
+    background-size: 450px;
     background-repeat: no-repeat;
     padding: 20px;
     border-top: 1px solid #003b5c;
     border-left: 1px solid #003b5c;
-    animation: fadeIn 0.4s linear;
+    /* animation: fadeIn 0.4s linear; */
 
     @media screen and (max-width: 1100px) {
         animation: fadeUp 0.3s linear;
@@ -72,6 +75,8 @@ const WrapBox = styled.div`
 
     @media screen and (max-width: 476px) {
         width: 90%;
+        height: auto;
+        top: 90px;
     }
 
     @keyframes fadeIn {
@@ -100,7 +105,7 @@ const WrapBox = styled.div`
 const Box = styled.div`
     background: var(--bg2);
     backdrop-filter: blur(4px);
-    max-width: 400px;
+    max-width: 450px;
     height: fit-content;
     border: 12px solid #99999978;
 

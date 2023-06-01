@@ -1,10 +1,8 @@
 import { createReducer } from '@reduxjs/toolkit'
 import { addUser, updateActivity, updateBalanceTokens, updateUser } from './action'
 import { ChainId, Token } from 'interfaces'
-import { WRAPPED_NATIVE_ADDRESSES } from 'constants/addresses'
-import { getKeyValue } from 'utils/handleType'
 import { NATIVE_COIN } from 'constants/index'
-import { useUpdateUser } from './hooks'
+import LogoETH from 'assets/token-logos/eth.svg'
 export interface UserActivity {
   method: string,
   timestamp: string,
@@ -21,7 +19,7 @@ export const initBalanceToken = (chainId: ChainId): UserBalance => {
     symbol: 'ETH',
     chainId: chainId,
     name: 'Ethereum',
-    logoURI: '',
+    logoURI: LogoETH,
     decimals: 18,
     balance: '0'
   }

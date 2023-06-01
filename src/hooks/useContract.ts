@@ -18,9 +18,9 @@ import {
     LAUNCHPADS,
     STAKING_ABI,
     STAKING,
-    // AAEntryPoints
     AAEntryPoints,
-    AAFactory
+    AAFactory,
+    PAYMASTERS
 } from 'constants/addresses'
 import ERC20 from 'constants/jsons/erc20.json'
 import { PAIR_ABI } from 'constants/jsons/pair'
@@ -34,6 +34,7 @@ import { ethers } from 'ethers'
 import NFT_ABI from 'constants/jsons/nft.json'
 import AA_ABI from 'constants/jsons/aa.json'
 import AAFACTORY_ABI from 'constants/jsons/aaFactory.json'
+import PAYMASTER_ABI from 'constants/jsons/paymaster.json'
 import Web3 from 'web3'
 
 // returns null on errors
@@ -156,4 +157,9 @@ export function useMulticallWeb3Contract() {
     const web3 = new Web3(Web3.givenProvider || 'https://rpc-mumbai.maticvigil.com')
     const abi: any = MULTICALL_ABI
     return new web3.eth.Contract(abi, MULTICALL_NETWORKS[chainId || 80001])
+}
+
+export function usePaymasterContract() {
+    const { chainId } = useActiveWeb3React()
+    return useContract(PAYMASTERS[chainId || 80001], PAYMASTER_ABI)
 }

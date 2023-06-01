@@ -3,14 +3,15 @@ import Modal from 'components/Modal'
 import styled from 'styled-components'
 import PrimaryButton from 'components/Buttons/PrimaryButton'
 import { Columns, Row } from 'components/Layouts'
-import { useSmartAccountContext } from 'contexts/SmartAccountContext'
 import GAS_ICON from 'assets/icons/gas-station-dark.svg'
 import { Token } from 'interfaces'
 import { GAS_TOKEN } from 'constants/index'
 import { useCurrencyBalance } from 'hooks/useCurrencyBalance'
 import { useAppState, useUpdateGasToken } from 'states/application/hooks'
 import LogoToken from 'components/LogoToken'
-
+import { useActiveWeb3React } from 'hooks'
+import { useSmartAccountContext } from 'contexts/SmartAccountContext'
+import checkLogo from 'assets/icons/check-mate.svg'
 const TokenSelection = ({
     token,
     gasToken,
@@ -20,8 +21,8 @@ const TokenSelection = ({
     gasToken: Token | undefined
     onSetGasToken: (token: Token) => void
 }) => {
-    const { wallet } = useSmartAccountContext()
-    const balance = useCurrencyBalance(wallet?.address, token)
+    const { smartAccountAddress } = useSmartAccountContext()
+    const balance = useCurrencyBalance(smartAccountAddress, token)
 
     return (
         <TokenWrapper
@@ -36,18 +37,23 @@ const TokenSelection = ({
                     {token.name}({token.symbol})
                 </div>
             </Row>
-            <Row al="center" className="to">
-                {balance || '0.00'}
+            <Row al="center" className="to" gap="5px">
+                {(balance && Number(balance).toFixed(6)) || '0.00'}
+                <LogoCheck>
+                    {gasToken?.address === token.address && (
+                        <img src={checkLogo} alt="check-mate" />
+                    )}
+                </LogoCheck>
             </Row>
         </TokenWrapper>
     )
 }
 
 const GasSetting = () => {
-    const { state } = useSmartAccountContext()
     const { gasToken: gasTokenDefault } = useAppState()
     const [gasToken, setGasToken] = useState<Token>(gasTokenDefault)
     const updateGasToken = useUpdateGasToken()
+    const { chainId } = useActiveWeb3React()
 
     const Button = (onOpen: () => void) => {
         return (
@@ -72,8 +78,8 @@ const GasSetting = () => {
                         account transaction using Paymaster.
                     </div>
                     <div>Select a token: </div>
-                    {state?.chainId &&
-                        GAS_TOKEN[state.chainId].map((token, index) => {
+                    {chainId &&
+                        GAS_TOKEN[chainId].map((token, index) => {
                             return (
                                 <TokenSelection
                                     key={index}
@@ -83,14 +89,25 @@ const GasSetting = () => {
                                 />
                             )
                         })}
-                    <PrimaryButton
-                        name={'Select'}
-                        onClick={() => {
-                            updateGasToken(gasToken)
-                            onClose()
-                        }}
-                        disabled={!gasToken}
-                    />
+                    <Row gap="10px">
+                        <PrimaryButton
+                            name={'Cancel'}
+                            onClick={() => {
+                                setGasToken(gasTokenDefault)
+                                onClose()
+                            }}
+                            height="38px"
+                        />
+                        <PrimaryButton
+                            name={'Confirm'}
+                            onClick={() => {
+                                updateGasToken(gasToken)
+                                onClose()
+                            }}
+                            disabled={!gasToken}
+                            height="38px"
+                        />
+                    </Row>
                 </ModalBody>
             </ModalWrapper>
         )
@@ -154,6 +171,16 @@ const Input = styled.input`
     ::placeholder {
         color: #ffffff81;
     }
+`
+
+const LogoCheck = styled.div`
+    border: 1px solid #e9ddea5e;
+    padding: 4px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
 `
 
 export default GasSetting

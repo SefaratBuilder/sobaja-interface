@@ -40,24 +40,24 @@ export const ListNetwork = [
             },
         ],
     },
-    {
-        name: 'Mumbai',
-        chainId: 80001,
-        logo: LogoMatic,
-        switchNetwork: [
-            {
-                chainId: 80001,
-                chainName: 'Mumbai',
-                nativeCurrency: {
-                    name: 'MATIC',
-                    symbol: 'MATIC',
-                    decimals: 18,
-                },
-                rpcUrls: ['https://rpc-mumbai.maticvigil.com'],
-                blockExplorerUrls: ['https://explorer-mumbai.maticvigil.com/'],
-            },
-        ],
-    },
+    // {
+    //     name: 'Mumbai',
+    //     chainId: 80001,
+    //     logo: LogoMatic,
+    //     switchNetwork: [
+    //         {
+    //             chainId: 80001,
+    //             chainName: 'Mumbai',
+    //             nativeCurrency: {
+    //                 name: 'MATIC',
+    //                 symbol: 'MATIC',
+    //                 decimals: 18,
+    //             },
+    //             rpcUrls: ['https://rpc-mumbai.maticvigil.com'],
+    //             blockExplorerUrls: ['https://explorer-mumbai.maticvigil.com/'],
+    //         },
+    //     ],
+    // },
     {
         name: 'Goerli',
         chainId: ChainId.GOERLI,

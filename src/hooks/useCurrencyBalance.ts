@@ -6,7 +6,6 @@ import {
     useSingleContractMultipleData,
 } from 'states/multicall/hooks'
 import { isAddress } from 'utils'
-import { FixedNumber } from 'ethers'
 import { Token } from 'interfaces'
 import ERC20_INTERFACE from 'constants/jsons/erc20'
 import { NATIVE_COIN } from 'constants/index'
@@ -166,10 +165,10 @@ export function useAllTokenBalances(): {
     [tokenAddress: string]: string | undefined
 } {
     const { account, chainId } = useActiveWeb3React()
-    const { wallet } = useSmartAccountContext()
+    const { smartAccountAddress } = useSmartAccountContext()
     const currentList = useTokenList()
-    const balances = useTokenBalances(wallet?.address || account, currentList)
-    let ethBalanceWithAccountKey = useETHBalances([wallet?.address || account])
+    const balances = useTokenBalances(smartAccountAddress || account, currentList)
+    let ethBalanceWithAccountKey = useETHBalances([smartAccountAddress || account])
 
     let ethBalanceWithTokenKey = {}
     chainId &&

@@ -116,7 +116,7 @@ export const useQueryPool = (skipValue: number) => {
 
     const client = useMemo(() => {
         return new ApolloClient({
-            uri: chainId ? POOLS_SUBGRAPH_URL?.[chainId] : ChainId.ZKTESTNET.toString(),
+            uri: POOLS_SUBGRAPH_URL[chainId || 80001],
             cache: new InMemoryCache(),
         })
     }, [chainId])
@@ -273,7 +273,7 @@ export const useGetTotalPools = (): number => {
 
     const client = useMemo(() => {
         return new ApolloClient({
-            uri: chainId ? POOLS_SUBGRAPH_URL?.[chainId] : ChainId.ZKTESTNET.toString(),
+            uri: POOLS_SUBGRAPH_URL?.[chainId || 280],
             cache: new InMemoryCache(),
         })
     }, [chainId])
@@ -379,7 +379,7 @@ export const useGetPoolsTransactions = (): Array<ISwap | IMint> => {
 
     const client = useMemo(() => {
         return new ApolloClient({
-            uri: chainId ? POOLS_SUBGRAPH_URL?.[chainId] : ChainId.ZKTESTNET.toString(),
+            uri: POOLS_SUBGRAPH_URL?.[chainId || 280],
             cache: new InMemoryCache(),
         })
     }, [chainId])
