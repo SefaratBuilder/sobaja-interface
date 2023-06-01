@@ -764,7 +764,8 @@ const SwapContainer = styled(Columns)`
     z-index: 0;
 
     @media (max-width: 500px) {
-        width: 90%;
+        width: 94%;
+        padding: 20px 10px;
     }
 `
 
@@ -837,6 +838,9 @@ const Title = styled.div`
     font-size: 24px;
     width: 100%;
     text-align: center;
+    @media (max-width: 767px) {
+        font-size: 20px;
+    }
 `
 
 const Icon = styled.div`

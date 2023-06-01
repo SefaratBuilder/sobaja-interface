@@ -75,7 +75,7 @@ export const Button = styled.button<{
         font-size: ${({ size }) => (size ? size : '1rem')};
     }
     @media screen and (max-width: 767px) {
-        height: ${({ height }) => (height ? height : '42px')};
+        height: ${({ height }) => (height ? height : '40px')};
         span {
             font-size: ${({ size }) => (size ? size : '14px')};
         }

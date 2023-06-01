@@ -662,7 +662,8 @@ const Container = styled.div`
         background-repeat: no-repeat;
         background-size: cover;
         min-width: 84px;
-        border-radius: 12px 12px 0px 0px;
+        border-radius:18px 18px 0px 0px;
+        margin-left: -8px;
     }
 
     .black-bg2 {
@@ -671,7 +672,7 @@ const Container = styled.div`
     }
 
     @media screen and (max-width: 772px) {
-        width: 90%;
+        width: 94%;
     }
 `
 
