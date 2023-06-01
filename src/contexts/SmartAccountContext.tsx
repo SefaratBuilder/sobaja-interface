@@ -78,7 +78,7 @@ export const SmartAccountProvider = ({ children }: any) => {
     const executeUserOp = async (userOp: any, chainId: ChainId) => {
         try {
             const result = await axios.post(
-                'http://localhost:3000/user-operations/execute',
+                'https://api.sobajaswap.com/user-operations/execute',
                 {
                     userOp,
                     chainId,
