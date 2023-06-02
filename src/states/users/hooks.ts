@@ -3,12 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { addUser, updateActivity, updateBalanceTokens, updateUser } from "./action";
 import { User, UserActivity, UserBalance, UsersDetails, initUser } from "./reducer";
 import { useActiveWeb3React } from "hooks";
+import { useSmartAccountContext } from "contexts/SmartAccountContext";
 
 export function useUsersState(): User {
     const { chainId, account } = useActiveWeb3React()
+    const { smartAccountAddress } = useSmartAccountContext()
 
     return useSelector((state: AppState) =>
-        chainId && account ? state.users.users[chainId][account] : initUser)
+        chainId && account ? state.users.users[chainId][smartAccountAddress || account] : initUser)
 }
 
 // export const useUpdateActivity = () => {
@@ -26,8 +28,18 @@ export function useUsersState(): User {
 export const useAddUser = () => {
     const dispatch = useDispatch()
     const { chainId, account } = useActiveWeb3React()
+    const { smartAccountAddress } = useSmartAccountContext()
     return (user: User) => {
-        chainId && account &&
+
+        if (chainId && smartAccountAddress) {
+            dispatch(
+                addUser({
+                    chainId,
+                    account: smartAccountAddress,
+                    users: user
+                })
+            )
+        } else if (chainId && account) {
             dispatch(
                 addUser({
                     chainId,
@@ -35,5 +47,6 @@ export const useAddUser = () => {
                     users: user
                 })
             )
+        }
     }
 }

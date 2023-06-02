@@ -25,6 +25,7 @@ import Launchpad from 'pages/launchpad'
 import AA from 'pages/account-abstraction'
 import ToastMessage from 'components/ToastMessage'
 import StakePools from 'pages/staking/listpoolstake'
+import UsersUpdater from 'states/users/updater'
 
 const App = () => {
     const Updater = () => {
@@ -40,6 +41,7 @@ const App = () => {
                 <AppUpdater />
                 <MulticallUpdater />
                 <ListUpdater />
+                <UsersUpdater />
             </>
         )
     }

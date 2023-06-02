@@ -69,19 +69,6 @@ const WrapDetailsAccount = ({ balance }: { balance?: string }) => {
     )
 
     /**
-     * @init init data balance when not exist
-     */
-    useEffect(() => {
-        if (!chainId) return
-        if (!userData && balance) {
-            addUser({
-                balances: [{ ...initBalanceToken(chainId), balance: balance }],
-                activity: [],
-            })
-        }
-    }, [chainId, balance])
-
-    /**
      * @update update balances when open
      */
     useEffect(() => {
